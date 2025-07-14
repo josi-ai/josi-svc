@@ -1,0 +1,628 @@
+"""Extended comprehensive unit tests for ChartService to increase coverage."""
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+from datetime import datetime, date
+from decimal import Decimal
+
+from josi.services.chart_service import ChartService
+from josi.models.chart_model import AstrologyChart, ChartEntity
+from josi.models.person_model import Person
+from josi.repositories.base_repository import BaseRepository
+
+
+class TestChartServiceExtended:
+    """Extended comprehensive test coverage for ChartService."""
+    
+    @pytest.fixture
+    def mock_chart_repository(self):
+        """Create a mock chart repository."""
+        repo = AsyncMock(spec=BaseRepository)
+        return repo
+    
+    @pytest.fixture
+    def mock_astrology_calculator(self):
+        """Create a mock astrology calculator."""
+        calculator = MagicMock()
+        calculator.calculate_planetary_positions = MagicMock(return_value={
+            "sun": {"longitude": 120.5, "sign": "leo", "house": 5},
+            "moon": {"longitude": 45.2, "sign": "taurus", "house": 1}
+        })
+        calculator.calculate_house_cusps = MagicMock(return_value={
+            "1": 0.0, "2": 30.0, "3": 60.0, "4": 90.0,
+            "5": 120.0, "6": 150.0, "7": 180.0, "8": 210.0,
+            "9": 240.0, "10": 270.0, "11": 300.0, "12": 330.0
+        })
+        calculator.calculate_aspects = MagicMock(return_value=[
+            {"planet1": "sun", "planet2": "moon", "aspect": "trine", "orb": 2.3}
+        ])
+        calculator.calculate_vedic_chart = MagicMock(return_value={"chart_type": "vedic"})
+        calculator.calculate_western_chart = MagicMock(return_value={"chart_type": "western"})
+        calculator.calculate_chinese_chart = MagicMock(return_value={"chart_type": "chinese"})
+        calculator.calculate_divisional_chart = MagicMock(return_value={"chart_type": "divisional"})
+        return calculator
+    
+    @pytest.fixture
+    def mock_interpretation_engine(self):
+        """Create a mock interpretation engine."""
+        engine = MagicMock()
+        engine.generate_interpretation = MagicMock(return_value={
+            "interpretation_type": "general",
+            "text": "This is a test interpretation",
+            "confidence": 0.85,
+            "language": "en"
+        })
+        return engine
+    
+    @pytest.fixture
+    def mock_db_session(self):
+        """Create a mock database session."""
+        return AsyncMock()
+    
+    @pytest.fixture
+    def chart_service(self, mock_db_session, mock_chart_repository, mock_astrology_calculator, mock_interpretation_engine):
+        """Create a ChartService instance."""
+        with patch('josi.services.chart_service.ChartRepository', return_value=mock_chart_repository):
+            with patch('josi.services.chart_service.AstrologyCalculator', return_value=mock_astrology_calculator):
+                with patch('josi.services.chart_service.InterpretationEngine', return_value=mock_interpretation_engine):
+                    service = ChartService(mock_db_session, uuid4())
+                    return service
+    
+    @pytest.fixture
+    def test_organization_id(self):
+        """Test organization ID."""
+        return uuid4()
+    
+    @pytest.fixture
+    def test_person_id(self):
+        """Test person ID."""
+        return uuid4()
+    
+    @pytest.fixture
+    def test_chart_id(self):
+        """Test chart ID."""
+        return uuid4()
+    
+    @pytest.fixture
+    def test_person(self, test_organization_id, test_person_id):
+        """Create a test person."""
+        return Person(
+            person_id=test_person_id,
+            organization_id=test_organization_id,
+            name="John Doe",
+            date_of_birth=date(1990, 1, 1),
+            time_of_birth=datetime(1990, 1, 1, 12, 0, 0),
+            place_of_birth="New York, NY, USA",
+            latitude=Decimal("40.7128"),
+            longitude=Decimal("-74.0060"),
+            timezone="America/New_York"
+        )
+    
+    @pytest.fixture
+    def test_chart(self, test_chart_id, test_person_id, test_organization_id):
+        """Create a test chart."""
+        return AstrologyChart(
+            chart_id=test_chart_id,
+            person_id=test_person_id,
+            organization_id=test_organization_id,
+            chart_type="natal",
+            house_system="placidus",
+            ayanamsa="lahiri",
+            calculated_at=datetime.now(),
+            calculation_version="1.0",
+            chart_data={"planets": {}, "houses": {}}
+        )
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_for_person_vedic_system(self, chart_service, mock_chart_repository, test_person_id, mock_astrology_calculator):
+        """Test calculating vedic charts for a person."""
+        chart_types = ["vedic"]
+        house_system = "whole_sign"
+        ayanamsa = "lahiri"
+        
+        expected_chart = AstrologyChart(
+            chart_id=uuid4(),
+            person_id=test_person_id,
+            organization_id=uuid4(),
+            chart_type="vedic",
+            house_system=house_system,
+            ayanamsa=ayanamsa,
+            calculated_at=datetime.now(),
+            calculation_version="1.0",
+            chart_data={"chart_type": "vedic"}
+        )
+        
+        mock_chart_repository.create.return_value = expected_chart
+        
+        with patch.object(chart_service, '_calculate_single_chart', return_value=expected_chart) as mock_calc:
+            result = await chart_service.calculate_charts_for_person(
+                person_id=test_person_id,
+                chart_types=chart_types,
+                house_system=house_system,
+                ayanamsa=ayanamsa
+            )
+        
+        assert len(result) == 1
+        assert result[0].chart_type == "vedic"
+        assert result[0].house_system == house_system
+        assert result[0].ayanamsa == ayanamsa
+        mock_calc.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_for_person_western_system(self, chart_service, mock_chart_repository, test_person_id, mock_astrology_calculator):
+        """Test calculating western charts for a person."""
+        chart_types = ["western"]
+        house_system = "placidus"
+        
+        expected_chart = AstrologyChart(
+            chart_id=uuid4(),
+            person_id=test_person_id,
+            organization_id=uuid4(),
+            chart_type="western",
+            house_system=house_system,
+            calculated_at=datetime.now(),
+            calculation_version="1.0",
+            chart_data={"chart_type": "western"}
+        )
+        
+        mock_chart_repository.create.return_value = expected_chart
+        
+        with patch.object(chart_service, '_calculate_single_chart', return_value=expected_chart) as mock_calc:
+            result = await chart_service.calculate_charts_for_person(
+                person_id=test_person_id,
+                chart_types=chart_types,
+                house_system=house_system
+            )
+        
+        assert len(result) == 1
+        assert result[0].chart_type == "western"
+        assert result[0].house_system == house_system
+        mock_calc.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_for_person_chinese_system(self, chart_service, mock_chart_repository, test_person_id, mock_astrology_calculator):
+        """Test calculating chinese charts for a person."""
+        chart_types = ["chinese"]
+        
+        expected_chart = AstrologyChart(
+            chart_id=uuid4(),
+            person_id=test_person_id,
+            organization_id=uuid4(),
+            chart_type="chinese",
+            calculated_at=datetime.now(),
+            calculation_version="1.0",
+            chart_data={"chart_type": "chinese"}
+        )
+        
+        mock_chart_repository.create.return_value = expected_chart
+        
+        with patch.object(chart_service, '_calculate_single_chart', return_value=expected_chart) as mock_calc:
+            result = await chart_service.calculate_charts_for_person(
+                person_id=test_person_id,
+                chart_types=chart_types
+            )
+        
+        assert len(result) == 1
+        assert result[0].chart_type == "chinese"
+        mock_calc.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_with_multiple_systems(self, chart_service, mock_chart_repository, test_person_id):
+        """Test calculating multiple chart systems at once."""
+        chart_types = ["vedic", "western", "chinese"]
+        expected_charts = []
+        
+        for i, chart_type in enumerate(chart_types):
+            chart = AstrologyChart(
+                chart_id=uuid4(),
+                person_id=test_person_id,
+                organization_id=uuid4(),
+                chart_type=chart_type,
+                house_system="placidus",
+                calculated_at=datetime.now(),
+                calculation_version="1.0",
+                chart_data={f"chart_type": chart_type}
+            )
+            expected_charts.append(chart)
+        
+        mock_chart_repository.create.side_effect = expected_charts
+        
+        with patch.object(chart_service, '_calculate_single_chart', side_effect=expected_charts) as mock_calc:
+            result = await chart_service.calculate_charts_for_person(
+                person_id=test_person_id,
+                chart_types=chart_types
+            )
+        
+        assert len(result) == 3
+        assert mock_calc.call_count == 3
+        for i, chart in enumerate(result):
+            assert chart.chart_type == chart_types[i]
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_with_interpretations_enabled(self, chart_service, mock_chart_repository, mock_interpretation_engine, test_person_id):
+        """Test calculating charts with interpretations enabled."""
+        chart_types = ["natal"]
+        expected_chart = AstrologyChart(
+            chart_id=uuid4(),
+            person_id=test_person_id,
+            organization_id=uuid4(),
+            chart_type="natal",
+            calculated_at=datetime.now(),
+            calculation_version="1.0",
+            chart_data={"planets": {}, "interpretations": []}
+        )
+        
+        mock_chart_repository.create.return_value = expected_chart
+        
+        with patch.object(chart_service, '_calculate_single_chart', return_value=expected_chart) as mock_calc:
+            with patch.object(chart_service, '_add_interpretations_to_chart') as mock_interp:
+                result = await chart_service.calculate_charts_for_person(
+                    person_id=test_person_id,
+                    chart_types=chart_types,
+                    include_interpretations=True
+                )
+        
+        assert len(result) == 1
+        mock_calc.assert_called_once()
+        mock_interp.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_get_person_charts_with_chart_type_filter(self, chart_service, mock_chart_repository, test_person_id, test_chart):
+        """Test getting charts for a person with chart type filter."""
+        chart_type = "natal"
+        charts = [test_chart]
+        mock_chart_repository.get_charts_by_person.return_value = charts
+        
+        result = await chart_service.get_person_charts(test_person_id, chart_type)
+        
+        assert result == charts
+        mock_chart_repository.get_charts_by_person.assert_called_once_with(test_person_id, chart_type)
+    
+    @pytest.mark.asyncio
+    async def test_get_person_charts_no_filter(self, chart_service, mock_chart_repository, test_person_id, test_chart):
+        """Test getting all charts for a person without filter."""
+        charts = [test_chart]
+        mock_chart_repository.get_charts_by_person.return_value = charts
+        
+        result = await chart_service.get_person_charts(test_person_id)
+        
+        assert result == charts
+        mock_chart_repository.get_charts_by_person.assert_called_once_with(test_person_id, None)
+    
+    @pytest.mark.asyncio
+    async def test_update_chart_with_valid_data(self, chart_service, mock_chart_repository, test_chart_id, test_chart):
+        """Test updating a chart with valid data."""
+        update_data = {
+            "chart_type": "transit",
+            "house_system": "koch",
+            "chart_data": {"updated": True}
+        }
+        
+        updated_chart = test_chart
+        updated_chart.chart_type = "transit"
+        updated_chart.house_system = "koch"
+        
+        mock_chart_repository.update.return_value = updated_chart
+        
+        result = await chart_service.update_chart(test_chart_id, update_data)
+        
+        assert result == updated_chart
+        mock_chart_repository.update.assert_called_once_with(test_chart_id, update_data)
+    
+    @pytest.mark.asyncio
+    async def test_generate_interpretations_multiple_types(self, chart_service, test_chart_id, test_chart, mock_chart_repository, mock_interpretation_engine):
+        """Test generating multiple interpretation types for a chart."""
+        interpretation_types = ["general", "personality", "career"]
+        language = "en"
+        
+        mock_chart_repository.get.return_value = test_chart
+        
+        expected_interpretations = []
+        for interp_type in interpretation_types:
+            expected_interpretations.append({
+                "interpretation_type": interp_type,
+                "text": f"Test {interp_type} interpretation",
+                "confidence": 0.85,
+                "language": language
+            })
+        
+        mock_interpretation_engine.generate_interpretation.side_effect = expected_interpretations
+        
+        result = await chart_service.generate_interpretations(
+            chart_id=test_chart_id,
+            interpretation_types=interpretation_types,
+            language=language
+        )
+        
+        assert len(result) == 3
+        assert mock_interpretation_engine.generate_interpretation.call_count == 3
+        for i, interpretation in enumerate(result):
+            assert interpretation["interpretation_type"] == interpretation_types[i]
+    
+    @pytest.mark.asyncio
+    async def test_generate_interpretations_different_language(self, chart_service, test_chart_id, test_chart, mock_chart_repository, mock_interpretation_engine):
+        """Test generating interpretations in different language."""
+        interpretation_types = ["general"]
+        language = "es"
+        
+        mock_chart_repository.get.return_value = test_chart
+        mock_interpretation_engine.generate_interpretation.return_value = {
+            "interpretation_type": "general",
+            "text": "Interpretación de prueba",
+            "confidence": 0.85,
+            "language": "es"
+        }
+        
+        result = await chart_service.generate_interpretations(
+            chart_id=test_chart_id,
+            interpretation_types=interpretation_types,
+            language=language
+        )
+        
+        assert len(result) == 1
+        assert result[0]["language"] == "es"
+        assert "Interpretación" in result[0]["text"]
+    
+    @pytest.mark.asyncio
+    async def test_get_person_for_calculation_success(self, chart_service, test_person):
+        """Test successfully getting person for calculation."""
+        with patch('josi.services.chart_service.PersonService') as mock_person_service_class:
+            mock_person_service = AsyncMock()
+            mock_person_service.get_person.return_value = test_person
+            mock_person_service_class.return_value = mock_person_service
+            
+            result = await chart_service._get_person_for_calculation(test_person.person_id)
+        
+        assert result == test_person
+        mock_person_service.get_person.assert_called_once_with(test_person.person_id)
+    
+    @pytest.mark.asyncio
+    async def test_get_person_for_calculation_not_found(self, chart_service, test_person_id):
+        """Test getting person for calculation when person not found."""
+        with patch('josi.services.chart_service.PersonService') as mock_person_service_class:
+            mock_person_service = AsyncMock()
+            mock_person_service.get_person.return_value = None
+            mock_person_service_class.return_value = mock_person_service
+            
+            with pytest.raises(ValueError, match="Person not found"):
+                await chart_service._get_person_for_calculation(test_person_id)
+    
+    @pytest.mark.asyncio
+    async def test_calculate_single_chart_vedic_system(self, chart_service, test_person, test_organization_id, mock_astrology_calculator):
+        """Test calculating a single vedic chart."""
+        chart_type = "vedic"
+        house_system = "whole_sign"
+        ayanamsa = "lahiri"
+        
+        with patch.object(chart_service, '_get_person_for_calculation', return_value=test_person):
+            result = await chart_service._calculate_single_chart(
+                person_id=test_person.person_id,
+                chart_type=chart_type,
+                house_system=house_system,
+                ayanamsa=ayanamsa
+            )
+        
+        assert result.chart_type == chart_type
+        assert result.house_system == house_system
+        assert result.ayanamsa == ayanamsa
+        assert result.person_id == test_person.person_id
+        assert result.organization_id == test_organization_id
+        mock_astrology_calculator.calculate_vedic_chart.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_single_chart_western_system(self, chart_service, test_person, mock_astrology_calculator):
+        """Test calculating a single western chart."""
+        chart_type = "western"
+        house_system = "placidus"
+        
+        with patch.object(chart_service, '_get_person_for_calculation', return_value=test_person):
+            result = await chart_service._calculate_single_chart(
+                person_id=test_person.person_id,
+                chart_type=chart_type,
+                house_system=house_system
+            )
+        
+        assert result.chart_type == chart_type
+        assert result.house_system == house_system
+        mock_astrology_calculator.calculate_western_chart.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_single_chart_chinese_system(self, chart_service, test_person, mock_astrology_calculator):
+        """Test calculating a single chinese chart."""
+        chart_type = "chinese"
+        
+        with patch.object(chart_service, '_get_person_for_calculation', return_value=test_person):
+            result = await chart_service._calculate_single_chart(
+                person_id=test_person.person_id,
+                chart_type=chart_type
+            )
+        
+        assert result.chart_type == chart_type
+        mock_astrology_calculator.calculate_chinese_chart.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_calculate_single_chart_unsupported_system(self, chart_service, test_person):
+        """Test calculating chart with unsupported system."""
+        chart_type = "unsupported_system"
+        
+        with patch.object(chart_service, '_get_person_for_calculation', return_value=test_person):
+            with pytest.raises(ValueError, match="Unsupported chart type"):
+                await chart_service._calculate_single_chart(
+                    person_id=test_person.person_id,
+                    chart_type=chart_type
+                )
+    
+    @pytest.mark.asyncio
+    async def test_add_interpretations_to_chart_single_type(self, chart_service, test_chart, mock_interpretation_engine):
+        """Test adding single interpretation type to a chart."""
+        interpretation_types = ["general"]
+        language = "en"
+        
+        expected_interpretation = {
+            "interpretation_type": "general",
+            "text": "General interpretation",
+            "confidence": 0.9,
+            "language": "en"
+        }
+        
+        mock_interpretation_engine.generate_interpretation.return_value = expected_interpretation
+        
+        await chart_service._add_interpretations_to_chart(
+            test_chart, interpretation_types, language
+        )
+        
+        mock_interpretation_engine.generate_interpretation.assert_called_once()
+        assert "interpretations" in test_chart.chart_data
+    
+    @pytest.mark.asyncio
+    async def test_add_interpretations_to_chart_multiple_types(self, chart_service, test_chart, mock_interpretation_engine):
+        """Test adding multiple interpretation types to a chart."""
+        interpretation_types = ["general", "personality", "career"]
+        language = "en"
+        
+        expected_interpretations = []
+        for interp_type in interpretation_types:
+            expected_interpretations.append({
+                "interpretation_type": interp_type,
+                "text": f"{interp_type.title()} interpretation",
+                "confidence": 0.85,
+                "language": "en"
+            })
+        
+        mock_interpretation_engine.generate_interpretation.side_effect = expected_interpretations
+        
+        await chart_service._add_interpretations_to_chart(
+            test_chart, interpretation_types, language
+        )
+        
+        assert mock_interpretation_engine.generate_interpretation.call_count == 3
+        assert "interpretations" in test_chart.chart_data
+    
+    @pytest.mark.asyncio
+    async def test_restore_chart_successful(self, chart_service, mock_chart_repository, test_chart_id, test_chart):
+        """Test successful chart restoration."""
+        mock_chart_repository.restore.return_value = test_chart
+        
+        result = await chart_service.restore_chart(test_chart_id)
+        
+        assert result == test_chart
+        mock_chart_repository.restore.assert_called_once_with(test_chart_id)
+    
+    @pytest.mark.asyncio
+    async def test_restore_chart_not_found_or_not_deleted(self, chart_service, mock_chart_repository, test_chart_id):
+        """Test restoring chart that doesn't exist or isn't deleted."""
+        mock_chart_repository.restore.return_value = None
+        
+        result = await chart_service.restore_chart(test_chart_id)
+        
+        assert result is None
+        mock_chart_repository.restore.assert_called_once_with(test_chart_id)
+    
+    @pytest.mark.asyncio
+    async def test_list_charts_with_pagination(self, chart_service, mock_chart_repository, test_chart):
+        """Test listing charts with specific pagination parameters."""
+        charts = [test_chart] * 5
+        skip = 10
+        limit = 20
+        
+        mock_chart_repository.get_multi.return_value = charts
+        
+        result = await chart_service.list_charts(skip=skip, limit=limit)
+        
+        assert result == charts
+        assert len(result) == 5
+        mock_chart_repository.get_multi.assert_called_once_with(skip=skip, limit=limit)
+    
+    @pytest.mark.asyncio
+    async def test_calculation_error_handling(self, chart_service, test_person_id):
+        """Test error handling during chart calculation."""
+        chart_types = ["natal"]
+        
+        with patch.object(chart_service, '_get_person_for_calculation', side_effect=Exception("Database error")):
+            with pytest.raises(Exception, match="Database error"):
+                await chart_service.calculate_charts_for_person(
+                    person_id=test_person_id,
+                    chart_types=chart_types
+                )
+    
+    @pytest.mark.asyncio
+    async def test_interpretation_error_handling(self, chart_service, test_chart_id, test_chart, mock_chart_repository, mock_interpretation_engine):
+        """Test error handling during interpretation generation."""
+        interpretation_types = ["general"]
+        language = "en"
+        
+        mock_chart_repository.get.return_value = test_chart
+        mock_interpretation_engine.generate_interpretation.side_effect = Exception("Interpretation service error")
+        
+        with pytest.raises(Exception, match="Interpretation service error"):
+            await chart_service.generate_interpretations(
+                chart_id=test_chart_id,
+                interpretation_types=interpretation_types,
+                language=language
+            )
+    
+    @pytest.mark.asyncio
+    async def test_service_initialization_with_dependencies(self, mock_db_session):
+        """Test ChartService initialization with all dependencies."""
+        org_id = uuid4()
+        
+        with patch('josi.services.chart_service.ChartRepository') as mock_repo_class:
+            with patch('josi.services.chart_service.AstrologyCalculator') as mock_calc_class:
+                with patch('josi.services.chart_service.InterpretationEngine') as mock_interp_class:
+                    service = ChartService(mock_db_session, org_id)
+                    
+                    # Verify dependencies were initialized
+                    mock_repo_class.assert_called_once_with(AstrologyChart, mock_db_session, org_id)
+                    mock_calc_class.assert_called_once()
+                    mock_interp_class.assert_called_once()
+                    
+                    assert service.db == mock_db_session
+                    assert service.organization_id == org_id
+                    assert hasattr(service, 'chart_repository')
+                    assert hasattr(service, 'astrology_calculator')
+                    assert hasattr(service, 'interpretation_engine')
+    
+    @pytest.mark.asyncio
+    async def test_chart_data_structure_after_calculation(self, chart_service, test_person, mock_astrology_calculator):
+        """Test that calculated chart data has expected structure."""
+        chart_type = "natal"
+        
+        with patch.object(chart_service, '_get_person_for_calculation', return_value=test_person):
+            result = await chart_service._calculate_single_chart(
+                person_id=test_person.person_id,
+                chart_type=chart_type
+            )
+        
+        # Verify chart data structure
+        assert isinstance(result.chart_data, dict)
+        assert result.calculated_at is not None
+        assert result.calculation_version is not None
+        assert result.chart_type == chart_type
+    
+    @pytest.mark.asyncio
+    async def test_calculate_charts_empty_chart_types_list(self, chart_service, test_person_id):
+        """Test calculating charts with empty chart types list."""
+        chart_types = []
+        
+        result = await chart_service.calculate_charts_for_person(
+            person_id=test_person_id,
+            chart_types=chart_types
+        )
+        
+        assert result == []
+    
+    @pytest.mark.asyncio
+    async def test_generate_interpretations_empty_types_list(self, chart_service, test_chart_id, test_chart, mock_chart_repository):
+        """Test generating interpretations with empty types list."""
+        interpretation_types = []
+        language = "en"
+        
+        mock_chart_repository.get.return_value = test_chart
+        
+        result = await chart_service.generate_interpretations(
+            chart_id=test_chart_id,
+            interpretation_types=interpretation_types,
+            language=language
+        )
+        
+        assert result == []

@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: josi-api
+  namespace: josi
+  labels:
+    app: josi-api
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: josi-api
+  template:
+    metadata:
+      labels:
+        app: josi-api
+        version: v1
+    spec:
+      serviceAccountName: josi-sa
+      containers:
+      - name: josi-api
+        image: us-central1-docker.pkg.dev/PROJECT_ID/josi/josi-api:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: PORT
+          value: "8000"
+        envFrom:
+        - configMapRef:
+            name: josi-config
+        - secretRef:
+            name: josi-secret
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      # Cloud SQL Proxy sidecar
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:latest
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=PROJECT_ID:us-central1:josi-db=tcp:5432"
+          - "-credential_file=/secrets/service_account.json"
+        securityContext:
+          runAsNonRoot: true
+        volumeMounts:
+        - name: sa-key
+          mountPath: /secrets/
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      volumes:
+      - name: sa-key
+        secret:
+          secretName: cloudsql-sa-key

@@ -1,0 +1,215 @@
+"""
+{{ model_name }} controller - auto-generated CRUD operations.
+"""
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
+from uuid import UUID
+import logging
+
+from josi.db.async_db import get_async_db
+from josi.api.v1.dependencies import get_current_organization
+from josi.api.response import ResponseModel
+from josi.services.{{ module_name }}_service import {{ model_name }}Service
+from josi.models.organization_model import Organization
+from josi.models.{{ module_name }}_model import {{ model_name }}
+from cache import cache
+
+log = logging.getLogger("uvicorn")
+
+router = APIRouter(prefix="/{{ module_name|plural }}", tags=["{{ module_name|plural }}"])
+
+
+@router.post("/", response_model=ResponseModel)
+async def create_{{ module_name }}(
+    payload: {{ model_name }},
+    {% if has_organization %}organization: Organization = Depends(get_current_organization),{% endif %}
+    db: AsyncSession = Depends(get_async_db)
+) -> ResponseModel:
+    """
+    Create a new {{ model_name|title_case }}.
+    
+    Args:
+        payload ({{ model_name }}): {{ model_name }} data
+        {% if has_organization %}organization (Organization): Current organization (injected){% endif %}
+        db (AsyncSession): Database session (injected)
+    
+    Returns:
+        ResponseModel: Created {{ model_name|lower }} data
+    
+    Raises:
+        HTTPException(400): If payload is invalid
+        HTTPException(500): If creation fails
+    """
+    if payload is None:
+        raise HTTPException(400, "payload is empty")
+        
+    service = {{ model_name }}Service(db{% if has_organization %}, organization.id{% endif %})
+    
+    try:
+        result = await service.create(payload.model_dump(exclude_unset=True))
+        return ResponseModel(
+            success=True,
+            message="{{ model_name }} created successfully",
+            data=result
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        log.error(f"Failed to create {{ model_name|lower }}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create {{ model_name|lower }}: {str(e)}")
+
+
+@router.get("/{id}", response_model=ResponseModel)
+@cache(expire=3600, prefix="{{ module_name }}")
+async def get_{{ module_name }}(
+    id: UUID,
+    {% if has_organization %}organization: Organization = Depends(get_current_organization),{% endif %}
+    db: AsyncSession = Depends(get_async_db)
+) -> ResponseModel:
+    """
+    Get a {{ model_name|title_case }} by ID.
+    
+    Args:
+        id (UUID): {{ model_name }} ID
+        {% if has_organization %}organization (Organization): Current organization (injected){% endif %}
+        db (AsyncSession): Database session (injected)
+    
+    Returns:
+        ResponseModel: {{ model_name }} data
+    
+    Raises:
+        HTTPException(404): If {{ model_name|lower }} not found
+    """
+    if id is None:
+        raise HTTPException(400, "id is empty")
+        
+    service = {{ model_name }}Service(db{% if has_organization %}, organization.id{% endif %})
+    
+    result = await service.get(id)
+    if not result:
+        raise HTTPException(status_code=404, detail=f"{{ model_name }} with id: {id} not found")
+    
+    return ResponseModel(
+        success=True,
+        message="{{ model_name }} retrieved successfully",
+        data=result
+    )
+
+
+@router.get("/", response_model=ResponseModel)
+@cache(expire=1800, prefix="{{ module_name }}_list")
+async def list_{{ module_name|plural }}(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, le=1000),
+    search: Optional[str] = Query(None),
+    {% if has_organization %}organization: Organization = Depends(get_current_organization),{% endif %}
+    db: AsyncSession = Depends(get_async_db)
+) -> ResponseModel:
+    """
+    List all {{ model_name|plural|title_case }}.
+    
+    Args:
+        skip (int): Number of records to skip
+        limit (int): Maximum number of records to return
+        search (str, optional): Search term
+        {% if has_organization %}organization (Organization): Current organization (injected){% endif %}
+        db (AsyncSession): Database session (injected)
+    
+    Returns:
+        ResponseModel: List of {{ model_name|plural|lower }}
+    """
+    service = {{ model_name }}Service(db{% if has_organization %}, organization.id{% endif %})
+    
+    results = await service.list(skip=skip, limit=limit, search=search)
+    
+    return ResponseModel(
+        success=True,
+        message="{{ model_name|plural }} retrieved successfully",
+        data=results
+    )
+
+
+@router.put("/{id}", response_model=ResponseModel)
+async def update_{{ module_name }}(
+    id: UUID,
+    payload: {{ model_name }},
+    {% if has_organization %}organization: Organization = Depends(get_current_organization),{% endif %}
+    db: AsyncSession = Depends(get_async_db)
+) -> ResponseModel:
+    """
+    Update a {{ model_name|title_case }}.
+    
+    Args:
+        id (UUID): {{ model_name }} ID
+        payload ({{ model_name }}): Update data
+        {% if has_organization %}organization (Organization): Current organization (injected){% endif %}
+        db (AsyncSession): Database session (injected)
+    
+    Returns:
+        ResponseModel: Updated {{ model_name|lower }} data
+    
+    Raises:
+        HTTPException(404): If {{ model_name|lower }} not found
+        HTTPException(500): If update fails
+    """
+    if id is None:
+        raise HTTPException(400, "id is empty")
+    if payload is None:
+        raise HTTPException(400, "payload is empty")
+        
+    service = {{ model_name }}Service(db{% if has_organization %}, organization.id{% endif %})
+    
+    try:
+        update_data = payload.model_dump(exclude_unset=True, exclude={'id', 'organization_id'})
+        result = await service.update(id, update_data)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail=f"{{ model_name }} with id: {id} not found")
+            
+        return ResponseModel(
+            success=True,
+            message="{{ model_name }} updated successfully",
+            data=result
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        log.error(f"Failed to update {{ model_name|lower }}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update {{ model_name|lower }}: {str(e)}")
+
+
+@router.delete("/{id}", response_model=ResponseModel)
+async def delete_{{ module_name }}(
+    id: UUID,
+    {% if has_organization %}organization: Organization = Depends(get_current_organization),{% endif %}
+    db: AsyncSession = Depends(get_async_db)
+) -> ResponseModel:
+    """
+    Delete a {{ model_name|title_case }}.
+    
+    Args:
+        id (UUID): {{ model_name }} ID
+        {% if has_organization %}organization (Organization): Current organization (injected){% endif %}
+        db (AsyncSession): Database session (injected)
+    
+    Returns:
+        ResponseModel: Deletion confirmation
+    
+    Raises:
+        HTTPException(404): If {{ model_name|lower }} not found
+    """
+    if id is None:
+        raise HTTPException(400, "id is empty")
+        
+    service = {{ model_name }}Service(db{% if has_organization %}, organization.id{% endif %})
+    
+    success = await service.delete({{ table_name }}_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"{{ model_name }} with id: {id} not found")
+    
+    return ResponseModel(
+        success=True,
+        message="{{ model_name }} deleted successfully",
+        data={"{{ table_name }}_id": str({{ table_name }}_id)}
+    )

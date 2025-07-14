@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: josi-api-ingress
+  namespace: josi
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "josi-api-ip"
+    networking.gke.io/managed-certificates: "josi-api-cert"
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+  - host: api.josi.example.com  # Replace with your domain
+    http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: josi-api-service
+            port:
+              number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: josi-api-cert
+  namespace: josi
+spec:
+  domains:
+    - api.josi.example.com  # Replace with your domain
