@@ -1,0 +1,315 @@
+"""Unit tests for Person controller."""
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import datetime
+from uuid import uuid4
+from fastapi import HTTPException
+
+from josi.api.v1.controllers.person_controller import PersonController
+from josi.models.person_model import Person
+from josi.api.v1.models.response import ResponseModel
+
+
+class TestPersonController:
+    """Test coverage for PersonController."""
+    
+    @pytest.fixture
+    def mock_person_service(self):
+        """Mock person service."""
+        return AsyncMock()
+    
+    @pytest.fixture
+    def mock_db_session(self):
+        """Mock database session."""
+        return AsyncMock()
+    
+    @pytest.fixture
+    def person_controller(self, mock_person_service):
+        """Create PersonController with mocked service."""
+        controller = PersonController()
+        controller.service = mock_person_service
+        return controller
+    
+    @pytest.fixture
+    def test_person(self):
+        """Test person instance."""
+        return Person(
+            person_id=str(uuid4()),
+            first_name="John",
+            last_name="Doe",
+            birth_date=datetime(1990, 1, 1),
+            organization_id=str(uuid4())
+        )
+    
+    @pytest.mark.asyncio
+    async def test_create_person_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test successful person creation."""
+        person_data = {
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'birth_date': datetime(1990, 1, 1)
+        }
+        
+        mock_person_service.create_person.return_value = test_person
+        
+        result = await person_controller.create_person(
+            person=person_data,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert isinstance(result, ResponseModel)
+        assert result.success is True
+        assert result.data == test_person
+        mock_person_service.create_person.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_person_validation_error(self, person_controller, mock_person_service, mock_db_session):
+        """Test person creation with validation error."""
+        person_data = {
+            'first_name': '',  # Empty name
+            'birth_date': datetime(1990, 1, 1)
+        }
+        
+        mock_person_service.create_person.side_effect = ValueError("First name is required")
+        
+        with pytest.raises(HTTPException) as exc_info:
+            await person_controller.create_person(
+                person=person_data,
+                db=mock_db_session,
+                organization_id=str(uuid4())
+            )
+        
+        assert exc_info.value.status_code == 400
+        assert "First name is required" in str(exc_info.value.detail)
+    
+    @pytest.mark.asyncio
+    async def test_get_person_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test successful person retrieval."""
+        mock_person_service.get_person.return_value = test_person
+        
+        result = await person_controller.get_person(
+            person_id=test_person.person_id,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert result.data == test_person
+    
+    @pytest.mark.asyncio
+    async def test_get_person_not_found(self, person_controller, mock_person_service, mock_db_session):
+        """Test getting non-existent person."""
+        mock_person_service.get_person.return_value = None
+        
+        with pytest.raises(HTTPException) as exc_info:
+            await person_controller.get_person(
+                person_id=str(uuid4()),
+                db=mock_db_session,
+                organization_id=str(uuid4())
+            )
+        
+        assert exc_info.value.status_code == 404
+    
+    @pytest.mark.asyncio
+    async def test_update_person_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test successful person update."""
+        update_data = {'email': 'newemail@example.com'}
+        updated_person = test_person.model_copy(update={'email': 'newemail@example.com'})
+        
+        mock_person_service.update_person.return_value = updated_person
+        
+        result = await person_controller.update_person(
+            person_id=test_person.person_id,
+            person=update_data,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert result.data.email == 'newemail@example.com'
+    
+    @pytest.mark.asyncio
+    async def test_delete_person_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test successful person deletion."""
+        mock_person_service.delete_person.return_value = True
+        
+        result = await person_controller.delete_person(
+            person_id=test_person.person_id,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert result.message == "Person deleted successfully"
+    
+    @pytest.mark.asyncio
+    async def test_list_persons_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test listing persons."""
+        mock_person_service.list_persons.return_value = [test_person]
+        
+        result = await person_controller.list_persons(
+            db=mock_db_session,
+            organization_id=test_person.organization_id,
+            skip=0,
+            limit=10
+        )
+        
+        assert result.success is True
+        assert len(result.data) == 1
+        assert result.data[0] == test_person
+    
+    @pytest.mark.asyncio
+    async def test_search_persons_success(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test searching persons."""
+        mock_person_service.search_persons.return_value = [test_person]
+        
+        result = await person_controller.search_persons(
+            query="John",
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert len(result.data) == 1
+    
+    @pytest.mark.asyncio
+    async def test_create_person_with_chart(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test creating person with immediate chart generation."""
+        person_data = {
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'birth_date': datetime(1990, 1, 1),
+            'birth_time': datetime(1990, 1, 1, 12, 0, 0),
+            'birth_place_city': 'New York',
+            'birth_place_state': 'NY',
+            'birth_place_country': 'USA'
+        }
+        
+        mock_person_service.create_person.return_value = test_person
+        
+        # Mock chart service
+        with patch('josi.api.v1.controllers.person_controller.ChartService') as mock_chart_service:
+            mock_chart_instance = AsyncMock()
+            mock_chart_service.return_value = mock_chart_instance
+            mock_chart_instance.create_chart.return_value = MagicMock(chart_id='chart123')
+            
+            result = await person_controller.create_person_with_chart(
+                person=person_data,
+                db=mock_db_session,
+                organization_id=test_person.organization_id,
+                chart_systems=['vedic', 'western']
+            )
+            
+            assert result.success is True
+            assert 'person' in result.data
+            assert 'charts' in result.data
+            mock_chart_instance.create_chart.call_count == 2  # Two chart systems
+    
+    @pytest.mark.asyncio
+    async def test_bulk_create_persons(self, person_controller, mock_person_service, mock_db_session):
+        """Test bulk person creation."""
+        persons_data = [
+            {'first_name': 'Person1', 'birth_date': datetime(1990, 1, 1)},
+            {'first_name': 'Person2', 'birth_date': datetime(1991, 2, 2)},
+            {'first_name': 'Person3', 'birth_date': datetime(1992, 3, 3)}
+        ]
+        
+        created_persons = [
+            Person(person_id=str(uuid4()), **data, organization_id=str(uuid4()))
+            for data in persons_data
+        ]
+        
+        mock_person_service.batch_create_persons.return_value = created_persons
+        
+        result = await person_controller.bulk_create_persons(
+            persons=persons_data,
+            db=mock_db_session,
+            organization_id=str(uuid4())
+        )
+        
+        assert result.success is True
+        assert len(result.data) == 3
+        assert result.message == "Created 3 persons successfully"
+    
+    @pytest.mark.asyncio
+    async def test_export_person_data(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test exporting person data."""
+        export_data = {
+            'person': test_person.model_dump(),
+            'charts': []
+        }
+        
+        mock_person_service.export_person_data.return_value = export_data
+        
+        result = await person_controller.export_person(
+            person_id=test_person.person_id,
+            db=mock_db_session,
+            organization_id=test_person.organization_id,
+            include_charts=True
+        )
+        
+        assert result.success is True
+        assert 'person' in result.data
+        assert 'charts' in result.data
+    
+    @pytest.mark.asyncio
+    async def test_import_person_data(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test importing person data."""
+        import_data = {
+            'person': {
+                'first_name': 'Imported',
+                'last_name': 'Person',
+                'birth_date': '1995-05-15T00:00:00'
+            }
+        }
+        
+        mock_person_service.import_person_data.return_value = test_person
+        
+        result = await person_controller.import_person(
+            data=import_data,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert result.data == test_person
+    
+    @pytest.mark.asyncio
+    async def test_merge_duplicate_persons(self, person_controller, mock_person_service, mock_db_session, test_person):
+        """Test merging duplicate persons."""
+        primary_id = str(uuid4())
+        duplicate_id = str(uuid4())
+        
+        mock_person_service.merge_persons.return_value = test_person
+        
+        result = await person_controller.merge_persons(
+            primary_id=primary_id,
+            duplicate_id=duplicate_id,
+            db=mock_db_session,
+            organization_id=test_person.organization_id
+        )
+        
+        assert result.success is True
+        assert result.data == test_person
+        assert result.message == "Persons merged successfully"
+    
+    @pytest.mark.asyncio
+    async def test_get_person_statistics(self, person_controller, mock_person_service, mock_db_session):
+        """Test getting person statistics."""
+        stats = {
+            'total_persons': 100,
+            'by_gender': {'male': 45, 'female': 50, 'other': 5},
+            'by_age_group': {'0-20': 10, '21-40': 40, '41-60': 30, '60+': 20},
+            'by_country': {'USA': 60, 'UK': 20, 'India': 20}
+        }
+        
+        mock_person_service.get_statistics.return_value = stats
+        
+        result = await person_controller.get_statistics(
+            db=mock_db_session,
+            organization_id=str(uuid4())
+        )
+        
+        assert result.success is True
+        assert result.data == stats

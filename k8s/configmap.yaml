@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: josi-config
+  namespace: josi
+data:
+  APP_NAME: "Josi API"
+  ENVIRONMENT: "production"
+  AUTO_DB_MIGRATION: "true"
+  EPHEMERIS_PATH: "/usr/share/swisseph"
+  CORS_ORIGINS: "*"
+  LOG_LEVEL: "INFO"
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_PER_MINUTE: "60"
+  GZIP_MINIMUM_SIZE: "1000"
+  API_KEY_HEADER: "X-API-Key"

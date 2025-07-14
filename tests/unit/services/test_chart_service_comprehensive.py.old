@@ -1,0 +1,496 @@
+"""Comprehensive unit tests for Chart service."""
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import datetime
+from uuid import uuid4
+import json
+
+from josi.services.chart_service import ChartService
+from josi.models.chart_model import AstrologyChart, AstrologySystem
+
+
+class TestChartServiceComprehensive:
+    """Comprehensive test coverage for ChartService."""
+    
+    @pytest.fixture
+    def mock_dependencies(self):
+        """Mock all dependencies."""
+        return {
+            'chart_repository': AsyncMock(),
+            'person_repository': AsyncMock(),
+            'astrology_calculator': MagicMock(),
+            'interpretation_engine': MagicMock(),
+            'geocoding_service': MagicMock(),
+            'organization_id': str(uuid4())
+        }
+    
+    @pytest.fixture
+    def chart_service(self, mock_dependencies):
+        """Create ChartService with mocked dependencies."""
+        return ChartService(
+            chart_repository=mock_dependencies['chart_repository'],
+            person_repository=mock_dependencies['person_repository'],
+            astrology_calculator=mock_dependencies['astrology_calculator'],
+            interpretation_engine=mock_dependencies['interpretation_engine'],
+            geocoding_service=mock_dependencies['geocoding_service']
+        )
+    
+    @pytest.fixture
+    def test_person(self):
+        """Test person data."""
+        return {
+            'person_id': str(uuid4()),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'birth_date': datetime(1990, 1, 1),
+            'birth_time': datetime(1990, 1, 1, 12, 0, 0),
+            'birth_place_city': 'New York',
+            'birth_place_state': 'NY',
+            'birth_place_country': 'USA',
+            'latitude': 40.7128,
+            'longitude': -74.0060,
+            'timezone': 'America/New_York'
+        }
+    
+    @pytest.fixture
+    def test_chart(self, test_person):
+        """Test chart data."""
+        return AstrologyChart(
+            chart_id=str(uuid4()),
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_system=AstrologySystem.VEDIC,
+            calculation_time=datetime.utcnow(),
+            chart_data={
+                'planets': {
+                    'Sun': {'longitude': 280.0, 'sign': 'Capricorn', 'house': 10},
+                    'Moon': {'longitude': 45.0, 'sign': 'Taurus', 'house': 2}
+                },
+                'houses': [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+                'ascendant': {'longitude': 0.0, 'sign': 'Aries'}
+            },
+            interpretation_data={'general': 'Test interpretation'},
+            organization_id=str(uuid4())
+        )
+    
+    @pytest.mark.asyncio
+    async def test_create_chart_vedic(self, chart_service, mock_dependencies, test_person):
+        """Test creating a Vedic chart."""
+        # Setup mocks
+        mock_dependencies['person_repository'].get.return_value = test_person
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.return_value = {
+            'chart_type': 'vedic',
+            'planets': {'Sun': {'longitude': 280.0}},
+            'houses': [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+        }
+        mock_dependencies['interpretation_engine'].generate_interpretations.return_value = {
+            'general': {'summary': 'Test interpretation'}
+        }
+        mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='123')
+        
+        # Test
+        result = await chart_service.create_chart(
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_system=AstrologySystem.VEDIC,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        # Assertions
+        assert result is not None
+        assert result.chart_id == '123'
+        mock_dependencies['person_repository'].get.assert_called_once()
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.assert_called_once()
+        mock_dependencies['interpretation_engine'].generate_interpretations.assert_called_once()
+        mock_dependencies['chart_repository'].create.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_chart_western(self, chart_service, mock_dependencies, test_person):
+        """Test creating a Western chart."""
+        # Setup mocks
+        mock_dependencies['person_repository'].get.return_value = test_person
+        mock_dependencies['astrology_calculator'].calculate_western_chart.return_value = {
+            'chart_type': 'western',
+            'planets': {'Sun': {'longitude': 280.0}},
+            'houses': [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+        }
+        mock_dependencies['interpretation_engine'].generate_interpretations.return_value = {
+            'general': {'summary': 'Western interpretation'}
+        }
+        mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='456')
+        
+        # Test
+        result = await chart_service.create_chart(
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_system=AstrologySystem.WESTERN,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        # Assertions
+        assert result.chart_id == '456'
+        mock_dependencies['astrology_calculator'].calculate_western_chart.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_chart_chinese(self, chart_service, mock_dependencies, test_person):
+        """Test creating a Chinese chart."""
+        # Setup mocks
+        mock_dependencies['person_repository'].get.return_value = test_person
+        # Mock Chinese calculator
+        with patch('josi.services.chart_service.BaziCalculator') as mock_bazi:
+            mock_bazi_instance = MagicMock()
+            mock_bazi.return_value = mock_bazi_instance
+            mock_bazi_instance.calculate_bazi_chart.return_value = {
+                'four_pillars': {'year': 'Metal Horse'},
+                'elements_balance': {'Metal': 2, 'Water': 1}
+            }
+            
+            mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='789')
+            
+            # Test
+            result = await chart_service.create_chart(
+                person_id=test_person['person_id'],
+                chart_type=ChartType.NATAL,
+                astrology_system=AstrologySystem.CHINESE,
+                organization_id=mock_dependencies['organization_id']
+            )
+            
+            # Assertions
+            assert result.chart_id == '789'
+            mock_bazi_instance.calculate_bazi_chart.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_chart_missing_birth_time(self, chart_service, mock_dependencies, test_person):
+        """Test creating chart without birth time."""
+        # Remove birth time
+        test_person['birth_time'] = None
+        mock_dependencies['person_repository'].get.return_value = test_person
+        
+        # Test
+        with pytest.raises(ValueError, match="Birth time is required"):
+            await chart_service.create_chart(
+                person_id=test_person['person_id'],
+                chart_type=ChartType.NATAL,
+                astrology_system=AstrologySystem.VEDIC,
+                organization_id=mock_dependencies['organization_id']
+            )
+    
+    @pytest.mark.asyncio
+    async def test_create_chart_missing_location(self, chart_service, mock_dependencies, test_person):
+        """Test creating chart without location data."""
+        # Remove location data
+        test_person['latitude'] = None
+        test_person['longitude'] = None
+        mock_dependencies['person_repository'].get.return_value = test_person
+        
+        # Mock geocoding service
+        mock_dependencies['geocoding_service'].get_coordinates_and_timezone.return_value = (
+            40.7128, -74.0060, 'America/New_York'
+        )
+        
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.return_value = {
+            'chart_type': 'vedic',
+            'planets': {}
+        }
+        mock_dependencies['interpretation_engine'].generate_interpretations.return_value = {}
+        mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='999')
+        
+        # Test
+        result = await chart_service.create_chart(
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_system=AstrologySystem.VEDIC,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        # Should use geocoding service
+        mock_dependencies['geocoding_service'].get_coordinates_and_timezone.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_get_chart(self, chart_service, mock_dependencies, test_chart):
+        """Test getting a chart by ID."""
+        mock_dependencies['chart_repository'].get.return_value = test_chart
+        
+        result = await chart_service.get_chart(
+            chart_id=test_chart.chart_id,
+            organization_id=test_chart.organization_id
+        )
+        
+        assert result == test_chart
+        mock_dependencies['chart_repository'].get.assert_called_once_with(
+            test_chart.chart_id
+        )
+    
+    @pytest.mark.asyncio
+    async def test_get_person_charts(self, chart_service, mock_dependencies, test_chart):
+        """Test getting all charts for a person."""
+        mock_dependencies['chart_repository'].get_by_person.return_value = [test_chart]
+        
+        result = await chart_service.get_person_charts(
+            person_id=test_chart.person_id,
+            organization_id=test_chart.organization_id
+        )
+        
+        assert len(result) == 1
+        assert result[0] == test_chart
+    
+    @pytest.mark.asyncio
+    async def test_update_chart(self, chart_service, mock_dependencies, test_chart):
+        """Test updating a chart."""
+        updated_chart = test_chart.model_copy()
+        updated_chart.interpretation_data = {'updated': True}
+        
+        mock_dependencies['chart_repository'].get.return_value = test_chart
+        mock_dependencies['chart_repository'].update.return_value = updated_chart
+        
+        result = await chart_service.update_chart(
+            chart_id=test_chart.chart_id,
+            organization_id=test_chart.organization_id,
+            interpretation_data={'updated': True}
+        )
+        
+        assert result.interpretation_data == {'updated': True}
+    
+    @pytest.mark.asyncio
+    async def test_delete_chart(self, chart_service, mock_dependencies, test_chart):
+        """Test deleting a chart."""
+        mock_dependencies['chart_repository'].get.return_value = test_chart
+        mock_dependencies['chart_repository'].soft_delete.return_value = True
+        
+        result = await chart_service.delete_chart(
+            chart_id=test_chart.chart_id,
+            organization_id=test_chart.organization_id
+        )
+        
+        assert result is True
+        mock_dependencies['chart_repository'].soft_delete.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_synastry_chart(self, chart_service, mock_dependencies, test_person):
+        """Test creating a synastry (relationship) chart."""
+        person2 = test_person.copy()
+        person2['person_id'] = str(uuid4())
+        person2['first_name'] = 'Jane'
+        
+        mock_dependencies['person_repository'].get.side_effect = [test_person, person2]
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.side_effect = [
+            {'planets': {'Sun': {'longitude': 280.0}}},
+            {'planets': {'Sun': {'longitude': 100.0}}}
+        ]
+        
+        # Mock synastry calculation
+        with patch.object(chart_service, '_calculate_synastry_aspects') as mock_synastry:
+            mock_synastry.return_value = {
+                'aspects': [{'planet1': 'Sun', 'planet2': 'Sun', 'aspect': 'opposition'}]
+            }
+            
+            mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='syn123')
+            
+            result = await chart_service.create_synastry_chart(
+                person1_id=test_person['person_id'],
+                person2_id=person2['person_id'],
+                astrology_system=AstrologySystem.VEDIC,
+                organization_id=mock_dependencies['organization_id']
+            )
+            
+            assert result.chart_id == 'syn123'
+            assert result.chart_type == ChartType.SYNASTRY
+            mock_synastry.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_create_composite_chart(self, chart_service, mock_dependencies, test_person):
+        """Test creating a composite chart."""
+        person2 = test_person.copy()
+        person2['person_id'] = str(uuid4())
+        
+        mock_dependencies['person_repository'].get.side_effect = [test_person, person2]
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.return_value = {
+            'planets': {'Sun': {'longitude': 190.0}}  # Midpoint
+        }
+        mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='comp123')
+        
+        result = await chart_service.create_composite_chart(
+            person1_id=test_person['person_id'],
+            person2_id=person2['person_id'],
+            astrology_system=AstrologySystem.VEDIC,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        assert result.chart_id == 'comp123'
+        assert result.chart_type == ChartType.COMPOSITE
+    
+    @pytest.mark.asyncio
+    async def test_create_transit_chart(self, chart_service, mock_dependencies, test_person):
+        """Test creating a transit chart."""
+        transit_date = datetime(2024, 1, 1, 12, 0, 0)
+        
+        mock_dependencies['person_repository'].get.return_value = test_person
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.side_effect = [
+            {'planets': {'Sun': {'longitude': 280.0}}},  # Natal
+            {'planets': {'Sun': {'longitude': 290.0}}}   # Transit
+        ]
+        mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='trans123')
+        
+        result = await chart_service.create_transit_chart(
+            person_id=test_person['person_id'],
+            transit_datetime=transit_date,
+            astrology_system=AstrologySystem.VEDIC,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        assert result.chart_id == 'trans123'
+        assert result.chart_type == ChartType.TRANSIT
+    
+    @pytest.mark.asyncio
+    async def test_create_solar_return_chart(self, chart_service, mock_dependencies, test_person):
+        """Test creating a solar return chart."""
+        return_year = 2024
+        
+        mock_dependencies['person_repository'].get.return_value = test_person
+        
+        # Mock solar return calculation
+        with patch.object(chart_service, '_calculate_solar_return_time') as mock_return:
+            mock_return.return_value = datetime(2024, 1, 1, 15, 30, 0)
+            
+            mock_dependencies['astrology_calculator'].calculate_vedic_chart.return_value = {
+                'planets': {'Sun': {'longitude': 280.0}}
+            }
+            mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='sr123')
+            
+            result = await chart_service.create_solar_return_chart(
+                person_id=test_person['person_id'],
+                return_year=return_year,
+                astrology_system=AstrologySystem.VEDIC,
+                organization_id=mock_dependencies['organization_id']
+            )
+            
+            assert result.chart_id == 'sr123'
+            assert result.chart_type == ChartType.SOLAR_RETURN
+    
+    @pytest.mark.asyncio
+    async def test_create_progressed_chart(self, chart_service, mock_dependencies, test_person):
+        """Test creating a progressed chart."""
+        progression_date = datetime(2024, 1, 1)
+        
+        mock_dependencies['person_repository'].get.return_value = test_person
+        
+        # Mock progression calculation
+        with patch('josi.services.chart_service.ProgressionsCalculator') as mock_prog:
+            mock_prog_instance = MagicMock()
+            mock_prog.return_value = mock_prog_instance
+            mock_prog_instance.calculate_secondary_progressions.return_value = {
+                'progressed_planets': {'Sun': {'longitude': 310.0}}
+            }
+            
+            mock_dependencies['chart_repository'].create.return_value = MagicMock(chart_id='prog123')
+            
+            result = await chart_service.create_progressed_chart(
+                person_id=test_person['person_id'],
+                progression_date=progression_date,
+                progression_type='secondary',
+                astrology_system=AstrologySystem.WESTERN,
+                organization_id=mock_dependencies['organization_id']
+            )
+            
+            assert result.chart_id == 'prog123'
+            assert result.chart_type == ChartType.PROGRESSED
+    
+    @pytest.mark.asyncio
+    async def test_calculate_compatibility(self, chart_service, mock_dependencies):
+        """Test compatibility calculation between two charts."""
+        chart1_data = {
+            'planets': {'Sun': {'longitude': 100.0}, 'Moon': {'longitude': 200.0}},
+            'ascendant': {'longitude': 0.0}
+        }
+        chart2_data = {
+            'planets': {'Sun': {'longitude': 280.0}, 'Moon': {'longitude': 20.0}},
+            'ascendant': {'longitude': 180.0}
+        }
+        
+        compatibility = await chart_service.calculate_compatibility(
+            chart1_data, chart2_data, AstrologySystem.VEDIC
+        )
+        
+        assert 'overall_score' in compatibility
+        assert 'aspects' in compatibility
+        assert 'strengths' in compatibility
+        assert 'challenges' in compatibility
+    
+    @pytest.mark.asyncio
+    async def test_batch_create_charts(self, chart_service, mock_dependencies, test_person):
+        """Test batch creation of multiple charts."""
+        mock_dependencies['person_repository'].get.return_value = test_person
+        mock_dependencies['astrology_calculator'].calculate_vedic_chart.return_value = {
+            'planets': {}
+        }
+        mock_dependencies['interpretation_engine'].generate_interpretations.return_value = {}
+        mock_dependencies['chart_repository'].create.side_effect = [
+            MagicMock(chart_id='1'),
+            MagicMock(chart_id='2'),
+            MagicMock(chart_id='3')
+        ]
+        
+        systems = [AstrologySystem.VEDIC, AstrologySystem.WESTERN, AstrologySystem.CHINESE]
+        
+        results = await chart_service.batch_create_charts(
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_systems=systems,
+            organization_id=mock_dependencies['organization_id']
+        )
+        
+        assert len(results) == 3
+        assert mock_dependencies['chart_repository'].create.call_count == 3
+    
+    def test_calculate_aspect(self, chart_service):
+        """Test aspect calculation between planets."""
+        planet1_longitude = 100.0
+        planet2_longitude = 190.0
+        
+        aspect = chart_service._calculate_aspect(planet1_longitude, planet2_longitude)
+        
+        assert aspect is not None
+        assert aspect['angle'] == 90.0
+        assert aspect['type'] == 'square'
+        assert 'orb' in aspect
+    
+    def test_get_house_position(self, chart_service):
+        """Test house position calculation."""
+        houses = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+        planet_longitude = 45.0
+        
+        house = chart_service._get_house_position(planet_longitude, houses)
+        
+        assert house == 2  # 45° is in 2nd house (30-60°)
+    
+    @pytest.mark.asyncio
+    async def test_error_handling_person_not_found(self, chart_service, mock_dependencies):
+        """Test error handling when person not found."""
+        mock_dependencies['person_repository'].get.return_value = None
+        
+        with pytest.raises(ValueError, match="Person not found"):
+            await chart_service.create_chart(
+                person_id=str(uuid4()),
+                chart_type=ChartType.NATAL,
+                astrology_system=AstrologySystem.VEDIC,
+                organization_id=mock_dependencies['organization_id']
+            )
+    
+    @pytest.mark.asyncio
+    async def test_chart_caching(self, chart_service, mock_dependencies, test_person, test_chart):
+        """Test chart caching functionality."""
+        mock_dependencies['person_repository'].get.return_value = test_person
+        mock_dependencies['chart_repository'].get_recent_by_type.return_value = test_chart
+        
+        # Should return cached chart
+        result = await chart_service.create_chart(
+            person_id=test_person['person_id'],
+            chart_type=ChartType.NATAL,
+            astrology_system=AstrologySystem.VEDIC,
+            organization_id=mock_dependencies['organization_id'],
+            use_cache=True
+        )
+        
+        assert result == test_chart
+        # Should not create new chart
+        mock_dependencies['chart_repository'].create.assert_not_called()

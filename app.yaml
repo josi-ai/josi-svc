@@ -1,0 +1,57 @@
+# Google Cloud Run configuration (alternative to cloudbuild.yaml)
+# This file can be used for direct deployment to Cloud Run
+
+service: josi-api
+env: flex
+
+runtime: python
+runtime_config:
+  operating_system: ubuntu22
+  runtime_version: "3.12"
+
+# Environment variables
+env_variables:
+  ENVIRONMENT: "production"
+  AUTO_DB_MIGRATION: "true"
+  EPHEMERIS_PATH: "/usr/share/swisseph"
+  LOG_LEVEL: "INFO"
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_PER_MINUTE: "60"
+  GZIP_MINIMUM_SIZE: "1000"
+
+# Resources
+resources:
+  cpu: 2
+  memory_gb: 2
+  disk_size_gb: 10
+
+# Scaling
+automatic_scaling:
+  min_instances: 1
+  max_instances: 20
+  cool_down_period_sec: 120
+  cpu_utilization:
+    target_utilization: 0.7
+
+# Health checks
+readiness_check:
+  path: "/health/ready"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
+liveness_check:
+  path: "/health/live"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 3
+  success_threshold: 1
+
+# Network
+network:
+  session_affinity: false
+  
+# VPC connector for private resources
+vpc_access_connector:
+  name: projects/PROJECT_ID/locations/us-central1/connectors/josi-connector

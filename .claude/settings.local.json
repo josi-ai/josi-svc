@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(poetry init:*)",
+      "Bash(poetry install:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(docker-compose exec api poetry run alembic:*)",
+      "Bash(docker-compose exec:*)",
+      "Bash(redock)",
+      "Bash(chmod:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker-compose logs:*)",
+      "WebFetch(domain:vedicastroapi.com)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(poetry show:*)",
+      "Bash(poetry lock:*)",
+      "Bash(sed:*)",
+      "Bash(touch:*)",
+      "Bash(ls:*)",
+      "Bash(poetry run alembic:*)",
+      "Bash(PYTHONPATH=./src poetry run alembic revision --autogenerate -m \"Initial migration with table_id primary keys\")",
+      "Bash(poetry:*)",
+      "Bash(grep:*)",
+      "Bash(docker-compose:*)",
+      "Bash(./scripts/run_tests.sh:*)",
+      "Bash(PGPASSWORD=astrow psql -h localhost -p 5433 -U astrow -d astrow_test -c \"SELECT 1\")"
+    ],
+    "deny": []
+  }
+}

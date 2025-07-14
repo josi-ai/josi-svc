@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  test-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: astrow
+      POSTGRES_PASSWORD: astrow
+      POSTGRES_DB: astrow_test
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astrow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c max_connections=200
+
+  test-redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URL: postgresql://astrow:astrow@test-db:5432/astrow_test
+      REDIS_URL: redis://test-redis:6379/1
+      ENVIRONMENT: test
+      AUTO_DB_MIGRATION: "false"
+      SECRET_KEY: test-secret-key-for-testing
+      APP_NAME: "Astrow API Test"
+      APP_VERSION: "test"
+      DEBUG: "true"
+      LOG_LEVEL: DEBUG
+      CORS_ORIGINS: '["*"]'
+      CORS_ALLOW_CREDENTIALS: "true"
+      CORS_ALLOW_METHODS: '["*"]'
+      CORS_ALLOW_HEADERS: '["*"]'
+      EPHEMERIS_PATH: /usr/share/swisseph
+      RATE_LIMIT_ENABLED: "false"
+      API_KEY_HEADER: X-API-Key
+    depends_on:
+      test-db:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./alembic.ini:/app/alembic.ini
+      - ./pytest.ini:/app/pytest.ini
+      - ./coverage:/app/coverage
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        poetry run alembic upgrade head &&
+        echo 'Running tests...' &&
+        poetry run pytest tests/unit -v --cov=src/josi --cov-report=term-missing --cov-report=html
+      "

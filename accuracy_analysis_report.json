@@ -1,0 +1,755 @@
+[
+  {
+    "name": "Barack Obama",
+    "accuracy_score": 0,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 132.14844664740582,
+          "sign": "Leo",
+          "degree_in_sign": 12.14844664740582
+        },
+        "expected": {
+          "degrees": 132.55,
+          "sign": "Leo",
+          "degree_in_sign": 12.55
+        },
+        "orb": 0.4015533525941919,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 58.04315740171144,
+          "sign": "Taurus",
+          "degree_in_sign": 28.04315740171144
+        },
+        "expected": {
+          "degrees": 63.36,
+          "sign": "Gemini",
+          "degree_in_sign": 3.36
+        },
+        "orb": 5.316842598288559,
+        "accurate": false
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 176.51353304584242,
+          "sign": "Virgo",
+          "degree_in_sign": 26.513533045842422
+        },
+        "expected": {
+          "degrees": 318.05,
+          "sign": "Aquarius",
+          "degree_in_sign": 18.05
+        },
+        "orb": 141.5364669541576,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 121.49784522802643,
+          "sign": "Leo",
+          "degree_in_sign": 1.497845228026435
+        },
+        "expected": {
+          "degrees": 122.33,
+          "sign": "Leo",
+          "degree_in_sign": 2.33
+        },
+        "orb": 0.8321547719735634,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 91.31665956217212,
+          "sign": "Cancer",
+          "degree_in_sign": 1.31665956217212
+        },
+        "expected": {
+          "degrees": 91.79,
+          "sign": "Cancer",
+          "degree_in_sign": 1.79
+        },
+        "orb": 0.47334043782788626,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 172.31666932014411,
+          "sign": "Virgo",
+          "degree_in_sign": 22.316669320144115
+        },
+        "expected": {
+          "degrees": 172.57999999999998,
+          "sign": "Virgo",
+          "degree_in_sign": 22.58
+        },
+        "orb": 0.2633306798558692,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Moon: 5.32\u00b0 off (expected 3.36\u00b0 Gemini, got 28.04\u00b0 Taurus)",
+      "Ascendant: 141.54\u00b0 off (expected 18.05\u00b0 Aquarius, got 26.51\u00b0 Virgo)"
+    ],
+    "average_orb": 24.80394813244961
+  },
+  {
+    "name": "Princess Diana",
+    "accuracy_score": 77.3449498550421,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 99.70241012307237,
+          "sign": "Cancer",
+          "degree_in_sign": 9.702410123072369
+        },
+        "expected": {
+          "degrees": 99.66,
+          "sign": "Cancer",
+          "degree_in_sign": 9.66
+        },
+        "orb": 0.04241012307237213,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 325.6443512961184,
+          "sign": "Aquarius",
+          "degree_in_sign": 25.644351296118373
+        },
+        "expected": {
+          "degrees": 325.04,
+          "sign": "Aquarius",
+          "degree_in_sign": 25.04
+        },
+        "orb": 0.6043512961183524,
+        "accurate": true
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 271.2956201523652,
+          "sign": "Capricorn",
+          "degree_in_sign": 1.2956201523651885
+        },
+        "expected": {
+          "degrees": 258.43,
+          "sign": "Sagittarius",
+          "degree_in_sign": 18.43
+        },
+        "orb": 12.865620152365182,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 93.18157032224758,
+          "sign": "Cancer",
+          "degree_in_sign": 3.1815703222475804
+        },
+        "expected": {
+          "degrees": 93.2,
+          "sign": "Cancer",
+          "degree_in_sign": 3.2
+        },
+        "orb": 0.018429677752422435,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 54.442093127775834,
+          "sign": "Taurus",
+          "degree_in_sign": 24.442093127775834
+        },
+        "expected": {
+          "degrees": 54.4,
+          "sign": "Taurus",
+          "degree_in_sign": 24.4
+        },
+        "orb": 0.042093127775835626,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 151.67012570989058,
+          "sign": "Virgo",
+          "degree_in_sign": 1.6701257098905842
+        },
+        "expected": {
+          "degrees": 151.65,
+          "sign": "Virgo",
+          "degree_in_sign": 1.65
+        },
+        "orb": 0.02012570989057849,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 12.87\u00b0 off (expected 18.43\u00b0 Sagittarius, got 1.30\u00b0 Capricorn)"
+    ],
+    "average_orb": 2.2655050144957904
+  },
+  {
+    "name": "Albert Einstein",
+    "accuracy_score": 80.93138137305303,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 353.535440441286,
+          "sign": "Pisces",
+          "degree_in_sign": 23.535440441286028
+        },
+        "expected": {
+          "degrees": 353.5,
+          "sign": "Pisces",
+          "degree_in_sign": 23.5
+        },
+        "orb": 0.035440441286027635,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 254.91289507960164,
+          "sign": "Sagittarius",
+          "degree_in_sign": 14.91289507960164
+        },
+        "expected": {
+          "degrees": 254.4,
+          "sign": "Sagittarius",
+          "degree_in_sign": 14.4
+        },
+        "orb": 0.512895079601634,
+        "accurate": true
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 109.67091013561605,
+          "sign": "Cancer",
+          "degree_in_sign": 19.670910135616055
+        },
+        "expected": {
+          "degrees": 98.92,
+          "sign": "Cancer",
+          "degree_in_sign": 8.92
+        },
+        "orb": 10.750910135616053,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 3.1981668831597894,
+          "sign": "Aries",
+          "degree_in_sign": 3.1981668831597894
+        },
+        "expected": {
+          "degrees": 3.13,
+          "sign": "Aries",
+          "degree_in_sign": 3.13
+        },
+        "orb": 0.06816688315978947,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 17.019276539758962,
+          "sign": "Aries",
+          "degree_in_sign": 17.019276539758962
+        },
+        "expected": {
+          "degrees": 16.97,
+          "sign": "Aries",
+          "degree_in_sign": 16.97
+        },
+        "orb": 0.04927653975896362,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 296.93448209674574,
+          "sign": "Capricorn",
+          "degree_in_sign": 26.93448209674574
+        },
+        "expected": {
+          "degrees": 296.91,
+          "sign": "Capricorn",
+          "degree_in_sign": 26.91
+        },
+        "orb": 0.024482096745714443,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 10.75\u00b0 off (expected 8.92\u00b0 Cancer, got 19.67\u00b0 Cancer)"
+    ],
+    "average_orb": 1.9068618626946972
+  },
+  {
+    "name": "Steve Jobs",
+    "accuracy_score": 0,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 335.4123917045036,
+          "sign": "Pisces",
+          "degree_in_sign": 5.412391704503591
+        },
+        "expected": {
+          "degrees": 335.75,
+          "sign": "Pisces",
+          "degree_in_sign": 5.75
+        },
+        "orb": 0.337608295496409,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 3.0239149598257935,
+          "sign": "Aries",
+          "degree_in_sign": 3.0239149598257935
+        },
+        "expected": {
+          "degrees": 7.75,
+          "sign": "Aries",
+          "degree_in_sign": 7.75
+        },
+        "orb": 4.7260850401742065,
+        "accurate": false
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 70.07034051057971,
+          "sign": "Gemini",
+          "degree_in_sign": 10.070340510579712
+        },
+        "expected": {
+          "degrees": 172.29,
+          "sign": "Virgo",
+          "degree_in_sign": 22.29
+        },
+        "orb": 102.21965948942028,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 314.37907247768345,
+          "sign": "Aquarius",
+          "degree_in_sign": 14.37907247768345
+        },
+        "expected": {
+          "degrees": 314.36,
+          "sign": "Aquarius",
+          "degree_in_sign": 14.36
+        },
+        "orb": 0.019072477683437228,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 290.7927044430498,
+          "sign": "Capricorn",
+          "degree_in_sign": 20.792704443049786
+        },
+        "expected": {
+          "degrees": 291.17,
+          "sign": "Capricorn",
+          "degree_in_sign": 21.17
+        },
+        "orb": 0.3772955569502301,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 28.856263903194904,
+          "sign": "Aries",
+          "degree_in_sign": 28.856263903194904
+        },
+        "expected": {
+          "degrees": 29.09,
+          "sign": "Aries",
+          "degree_in_sign": 29.09
+        },
+        "orb": 0.23373609680509588,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 102.22\u00b0 off (expected 22.29\u00b0 Virgo, got 10.07\u00b0 Gemini)"
+    ],
+    "average_orb": 17.985576159421612
+  },
+  {
+    "name": "Queen Elizabeth II",
+    "accuracy_score": 62.05188607345331,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 30.246324428646325,
+          "sign": "Taurus",
+          "degree_in_sign": 0.2463244286463251
+        },
+        "expected": {
+          "degrees": 30.21,
+          "sign": "Taurus",
+          "degree_in_sign": 0.21
+        },
+        "orb": 0.036324428646324236,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 132.61055938666632,
+          "sign": "Leo",
+          "degree_in_sign": 12.610559386666324
+        },
+        "expected": {
+          "degrees": 132.12,
+          "sign": "Leo",
+          "degree_in_sign": 12.12
+        },
+        "orb": 0.4905593866663196,
+        "accurate": true
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 313.5733793987955,
+          "sign": "Aquarius",
+          "degree_in_sign": 13.57337939879551
+        },
+        "expected": {
+          "degrees": 291.42,
+          "sign": "Capricorn",
+          "degree_in_sign": 21.42
+        },
+        "orb": 22.153379398795494,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 4.685403317834169,
+          "sign": "Aries",
+          "degree_in_sign": 4.685403317834169
+        },
+        "expected": {
+          "degrees": 4.66,
+          "sign": "Aries",
+          "degree_in_sign": 4.66
+        },
+        "orb": 0.025403317834168604,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 343.9970830007128,
+          "sign": "Pisces",
+          "degree_in_sign": 13.997083000712792
+        },
+        "expected": {
+          "degrees": 343.96,
+          "sign": "Pisces",
+          "degree_in_sign": 13.96
+        },
+        "orb": 0.03708300071281201,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 320.8961188232729,
+          "sign": "Aquarius",
+          "degree_in_sign": 20.8961188232729
+        },
+        "expected": {
+          "degrees": 320.87,
+          "sign": "Aquarius",
+          "degree_in_sign": 20.87
+        },
+        "orb": 0.026118823272895497,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 22.15\u00b0 off (expected 21.42\u00b0 Capricorn, got 13.57\u00b0 Aquarius)"
+    ],
+    "average_orb": 3.794811392654669
+  },
+  {
+    "name": "John F. Kennedy",
+    "accuracy_score": 0,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 67.64359097018306,
+          "sign": "Gemini",
+          "degree_in_sign": 7.643590970183055
+        },
+        "expected": {
+          "degrees": 67.84,
+          "sign": "Gemini",
+          "degree_in_sign": 7.84
+        },
+        "orb": 0.19640902981694808,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 164.70749191615056,
+          "sign": "Virgo",
+          "degree_in_sign": 14.707491916150559
+        },
+        "expected": {
+          "degrees": 167.21,
+          "sign": "Virgo",
+          "degree_in_sign": 17.21
+        },
+        "orb": 2.502508083849449,
+        "accurate": false
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 141.5271588848642,
+          "sign": "Leo",
+          "degree_in_sign": 21.527158884864207
+        },
+        "expected": {
+          "degrees": 200.0,
+          "sign": "Libra",
+          "degree_in_sign": 20.0
+        },
+        "orb": 58.47284111513579,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 50.5900528539203,
+          "sign": "Taurus",
+          "degree_in_sign": 20.590052853920298
+        },
+        "expected": {
+          "degrees": 50.59,
+          "sign": "Taurus",
+          "degree_in_sign": 20.59
+        },
+        "orb": 5.2853920294637646e-05,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 76.48881432835616,
+          "sign": "Gemini",
+          "degree_in_sign": 16.488814328356156
+        },
+        "expected": {
+          "degrees": 76.74,
+          "sign": "Gemini",
+          "degree_in_sign": 16.74
+        },
+        "orb": 0.25118567164383876,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 48.27917428175451,
+          "sign": "Taurus",
+          "degree_in_sign": 18.279174281754507
+        },
+        "expected": {
+          "degrees": 48.43,
+          "sign": "Taurus",
+          "degree_in_sign": 18.43
+        },
+        "orb": 0.15082571824549262,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 58.47\u00b0 off (expected 20.00\u00b0 Libra, got 21.53\u00b0 Leo)"
+    ],
+    "average_orb": 10.262303745435302
+  },
+  {
+    "name": "Nelson Mandela",
+    "accuracy_score": 52.58158058870474,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 115.15007730014283,
+          "sign": "Cancer",
+          "degree_in_sign": 25.150077300142826
+        },
+        "expected": {
+          "degrees": 115.07,
+          "sign": "Cancer",
+          "degree_in_sign": 25.07
+        },
+        "orb": 0.08007730014283254,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 231.27561867231464,
+          "sign": "Scorpio",
+          "degree_in_sign": 21.275618672314636
+        },
+        "expected": {
+          "degrees": 230.26,
+          "sign": "Scorpio",
+          "degree_in_sign": 20.26
+        },
+        "orb": 1.0156186723146448,
+        "accurate": false
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 290.4464542725974,
+          "sign": "Capricorn",
+          "degree_in_sign": 20.446454272597407
+        },
+        "expected": {
+          "degrees": 263.37,
+          "sign": "Sagittarius",
+          "degree_in_sign": 23.37
+        },
+        "orb": 27.076454272597402,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 136.2670929865603,
+          "sign": "Leo",
+          "degree_in_sign": 16.2670929865603
+        },
+        "expected": {
+          "degrees": 136.13,
+          "sign": "Leo",
+          "degree_in_sign": 16.13
+        },
+        "orb": 0.13709298656030455,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 82.67790750947549,
+          "sign": "Gemini",
+          "degree_in_sign": 22.67790750947549
+        },
+        "expected": {
+          "degrees": 82.58,
+          "sign": "Gemini",
+          "degree_in_sign": 22.58
+        },
+        "orb": 0.09790750947549043,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 192.6239009056865,
+          "sign": "Libra",
+          "degree_in_sign": 12.623900905686497
+        },
+        "expected": {
+          "degrees": 192.58,
+          "sign": "Libra",
+          "degree_in_sign": 12.58
+        },
+        "orb": 0.04390090568648475,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 27.08\u00b0 off (expected 23.37\u00b0 Sagittarius, got 20.45\u00b0 Capricorn)"
+    ],
+    "average_orb": 4.741841941129526
+  },
+  {
+    "name": "Oprah Winfrey",
+    "accuracy_score": 0,
+    "planet_comparisons": {
+      "Sun": {
+        "calculated": {
+          "degrees": 308.7388566026763,
+          "sign": "Aquarius",
+          "degree_in_sign": 8.738856602676321
+        },
+        "expected": {
+          "degrees": 308.99,
+          "sign": "Aquarius",
+          "degree_in_sign": 8.99
+        },
+        "orb": 0.2511433973236876,
+        "accurate": true
+      },
+      "Moon": {
+        "calculated": {
+          "degrees": 241.43167087520854,
+          "sign": "Sagittarius",
+          "degree_in_sign": 1.431670875208539
+        },
+        "expected": {
+          "degrees": 244.53,
+          "sign": "Sagittarius",
+          "degree_in_sign": 4.53
+        },
+        "orb": 3.098329124791462,
+        "accurate": false
+      },
+      "Ascendant": {
+        "calculated": {
+          "degrees": 193.4185627618846,
+          "sign": "Libra",
+          "degree_in_sign": 13.418562761884601
+        },
+        "expected": {
+          "degrees": 269.69,
+          "sign": "Sagittarius",
+          "degree_in_sign": 29.69
+        },
+        "orb": 76.2714372381154,
+        "accurate": false
+      },
+      "Mercury": {
+        "calculated": {
+          "degrees": 318.72083948628045,
+          "sign": "Aquarius",
+          "degree_in_sign": 18.720839486280454
+        },
+        "expected": {
+          "degrees": 319.16,
+          "sign": "Aquarius",
+          "degree_in_sign": 19.16
+        },
+        "orb": 0.4391605137195711,
+        "accurate": true
+      },
+      "Venus": {
+        "calculated": {
+          "degrees": 308.5407132044424,
+          "sign": "Aquarius",
+          "degree_in_sign": 8.540713204442397
+        },
+        "expected": {
+          "degrees": 308.86,
+          "sign": "Aquarius",
+          "degree_in_sign": 8.86
+        },
+        "orb": 0.3192867955576162,
+        "accurate": true
+      },
+      "Mars": {
+        "calculated": {
+          "degrees": 233.43382356987283,
+          "sign": "Scorpio",
+          "degree_in_sign": 23.43382356987283
+        },
+        "expected": {
+          "degrees": 233.57999999999998,
+          "sign": "Scorpio",
+          "degree_in_sign": 23.58
+        },
+        "orb": 0.14617643012715575,
+        "accurate": true
+      }
+    },
+    "errors": [
+      "Ascendant: 76.27\u00b0 off (expected 29.69\u00b0 Sagittarius, got 13.42\u00b0 Libra)"
+    ],
+    "average_orb": 13.420922249939148
+  }
+]
