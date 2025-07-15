@@ -14,8 +14,8 @@ router = APIRouter(prefix="/location", tags=["location"])
 @router.get("/search", response_model=ResponseModel)
 async def search_location(
     query: str,
-    limit: int = Query(default=5, le=20),
-    geocoding_service: GeocodingServiceDep
+    geocoding_service: GeocodingServiceDep,
+    limit: int = Query(default=5, le=20)
 ) -> ResponseModel:
     """
     Search for locations and get coordinates and timezone.
@@ -89,9 +89,9 @@ async def search_location(
 @router.post("/coordinates", response_model=ResponseModel)
 async def get_coordinates(
     city: str,
+    geocoding_service: GeocodingServiceDep,
     state: Optional[str] = None,
-    country: Optional[str] = None,
-    geocoding_service: GeocodingServiceDep
+    country: Optional[str] = None
 ) -> ResponseModel:
     """
     Get coordinates and timezone for a specific location.
