@@ -32,7 +32,8 @@ class ConsultationService:
     
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.video_service = VideoConsultationService()
+        # self.video_service = VideoConsultationService()  # Commented out due to missing twilio dependency
+        self.video_service = None
         self.ai_service = AIInterpretationService()
     
     async def book_consultation(
@@ -88,7 +89,7 @@ class ConsultationService:
             await self.db.flush()  # Get the ID
             
             # Create video room if it's a video consultation
-            if consultation_request.type == "video" and available_slot:
+            if consultation_request.type == "video" and available_slot and self.video_service:
                 try:
                     video_details = self.video_service.create_room_for_consultation(
                         str(consultation.consultation_id),
@@ -107,6 +108,11 @@ class ConsultationService:
                         error=str(e),
                         consultation_id=str(consultation.consultation_id)
                     )
+            elif consultation_request.type == "video" and not self.video_service:
+                logger.warning(
+                    "Video consultation requested but video service not available",
+                    consultation_id=str(consultation.consultation_id)
+                )
             
             # Generate AI-suggested questions based on chart
             try:
@@ -319,7 +325,7 @@ class ConsultationService:
             consultation.updated_at = datetime.utcnow()
             
             # End video room if exists
-            if consultation.video_room_id:
+            if consultation.video_room_id and self.video_service:
                 try:
                     await self.video_service.end_room(consultation.video_room_id)
                 except Exception as e:
