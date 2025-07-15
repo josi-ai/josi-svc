@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from josi.core.database import get_db
 from josi.services.auth_service import AuthService, get_current_active_user
 from josi.models.user_model import UserCreate, UserResponse, User, UserLogin
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import CacheInvalidator
+from josi.api.response import ResponseModel
+# from cache.cache_invalidation import CacheInvalidator  # TODO: Implement proper cache invalidation
 
 router = APIRouter(tags=["Authentication"], prefix="/auth")
 
@@ -26,7 +26,7 @@ async def register(
         user = await auth_service.register_user(user_data)
         
         # Clear any cached data
-        await CacheInvalidator.invalidate_user_cache(str(user.user_id))
+        # await CacheInvalidator.invalidate_user_cache(str(user.user_id))  # TODO: Implement
         
         return ResponseModel(
             success=True,
@@ -146,7 +146,7 @@ async def logout(
     # TODO: Add token to blacklist if implementing token revocation
     
     # Clear user cache
-    await CacheInvalidator.invalidate_user_cache(str(current_user.user_id))
+    # await CacheInvalidator.invalidate_user_cache(str(current_user.user_id))  # TODO: Implement
     
     return ResponseModel(
         success=True,

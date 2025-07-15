@@ -16,9 +16,9 @@ router = APIRouter(prefix="/predictions", tags=["predictions"])
 @router.get("/daily/{person_id}", response_model=ResponseModel)
 async def get_daily_predictions(
     person_id: UUID,
-    date: Optional[datetime] = None,
     person_service: PersonServiceDep,
-    astrology_calculator: AstrologyCalculatorDep
+    astrology_calculator: AstrologyCalculatorDep,
+    date: Optional[datetime] = None
 ) -> ResponseModel:
     """
     Get daily predictions based on planetary transits.
@@ -125,10 +125,10 @@ async def get_daily_predictions(
 @router.get("/monthly/{person_id}", response_model=ResponseModel)
 async def get_monthly_predictions(
     person_id: UUID,
-    month: Optional[int] = None,
-    year: Optional[int] = None,
     person_service: PersonServiceDep,
-    astrology_calculator: AstrologyCalculatorDep
+    astrology_calculator: AstrologyCalculatorDep,
+    month: Optional[int] = None,
+    year: Optional[int] = None
 ) -> ResponseModel:
     """
     Get monthly predictions based on planetary movements.
@@ -227,9 +227,9 @@ async def get_monthly_predictions(
 @router.get("/yearly/{person_id}", response_model=ResponseModel)
 async def get_yearly_predictions(
     person_id: UUID,
-    year: Optional[int] = None,
     person_service: PersonServiceDep,
-    astrology_calculator: AstrologyCalculatorDep
+    astrology_calculator: AstrologyCalculatorDep,
+    year: Optional[int] = None
 ) -> ResponseModel:
     """
     Get yearly predictions based on solar return and annual transits.

@@ -20,8 +20,8 @@ from josi.models.astrologer_model import (
     ReviewResponse,
     VerificationStatus
 )
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import cache
+from josi.api.response import ResponseModel
+from cache.cache_decorator import cache
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -91,7 +91,7 @@ async def register_as_astrologer(
 
 
 @router.get("/search", response_model=ResponseModel)
-@cache(expire=300, key_prefix="astrologer_search")
+@cache(expire=300, prefix="astrologer_search")
 async def search_astrologers(
     specializations: Optional[List[str]] = Query(default=None),
     languages: Optional[List[str]] = Query(default=None),
@@ -207,7 +207,7 @@ async def search_astrologers(
 
 
 @router.get("/{astrologer_id}", response_model=ResponseModel)
-@cache(expire=600, key_prefix="astrologer_profile")
+@cache(expire=600, prefix="astrologer_profile")
 async def get_astrologer_profile(
     astrologer_id: UUID,
     db: AsyncSession = Depends(get_db)

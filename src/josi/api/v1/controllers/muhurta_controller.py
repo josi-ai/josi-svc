@@ -8,10 +8,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from josi.core.database import get_db
-from josi.core.dependencies import get_current_organization
+from josi.api.v1.dependencies import get_current_organization
 from josi.models.organization_model import Organization
 from josi.services.vedic.muhurta_service import MuhurtaCalculator
-from josi.api.v1.response_model import ResponseModel
+from josi.api.response import ResponseModel
 import structlog
 
 logger = structlog.get_logger(__name__)

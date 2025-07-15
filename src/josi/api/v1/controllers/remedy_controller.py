@@ -8,7 +8,8 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from josi.core.database import get_db
-from josi.core.dependencies import get_current_organization, get_current_user
+from josi.api.v1.dependencies import get_current_organization
+from josi.services.auth_service import get_current_active_user as get_current_user
 from josi.models.organization_model import Organization
 from josi.models.user_model import User
 from josi.models.remedy_model import (
@@ -19,7 +20,7 @@ from josi.models.remedy_model import (
 )
 from josi.services.remedy_recommendation_service import RemedyRecommendationService
 from josi.repositories.remedy_repository import RemedyRepository
-from josi.api.v1.response_model import ResponseModel
+from josi.api.response import ResponseModel
 import structlog
 
 logger = structlog.get_logger(__name__)

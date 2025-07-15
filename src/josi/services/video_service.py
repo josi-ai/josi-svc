@@ -1,7 +1,7 @@
 """
 Video consultation service using Twilio Video API.
 """
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from datetime import datetime, timedelta
 import secrets
 

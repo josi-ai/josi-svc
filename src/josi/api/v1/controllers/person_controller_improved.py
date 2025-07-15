@@ -66,10 +66,10 @@ async def get_person(
 
 @router.get("/", response_model=ResponseModel)
 async def list_persons(
+    person_service: PersonServiceDep,  # ✅ Service handles all business logic
     search: Optional[str] = None,
     skip: int = 0,
-    limit: int = 100,
-    person_service: PersonServiceDep  # ✅ Service handles all business logic
+    limit: int = 100
 ) -> ResponseModel:
     """List all persons with optional search."""
     persons = await person_service.list(

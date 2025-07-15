@@ -145,9 +145,9 @@ async def get_current_transits(
 @router.get("/forecast/{person_id}", response_model=ResponseModel)
 async def get_transit_forecast(
     person_id: UUID,
-    days: int = 30,
     person_service: PersonServiceDep,
-    astrology_calculator: AstrologyCalculatorDep
+    astrology_calculator: AstrologyCalculatorDep,
+    days: int = 30
 ) -> ResponseModel:
     """
     Get transit forecast for upcoming period.

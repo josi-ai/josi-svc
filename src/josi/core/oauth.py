@@ -4,13 +4,14 @@ OAuth2 integration using Authlib for social login.
 from typing import Optional, Dict, Any
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import HTTPException, Request, Depends
-from sqlmodel import Session, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 from uuid import uuid4
 import logging
 
 from josi.core.config import settings
 from josi.core.security import create_access_token, hash_password
-from josi.core.database import get_session
+from josi.db.async_db import get_async_db
 from josi.models.organization_model import Organization
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ if hasattr(settings, 'github_client_id') and settings.github_client_id:
 class OAuthService:
     """Service for handling OAuth operations."""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
     async def get_oauth_redirect_url(self, provider: str, request: Request) -> str:
@@ -198,6 +199,6 @@ class OAuthService:
         }
 
 
-async def get_oauth_service(db: Session = Depends(get_session)) -> OAuthService:
+async def get_oauth_service(db: AsyncSession = Depends(get_async_db)) -> OAuthService:
     """Dependency to get OAuth service."""
     return OAuthService(db)

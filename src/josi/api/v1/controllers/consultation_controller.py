@@ -22,8 +22,8 @@ from josi.models.consultation_model import (
     ConsultationStatus,
     ConsultationType
 )
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import cache
+from josi.api.response import ResponseModel
+from cache.cache_decorator import cache
 import structlog
 
 logger = structlog.get_logger(__name__)
