@@ -1,0 +1,126 @@
+{
+  "status": 200,
+  "response": [
+    {
+      "current_house": 1,
+      "verbal_location": "1st lord is in the 9th house",
+      "current_zodiac": "Aquarius",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Aquarius",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  1st lord, Mercury is in the 9th house, Curiosity leads you to delve deep into higher learning, philosophy, and religion. Your talent for understanding complex ideas may turn into a fulfilling career as a teacher or philosopher of a unique kind.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 2,
+      "verbal_location": "2nd lord is in the 7th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Moon",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 7,
+      "personalised_prediction": "Since the  2nd lord, Moon is in the 7th house, Your mother will offer helpful advice regarding your choice of spouse, ensuring that no conflict arises. Your spouse will be highly religious and bring wisdom into your home, possibly having a business-oriented mindset.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 3,
+      "verbal_location": "3rd lord is in the 8th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Sun",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  3rd lord, Sun is in the 8th house, You will be a strong person who shall be working in the government agencies or a secret society. You may also work as spies for the government. Your father too shall be associated with this kind of work. Your father shall be a distant person and may suffer lots of ups and downs in life.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 4,
+      "verbal_location": "4th lord is in the 9th house",
+      "current_zodiac": "Aquarius",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Aquarius",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  4th lord, Mercury is in the 9th house, Your knowledge shall be related to occult and mysticism. Your home will be filled with occult stuff and all your family members will be related to the occult. You can become an occult practitioner too.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 5,
+      "verbal_location": "5th lord is in the 10th house",
+      "current_zodiac": "Pisces",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Pisces",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  5th lord, Venus is in the 10th house, You will have a great creative career in any field of art. You can be a performer, singer, or an actor in society. Your creativity will bring you both creativity and fame. You shall meet your love interest at your workplace.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 6,
+      "verbal_location": "6th lord is in the 1st house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 1,
+      "personalised_prediction": "Since the  6th lord, Mars is in the 1st house, You will continue to have disputes in your life which shall bring out transformative changes. You can be activists, lawyers, attorneys, or writers on social issues. However your communications are going to be aggressive.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 7,
+      "verbal_location": "7th lord is in the 8th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  7th lord, Jupiter is in the 8th house, Your spouse may take hold of all your joint assets and your relationship with in-laws will go for a toss. You shall feel helpless in a relationship. You should be very careful in marriage or you may end up having a divorce.",
+      "lord_strength": "Debilitated"
+    },
+    {
+      "current_house": 8,
+      "verbal_location": "8th lord is in the 8th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  8th lord, Saturn is in the 8th house, You will have a stressful relationship with your in-laws and it will improve after your 30s.joint assets with spouse will improve gradually. You will serve the government in a law-related field.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 9,
+      "verbal_location": "9th lord is in the 8th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  9th lord, Saturn is in the 8th house, You shall be someone who will have a very long life to lead. You will gain information about the occult but in a very vague way. Joint assets with spouse shall grow gradually with time. You can be people working in the government or the field of law.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 10,
+      "verbal_location": "10th lord is in the 8th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  10th lord, Jupiter is in the 8th house, You shall use your higher knowledge in the field of the occult to help people out of any trouble. You can become a very good occultist. You can be great relationship counselors as you will understand people very well.",
+      "lord_strength": "Debilitated"
+    },
+    {
+      "current_house": 11,
+      "verbal_location": "11th lord is in the 1st house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 1,
+      "personalised_prediction": "Since the  11th lord, Mars is in the 1st house, You will have a direct and harsh speech and will have a dominating nature towards others. You will also be harsh towards your siblings and will be impulse oriented person. You act first without any prior planning. You may work in defense and security agencies.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 12,
+      "verbal_location": "12th lord is in the 10th house",
+      "current_zodiac": "Pisces",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Pisces",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  12th lord, Venus is in the 10th house, You will have a creative career in the movies, arts, and media. You shall also have a lot of hidden talents. You will have a beautiful relationship with your colleagues. Your spouse shall be of foreign origin.",
+      "lord_strength": "Exalted"
+    }
+  ],
+  "remaining_api_calls": 29985
+}

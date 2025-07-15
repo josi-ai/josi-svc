@@ -1,0 +1,126 @@
+{
+  "status": 200,
+  "response": [
+    {
+      "current_house": 1,
+      "verbal_location": "1st lord is in the 10th house",
+      "current_zodiac": "Libra",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Libra",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  1st lord, Saturn is in the 10th house, Discipline and dedication lead to a stable, albeit delayed, career growth. A strong work ethic ensures success in structured fields like law or administration.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 2,
+      "verbal_location": "2nd lord is in the 10th house",
+      "current_zodiac": "Libra",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Libra",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  2nd lord, Saturn is in the 10th house, You will succeed only through hard work and perseverance. Opportunities will not come easily, requiring significant effort. You may have a strained relationship with your father and could become a workaholic.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 3,
+      "verbal_location": "3rd lord is in the 11th house",
+      "current_zodiac": "Scorpio",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Scorpio",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  3rd lord, Jupiter is in the 11th house, You can work as a finance manager or a business analyst in some big organizations. You also work for the government and formulate finance policies. You shall have a transformative relationship with your sibling. You may earn huge profits sometimes or may incur huge losses.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 4,
+      "verbal_location": "4th lord is in the 1st house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 1,
+      "personalised_prediction": "Since the  4th lord, Mars is in the 1st house, You are the real protector of the homeland or the nation. You shall have a good carer in the army or the police. You may also be attracted to real estate. Your relationship with your mother will be good and loving.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 5,
+      "verbal_location": "5th lord is in the 12th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 12,
+      "personalised_prediction": "Since the  5th lord, Venus is in the 12th house, You shall earn happiness by visiting religious and spiritual places. You will love reading ancient texts from different religions. You may even find your love interest in a spiritual place. You will not be attracted to money and status.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 6,
+      "verbal_location": "6th lord is in the 12th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 12,
+      "personalised_prediction": "Since the  6th lord, Mercury is in the 12th house, You will be curious to learn about different religions and philosophies of the world. Later on, in life, you will use these philosophies to preach people on how to remove obstacles from one's life.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 7,
+      "verbal_location": "7th lord is in the 1st house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Moon",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 1,
+      "personalised_prediction": "Since the  7th lord, Moon is in the 1st house, You shall always want to have emotional security in relations and will want your spouse to understand your emotional nature. Your spouse will be practical by nature and will want to find happiness in your relationship.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 8,
+      "verbal_location": "8th lord is in the 12th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Sun",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 12,
+      "personalised_prediction": "Since the  8th lord, Sun is in the 12th house, You are likely to get higher education from a foreign land. You will travel far to get an education. You may  work as a lecturer or educator in any foreign institute.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 9,
+      "verbal_location": "9th lord is in the 12th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 12,
+      "personalised_prediction": "Since the  9th lord, Mercury is in the 12th house, You shall be ever thirsty of receiving knowledge about religion and spirituality. You can be very analytical, critical and perfectionist by nature. You can become an amazing writer.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 10,
+      "verbal_location": "10th lord is in the 12th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 12,
+      "personalised_prediction": "Since the  10th lord, Venus is in the 12th house, You shall be a very nourishing people and will want to serve others. So you may work in the hospitals as a nurse or caretakers. You can also do well in the software industry or may work behind the scenes like a director or writer.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 11,
+      "verbal_location": "11th lord is in the 1st house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 1,
+      "personalised_prediction": "Since the  11th lord, Mars is in the 1st house, You will have a direct and harsh speech and will have a dominating nature towards others. You will also be harsh towards your siblings and will be impulse oriented person. You act first without any prior planning. You may work in defense and security agencies.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 12,
+      "verbal_location": "12th lord is in the 11th house",
+      "current_zodiac": "Scorpio",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Scorpio",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  12th lord, Jupiter is in the 11th house, You shall use your knowledge of occult and mysticism to serve other people and to bring a change into the world. Counseling and teaching shall be the beneficial career for you. Your flow of income shall go through a lot of transformation in life.",
+      "lord_strength": "Neutral"
+    }
+  ],
+  "remaining_api_calls": 29979
+}
