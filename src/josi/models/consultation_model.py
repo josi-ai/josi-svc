@@ -153,7 +153,7 @@ class ConsultationMessage(SQLModel, table=True):
     # Message Content
     message_type: str = Field(default="text")  # text, image, file, chart_annotation
     content: str
-    metadata: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+    message_metadata: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
     
     # File attachments
     attachment_url: Optional[str] = Field(default=None)

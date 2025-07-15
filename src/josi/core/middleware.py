@@ -188,6 +188,18 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                     headers={"Content-Type": "application/json", "X-Correlation-ID": correlation_id}
                 )
     
+    def _get_client_ip(self, request: Request) -> str:
+        """Get real client IP address"""
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
+        
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip
+        
+        return request.client.host if request.client else "unknown"
+    
 def setup_middleware(app: FastAPI) -> None:
     """Configure all middleware for the FastAPI app"""
     

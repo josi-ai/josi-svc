@@ -17,8 +17,8 @@ from josi.services.ai.interpretation_service import (
 from josi.services.chart_service import ChartService
 from josi.services.auth_service import get_current_active_user
 from josi.models.user_model import User
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import cache
+from josi.api.response import ResponseModel
+from cache.cache_decorator import cache
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -43,7 +43,7 @@ class NeuralPathwayRequest(SQLModel):
 
 
 @router.post("/interpret", response_model=ResponseModel)
-@cache(expire=3600, key_prefix="ai_interpretation")
+@cache(expire=3600, prefix="ai_interpretation")
 async def generate_interpretation(
     request: InterpretationRequest,
     current_user: User = Depends(get_current_active_user),
