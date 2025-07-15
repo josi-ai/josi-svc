@@ -77,6 +77,20 @@ class Settings(BaseSettings):
     github_client_secret: Optional[str] = Field(default=None)
     frontend_url: Optional[str] = Field(default="http://localhost:3000")
     
+    # AI service settings
+    openai_api_key: Optional[str] = Field(default=None)
+    anthropic_api_key: Optional[str] = Field(default=None)
+    qdrant_url: Optional[str] = Field(default="http://localhost:6333")
+    
+    # Twilio settings for video consultations
+    twilio_account_sid: Optional[str] = Field(default=None)
+    twilio_auth_token: Optional[str] = Field(default=None)
+    twilio_api_key: Optional[str] = Field(default=None)
+    twilio_api_secret: Optional[str] = Field(default=None)
+    
+    # Base URL for webhooks
+    base_url: str = Field(default="http://localhost:8000")
+    
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v):

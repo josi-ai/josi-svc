@@ -1,0 +1,28 @@
+{
+  "status": 200,
+  "response": {
+    "gana": "manushya",
+    "yoni": "elephant",
+    "vasya": "Chatushpada",
+    "nadi": "Madhya",
+    "varna": "Kshatriya",
+    "paya": "Copper",
+    "tatva": "Agni (Fire)",
+    "life_stone": "blue sapphire",
+    "lucky_stone": "emerald",
+    "fortune_stone": "diamond",
+    "name_start": "Lee",
+    "ascendant_sign": "Aquarius",
+    "ascendant_nakshatra": "Dhanista",
+    "rasi": "Aries",
+    "rasi_lord": "Mars",
+    "nakshatra": "Bharani",
+    "nakshatra_lord": "Venus",
+    "nakshatra_pada": 4,
+    "sun_sign": "Leo",
+    "tithi": "S.Dvitiya",
+    "karana": "Bawa",
+    "yoga": "Vridhi"
+  },
+  "remaining_api_calls": 29971
+}

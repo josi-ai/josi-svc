@@ -21,7 +21,7 @@ from josi.services.astrology_service import AstrologyCalculator
 from josi.services.vedic.panchang_service import PanchangCalculator
 from josi.services.vedic.muhurta_service import MuhurtaCalculator
 from josi.services.vedic.dasha_service import VimshottariDashaCalculator, YoginiDashaCalculator, CharaDashaCalculator
-from josi.services.vedic.remedies_service import RemedyService
+from josi.services.vedic.remedies_service import RemediesCalculator
 from josi.services.western.progressions_service import ProgressionCalculator
 from josi.services.interpretation_engine_service import InterpretationEngine
 from josi.services.vedic.ashtakoota_service import AshtakootaCalculator
@@ -129,9 +129,9 @@ async def get_chara_dasha_calculator() -> CharaDashaCalculator:
     return CharaDashaCalculator()
 
 
-async def get_remedy_service() -> RemedyService:
-    """Get RemedyService instance."""
-    return RemedyService()
+async def get_remedy_service() -> RemediesCalculator:
+    """Get RemediesCalculator instance."""
+    return RemediesCalculator()
 
 
 async def get_progression_calculator() -> ProgressionCalculator:
@@ -161,7 +161,7 @@ MuhurtaCalculatorDep = Annotated[MuhurtaCalculator, Depends(get_muhurta_calculat
 VimshottariDashaDep = Annotated[VimshottariDashaCalculator, Depends(get_vimshottari_dasha_calculator)]
 YoginiDashaDep = Annotated[YoginiDashaCalculator, Depends(get_yogini_dasha_calculator)]
 CharaDashaDep = Annotated[CharaDashaCalculator, Depends(get_chara_dasha_calculator)]
-RemedyServiceDep = Annotated[RemedyService, Depends(get_remedy_service)]
+RemedyServiceDep = Annotated[RemediesCalculator, Depends(get_remedy_service)]
 ProgressionCalculatorDep = Annotated[ProgressionCalculator, Depends(get_progression_calculator)]
 InterpretationEngineDep = Annotated[InterpretationEngine, Depends(get_interpretation_engine)]
 AshtakootaCalculatorDep = Annotated[AshtakootaCalculator, Depends(get_ashtakoota_calculator)]

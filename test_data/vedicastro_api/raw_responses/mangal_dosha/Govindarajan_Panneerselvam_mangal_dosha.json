@@ -1,0 +1,19 @@
+{
+  "status": 200,
+  "response": {
+    "factors": {
+      "moon": "Mangal dosh from moon lagna, mars in house  12, aspecting the houses 3, 6 and 7 "
+    },
+    "is_dosha_present_mars_from_lagna": false,
+    "is_dosha_present_mars_from_moon": true,
+    "is_anshik": false,
+    "is_dosha_present": true,
+    "bot_response": "You are 23% manglik, a little bit of manglik is good in today's world",
+    "score": 23,
+    "cancellation": {
+      "cancellationScore": 0,
+      "cancellationReason": []
+    }
+  },
+  "remaining_api_calls": 29975
+}

@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "response": {
+    "mahadasha": [
+      "Venus",
+      "Sun",
+      "Moon",
+      "Mars",
+      "Rahu",
+      "Jupiter",
+      "Saturn",
+      "Mercury",
+      "Ketu"
+    ],
+    "mahadasha_order": [
+      "Sat Apr 20 1957",
+      "Sat Apr 20 1963",
+      "Fri Apr 20 1973",
+      "Sun Apr 20 1980",
+      "Mon Apr 20 1998",
+      "Sun Apr 20 2014",
+      "Wed Apr 20 2033",
+      "Wed Apr 20 2050",
+      "Fri Apr 20 2057"
+    ],
+    "start_year": 1937,
+    "dasha_start_date": "Tue Apr 20 1937",
+    "dasha_remaining_at_birth": "2 years 8 months 0 days"
+  },
+  "remaining_api_calls": 29970
+}

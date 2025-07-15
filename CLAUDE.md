@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Documentation Location
+
+All project documentation has been organized in the `docs/markdown/` directory. When looking for:
+- Implementation plans
+- Test strategies
+- API documentation
+- Verification reports
+- Configuration guides
+
+Please check the `docs/markdown/` folder first. Key documents include:
+- `VEDICASTROAPI_TEST_CASES.md` - Comprehensive test cases for API validation
+- `TEST_DATA_COLLECTION_PLAN.md` - Strategy for collecting astronomical test data
+- `IMPLEMENTATION_PLAN_AI_MARKETPLACE.md` - AI and marketplace feature plans
+- `CORRECTNESS_VERIFICATION_PLAN.md` - Accuracy verification strategies
+
 ## Project Overview
 
 Astrow is a comprehensive astrology calculation API that supports multiple astrological systems (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) with both REST and GraphQL interfaces. It uses FastAPI, SQLModel, and PostgreSQL with a multi-tenant architecture.

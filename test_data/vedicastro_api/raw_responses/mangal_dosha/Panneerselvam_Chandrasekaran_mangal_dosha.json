@@ -1,0 +1,16 @@
+{
+  "status": 200,
+  "response": {
+    "factors": {},
+    "is_dosha_present_mars_from_lagna": false,
+    "is_dosha_present_mars_from_moon": false,
+    "is_anshik": false,
+    "bot_response": "Great! You are not a manglik, a little bit of manglik is good in today's world though",
+    "score": 0,
+    "cancellation": {
+      "cancellationScore": 0,
+      "cancellationReason": []
+    }
+  },
+  "remaining_api_calls": 29969
+}
