@@ -8,10 +8,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from josi.core.database import get_db
-from josi.core.dependencies import get_current_organization
+from josi.api.v1.dependencies import get_current_organization
 from josi.models.organization_model import Organization
 from josi.services.vedic.muhurta_service import MuhurtaCalculator
-from josi.api.v1.response_model import ResponseModel
+from josi.api.response import ResponseModel
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -289,9 +289,9 @@ async def get_best_times_today(
     latitude: float = Query(..., ge=-90, le=90, description="Location latitude"),
     longitude: float = Query(..., ge=-180, le=180, description="Location longitude"),
     timezone: str = Query(..., description="Location timezone"),
-    purpose: str = Query(default="general", description="Activity purpose"),
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
+    organization: Organization = Depends(get_current_organization),
+    purpose: str = Query(default="general", description="Activity purpose")
 ) -> ResponseModel:
     """
     Get best times for today for quick reference.

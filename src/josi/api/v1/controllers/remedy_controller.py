@@ -8,7 +8,8 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from josi.core.database import get_db
-from josi.core.dependencies import get_current_organization, get_current_user
+from josi.api.v1.dependencies import get_current_organization
+from josi.services.auth_service import get_current_user
 from josi.models.organization_model import Organization
 from josi.models.user_model import User
 from josi.models.remedy_model import (
@@ -19,7 +20,7 @@ from josi.models.remedy_model import (
 )
 from josi.services.remedy_recommendation_service import RemedyRecommendationService
 from josi.repositories.remedy_repository import RemedyRepository
-from josi.api.v1.response_model import ResponseModel
+from josi.api.response import ResponseModel
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -95,6 +96,8 @@ async def get_remedy_recommendations(
 
 @router.get("/")
 async def list_remedies(
+    db: AsyncSession = Depends(get_db),
+    organization: Organization = Depends(get_current_organization),
     tradition: Optional[Tradition] = Query(None, description="Filter by tradition"),
     remedy_type: Optional[RemedyType] = Query(None, description="Filter by remedy type"),
     planet: Optional[str] = Query(None, description="Filter by planet"),
@@ -102,9 +105,7 @@ async def list_remedies(
     difficulty_max: Optional[int] = Query(None, ge=1, le=5, description="Maximum difficulty level"),
     cost_max: Optional[int] = Query(None, ge=1, le=5, description="Maximum cost level"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(50, ge=1, le=100, description="Number of records to return"),
-    db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
+    limit: int = Query(50, ge=1, le=100, description="Number of records to return")
 ) -> ResponseModel:
     """
     List available remedies with optional filtering.
@@ -169,9 +170,9 @@ async def list_remedies(
 @router.get("/{remedy_id}")
 async def get_remedy(
     remedy_id: UUID = Path(..., description="Remedy ID"),
-    language: str = Query("en", description="Language for localized content"),
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
+    organization: Organization = Depends(get_current_organization),
+    language: str = Query("en", description="Language for localized content")
 ) -> ResponseModel:
     """
     Get detailed information about a specific remedy.
@@ -318,10 +319,10 @@ async def update_remedy(
 @router.post("/{remedy_id}/start-progress")
 async def start_remedy_progress(
     remedy_id: UUID,
-    target_days: Optional[int] = Query(None, ge=1, le=365, description="Target duration in days"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    organization: Organization = Depends(get_current_organization),
+    target_days: Optional[int] = Query(None, ge=1, le=365, description="Target duration in days")
 ) -> ResponseModel:
     """
     Start tracking progress for a remedy.
