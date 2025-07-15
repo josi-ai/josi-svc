@@ -12,6 +12,12 @@ from josi.api.v1.controllers.dasha_controller import router as dasha_router
 from josi.api.v1.controllers.prediction_controller import router as prediction_router
 from josi.api.v1.controllers.remedies_controller import router as remedies_router
 from josi.api.v1.controllers.location_controller import router as location_router
+from josi.api.v1.controllers.auth_controller import router as auth_router
+from josi.api.v1.controllers.ai_controller import router as ai_router
+from josi.api.v1.controllers.astrologer_controller import router as astrologer_router
+from josi.api.v1.controllers.consultation_controller import router as consultation_router
+from josi.api.v1.controllers.muhurta_controller import router as muhurta_router
+from josi.api.v1.controllers.remedy_controller import router as remedy_router
 from josi.api.v1.health import router as health_router
 from josi.api.v1.oauth import router as oauth_router
 
@@ -29,6 +35,12 @@ v1_router.include_router(dasha_router)
 v1_router.include_router(prediction_router)
 v1_router.include_router(remedies_router)
 v1_router.include_router(location_router)
+v1_router.include_router(auth_router)
+v1_router.include_router(ai_router)
+v1_router.include_router(astrologer_router)
+v1_router.include_router(consultation_router)
+v1_router.include_router(muhurta_router)
+v1_router.include_router(remedy_router)
 v1_router.include_router(health_router)
 v1_router.include_router(oauth_router)
 

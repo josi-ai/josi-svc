@@ -1,0 +1,126 @@
+{
+  "status": 200,
+  "response": [
+    {
+      "current_house": 1,
+      "verbal_location": "1st lord is in the 9th house",
+      "current_zodiac": "Libra",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Libra",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  1st lord, Saturn is in the 9th house, Life teaches you profound lessons through hardships before revealing true beliefs. Skepticism towards conventional wisdom often drives you to seek personal truths, valuing achievements born of perseverance.",
+      "lord_strength": "Exalted"
+    },
+    {
+      "current_house": 2,
+      "verbal_location": "2nd lord is in the 5th house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 5,
+      "personalised_prediction": "Since the  2nd lord, Jupiter is in the 5th house, You are likely to become a teacher or guru, earning money through your ability to guide others. Your openness to creative pursuits and finance-related endeavors will help you find success.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 3,
+      "verbal_location": "3rd lord is in the 11th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  3rd lord, Mars is in the 11th house, You shall be someone who will be putting in a lot of efforts for higher studies. You can also be adept in religion and philosophy. You will gain from working in large institutions. You will be stubborn about the beliefs of your religion. You may not have a good relationship with your sibling.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 4,
+      "verbal_location": "4th lord is in the 8th house",
+      "current_zodiac": "Virgo",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Virgo",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  4th lord, Venus is in the 8th house, You may be involved in an abusive physical relationship. You may be involved in secret love affairs despite being married. You may also earn money through research works. You may lose wealth due to problems in inheritance.",
+      "lord_strength": "Debilitated"
+    },
+    {
+      "current_house": 5,
+      "verbal_location": "5th lord is in the 7th house",
+      "current_zodiac": "Leo",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Leo",
+      "lord_house_location": 7,
+      "personalised_prediction": "Since the  5th lord, Mercury is in the 7th house, You shall a communicative and a fun spouse who will make you laugh and shall be very creative. You shall be very good with the kids and will be direct in speech. Your spouse can even be of emotional nature which may sometimes lead to fights.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 6,
+      "verbal_location": "6th lord is in the 3rd house",
+      "current_zodiac": "Aries",
+      "lord_of_zodiac": "Moon",
+      "lord_zodiac_location": "Aries",
+      "lord_house_location": 3,
+      "personalised_prediction": "Since the  6th lord, Moon is in the 3rd house, Your mother shall have to go through a lot of pain in her life. Your mind can be focused on nursing and healing so you may take up professions linked to that. You may also become a relationship counselor.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 7,
+      "verbal_location": "7th lord is in the 7th house",
+      "current_zodiac": "Leo",
+      "lord_of_zodiac": "Sun",
+      "lord_zodiac_location": "Leo",
+      "lord_house_location": 7,
+      "personalised_prediction": "Since the  7th lord, Sun is in the 7th house, You and your spouse shall both be egoists by nature. Your spouse may be an authoritative figure in the government and so can be your father. Ego battles between husband and wife shall burn down your marriage.",
+      "lord_strength": "Strong"
+    },
+    {
+      "current_house": 8,
+      "verbal_location": "8th lord is in the 7th house",
+      "current_zodiac": "Leo",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Leo",
+      "lord_house_location": 7,
+      "personalised_prediction": "Since the  8th lord, Mercury is in the 7th house, You will have a business-oriented communicative spouse. Your spouse will have great business ideas as a result of which your assets will increase after your marriage. Your spouse will be very calculative in the matter of wealth and assets. You will be working the field of revenue or taxes.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 9,
+      "verbal_location": "9th lord is in the 8th house",
+      "current_zodiac": "Virgo",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Virgo",
+      "lord_house_location": 8,
+      "personalised_prediction": "Since the  9th lord, Venus is in the 8th house, You shall be in love with the occult side of life but at the same time you will be keeping a secret love affair about which no one shall know. You shall be individualistic by nature and keep your wealth separate from your partner.",
+      "lord_strength": "Debilitated"
+    },
+    {
+      "current_house": 10,
+      "verbal_location": "10th lord is in the 11th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  10th lord, Mars is in the 11th house, You shall be working in large financial institutions like in the banking sector. You may also have a business related to finance. You will both gain and lose money at the same rate. Relation with father will be a dominance struggle.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 11,
+      "verbal_location": "11th lord is in the 5th house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 5,
+      "personalised_prediction": "Since the  11th lord, Jupiter is in the 5th house, You can be a very good teacher or shall be a counselor to different people. You will be devoted to the field of education. You shall guide people about higher learning and the different philosophies of life. You can also become a business-minded person and gain wealth.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 12,
+      "verbal_location": "12th lord is in the 9th house",
+      "current_zodiac": "Libra",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Libra",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  12th lord, Saturn is in the 9th house, Higher learning shall come with a lot of delay in life. You shall be very strict regarding law and order and shall be a very hard worker. Long-distance travel shall come very late in your life. Your spouse shall be elder and be very mature. You shall have an easy life but only after the thirties.",
+      "lord_strength": "Exalted"
+    }
+  ],
+  "remaining_api_calls": 29967
+}

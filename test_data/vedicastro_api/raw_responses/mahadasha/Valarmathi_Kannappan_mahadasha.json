@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "response": {
+    "mahadasha": [
+      "Ketu",
+      "Venus",
+      "Sun",
+      "Moon",
+      "Mars",
+      "Rahu",
+      "Jupiter",
+      "Saturn",
+      "Mercury"
+    ],
+    "mahadasha_order": [
+      "Thu Nov 11 1965",
+      "Mon Nov 11 1985",
+      "Mon Nov 11 1991",
+      "Sun Nov 11 2001",
+      "Tue Nov 11 2008",
+      "Wed Nov 11 2026",
+      "Tue Nov 11 2042",
+      "Fri Nov 11 2061",
+      "Fri Nov 11 2078"
+    ],
+    "start_year": 1958,
+    "dasha_start_date": "Tue Nov 11 1958",
+    "dasha_remaining_at_birth": "4 years 9 months 0 days"
+  },
+  "remaining_api_calls": 29988
+}

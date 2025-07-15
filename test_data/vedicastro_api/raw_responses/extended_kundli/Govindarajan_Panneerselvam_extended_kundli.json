@@ -1,0 +1,28 @@
+{
+  "status": 200,
+  "response": {
+    "gana": "manushya",
+    "yoni": "mongoose",
+    "vasya": "Chatushpada",
+    "nadi": "Antya",
+    "varna": "Kshatriya",
+    "paya": "Copper",
+    "tatva": "Agni (Fire)",
+    "life_stone": "yellow sapphire",
+    "lucky_stone": "pearl",
+    "fortune_stone": "coral",
+    "name_start": "Be",
+    "ascendant_sign": "Pisces",
+    "ascendant_nakshatra": "UttaraBhadra",
+    "rasi": "Sagittarius",
+    "rasi_lord": "Jupiter",
+    "nakshatra": "UttraShadha",
+    "nakshatra_lord": "Sun",
+    "nakshatra_pada": 1,
+    "sun_sign": "Sagittarius",
+    "tithi": "S.Dvitiya",
+    "karana": "Balava",
+    "yoga": "Vyaghata"
+  },
+  "remaining_api_calls": 29977
+}

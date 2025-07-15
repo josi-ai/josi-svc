@@ -1,0 +1,41 @@
+{
+  "collection_date": "2025-07-15T04:20:10.898360",
+  "test_cases_processed": [
+    {
+      "name": "Panneerselvam Chandrasekaran",
+      "file": "collected_Panneerselvam_Chandrasekaran.json",
+      "report": "detailed_reports/Panneerselvam_Chandrasekaran_detailed_analysis.md",
+      "endpoints_successful": 6
+    },
+    {
+      "name": "Valarmathi Kannappan",
+      "file": "collected_Valarmathi_Kannappan.json",
+      "report": "detailed_reports/Valarmathi_Kannappan_detailed_analysis.md",
+      "endpoints_successful": 6
+    },
+    {
+      "name": "Janaki Panneerselvam",
+      "file": "collected_Janaki_Panneerselvam.json",
+      "report": "detailed_reports/Janaki_Panneerselvam_detailed_analysis.md",
+      "endpoints_successful": 6
+    },
+    {
+      "name": "Govindarajan Panneerselvam",
+      "file": "collected_Govindarajan_Panneerselvam.json",
+      "report": "detailed_reports/Govindarajan_Panneerselvam_detailed_analysis.md",
+      "endpoints_successful": 6
+    }
+  ],
+  "api_key_used": "30548028-0...",
+  "endpoints_tested": [
+    "planet_details",
+    "extended_kundli",
+    "panchang",
+    "mahadasha",
+    "western_planets",
+    "mangal_dosha",
+    "kaalsarp_dosha",
+    "personal_characteristics",
+    "planetary_aspects"
+  ]
+}
