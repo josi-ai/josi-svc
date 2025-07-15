@@ -4,7 +4,8 @@ Test if Vedic chart data can be serialized to JSON.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 import json
 from datetime import datetime

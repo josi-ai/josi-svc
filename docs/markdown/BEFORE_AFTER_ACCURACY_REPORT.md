@@ -1,4 +1,4 @@
-# 📊 ASTROW API ACCURACY: BEFORE vs AFTER FIX
+# 📊 JOSI API ACCURACY: BEFORE vs AFTER FIX
 
 ## 🔴 BEFORE FIX (Using API Endpoints)
 
@@ -93,7 +93,7 @@ def _datetime_to_julian(self, dt: datetime) -> float:
 ```
 
 ### Conclusion:
-The Astrow API now achieves **professional-grade accuracy** suitable for production use in astrological applications. All planetary positions and house calculations are within 0.1° of Swiss Ephemeris standards.
+The Josi API now achieves **professional-grade accuracy** suitable for production use in astrological applications. All planetary positions and house calculations are within 0.1° of Swiss Ephemeris standards.
 
 ---
 

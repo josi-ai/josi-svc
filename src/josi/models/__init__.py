@@ -1,5 +1,5 @@
 """
-SQLModel models for the Astrow application.
+SQLModel models for the Josi application.
 """
 from .base import SQLBaseModel, TenantBaseModel
 from .organization_model import (

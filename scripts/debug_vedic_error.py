@@ -4,7 +4,8 @@ Debug script to trace exactly where the Vedic chart error occurs.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 import traceback
 from datetime import datetime

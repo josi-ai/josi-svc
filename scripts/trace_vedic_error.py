@@ -4,7 +4,8 @@ Trace the Vedic chart error by examining the chart data structure.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 from datetime import datetime
 from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
