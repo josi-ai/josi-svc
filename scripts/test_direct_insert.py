@@ -16,9 +16,9 @@ async def test_direct_insert():
     conn = await asyncpg.connect(
         host='localhost',
         port=5432,
-        user='astrow',
-        password='astrow',
-        database='astrow'
+        user='josi',
+        password='josi',
+        database='josi'
     )
     
     try:

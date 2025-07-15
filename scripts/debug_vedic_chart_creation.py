@@ -4,7 +4,8 @@ Debug script to trace Vedic chart creation issue.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from datetime import datetime
 import asyncio

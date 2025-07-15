@@ -1,7 +1,7 @@
 """
 Integration tests for celebrity chart calculations.
 
-This module tests the Astrow API using real celebrity birth data with known
+This module tests the Josi API using real celebrity birth data with known
 astrological positions to validate the accuracy of calculations.
 """
 

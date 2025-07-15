@@ -13,7 +13,7 @@ class TestSettings:
         """Test default settings values."""
         settings = Settings()
         
-        assert settings.app_name == "Astrow API"
+        assert settings.app_name == "Josi API"
         assert settings.app_version == "1.0.0"
         # Debug and environment may vary based on env vars, just check they exist
         assert hasattr(settings, 'debug')

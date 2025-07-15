@@ -1,4 +1,4 @@
-# Comprehensive Test Plan for Astrow API
+# Comprehensive Test Plan for Josi API
 
 ## Overview
 This document outlines a systematic approach to test and fix all API endpoints, starting with the most critical issues.

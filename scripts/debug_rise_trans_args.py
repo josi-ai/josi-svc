@@ -4,7 +4,8 @@ Debug script to trace exactly what arguments are passed to rise_trans.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 import swisseph as swe
 from datetime import datetime
