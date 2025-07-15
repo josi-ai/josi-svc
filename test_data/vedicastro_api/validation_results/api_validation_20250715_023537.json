@@ -1,0 +1,48 @@
+{
+  "validation_date": "2025-07-15T06:35:37.699519",
+  "api_base_url": "http://localhost:8000/api/v1",
+  "summary": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "accuracy_percentage": 0
+  },
+  "endpoint_results": {
+    "Valarmathi_Kannappan_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": []
+    },
+    "Valarmathi_Kannappan_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Valarmathi_Kannappan_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    },
+    "Janaki_Panneerselvam_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": []
+    },
+    "Janaki_Panneerselvam_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Janaki_Panneerselvam_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    },
+    "Panneerselvam_Chandrasekaran_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": []
+    },
+    "Panneerselvam_Chandrasekaran_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Panneerselvam_Chandrasekaran_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    }
+  }
+}

@@ -270,6 +270,12 @@ def log_exception(
         })
         logger.warning("Business logic error", **log_data)
     else:
+        # Debug the error
+        import traceback
+        print(f"DEBUG: Exception type: {type(exc).__name__}")
+        print(f"DEBUG: Exception message: {str(exc)}")
+        print(f"DEBUG: Traceback:")
+        traceback.print_exc()
         logger.error("Unexpected error", **log_data, exc_info=True)
 
 

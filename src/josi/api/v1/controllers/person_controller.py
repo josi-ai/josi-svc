@@ -9,6 +9,7 @@ import logging
 from josi.api.v1.dependencies import PersonServiceDep
 from josi.api.response import ResponseModel
 from josi.models.person_model import PersonEntity
+from josi.api.v1.dto.person_dto import CreatePersonRequest
 
 log = logging.getLogger("uvicorn")
 
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/persons", tags=["persons"])
 
 @router.post("/", response_model=ResponseModel)
 async def create_person(
-    payload: PersonEntity,
+    payload: CreatePersonRequest,
     person_service: PersonServiceDep
 ) -> ResponseModel:
     """
@@ -28,10 +29,12 @@ async def create_person(
     and the timezone will be determined based on the location.
     
     Args:
-        payload (PersonEntity): Person creation data
+        payload (CreatePersonRequest): Person creation data
             - name (str): Full name of the person
             - date_of_birth (date): Birth date in YYYY-MM-DD format
-            - time_of_birth (time): Birth time in HH:MM:SS format
+            - time_of_birth (str): Birth time in flexible formats:
+                * 24-hour: "14:30" or "14:30:00"
+                * 12-hour: "2:30 PM" or "02:30 PM"
             - place_of_birth (str): Birth location as "City, State, Country"
             - email (str, optional): Email address
             - phone (str, optional): Phone number
@@ -54,6 +57,7 @@ async def create_person(
     
     Raises:
         HTTPException(400): If payload is empty or geocoding fails
+        HTTPException(422): If time format is invalid
         HTTPException(500): If person creation fails
     
     Example:
@@ -61,7 +65,7 @@ async def create_person(
         {
             "name": "John Doe",
             "date_of_birth": "1990-01-01",
-            "time_of_birth": "14:30:00",
+            "time_of_birth": "2:30 PM",
             "place_of_birth": "New York, NY, USA"
         }
     """
@@ -69,7 +73,9 @@ async def create_person(
         raise HTTPException(400, "payload is empty")
     
     try:
-        person = await person_service.create_person(payload)
+        # Convert DTO to entity
+        person_entity = payload.to_person_entity()
+        person = await person_service.create_person(person_entity)
         return ResponseModel(
             success=True,
             message="Person created successfully",
