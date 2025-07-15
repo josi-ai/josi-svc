@@ -22,8 +22,8 @@ from josi.models.consultation_model import (
     ConsultationStatus,
     ConsultationType
 )
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import cache
+from josi.api.response import ResponseModel
+from cache.cache_decorator import cache
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -82,11 +82,11 @@ async def book_consultation(
 
 @router.get("/my-consultations", response_model=ResponseModel)
 async def get_my_consultations(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
     status_filter: Optional[ConsultationStatus] = Query(default=None),
     limit: int = Query(default=20, le=100),
-    offset: int = Query(default=0, ge=0),
-    current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db)
+    offset: int = Query(default=0, ge=0)
 ) -> ResponseModel:
     """Get consultations for the current user."""
     try:
@@ -346,9 +346,9 @@ async def send_message(
 @router.delete("/{consultation_id}/cancel", response_model=ResponseModel)
 async def cancel_consultation(
     consultation_id: UUID,
-    reason: Optional[str] = Query(default=None),
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    reason: Optional[str] = Query(default=None)
 ) -> ResponseModel:
     """Cancel a consultation."""
     try:
@@ -411,10 +411,10 @@ async def get_consultation_types() -> ResponseModel:
 
 @router.get("/astrologer/pending", response_model=ResponseModel)
 async def get_pending_consultations(
-    limit: int = Query(default=20, le=100),
-    offset: int = Query(default=0, ge=0),
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(default=20, le=100),
+    offset: int = Query(default=0, ge=0)
 ) -> ResponseModel:
     """Get pending consultations for the current astrologer."""
     try:

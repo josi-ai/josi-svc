@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from josi.core.database import get_db
 from josi.services.auth_service import AuthService, get_current_active_user
 from josi.models.user_model import UserCreate, UserResponse, User, UserLogin
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import CacheInvalidator
+from josi.api.response import ResponseModel
+from cache.cache_invalidation import CacheInvalidator
 
 router = APIRouter(tags=["Authentication"], prefix="/auth")
 

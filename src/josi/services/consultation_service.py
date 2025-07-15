@@ -19,7 +19,7 @@ from josi.models.consultation_model import (
 )
 from josi.models.astrologer_model import Astrologer
 from josi.models.user_model import User
-from josi.services.video_service import VideoConsultationService
+# from josi.services.video_service import VideoConsultationService  # Commented out due to missing twilio dependency
 from josi.services.ai.interpretation_service import AIInterpretationService
 from josi.core.config import settings
 import structlog
