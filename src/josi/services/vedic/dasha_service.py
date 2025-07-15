@@ -454,3 +454,116 @@ class VimshottariDashaCalculator:
         }
         
         return planet_remedies.get(planet, ["Consult an astrologer for specific remedies"])
+
+
+class YoginiDashaCalculator:
+    """
+    Calculate Yogini Dasha periods.
+    
+    Yogini Dasha is a 36-year cycle system with 8 yoginis.
+    """
+    
+    def __init__(self):
+        self.yogini_cycle = 36  # years
+        self.yoginis = [
+            {"name": "Mangala", "years": 1, "lord": "Moon"},
+            {"name": "Pingala", "years": 2, "lord": "Sun"},
+            {"name": "Dhanya", "years": 3, "lord": "Jupiter"},
+            {"name": "Bhramari", "years": 4, "lord": "Mars"},
+            {"name": "Bhadrika", "years": 5, "lord": "Mercury"},
+            {"name": "Ulka", "years": 6, "lord": "Saturn"},
+            {"name": "Siddha", "years": 7, "lord": "Venus"},
+            {"name": "Sankata", "years": 8, "lord": "Rahu"}
+        ]
+    
+    def calculate_yogini_dasha(
+        self,
+        birth_datetime: datetime,
+        moon_longitude: float
+    ) -> List[Dict]:
+        """Calculate Yogini Dasha periods."""
+        # Simplified implementation
+        periods = []
+        
+        # Calculate starting yogini based on moon nakshatra
+        nakshatra_index = int(moon_longitude / 13.333)
+        starting_yogini_index = nakshatra_index % 8
+        
+        current_date = birth_datetime
+        for i in range(16):  # Calculate 2 full cycles
+            yogini = self.yoginis[(starting_yogini_index + i) % 8]
+            period = {
+                "yogini": yogini["name"],
+                "lord": yogini["lord"],
+                "start_date": current_date,
+                "years": yogini["years"]
+            }
+            current_date = current_date.replace(year=current_date.year + yogini["years"])
+            period["end_date"] = current_date
+            periods.append(period)
+        
+        return periods
+
+
+class CharaDashaCalculator:
+    """
+    Calculate Chara Dasha (Jaimini system).
+    
+    Based on movable, fixed, and dual signs.
+    """
+    
+    def __init__(self):
+        self.sign_types = {
+            "movable": [0, 3, 6, 9],    # Aries, Cancer, Libra, Capricorn
+            "fixed": [1, 4, 7, 10],      # Taurus, Leo, Scorpio, Aquarius
+            "dual": [2, 5, 8, 11]        # Gemini, Virgo, Sagittarius, Pisces
+        }
+    
+    def calculate_chara_dasha(
+        self,
+        birth_datetime: datetime,
+        ascendant_sign: int,
+        planet_positions: Dict[str, float]
+    ) -> List[Dict]:
+        """Calculate Chara Dasha periods."""
+        # Simplified implementation
+        periods = []
+        
+        # Calculate dasha order based on ascendant
+        dasha_order = self._get_dasha_order(ascendant_sign)
+        
+        current_date = birth_datetime
+        for sign in dasha_order:
+            # Calculate period length (simplified - normally based on lord's position)
+            years = self._calculate_sign_years(sign, planet_positions)
+            
+            period = {
+                "sign": sign,
+                "sign_name": self._get_sign_name(sign),
+                "start_date": current_date,
+                "years": years
+            }
+            current_date = current_date.replace(year=current_date.year + years)
+            period["end_date"] = current_date
+            periods.append(period)
+        
+        return periods
+    
+    def _get_dasha_order(self, ascendant_sign: int) -> List[int]:
+        """Get dasha order based on ascendant."""
+        # Simplified - normally considers odd/even and sign type
+        order = list(range(12))
+        # Rotate to start from ascendant
+        return order[ascendant_sign:] + order[:ascendant_sign]
+    
+    def _calculate_sign_years(self, sign: int, planet_positions: Dict[str, float]) -> int:
+        """Calculate years for a sign dasha."""
+        # Simplified - normally based on lord's position from sign
+        base_years = [7, 8, 9, 10, 11, 12, 7, 8, 9, 10, 11, 12]
+        return base_years[sign]
+    
+    def _get_sign_name(self, sign: int) -> str:
+        """Get sign name from index."""
+        signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+                "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+        return signs[sign]

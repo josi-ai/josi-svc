@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "response": {
+    "mahadasha": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Rahu",
+      "Jupiter",
+      "Saturn",
+      "Mercury",
+      "Ketu",
+      "Venus"
+    ],
+    "mahadasha_order": [
+      "Fri Sep 29 1995",
+      "Thu Sep 29 2005",
+      "Sat Sep 29 2012",
+      "Sun Sep 29 2030",
+      "Sat Sep 29 2046",
+      "Tue Sep 29 2065",
+      "Tue Sep 29 2082",
+      "Thu Sep 29 2089",
+      "Sun Sep 29 2109"
+    ],
+    "start_year": 1989,
+    "dasha_start_date": "Fri Sep 29 1989",
+    "dasha_remaining_at_birth": "5 years 9 months 0 days"
+  },
+  "remaining_api_calls": 29976
+}

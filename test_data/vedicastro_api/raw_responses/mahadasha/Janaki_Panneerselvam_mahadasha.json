@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "response": {
+    "mahadasha": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Rahu",
+      "Jupiter",
+      "Saturn",
+      "Mercury",
+      "Ketu",
+      "Venus"
+    ],
+    "mahadasha_order": [
+      "Fri Apr 18 1986",
+      "Thu Apr 18 1996",
+      "Fri Apr 18 2003",
+      "Sun Apr 18 2021",
+      "Sat Apr 18 2037",
+      "Tue Apr 18 2056",
+      "Tue Apr 18 2073",
+      "Thu Apr 18 2080",
+      "Sun Apr 18 2100"
+    ],
+    "start_year": 1980,
+    "dasha_start_date": "Fri Apr 18 1980",
+    "dasha_remaining_at_birth": "3 years 4 months 0 days"
+  },
+  "remaining_api_calls": 29982
+}

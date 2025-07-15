@@ -128,10 +128,10 @@ async def get_person(
 @router.get("/", response_model=ResponseModel)
 # @cache(expire=3600)  # Cache for 1 hour - disabled for now
 async def list_persons(
+    person_service: PersonServiceDep,
     search: Optional[str] = Query(None, description="Search by name"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    person_service: PersonServiceDep
+    limit: int = Query(100, ge=1, le=1000)
 ) -> ResponseModel:
     """
     List all persons with optional search and pagination.
@@ -258,10 +258,10 @@ async def delete_person(
 @router.post("/{person_id}/update-birth-location", response_model=ResponseModel)
 async def update_birth_location(
     person_id: UUID,
+    person_service: PersonServiceDep,
     latitude: float = Query(..., ge=-90, le=90),
     longitude: float = Query(..., ge=-180, le=180),
-    timezone: str = Query(...),
-    person_service: PersonServiceDep
+    timezone: str = Query(...)
 ) -> ResponseModel:
     """
     Update person's birth location coordinates.

@@ -99,8 +99,8 @@ async def find_muhurta(
     latitude: float,
     longitude: float,
     timezone: str,
-    max_results: int = Query(default=10, le=50),
-    muhurta_calculator: MuhurtaCalculatorDep
+    muhurta_calculator: MuhurtaCalculatorDep,
+    max_results: int = Query(default=10, le=50)
 ) -> ResponseModel:
     """
     Find auspicious times (Muhurta) for specific activities.

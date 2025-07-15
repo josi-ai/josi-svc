@@ -1,0 +1,126 @@
+{
+  "status": 200,
+  "response": [
+    {
+      "current_house": 1,
+      "verbal_location": "1st lord is in the 4th house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 4,
+      "personalised_prediction": "Since the  1st lord, Jupiter is in the 4th house, You will have a strict mother who will also be able to discipline you but shall also love you immensely and will fulfill all your demands. You shall be confused about yourself in your early life. You shall be a very late bloomer and the majority of your life will go in focusing on your private life.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 2,
+      "verbal_location": "2nd lord is in the 9th house",
+      "current_zodiac": "Scorpio",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Scorpio",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  2nd lord, Mars is in the 9th house, You will remain close to your family, especially when it comes to your beliefs and higher education. Strong-willed and headstrong about your values, you will protect your ideas fiercely. Research and law are potential career paths.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 3,
+      "verbal_location": "3rd lord is in the 11th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  3rd lord, Venus is in the 11th house, You will have a large network of females who will help you to earn wealth. You shall even earn while working in large organizations. You have a very charming way of talking which will attract people towards you.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 4,
+      "verbal_location": "4th lord is in the 11th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  4th lord, Mercury is in the 11th house, You will have good gains from your mother. Your communicative skills shall also be great. You may be in business fields related to real estate or construction. You will be a motivating person.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 5,
+      "verbal_location": "5th lord is in the 10th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Moon",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  5th lord, Moon is in the 10th house, You will be interested in the higher studies to help the people who need nourishment and will want to take care of others. You may be a teacher or a professor and you shall get authority.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 6,
+      "verbal_location": "6th lord is in the 10th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Sun",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  6th lord, Sun is in the 10th house, You or father shall be working in the government. You will be related to the field of law and order or in the administration. You are a person of higher learning and wisdom and will be a person of authority.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 7,
+      "verbal_location": "7th lord is in the 11th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Mercury",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  7th lord, Mercury is in the 11th house, You shall have a very communicative spouse who shall be business-oriented and will bring in a lot of wealth. He or she shall be calculative about money and will always be saving money.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 8,
+      "verbal_location": "8th lord is in the 11th house",
+      "current_zodiac": "Capricorn",
+      "lord_of_zodiac": "Venus",
+      "lord_zodiac_location": "Capricorn",
+      "lord_house_location": 11,
+      "personalised_prediction": "Since the  8th lord, Venus is in the 11th house, You shall have a high desire for your spouse. You may be a hopeless romantic always trying to find love here and there. Anger, aggression, and dominance will be a part of your relationship.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 9,
+      "verbal_location": "9th lord is in the 9th house",
+      "current_zodiac": "Scorpio",
+      "lord_of_zodiac": "Mars",
+      "lord_zodiac_location": "Scorpio",
+      "lord_house_location": 9,
+      "personalised_prediction": "Since the  9th lord, Mars is in the 9th house, Your a headstrong person and faithful to your religious beliefs. You will assess individuality in the field of higher education or religion. You can even get into physical fights.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 10,
+      "verbal_location": "10th lord is in the 4th house",
+      "current_zodiac": "Gemini",
+      "lord_of_zodiac": "Jupiter",
+      "lord_zodiac_location": "Gemini",
+      "lord_house_location": 4,
+      "personalised_prediction": "Since the  10th lord, Jupiter is in the 4th house, All your energies shall be devoted towards higher studies in the field of philosophy or religion. You are in a good position to become or a professor. You may work in private settings.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 11,
+      "verbal_location": "11th lord is in the 10th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  11th lord, Saturn is in the 10th house, You shall have a distant relationship with your father for various reasons. You shall reach an authoritative position in life only after a lot of hard work and effort as nothing shall be easy for you. You may make a career in law or the administrative sector. You shall not be liked by people at work.",
+      "lord_strength": "Neutral"
+    },
+    {
+      "current_house": 12,
+      "verbal_location": "12th lord is in the 10th house",
+      "current_zodiac": "Sagittarius",
+      "lord_of_zodiac": "Saturn",
+      "lord_zodiac_location": "Sagittarius",
+      "lord_house_location": 10,
+      "personalised_prediction": "Since the  12th lord, Saturn is in the 10th house, You will be in a distant relationship with your father. You will have success in life only after a lot of hard work. You can become a judge but your colleagues will not like you much. Marriage shall be more of a restrictive relation and responsibility.",
+      "lord_strength": "Neutral"
+    }
+  ],
+  "remaining_api_calls": 29973
+}

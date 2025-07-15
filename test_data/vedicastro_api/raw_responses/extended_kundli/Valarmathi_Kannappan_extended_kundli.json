@@ -1,0 +1,28 @@
+{
+  "status": 200,
+  "response": {
+    "gana": "rakshas",
+    "yoni": "dog",
+    "vasya": "Chatushpada",
+    "nadi": "Adi",
+    "varna": "Kshatriya",
+    "paya": "Copper",
+    "tatva": "Agni (Fire)",
+    "life_stone": "emerald",
+    "lucky_stone": "diamond",
+    "fortune_stone": "blue sapphire",
+    "name_start": "Ye",
+    "ascendant_sign": "Gemini",
+    "ascendant_nakshatra": "Punarvasu",
+    "rasi": "Sagittarius",
+    "rasi_lord": "Jupiter",
+    "nakshatra": "Mula",
+    "nakshatra_lord": "Ketu",
+    "nakshatra_pada": 2,
+    "sun_sign": "Capricorn",
+    "tithi": "K.Ekadasi",
+    "karana": "Bawa",
+    "yoga": "Harshana"
+  },
+  "remaining_api_calls": 29989
+}

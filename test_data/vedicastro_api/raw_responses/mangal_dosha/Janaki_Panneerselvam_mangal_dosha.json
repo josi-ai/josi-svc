@@ -1,0 +1,20 @@
+{
+  "status": 200,
+  "response": {
+    "factors": {
+      "mars": "Mangal dosh is created by, mars in house 1, aspecting the houses 4, 7 and 8",
+      "moon": "Mangal dosh from moon lagna, mars in house  1, aspecting the houses 4, 7 and 8 "
+    },
+    "is_dosha_present_mars_from_lagna": true,
+    "is_dosha_present_mars_from_moon": true,
+    "is_dosha_present": true,
+    "is_anshik": true,
+    "bot_response": "You are 45% manglik, a little bit of manglik is good in today's world",
+    "score": 45,
+    "cancellation": {
+      "cancellationScore": 0,
+      "cancellationReason": []
+    }
+  },
+  "remaining_api_calls": 29981
+}

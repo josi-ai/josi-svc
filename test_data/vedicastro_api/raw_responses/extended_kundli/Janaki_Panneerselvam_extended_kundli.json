@@ -1,0 +1,28 @@
+{
+  "status": 200,
+  "response": {
+    "gana": "manushya",
+    "yoni": "mongoose",
+    "vasya": "Jalachara",
+    "nadi": "Antya",
+    "varna": "Vaishya",
+    "paya": "Gold",
+    "tatva": "Prithvi (Earth)",
+    "life_stone": "blue sapphire",
+    "lucky_stone": "diamond",
+    "fortune_stone": "emerald",
+    "name_start": "Be",
+    "ascendant_sign": "Capricorn",
+    "ascendant_nakshatra": "Dhanista",
+    "rasi": "Capricorn",
+    "rasi_lord": "Saturn",
+    "nakshatra": "UttraShadha",
+    "nakshatra_lord": "Sun",
+    "nakshatra_pada": 2,
+    "sun_sign": "Sagittarius",
+    "tithi": "S.Tritiya",
+    "karana": "Garaja",
+    "yoga": "Dhruva"
+  },
+  "remaining_api_calls": 29983
+}

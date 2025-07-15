@@ -15,12 +15,12 @@ router = APIRouter(prefix="/charts", tags=["charts"])
 @router.post("/calculate", response_model=ResponseModel)
 async def calculate_chart(
     person_id: UUID,
+    chart_service: ChartServiceDep = None,
+    person_service: PersonServiceDep = None,
     systems: str = Query(default="vedic,western", description="Comma-separated list of systems"),
     house_system: HouseSystem = Query(default=HouseSystem.PLACIDUS),
     ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI),
-    include_interpretations: bool = Query(default=False),
-    chart_service: ChartServiceDep,
-    person_service: PersonServiceDep
+    include_interpretations: bool = Query(default=False)
 ) -> ResponseModel:
     """
     Calculate astrological charts for a person.
@@ -105,9 +105,9 @@ async def calculate_chart(
 @router.get("/person/{person_id}", response_model=ResponseModel)
 async def get_person_charts(
     person_id: UUID,
+    chart_service: ChartServiceDep,
     system: Optional[AstrologySystem] = None,
-    chart_type: Optional[str] = None,
-    chart_service: ChartServiceDep
+    chart_type: Optional[str] = None
 ) -> ResponseModel:
     """
     Get all charts for a person.
@@ -142,8 +142,8 @@ async def get_person_charts(
 @router.get("/{chart_id}", response_model=ResponseModel)
 async def get_chart(
     chart_id: UUID,
-    include_interpretations: bool = Query(default=False),
-    chart_service: ChartServiceDep
+    chart_service: ChartServiceDep,
+    include_interpretations: bool = Query(default=False)
 ) -> ResponseModel:
     """
     Get a specific chart by ID.
@@ -225,10 +225,10 @@ async def delete_chart(
 @router.get("/divisional/{person_id}", response_model=ResponseModel)
 async def calculate_divisional_chart(
     person_id: UUID,
-    division: int = Query(..., ge=1, le=300, description="Division number (D1-D300)"),
-    ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI),
     chart_service: ChartServiceDep,
-    person_service: PersonServiceDep
+    person_service: PersonServiceDep,
+    division: int = Query(..., ge=1, le=300, description="Division number (D1-D300)"),
+    ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI)
 ) -> ResponseModel:
     """
     Calculate Vedic divisional chart (Varga).
@@ -299,11 +299,11 @@ async def calculate_divisional_chart(
 @router.post("/transit", response_model=ResponseModel)
 async def calculate_transit_chart(
     person_id: UUID,
+    chart_service: ChartServiceDep,
+    person_service: PersonServiceDep,
     transit_date: Optional[str] = None,
     systems: str = Query(default="vedic,western"),
-    include_aspects: bool = Query(default=True),
-    chart_service: ChartServiceDep,
-    person_service: PersonServiceDep
+    include_aspects: bool = Query(default=True)
 ) -> ResponseModel:
     """
     Calculate current planetary transits for a person.
@@ -361,9 +361,9 @@ async def calculate_transit_chart(
 async def calculate_synastry(
     person1_id: UUID,
     person2_id: UUID,
-    include_composite: bool = Query(default=True),
     chart_service: ChartServiceDep,
-    person_service: PersonServiceDep
+    person_service: PersonServiceDep,
+    include_composite: bool = Query(default=True)
 ) -> ResponseModel:
     """
     Calculate synastry (relationship compatibility) between two people.
