@@ -1,0 +1,219 @@
+{
+  "validation_date": "2025-07-15T06:38:48.861466",
+  "api_base_url": "http://localhost:8000/api/v1",
+  "summary": {
+    "total_tests": 24,
+    "passed": 0,
+    "failed": 24,
+    "accuracy_percentage": 0.0
+  },
+  "endpoint_results": {
+    "Valarmathi_Kannappan_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": [
+        {
+          "test": "Planet Sun longitude",
+          "reference": 299.1395504817733,
+          "calculated": 299.3706977556997,
+          "difference": 0.23114727392641043,
+          "passed": false
+        },
+        {
+          "test": "Planet Moon longitude",
+          "reference": 244.34990472992553,
+          "calculated": 247.6888076216939,
+          "difference": 3.3389028917683845,
+          "passed": false
+        },
+        {
+          "test": "Planet Mars longitude",
+          "reference": 66.84510622177082,
+          "calculated": 66.86520703399232,
+          "difference": 0.020100812221500064,
+          "passed": false
+        },
+        {
+          "test": "Planet Mercury longitude",
+          "reference": 315.64303217173153,
+          "calculated": 315.7053615148726,
+          "difference": 0.06232934314107297,
+          "passed": false
+        },
+        {
+          "test": "Planet Jupiter longitude",
+          "reference": 270.255404012214,
+          "calculated": 270.303262733721,
+          "difference": 0.04785872150699788,
+          "passed": false
+        },
+        {
+          "test": "Planet Venus longitude",
+          "reference": 345.3811032679155,
+          "calculated": 345.5885667235382,
+          "difference": 0.20746345562270108,
+          "passed": false
+        },
+        {
+          "test": "Planet Saturn longitude",
+          "reference": 271.07782937826585,
+          "calculated": 271.1013591052347,
+          "difference": 0.02352972696883171,
+          "passed": false
+        },
+        {
+          "test": "Ascendant degree",
+          "reference": 82.16557187740024,
+          "calculated": 160.7217082143004,
+          "difference": 78.55613633690017,
+          "passed": false
+        }
+      ]
+    },
+    "Valarmathi_Kannappan_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Valarmathi_Kannappan_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    },
+    "Janaki_Panneerselvam_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": [
+        {
+          "test": "Planet Sun longitude",
+          "reference": 242.31313281639302,
+          "calculated": 242.54123155815932,
+          "difference": 0.22809874176630274,
+          "passed": false
+        },
+        {
+          "test": "Planet Moon longitude",
+          "reference": 272.68132107993546,
+          "calculated": 275.3736353048889,
+          "difference": 2.6923142249534635,
+          "passed": false
+        },
+        {
+          "test": "Planet Mars longitude",
+          "reference": 282.5741373326083,
+          "calculated": 282.7450198322683,
+          "difference": 0.17088249966002422,
+          "passed": false
+        },
+        {
+          "test": "Planet Mercury longitude",
+          "reference": 257.69058107969664,
+          "calculated": 258.0262373491473,
+          "difference": 0.3356562694506806,
+          "passed": false
+        },
+        {
+          "test": "Planet Jupiter longitude",
+          "reference": 214.76915240665136,
+          "calculated": 214.81044073072977,
+          "difference": 0.04128832407840832,
+          "passed": false
+        },
+        {
+          "test": "Planet Venus longitude",
+          "reference": 253.10888437227936,
+          "calculated": 253.38499817061063,
+          "difference": 0.2761137983312665,
+          "passed": false
+        },
+        {
+          "test": "Planet Saturn longitude",
+          "reference": 188.20158296041515,
+          "calculated": 188.2173684503542,
+          "difference": 0.015785489939048603,
+          "passed": false
+        },
+        {
+          "test": "Ascendant degree",
+          "reference": 297.2779524314666,
+          "calculated": 32.842567307521755,
+          "difference": 264.43538512394485,
+          "passed": false
+        }
+      ]
+    },
+    "Janaki_Panneerselvam_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Janaki_Panneerselvam_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    },
+    "Panneerselvam_Chandrasekaran_charts": {
+      "endpoint": "/charts/calculate",
+      "tests": [
+        {
+          "test": "Planet Sun longitude",
+          "reference": 123.7283808638586,
+          "calculated": 123.95508491860838,
+          "difference": 0.2267040547497743,
+          "passed": false
+        },
+        {
+          "test": "Planet Moon longitude",
+          "reference": 24.90681627869362,
+          "calculated": 28.171791254743834,
+          "difference": 3.2649749760502154,
+          "passed": false
+        },
+        {
+          "test": "Planet Mars longitude",
+          "reference": 245.5608174551924,
+          "calculated": 245.63600648753618,
+          "difference": 0.07518903234378627,
+          "passed": false
+        },
+        {
+          "test": "Planet Mercury longitude",
+          "reference": 122.39309938349152,
+          "calculated": 122.84852246084304,
+          "difference": 0.45542307735152576,
+          "passed": false
+        },
+        {
+          "test": "Planet Jupiter longitude",
+          "reference": 86.22978978874372,
+          "calculated": 86.28075535494439,
+          "difference": 0.05096556620067361,
+          "passed": false
+        },
+        {
+          "test": "Planet Venus longitude",
+          "reference": 169.1306084596443,
+          "calculated": 169.37850847759373,
+          "difference": 0.2479000179494335,
+          "passed": false
+        },
+        {
+          "test": "Planet Saturn longitude",
+          "reference": 191.00534028306495,
+          "calculated": 191.02897920434395,
+          "difference": 0.02363892127900158,
+          "passed": false
+        },
+        {
+          "test": "Ascendant degree",
+          "reference": 301.96572156405097,
+          "calculated": 37.346537752098286,
+          "difference": 264.61918381195267,
+          "passed": false
+        }
+      ]
+    },
+    "Panneerselvam_Chandrasekaran_panchang": {
+      "endpoint": "/panchang/calculate",
+      "tests": []
+    },
+    "Panneerselvam_Chandrasekaran_dasha": {
+      "endpoint": "/dashas/vimshottari",
+      "tests": []
+    }
+  }
+}
