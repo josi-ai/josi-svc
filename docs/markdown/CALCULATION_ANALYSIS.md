@@ -95,6 +95,7 @@ person.time_of_birth = datetime.combine(
 1. **Ephemeris Data**: Different ephemeris files (DE431 vs DE406)
 2. **Nutation Corrections**: Not explicitly handled in our code
 3. **Light-Time Correction**: The Moon moves ~13° per day, so timing errors have significant impact
+4. **Topocentric vs Geocentric**: If VedicAstroAPI uses any topocentric correction while we use geocentric (or vice versa)
 
 ### Issue 3: Ayanamsa Application
 
@@ -107,6 +108,11 @@ sidereal_longitude = (tropical_longitude - ayanamsa) % 360
 **Potential Issues**:
 1. No verification that Swiss Ephemeris is using the same Lahiri calculation as VedicAstroAPI
 2. Different Lahiri implementations can vary by 0.001° - 0.01° per year
+3. **Ayanamsa Formula Variations**:
+   - Swiss Ephemeris: Uses ICRC standard from 1955
+   - KP Simple Formula: (Year - 291) × 50.2388475 seconds
+   - General Formula: 23.43661 + (AP / 3600) where AP = 5028.796195 + 2.2108696 × T
+   - Annual drift: ~52 seconds per year
 
 ### Issue 4: Julian Day Calculation Precision
 
@@ -137,6 +143,17 @@ decimal_hour = (utc_dt.hour * 3600 + utc_dt.minute * 60 + utc_dt.second + utc_dt
 - Server-side calculations with caching
 - Uses modified Swiss Ephemeris
 - Custom ayanamsa calculations
+
+## Critical Discovery: Geocentric vs Topocentric for Vedic Astrology
+
+### Key Finding
+According to multiple sources and user experiences with Swiss Ephemeris:
+- **Traditional Vedic astrology uses GEOCENTRIC positions, NOT topocentric**
+- Many developers have encountered this issue: "I was using topocentric values for moon's longitude, but apparently vedic horoscope uses geocentric values"
+- Users report: "Just removing this flag and my moon degree is back on track"
+
+### Impact on Our Implementation
+Our current implementation doesn't explicitly set topocentric flags, which is correct. However, we should ensure we're not inadvertently using topocentric corrections.
 
 ## Research Findings from Similar Implementations
 
@@ -186,13 +203,13 @@ def _datetime_to_julian(self, dt: datetime) -> float:
 ```
 
 ```python
-# Fix 3: Add topocentric correction for Moon
-def calculate_moon_position(self, julian_day: float, latitude: float, longitude: float, altitude: float = 0) -> Dict:
-    # Set topocentric flag for Moon
-    swe.set_topo(longitude, latitude, altitude)
+# Fix 3: Ensure GEOCENTRIC calculation for Vedic (NO topocentric)
+def calculate_moon_position(self, julian_day: float, latitude: float, longitude: float) -> Dict:
+    # IMPORTANT: Do NOT use topocentric flag for traditional Vedic calculations
+    # Traditional Vedic astrology uses geocentric positions
     
-    # Calculate with topocentric correction
-    result = swe.calc(julian_day, swe.MOON, swe.FLG_TOPO | swe.FLG_SIDEREAL)
+    # Calculate with geocentric position (no FLG_TOPO flag)
+    result = swe.calc(julian_day, swe.MOON, swe.FLG_SIDEREAL)
     
     return {
         'longitude': result[0][0],
@@ -282,20 +299,28 @@ def test_calculation_precision():
 
 The primary issues appear to be:
 1. **Timezone handling** causing time calculation errors
-2. **Lack of topocentric corrections** for the Moon
+2. **Possible geocentric/topocentric mismatch** - we should ensure we're using geocentric for Vedic
 3. **Missing precision optimizations** in Julian Day calculation
 4. **No interpolation** for fast-moving bodies
+5. **Ayanamsa implementation differences** between Swiss Ephemeris and VedicAstroAPI
 
 The differences we see (0.02° - 0.45° for planets, 2.69° - 3.34° for Moon) are consistent with these issues. Implementing the recommended fixes should reduce errors to < 0.01° for planets and < 0.1° for the Moon.
 
 ## Next Steps
 
 1. Implement timezone preservation fix (Priority: High)
-2. Add topocentric Moon correction (Priority: High)
-3. Improve Julian Day precision (Priority: Medium)
+2. **Verify we're using geocentric calculations** for Vedic (Priority: High)
+3. Improve Julian Day precision (Priority: High)
 4. Add interpolation for Moon (Priority: Medium)
-5. Implement Delta T correction (Priority: Low)
-6. Add calculation validation (Priority: Low)
+5. Investigate ayanamsa differences (Priority: Medium)
+6. Implement Delta T correction (Priority: Low)
+7. Add calculation validation (Priority: Low)
+
+## Additional Investigation Needed
+
+1. **Contact VedicAstroAPI** to understand their exact calculation method
+2. **Test with known astronomical events** (eclipses, etc.) to verify accuracy
+3. **Compare ayanamsa values** between our implementation and VedicAstroAPI for specific dates
 
 ## References
 
