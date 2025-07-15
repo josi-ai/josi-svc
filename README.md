@@ -42,48 +42,221 @@ Astrow (formerly Josi) is a production-ready, multi-tenant astrology calculation
 - Python 3.12+
 - PostgreSQL 16
 - Redis 7
-- Docker & Docker Compose (optional)
+- Docker & Docker Compose
+- Poetry (Python package manager)
 
 ### Local Development Setup
 
-1. **Clone the repository**
+#### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/josi.git
-cd josi
+git clone https://github.com/josi-ai/josi-svc.git
+cd josi-svc
 ```
 
-2. **Install dependencies**
+#### 2. Install Poetry (if not already installed)
 ```bash
-pip install poetry
+# macOS/Linux
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Windows (PowerShell)
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+
+# Add Poetry to PATH (macOS/Linux)
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+#### 3. Install Python dependencies
+```bash
+# Install all dependencies
 poetry install
+
+# Activate the virtual environment
+poetry shell
 ```
 
-3. **Set up environment variables**
+#### 4. Set up environment variables
 ```bash
+# Copy the example environment file
 cp .env.example .env
+
 # Edit .env with your configuration
+# Required variables:
+# - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/astrow
+# - REDIS_URL=redis://localhost:6379/0
+# - SECRET_KEY=your-secret-key-here
+# - API_KEY_HEADER=X-API-Key
 ```
 
-4. **Start services with Docker Compose**
+#### 5. Start required services with Docker Compose
 ```bash
-# Start core services (PostgreSQL, Redis)
-docker-compose up -d
+# Start PostgreSQL and Redis
+docker-compose up -d db redis
 
-# Start vector database for AI features (optional)
+# Verify services are running
+docker-compose ps
+
+# Optional: Start Qdrant vector database for AI features
 docker-compose -f docker-compose.vector.yml up -d
 ```
 
-5. **Run database migrations**
+#### 6. Initialize the database
 ```bash
+# Run database migrations
 poetry run alembic upgrade head
+
+# Optional: Create initial test data
+poetry run python scripts/create_test_data.py
 ```
 
-6. **Start the development server**
+#### 7. Download astronomical data files
 ```bash
-poetry run uvicorn josi.main:app --reload
+# Swiss Ephemeris data files (required for calculations)
+mkdir -p /usr/share/swisseph
+cd /usr/share/swisseph
+wget https://www.astro.com/ftp/swisseph/ephe/sweph_18.tar.gz
+tar -xzf sweph_18.tar.gz
+cd -
 ```
 
-The API will be available at `http://localhost:8000`
+#### 8. Start the development server
+```bash
+# Method 1: Using uvicorn directly
+poetry run uvicorn src.josi.main:app --reload --port 8000
+
+# Method 2: Using the startup script
+poetry run python start_server.py
+
+# Method 3: With custom settings
+PYTHONPATH=src poetry run uvicorn josi.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at:
+- REST API: `http://localhost:8000`
+- API Documentation: `http://localhost:8000/docs`
+- Alternative Docs: `http://localhost:8000/redoc`
+- GraphQL Playground: `http://localhost:8000/graphql`
+
+### Verifying Installation
+
+#### 1. Check API health
+```bash
+curl http://localhost:8000/health
+# Expected: {"status": "healthy", "timestamp": "..."}
+```
+
+#### 2. Create a test API key (for development)
+```bash
+# Connect to PostgreSQL
+docker-compose exec db psql -U postgres -d astrow
+
+# Insert a test organization and API key
+INSERT INTO organization (organization_id, name, api_key) 
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Test Org', 'test-api-key');
+```
+
+#### 3. Test API with a simple request
+```bash
+# Create a person
+curl -X POST "http://localhost:8000/v1/persons" \
+  -H "X-API-Key: test-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "birth_date": "1990-01-01",
+    "birth_time": "12:00:00",
+    "birth_place": "New York, NY",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "timezone": "America/New_York"
+  }'
+```
+
+### Troubleshooting
+
+#### Port already in use
+```bash
+# Find and kill the process using port 8000
+lsof -i :8000
+kill -9 <PID>
+```
+
+#### Database connection issues
+```bash
+# Check if PostgreSQL is running
+docker-compose ps db
+
+# View PostgreSQL logs
+docker-compose logs db
+
+# Restart PostgreSQL
+docker-compose restart db
+```
+
+#### Redis connection issues
+```bash
+# Check if Redis is running
+docker-compose ps redis
+
+# Test Redis connection
+docker-compose exec redis redis-cli ping
+# Expected: PONG
+```
+
+#### Module import errors
+```bash
+# Ensure you're in the poetry shell
+poetry shell
+
+# Verify PYTHONPATH
+echo $PYTHONPATH
+
+# Set PYTHONPATH manually if needed
+export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
+```
+
+### Development Tips
+
+1. **Auto-reload**: The `--reload` flag enables hot-reloading when code changes
+2. **Debugging**: Set `DEBUG=True` in `.env` for detailed error messages
+3. **Database GUI**: Use pgAdmin or TablePlus to inspect the database
+4. **API Testing**: Use Postman, Insomnia, or the built-in Swagger UI
+5. **Logs**: Check `logs/` directory for application logs
+
+### Running Tests Locally
+```bash
+# Run all tests
+poetry run pytest
+
+# Run with coverage
+poetry run pytest --cov=josi --cov-report=html
+
+# Run specific test file
+poetry run pytest tests/unit/services/test_astrology_service.py
+
+# Run validation against VedicAstroAPI
+poetry run python scripts/validate_our_endpoints.py
+```
+
+### Quick Start with Docker (Alternative)
+
+If you prefer to run everything in Docker containers:
+
+```bash
+# Clone the repository
+git clone https://github.com/josi-ai/josi-svc.git
+cd josi-svc
+
+# Copy environment file
+cp .env.example .env
+
+# Build and start all services
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+# In a new terminal, run migrations
+docker-compose exec api poetry run alembic upgrade head
+
+# Access the API at http://localhost:8000
+```
 
 ## 📚 API Documentation
 
