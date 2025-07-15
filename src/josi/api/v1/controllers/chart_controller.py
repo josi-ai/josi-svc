@@ -15,8 +15,8 @@ router = APIRouter(prefix="/charts", tags=["charts"])
 @router.post("/calculate", response_model=ResponseModel)
 async def calculate_chart(
     person_id: UUID,
-    chart_service: ChartServiceDep = None,
-    person_service: PersonServiceDep = None,
+    chart_service: ChartServiceDep,
+    person_service: PersonServiceDep,
     systems: str = Query(default="vedic,western", description="Comma-separated list of systems"),
     house_system: HouseSystem = Query(default=HouseSystem.PLACIDUS),
     ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI),

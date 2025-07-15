@@ -3,6 +3,7 @@ Astrologer marketplace API endpoints.
 """
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
@@ -20,8 +21,8 @@ from josi.models.astrologer_model import (
     ReviewResponse,
     VerificationStatus
 )
-from josi.api.models.response_model import ResponseModel
-from josi.core.cache import cache
+from josi.api.response import ResponseModel
+from cache.cache_decorator import cache
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -91,8 +92,9 @@ async def register_as_astrologer(
 
 
 @router.get("/search", response_model=ResponseModel)
-@cache(expire=300, key_prefix="astrologer_search")
+@cache(expire=300, prefix="astrologer_search")
 async def search_astrologers(
+    db: AsyncSession = Depends(get_db),
     specializations: Optional[List[str]] = Query(default=None),
     languages: Optional[List[str]] = Query(default=None),
     min_rating: Optional[float] = Query(default=None, ge=0, le=5),
@@ -101,8 +103,7 @@ async def search_astrologers(
     sort_by: str = Query(default="rating", regex="^(rating|hourly_rate|total_consultations|joined_at)$"),
     sort_order: str = Query(default="desc", regex="^(asc|desc)$"),
     limit: int = Query(default=20, le=100),
-    offset: int = Query(default=0, ge=0),
-    db: AsyncSession = Depends(get_db)
+    offset: int = Query(default=0, ge=0)
 ) -> ResponseModel:
     """Search for astrologers with filters."""
     try:
@@ -207,7 +208,7 @@ async def search_astrologers(
 
 
 @router.get("/{astrologer_id}", response_model=ResponseModel)
-@cache(expire=600, key_prefix="astrologer_profile")
+@cache(expire=600, prefix="astrologer_profile")
 async def get_astrologer_profile(
     astrologer_id: UUID,
     db: AsyncSession = Depends(get_db)

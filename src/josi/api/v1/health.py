@@ -5,7 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 import asyncio
-import psutil
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+
 import platform
 from typing import Dict, Any
 
@@ -261,6 +266,15 @@ async def _check_ephemeris_health() -> Dict[str, Any]:
 
 def _get_system_metrics() -> Dict[str, Any]:
     """Get system performance metrics"""
+    if not PSUTIL_AVAILABLE:
+        return {
+            "platform": {
+                "system": platform.system(),
+                "python_version": platform.python_version()
+            },
+            "message": "psutil not available - limited metrics"
+        }
+    
     try:
         # CPU usage
         cpu_percent = psutil.cpu_percent(interval=1)
@@ -307,6 +321,9 @@ def _get_uptime_seconds() -> float:
     """Get application uptime in seconds"""
     try:
         import time
-        return time.time() - psutil.boot_time()
+        if PSUTIL_AVAILABLE:
+            return time.time() - psutil.boot_time()
+        else:
+            return 0.0  # Fallback when psutil not available
     except:
         return 0.0
