@@ -22,7 +22,7 @@ class TestGeocodingServiceFixed:
                 service = GeocodingService()
                 
                 # Verify geolocator and timezone finder were created
-                mock_nominatim.assert_called_once_with(user_agent="astrow")
+                mock_nominatim.assert_called_once_with(user_agent="josi")
                 mock_tf.assert_called_once()
                 
                 assert hasattr(service, 'geolocator')

@@ -12,13 +12,13 @@ import re
 
 def load_validation_results():
     """Load the celebrity validation results from the API."""
-    results_path = Path("/Users/govind/Developer/astrow/celebrity_validation_results.json")
+    results_path = Path("celebrity_validation_results.json")
     with open(results_path, 'r') as f:
         return json.load(f)
 
 def load_accuracy_analysis():
     """Load the accuracy analysis results."""
-    analysis_path = Path("/Users/govind/Developer/astrow/accuracy_analysis_report.json")
+    analysis_path = Path("accuracy_analysis_report.json")
     with open(analysis_path, 'r') as f:
         return json.load(f)
 

@@ -1,1 +1,1 @@
-"""Test fixtures for Astrow integration tests."""
+"""Test fixtures for Josi integration tests."""

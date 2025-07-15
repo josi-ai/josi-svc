@@ -1,1 +1,1 @@
-"""Test package for Astrow API."""
+"""Test package for Josi API."""

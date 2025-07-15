@@ -102,7 +102,7 @@ def calculate_orb(calculated: float, expected: float) -> float:
 def analyze_accuracy():
     """Analyze the accuracy of calculated positions."""
     # Load validation results
-    results_path = Path("/Users/govind/Developer/astrow/celebrity_validation_results.json")
+    results_path = Path("celebrity_validation_results.json")
     with open(results_path, 'r') as f:
         results = json.load(f)
     

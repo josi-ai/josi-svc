@@ -33,7 +33,7 @@ from josi.repositories.organization_repository import OrganizationRepository
 def test_settings():
     """Override settings for testing."""
     return Settings(
-        database_url="postgresql+asyncpg://astrow:astrow@localhost:5433/astrow_test",
+        database_url="postgresql+asyncpg://josi:josi@localhost:5433/josi_test",
         redis_url="redis://localhost:6380/1",  # Use different Redis DB for tests
         environment="test",
         debug=True,

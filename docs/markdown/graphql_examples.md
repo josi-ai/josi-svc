@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Astrow API now supports GraphQL at the `/graphql` endpoint. You can use the interactive GraphQL playground by visiting `/graphql` in your browser.
+The Josi API now supports GraphQL at the `/graphql` endpoint. You can use the interactive GraphQL playground by visiting `/graphql` in your browser.
 
 ## Authentication
 

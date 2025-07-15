@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "astrow"
+name = "josi"
 version = "0.1.0"
 description = "A comprehensive astrology calculation API"
 authors = ["Govindarajan Panneerselvam <imgovind@live.com>"]

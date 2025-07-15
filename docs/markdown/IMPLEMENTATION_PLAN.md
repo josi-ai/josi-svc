@@ -1,4 +1,4 @@
-# Astrow API Implementation Plan
+# Josi API Implementation Plan
 
 ## Phase 1: Database & Architecture Refactoring
 

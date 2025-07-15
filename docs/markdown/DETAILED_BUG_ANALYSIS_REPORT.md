@@ -9,7 +9,7 @@
 
 ## 📋 Executive Summary
 
-Three critical bugs are preventing chart calculations in the Astrow API:
+Three critical bugs are preventing chart calculations in the Josi API:
 
 1. **Missing Method Error** - `set_ayanamsa` method not implemented
 2. **Incorrect Chart Type** - Solar return calculated instead of natal chart  
@@ -371,7 +371,7 @@ All three bugs are **straightforward to fix** with clear solutions:
 
 **Total estimated fix time: 30-45 minutes**
 
-The bugs are not architectural issues but simple implementation oversights. Once fixed, the Astrow API should achieve **100% success rate** for celebrity chart calculations.
+The bugs are not architectural issues but simple implementation oversights. Once fixed, the Josi API should achieve **100% success rate** for celebrity chart calculations.
 
 ### Next Steps
 

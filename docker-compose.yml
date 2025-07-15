@@ -2,16 +2,16 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: astrow
-      POSTGRES_PASSWORD: astrow
-      POSTGRES_DB: astrow
+      POSTGRES_USER: josi
+      POSTGRES_PASSWORD: josi
+      POSTGRES_DB: josi
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U astrow"]
+      test: ["CMD-SHELL", "pg_isready -U josi"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -44,7 +44,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://astrow:astrow@db:5432/astrow
+      DATABASE_URL: postgresql://josi:josi@db:5432/josi
       REDIS_URL: redis://redis:6379/0
       AUTO_DB_MIGRATION: "True"
     depends_on:

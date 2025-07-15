@@ -1,3 +1,3 @@
 """
-Core module for Astrow application.
+Core module for Josi application.
 """
