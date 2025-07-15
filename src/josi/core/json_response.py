@@ -14,6 +14,14 @@ from fastapi.encoders import jsonable_encoder
 class CustomJSONResponse(JSONResponse):
     """Custom JSON response that handles Decimal and other special types."""
     
+    # Define custom encoder as a dictionary mapping types to converter functions
+    custom_encoder = {
+        Decimal: float,
+        datetime: lambda dt: dt.isoformat(),
+        date: lambda d: d.isoformat(),
+        UUID: str,
+    }
+    
     def render(self, content: Any) -> bytes:
         """Render content with custom JSON encoder."""
         # Use FastAPI's jsonable_encoder which handles Pydantic models
@@ -26,19 +34,3 @@ class CustomJSONResponse(JSONResponse):
             indent=None,
             separators=(",", ":"),
         ).encode("utf-8")
-    
-    @staticmethod
-    def custom_encoder(obj: Any) -> Any:
-        """Custom encoder for special types."""
-        if isinstance(obj, Decimal):
-            # Convert Decimal to float for JSON serialization
-            return float(obj)
-        elif isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        elif isinstance(obj, UUID):
-            return str(obj)
-        elif hasattr(obj, "__dict__"):
-            return obj.__dict__
-        else:
-            # Let FastAPI's default encoder handle other types
-            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")

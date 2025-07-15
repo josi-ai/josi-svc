@@ -2,6 +2,66 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: Always Use Docker
+
+**ALWAYS run the entire application using Docker Compose with the `redock` alias.** Never attempt to run the server directly with uvicorn or python commands. The correct way to start the application is:
+
+```bash
+redock
+```
+
+This ensures all services (database, Redis, API server) are running with the correct configuration.
+
+## Project Folder Structure
+
+**IMPORTANT: Keep the root directory clean!** All generated files should be placed in their appropriate directories:
+
+### Directory Organization
+
+```
+/josi-svc/                      # Project root - keep minimal
+├── logs/                       # ALL log files go here
+│   └── *.log                   # server.log, api.log, etc.
+├── reports/                    # ALL JSON reports and analysis results
+│   └── *.json                  # coverage_report.json, validation_results.json, etc.
+├── scripts/                    # Utility and debugging scripts
+│   ├── utilities/              # Test coverage, analysis tools
+│   └── *.py                    # Debug scripts, one-off utilities
+├── docs/                       # Documentation
+│   ├── conversations/          # Claude chat exports (2025-*.txt files)
+│   ├── external_apis/          # External API docs (Postman collections, etc.)
+│   └── markdown/               # Project documentation
+├── test_data/                  # Test data and validation results
+│   └── vedicastro_api/
+│       └── validation_results/ # API validation outputs
+├── src/                        # Source code
+├── tests/                      # Test files
+└── (root files)                # Only essential configs: pyproject.toml, docker-compose.yml, etc.
+```
+
+### File Placement Rules
+
+1. **Log Files**: ANY file ending in `.log` → Move to `logs/`
+2. **Reports**: JSON reports, analysis results → Move to `reports/`
+3. **Scripts**: Python utilities, debug scripts → Move to `scripts/` or `scripts/utilities/`
+4. **Chat Exports**: Claude conversation files (2025-*.txt) → Move to `docs/conversations/`
+5. **External APIs**: Postman collections, API docs → Move to `docs/external_apis/`
+6. **Test Outputs**: Validation results → Stay in `test_data/vedicastro_api/validation_results/`
+
+### When Running Commands
+
+- Server logs should be redirected: `poetry run uvicorn ... > logs/server.log 2>&1`
+- Test outputs should use appropriate paths: `--output reports/test_results.json`
+- Validation scripts should save to: `test_data/vedicastro_api/validation_results/`
+
+### DO NOT Place in Root
+
+- Log files (*.log)
+- Temporary files (*.tmp, *.temp)
+- Generated reports (*.json)
+- Debug outputs
+- Chat conversation exports
+
 ## Documentation Location
 
 All project documentation has been organized in the `docs/markdown/` directory. When looking for:

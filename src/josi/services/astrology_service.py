@@ -55,16 +55,21 @@ class AstrologyCalculator:
         self.current_ayanamsa = ayanamsa_name
     
     def _datetime_to_julian(self, dt: datetime) -> float:
-        """Convert datetime to Julian day number."""
+        """Convert datetime to Julian day number with improved precision."""
         # Convert to UTC if the datetime has timezone info
         if dt.tzinfo is not None:
             utc_dt = dt.astimezone(pytz.UTC)
-            return swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, 
-                             utc_dt.hour + utc_dt.minute/60.0 + utc_dt.second/3600.0)
         else:
             # Assume UTC if no timezone info
-            return swe.julday(dt.year, dt.month, dt.day, 
-                             dt.hour + dt.minute/60.0 + dt.second/3600.0)
+            utc_dt = dt
+        
+        # Higher precision time calculation
+        decimal_hour = (utc_dt.hour * 3600.0 + 
+                       utc_dt.minute * 60.0 + 
+                       utc_dt.second + 
+                       utc_dt.microsecond / 1e6) / 3600.0
+        
+        return swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, decimal_hour)
     
     def _get_ayanamsa(self, julian_day: float, system: str = None) -> float:
         """Get ayanamsa value for Vedic calculations."""
@@ -74,9 +79,13 @@ class AstrologyCalculator:
         
         return swe.get_ayanamsa(julian_day)
     
-    def _calculate_houses(self, julian_day: float, latitude: float, longitude: float) -> List[float]:
+    def _calculate_houses(self, julian_day: float, latitude: float, longitude: float, sidereal: bool = False) -> List[float]:
         """Calculate house cusps."""
-        houses, ascmc = swe.houses(julian_day, latitude, longitude, b'P')  # Placidus
+        # Use sidereal flag for Vedic calculations
+        if sidereal:
+            houses, ascmc = swe.houses_ex(julian_day, latitude, longitude, b'P', swe.FLG_SIDEREAL)
+        else:
+            houses, ascmc = swe.houses(julian_day, latitude, longitude, b'P')  # Placidus
         return houses
     
     def _get_nakshatra_pada(self, longitude: float) -> Tuple[str, int]:
@@ -90,11 +99,17 @@ class AstrologyCalculator:
         sign_index = int(longitude / 30)
         return self.SIGNS[sign_index]
     
-    def calculate_vedic_chart(self, dt: datetime, latitude: float, longitude: float) -> Dict:
+    def calculate_vedic_chart(self, dt: datetime, latitude: float, longitude: float, timezone: str = None) -> Dict:
         """Calculate Vedic astrology chart."""
+        # Ensure datetime is timezone-aware
+        if dt.tzinfo is None and timezone:
+            import pytz
+            tz = pytz.timezone(timezone)
+            dt = tz.localize(dt)
+        
         julian_day = self._datetime_to_julian(dt)
         ayanamsa = self._get_ayanamsa(julian_day)
-        houses = self._calculate_houses(julian_day, latitude, longitude)
+        houses = self._calculate_houses(julian_day, latitude, longitude, sidereal=True)
         
         planet_positions = {}
         
@@ -109,22 +124,22 @@ class AstrologyCalculator:
                     'speed': -planet_positions['Rahu']['speed']
                 }
             else:
-                result = swe.calc(julian_day, planet_id)
-                tropical_longitude = result[0][0]
+                # Use sidereal flag for Vedic calculations to get direct sidereal positions
+                result = swe.calc(julian_day, planet_id, swe.FLG_SIDEREAL)
                 planet_data = {
                     'longitude': result[0][0],
                     'latitude': result[0][1],
                     'speed': result[0][3]
                 }
             
-            # Convert to sidereal for Vedic
-            sidereal_longitude = (planet_data['longitude'] - ayanamsa) % 360
+            # Already have sidereal longitude from FLG_SIDEREAL flag
+            sidereal_longitude = planet_data['longitude']
             
             # Determine house
             house = 1
             for i in range(12):
-                house_start = (houses[i] - ayanamsa) % 360
-                house_end = (houses[(i + 1) % 12] - ayanamsa) % 360
+                house_start = houses[i]
+                house_end = houses[(i + 1) % 12]
                 
                 if house_start <= sidereal_longitude < house_end:
                     house = i + 1
@@ -147,8 +162,8 @@ class AstrologyCalculator:
                 'pada': pada
             }
         
-        # Calculate ascendant
-        asc_longitude = (houses[0] - ayanamsa) % 360
+        # Calculate ascendant - houses are already sidereal
+        asc_longitude = houses[0]
         nakshatra, pada = self._get_nakshatra_pada(asc_longitude)
         sign = self._get_sign(asc_longitude)
         
@@ -161,7 +176,7 @@ class AstrologyCalculator:
                 'nakshatra': nakshatra,
                 'pada': pada
             },
-            'houses': [(h - ayanamsa) % 360 for h in houses],
+            'houses': houses,  # Already sidereal
             'planets': planet_positions
         }
     

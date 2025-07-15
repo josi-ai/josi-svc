@@ -1,0 +1,65 @@
+# Logs
+logs/
+*.log
+
+# Reports
+reports/
+*.json
+
+# Test data results
+test_data/vedicastro_api/validation_results/
+test_data/vedicastro_api/detailed_reports/
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/conversations/
+*.md
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# CI/CD
+.github/
+cloudbuild.yaml
+k8s/
+
+# Development
+scripts/
+tests/
+pytest.ini
+.env
+.env.local
