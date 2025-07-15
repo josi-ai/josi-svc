@@ -268,3 +268,23 @@ def validate_coordinates(latitude: float, longitude: float) -> tuple:
     if not -180 <= longitude <= 180:
         raise ValueError("Longitude must be between -180 and 180")
     return latitude, longitude
+
+
+# Standalone functions for backward compatibility
+_security_manager = SecurityManager()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """Create JWT access token (standalone function)"""
+    return _security_manager.create_access_token(data, expires_delta)
+
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt"""
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
