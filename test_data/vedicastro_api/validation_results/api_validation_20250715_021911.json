@@ -1,0 +1,11 @@
+{
+  "validation_date": "2025-07-15T06:19:11.607503",
+  "api_base_url": "http://localhost:8000/api/v1",
+  "summary": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "accuracy_percentage": 0
+  },
+  "endpoint_results": {}
+}

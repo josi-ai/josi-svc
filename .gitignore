@@ -205,3 +205,35 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific
+logs/
+reports/
+*.log
+server_*.log
+redock.log
+api_server.log
+coverage/
+
+# Docker volumes
+postgres_data/
+redis_data/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Claude conversation files
+2025-*.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

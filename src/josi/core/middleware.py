@@ -34,12 +34,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Skip rate limiting for health checks and auth endpoints
-        if request.url.path in ["/health", "/health/detailed", "/docs", "/openapi.json"]:
+        path = str(request.url.path) if hasattr(request.url, 'path') else request.url.path
+        if path in ["/health", "/health/detailed", "/docs", "/openapi.json"]:
             return await call_next(request)
         
         # Determine endpoint type for rate limiting
         endpoint_type = "general"
-        if "/charts/" in request.url.path and request.method == "POST":
+        if "/charts/" in path and request.method == "POST":
             endpoint_type = "calculation"
         
         # Check rate limit

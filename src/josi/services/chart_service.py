@@ -116,11 +116,12 @@ class ChartService:
         # Set ayanamsa
         self.astrology_calculator.set_ayanamsa(ayanamsa.value)
         
-        # Calculate base chart
+        # Calculate base chart with timezone
         chart_data = self.astrology_calculator.calculate_vedic_chart(
             person.time_of_birth,
             float(person.latitude),
-            float(person.longitude)
+            float(person.longitude),
+            person.timezone
         )
         
         # Add panchang

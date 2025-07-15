@@ -45,11 +45,17 @@ async def lifespan(app: FastAPI):
     if getattr(settings, 'auto_db_migration', False):
         logger.info("Running database migrations...")
         try:
+            # Use sys.executable to run alembic in the same Python environment
+            import sys
+            import os
+            # Get the project root directory (parent of src)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
             result = subprocess.run(
-                ["poetry", "run", "alembic", "upgrade", "head"],
+                [sys.executable, "-m", "alembic", "upgrade", "head"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
+                cwd=project_root  # Run from project root where alembic.ini is located
             )
             logger.info("Database migrations completed successfully")
         except subprocess.CalledProcessError as e:
