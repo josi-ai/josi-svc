@@ -12,7 +12,7 @@ import os
 
 # Import models
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from josi.models.chart_model import AstrologyChart, AstrologySystem, HouseSystem, Ayanamsa
 from josi.models.base import SQLBaseModel
 from sqlalchemy import text
@@ -22,7 +22,7 @@ async def test_minimal_chart_creation():
     """Test creating a minimal chart record to isolate the error."""
     
     # Database connection
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/astrow")
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/josi")
     
     engine = create_async_engine(DATABASE_URL, echo=True)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -93,7 +93,7 @@ async def test_minimal_chart_creation():
 async def test_check_functions():
     """Check for any database functions that might be causing the error."""
     
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/astrow")
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost/josi")
     engine = create_async_engine(DATABASE_URL)
     
     async with engine.begin() as conn:

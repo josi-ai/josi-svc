@@ -1,4 +1,4 @@
-# Astrow - Professional Astrology Calculation API
+# Josi - Professional Astrology Calculation API
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com)
@@ -6,7 +6,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/yourusername/josi/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Astrow (formerly Josi) is a production-ready, multi-tenant astrology calculation API that supports multiple astrological systems with enterprise-grade security, performance, and scalability. Built with FastAPI, it provides both REST and GraphQL interfaces for comprehensive astrological calculations with AI-powered interpretations.
+Josi is a production-ready, multi-tenant astrology calculation API that supports multiple astrological systems with enterprise-grade security, performance, and scalability. Built with FastAPI, it provides both REST and GraphQL interfaces for comprehensive astrological calculations with AI-powered interpretations.
 
 ## 🌟 Features
 
@@ -81,7 +81,7 @@ cp .env.example .env
 
 # Edit .env with your configuration
 # Required variables:
-# - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/astrow
+# - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/josi
 # - REDIS_URL=redis://localhost:6379/0
 # - SECRET_KEY=your-secret-key-here
 # - API_KEY_HEADER=X-API-Key
@@ -147,7 +147,7 @@ curl http://localhost:8000/health
 #### 2. Create a test API key (for development)
 ```bash
 # Connect to PostgreSQL
-docker-compose exec db psql -U postgres -d astrow
+docker-compose exec db psql -U postgres -d josi
 
 # Insert a test organization and API key
 INSERT INTO organization (organization_id, name, api_key) 
@@ -499,7 +499,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 🧪 Testing & Validation
 
-Astrow uses a comprehensive testing strategy with real astronomical data:
+Josi uses a comprehensive testing strategy with real astronomical data:
 
 ### Test Coverage
 - **90%+ code coverage** with 500+ tests

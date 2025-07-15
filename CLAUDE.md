@@ -19,7 +19,7 @@ Please check the `docs/markdown/` folder first. Key documents include:
 
 ## Project Overview
 
-Astrow is a comprehensive astrology calculation API that supports multiple astrological systems (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) with both REST and GraphQL interfaces. It uses FastAPI, SQLModel, and PostgreSQL with a multi-tenant architecture.
+Josi is a comprehensive astrology calculation API that supports multiple astrological systems (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) with both REST and GraphQL interfaces. It uses FastAPI, SQLModel, and PostgreSQL with a multi-tenant architecture.
 
 ## Development Commands
 

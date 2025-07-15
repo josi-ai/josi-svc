@@ -24,7 +24,8 @@ from tests.fixtures.celebrity_birth_data import get_celebrity_test_data
 from scripts.analyze_chart_accuracy import VERIFIED_POSITIONS, ZODIAC_SIGNS
 
 # Initialize Swiss Ephemeris
-swe.set_ephe_path('/Users/govind/Developer/astrow/src/josi/services/ephemeris_data')
+import os
+swe.set_ephe_path(os.path.join(os.path.dirname(__file__), '..', 'src', 'josi', 'services', 'ephemeris_data'))
 
 class PositionVerifier:
     """Verify astrological positions using Swiss Ephemeris and online sources."""

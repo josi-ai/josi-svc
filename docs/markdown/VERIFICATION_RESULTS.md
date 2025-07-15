@@ -100,4 +100,4 @@ Ascendant: 318.0510° = 18.05° Aquarius ✓
 4. ⏳ Need to test remaining endpoints
 5. ⏳ Create comprehensive test suite
 
-The Astrow API calculations are now astronomically accurate!
+The Josi API calculations are now astronomically accurate!

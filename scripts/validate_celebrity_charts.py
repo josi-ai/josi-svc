@@ -2,7 +2,7 @@
 """
 Standalone script to validate celebrity chart calculations.
 
-This script can be run independently to test the Astrow API with celebrity data.
+This script can be run independently to test the Josi API with celebrity data.
 """
 
 import asyncio
@@ -20,7 +20,7 @@ from tests.fixtures.celebrity_birth_data import get_celebrity_test_data, get_tes
 
 
 class CelebrityChartValidator:
-    """Validate celebrity charts against the Astrow API."""
+    """Validate celebrity charts against the Josi API."""
     
     def __init__(self, base_url: str = "http://localhost:8000", api_key: str = "test-api-key"):
         self.base_url = base_url
@@ -205,7 +205,7 @@ async def main():
     """Main entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Validate celebrity charts against Astrow API")
+    parser = argparse.ArgumentParser(description="Validate celebrity charts against Josi API")
     parser.add_argument("--url", default="http://localhost:8000", help="API base URL")
     parser.add_argument("--api-key", default="test-api-key", help="API key")
     parser.add_argument("--celebrity", help="Test specific celebrity by name")

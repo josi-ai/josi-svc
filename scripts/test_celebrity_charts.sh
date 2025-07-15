@@ -17,7 +17,7 @@ if ! docker-compose -f docker-compose.test.yml ps | grep -q "test-db.*Up"; then
 fi
 
 # Set test environment variables
-export DATABASE_URL="postgresql+asyncpg://astrow:astrow@localhost:5433/astrow_test"
+export DATABASE_URL="postgresql+asyncpg://josi:josi@localhost:5433/josi_test"
 export REDIS_URL="redis://localhost:6380/1"
 export ENVIRONMENT="test"
 export AUTO_DB_MIGRATION="true"

@@ -28,7 +28,7 @@ class TestGeocodingServiceSimple:
             with patch('josi.services.geocoding_service.TimezoneFinder') as mock_tf:
                 service = GeocodingService()
                 
-                mock_nominatim.assert_called_once_with(user_agent="astrow")
+                mock_nominatim.assert_called_once_with(user_agent="josi")
                 mock_tf.assert_called_once()
                 assert hasattr(service, 'geolocator')
                 assert hasattr(service, 'tf')

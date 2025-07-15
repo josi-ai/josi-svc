@@ -11,7 +11,7 @@
 
 ### Overall Accuracy: 17.1% (Poor)
 
-The Astrow API shows significant accuracy issues in planetary calculations:
+The Josi API shows significant accuracy issues in planetary calculations:
 - **Sun & Moon:** 100% accurate (perfect match)
 - **Ascendant:** 0% accurate (consistently wrong by 1-3 signs)
 - **Mercury:** Major errors (average 15° off)
@@ -194,7 +194,7 @@ Albert Einstein's chart shows 98.5% accuracy, proving the calculation engine CAN
 
 ## 📋 Conclusion
 
-The Astrow API demonstrates **excellent potential** with perfect Sun/Moon calculations but requires critical fixes for:
+The Josi API demonstrates **excellent potential** with perfect Sun/Moon calculations but requires critical fixes for:
 1. **Ascendant calculations** (affecting all charts)
 2. **Mercury positions** (retrograde handling)
 3. **Time zone conversions** (international accuracy)

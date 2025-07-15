@@ -1,6 +1,6 @@
-# Astrow API Endpoint Inventory
+# Josi API Endpoint Inventory
 
-This document provides a comprehensive inventory of all API endpoints available in the Astrow astrology calculation API. The API supports both REST and GraphQL interfaces.
+This document provides a comprehensive inventory of all API endpoints available in the Josi astrology calculation API. The API supports both REST and GraphQL interfaces.
 
 ## Base URL
 - REST API: `/api/v1`

@@ -422,7 +422,7 @@ async def main():
         await validator.close()
 
 if __name__ == "__main__":
-    print("=== Astrow API Validation ===")
+    print("=== Josi API Validation ===")
     print("This script validates our API endpoints against VedicAstroAPI reference data")
     print("\nPrerequisites:")
     print("1. Run collect_vedicastro_test_data.py to fetch reference data")

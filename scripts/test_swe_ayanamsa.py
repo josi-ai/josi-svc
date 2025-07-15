@@ -4,7 +4,8 @@ Test swe.get_ayanamsa function signature.
 """
 
 import sys
-sys.path.append('/Users/govind/Developer/astrow/src')
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 import swisseph as swe
 

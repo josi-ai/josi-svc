@@ -1,5 +1,5 @@
 """
-GraphQL module for Astrow application.
+GraphQL module for Josi application.
 """
 from .router import graphql_router, schema
 
