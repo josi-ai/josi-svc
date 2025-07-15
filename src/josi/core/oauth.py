@@ -10,7 +10,7 @@ import logging
 
 from josi.core.config import settings
 from josi.core.security import create_access_token, hash_password
-from josi.core.database import get_session
+from josi.core.database import get_db
 from josi.models.organization_model import Organization
 
 logger = logging.getLogger(__name__)
@@ -198,6 +198,6 @@ class OAuthService:
         }
 
 
-async def get_oauth_service(db: Session = Depends(get_session)) -> OAuthService:
+async def get_oauth_service(db: Session = Depends(get_db)) -> OAuthService:
     """Dependency to get OAuth service."""
     return OAuthService(db)
