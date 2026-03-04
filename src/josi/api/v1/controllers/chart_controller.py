@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from uuid import UUID
+import pytz
 
 from josi.api.v1.dependencies import (
     ChartServiceDep, PersonServiceDep,
@@ -112,7 +113,7 @@ async def calculate_chart_stateless(
     request: CalculateChartRequest,
     calculator: AstrologyCalculatorDep,
     geocoding: GeocodingServiceDep,
-    _org: OrganizationDep,
+    _org: OrganizationDep,  # enforces X-API-Key authentication
 ) -> ResponseModel:
     """
     Calculate a Vedic astrology chart from birth details (stateless).
@@ -123,8 +124,6 @@ async def calculate_chart_stateless(
     Provide either place_of_birth (geocoded automatically) or latitude + longitude.
     If both are given, lat/lng takes priority.
     """
-    import pytz
-
     # Resolve coordinates
     lat = request.latitude
     lng = request.longitude
@@ -141,7 +140,7 @@ async def calculate_chart_stateless(
         # Geocode place name
         try:
             lat, lng, resolved_tz = geocoding.get_coordinates_and_timezone(
-                city=request.place_of_birth
+                request.place_of_birth
             )
             if not tz:
                 tz = resolved_tz
@@ -149,6 +148,11 @@ async def calculate_chart_stateless(
             raise HTTPException(
                 status_code=400,
                 detail=f"Could not geocode location: {str(e)}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail="Geocoding service unavailable, please retry",
             )
 
     # Build timezone-aware datetime
@@ -164,11 +168,13 @@ async def calculate_chart_stateless(
         calculator.set_ayanamsa(request.ayanamsa.value)
         chart_data = calculator.calculate_vedic_chart(
             dt=birth_dt,
-            latitude=float(lat),
-            longitude=float(lng),
+            latitude=lat,
+            longitude=lng,
             timezone=tz,
             house_system=request.house_system.value,
         )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Chart calculation failed: {str(e)}"
