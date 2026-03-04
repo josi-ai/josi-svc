@@ -2,283 +2,151 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Product Vision
+
+Josi is a **full-stack, multi-tradition astrology platform** — both a direct-to-consumer product and a B2B API. It rests on three pillars:
+
+1. **Calculation Engine**: High-precision astronomical calculations across six traditions (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) — all treated as equally important. Built on Swiss Ephemeris (pyswisseph) and Skyfield. The goal is to be the most comprehensive multi-tradition calculation engine available.
+
+2. **AI-Powered Guidance** (central differentiator): LLM-powered interpretations (GPT-4/Claude) that transform chart data into personalized guidance. Five interpretation styles. "Neural Pathway Questions" use chart placements to generate psychological self-reflection prompts that build on previous responses. Vector similarity (Qdrant) finds charts with similar patterns.
+
+3. **Astrologer Marketplace** (near-term priority): Connects users with verified professional astrologers for video/chat/email/voice consultations. Includes booking, payments (Stripe), multi-dimensional reviews, and AI-generated post-consultation summaries.
+
+**Business model**: B2B API-as-a-Service (multi-tenant, API key auth) + B2C subscription tiers (Free/Explorer/Mystic/Master) with chart, AI interpretation, and consultation quotas.
+
+**Target audience**: Global users across all traditions, Indian diaspora and Tamil-speaking communities, professional astrologers, and developers needing a calculation API.
+
+For full detail see `docs/markdown/PRODUCT_VISION.md`.
+
 ## IMPORTANT: Always Use Docker
 
-**ALWAYS run the entire application using Docker Compose with the `redock` alias.** Never attempt to run the server directly with uvicorn or python commands. The correct way to start the application is:
+**ALWAYS run the application using Docker Compose with the `redock` alias.** Never run the server directly with uvicorn or python commands.
 
 ```bash
-redock
+redock                    # Start all services (db, redis, api) with rebuild
+docker-compose up -d      # Start without rebuild
+docker-compose down        # Stop all services
 ```
 
-This ensures all services (database, Redis, API server) are running with the correct configuration.
-
-## Project Folder Structure
-
-**IMPORTANT: Keep the root directory clean!** All generated files should be placed in their appropriate directories:
-
-### Directory Organization
-
-```
-/josi-svc/                      # Project root - keep minimal
-├── logs/                       # ALL log files go here
-│   └── *.log                   # server.log, api.log, etc.
-├── reports/                    # ALL JSON reports and analysis results
-│   └── *.json                  # coverage_report.json, validation_results.json, etc.
-├── scripts/                    # Utility and debugging scripts
-│   ├── utilities/              # Test coverage, analysis tools
-│   └── *.py                    # Debug scripts, one-off utilities
-├── docs/                       # Documentation
-│   ├── conversations/          # Claude chat exports (2025-*.txt files)
-│   ├── external_apis/          # External API docs (Postman collections, etc.)
-│   └── markdown/               # Project documentation
-├── test_data/                  # Test data and validation results
-│   └── vedicastro_api/
-│       └── validation_results/ # API validation outputs
-├── src/                        # Source code
-├── tests/                      # Test files
-└── (root files)                # Only essential configs: pyproject.toml, docker-compose.yml, etc.
-```
-
-### File Placement Rules
-
-1. **Log Files**: ANY file ending in `.log` → Move to `logs/`
-2. **Reports**: JSON reports, analysis results → Move to `reports/`
-3. **Scripts**: Python utilities, debug scripts → Move to `scripts/` or `scripts/utilities/`
-4. **Chat Exports**: Claude conversation files (2025-*.txt) → Move to `docs/conversations/`
-5. **External APIs**: Postman collections, API docs → Move to `docs/external_apis/`
-6. **Test Outputs**: Validation results → Stay in `test_data/vedicastro_api/validation_results/`
-
-### When Running Commands
-
-- Server logs should be redirected: `poetry run uvicorn ... > logs/server.log 2>&1`
-- Test outputs should use appropriate paths: `--output reports/test_results.json`
-- Validation scripts should save to: `test_data/vedicastro_api/validation_results/`
-
-### DO NOT Place in Root
-
-- Log files (*.log)
-- Temporary files (*.tmp, *.temp)
-- Generated reports (*.json)
-- Debug outputs
-- Chat conversation exports
-
-## Documentation Location
-
-All project documentation has been organized in the `docs/markdown/` directory. When looking for:
-- Implementation plans
-- Test strategies
-- API documentation
-- Verification reports
-- Configuration guides
-
-Please check the `docs/markdown/` folder first. Key documents include:
-- `VEDICASTROAPI_TEST_CASES.md` - Comprehensive test cases for API validation
-- `TEST_DATA_COLLECTION_PLAN.md` - Strategy for collecting astronomical test data
-- `IMPLEMENTATION_PLAN_AI_MARKETPLACE.md` - AI and marketplace feature plans
-- `CORRECTNESS_VERIFICATION_PLAN.md` - Accuracy verification strategies
-
-## Project Overview
-
-Josi is a comprehensive astrology calculation API that supports multiple astrological systems (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) with both REST and GraphQL interfaces. It uses FastAPI, SQLModel, and PostgreSQL with a multi-tenant architecture.
+The API runs at `http://localhost:8000`. Docs at `/docs`, GraphQL at `/graphql`.
 
 ## Development Commands
 
-### Local Development
 ```bash
 # Install dependencies
 poetry install
 
-# Start PostgreSQL and Redis services
-docker-compose up -d db redis
-
-# Run database migrations
-poetry run alembic upgrade head
-
-# Start development server
-poetry run uvicorn josi.main:app --reload
-
-# Or use the alias if available
-poetry start
-```
-
-### Running Tests
-```bash
 # Run all tests
 poetry run pytest
 
-# Run specific test file
-poetry run pytest tests/test_person_service.py
+# Run a single test file
+poetry run pytest tests/unit/services/test_astrology_service.py
 
-# Run with coverage
-poetry run pytest --cov=josi
-```
+# Run a specific test by name
+poetry run pytest -k "test_vedic_chart" -v
 
-### Code Quality
-```bash
-# Format code
+# Format / lint / type-check
 poetry run black src/
-
-# Lint code
 poetry run flake8 src/
-
-# Type checking
 poetry run mypy src/
-```
 
-### Database Operations
-```bash
-# Create new migration
-poetry run alembic revision --autogenerate -m "Description of changes"
-
-# Apply migrations
+# Database migrations (NEVER hand-write migrations - always autogenerate)
+poetry run alembic revision --autogenerate -m "description"
 poetry run alembic upgrade head
-
-# Downgrade one revision
 poetry run alembic downgrade -1
 
-# Show migration history
-poetry run alembic history
+# CRUD scaffolding for a new model
+poetry run generate-crud josi.models.{file}.{Model} --module {name}
+# Example: poetry run generate-crud josi.models.person_model.Person --module person
 ```
 
-### CRUD Generation
-```bash
-# Generate CRUD operations for a model
-poetry run generate-crud josi.models.{model_file}.{ModelClass} --module {module_name}
+## Keep the Root Directory Clean
 
-# Example
-poetry run generate-crud josi.models.person_model.Person --module person
+Generated files go in their proper directories:
+- `logs/` for `.log` files
+- `reports/` for JSON reports and analysis results
+- `scripts/` for utility/debug scripts
+- `docs/markdown/` for project documentation
+- `test_data/` for test data and validation results
 
-# Overwrite existing files
-poetry run generate-crud josi.models.chart_model.AstrologyChart --module chart --overwrite
-```
+Do NOT place log files, temp files, generated reports, or debug outputs in the project root.
 
 ## Architecture
 
-### Project Structure
-The codebase follows a layered architecture with clear separation of concerns:
+Josi is an astrology calculation API (Vedic, Western, Chinese, Hellenistic, Mayan, Celtic) built with FastAPI, SQLModel, and PostgreSQL. Multi-tenant with REST + GraphQL interfaces.
 
-1. **Models Layer** (`src/josi/models/`)
-   - SQLModel entities with `{table}_id` primary key naming convention
-   - Base models: `SQLBaseModel` (timestamps, soft delete) and `TenantBaseModel` (adds organization_id)
-   - Strawberry GraphQL schemas integrated directly in model files
-   - All models use UUID primary keys with server-side generation
+### Request Flow
 
-2. **API Layer** (`src/josi/api/`)
-   - REST endpoints organized by version (v1 consolidated)
-   - Controllers handle HTTP requests/responses
-   - Dependency injection for organization context and database sessions
-   - ResponseModel wrapper for consistent API responses
-
-3. **GraphQL Layer** (`src/josi/graphql/`)
-   - Strawberry GraphQL integration
-   - Schema files mirror REST functionality
-   - Uses same service layer as REST API (no direct SQL)
-   - Context injection for services
-
-4. **Service Layer** (`src/josi/services/`)
-   - Business logic implementation
-   - Handles complex operations like geocoding, chart calculations
-   - Integrates with external libraries (Swiss Ephemeris, Skyfield)
-   - No direct database access
-
-5. **Repository Layer** (`src/josi/repositories/`)
-   - Database operations using SQLModel/AsyncSession
-   - BaseRepository and TenantRepository base classes
-   - Automatic organization filtering for multi-tenancy
-   - Soft delete support
-
-6. **Core Layer** (`src/josi/core/`)
-   - Centralized configuration in `config.py`
-   - All environment variables accessed through `settings` singleton
-   - Security, database, and service configurations
-
-### Key Design Patterns
-
-1. **Multi-tenancy**: All entities (except Organization) include organization_id for data isolation
-2. **Soft Delete**: All entities have is_deleted/deleted_at fields
-3. **UUID Primary Keys**: Named as `{table}_id` (e.g., person_id, chart_id)
-4. **Async/Await**: Throughout the application with asyncpg
-5. **Dependency Injection**: FastAPI's Depends for database sessions and auth
-6. **Repository Pattern**: Clear separation between business logic and data access
-
-### Caching Strategy
-
-- Redis integration with automatic cache invalidation
-- Cache decorator for controllers: `@cache(expire=3600, prefix="module_name")`
-- Model-specific invalidation patterns in `CacheInvalidator`
-- Cache key generation from request parameters
-
-### Authentication
-
-- API key-based authentication via X-API-Key header
-- Organization context derived from API key
-- All endpoints require valid organization context
-
-## Important Configuration
-
-### Environment Variables (via src/josi/core/config.py)
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string
-- `AUTO_DB_MIGRATION`: Run migrations on startup (default: False)
-- `SECRET_KEY`: JWT secret key
-- `API_KEY_HEADER`: Header name for API key (default: X-API-Key)
-- `EPHEMERIS_PATH`: Path to Swiss Ephemeris data files
-- `GZIP_MINIMUM_SIZE`: Minimum response size for compression (default: 1000)
-
-### Database Schema Conventions
-- Primary keys: `{table}_id` format (UUID type)
-- Foreign keys: Reference the full primary key name
-- Timestamps: created_at, updated_at (auto-managed)
-- Soft delete: is_deleted (bool), deleted_at (timestamp)
-- Multi-tenant: organization_id on all tables except organization
-
-### API Response Format
-All REST endpoints return ResponseModel:
-```python
-{
-    "success": bool,
-    "message": str,
-    "data": Any,
-    "errors": Optional[List[str]]
-}
+```
+HTTP Request → Middleware (CORS, GZip, RateLimit, Security, Logging)
+  → Controller (src/josi/api/v1/controllers/)
+    → Service (src/josi/services/)
+      → Repository (src/josi/repositories/)
+        → AsyncSession (src/josi/db/async_db.py)
+          → PostgreSQL
 ```
 
-## Common Tasks
+### Layer Responsibilities
 
-### Adding a New Model
-1. Create model in `src/josi/models/` inheriting from TenantBaseModel
-2. Use `{table}_id` as primary key name
+- **Controllers** (`api/v1/controllers/`): HTTP handling, request validation, `ResponseModel` wrapping. Use dependency-injected services via `Annotated` type aliases (e.g., `PersonServiceDep`, `ChartServiceDep`) defined in `api/v1/dependencies.py`.
+- **Services** (`services/`): Business logic. No direct DB access. Key services: `AstrologyCalculator` (Swiss Ephemeris engine), `ChartService` (orchestrates calculations), `PersonService`, `GeocodingService`.
+- **Repositories** (`repositories/`): DB operations via `BaseRepository[T]`. Auto-applies tenant filtering (`organization_id`) and soft-delete filtering (`is_deleted == False`).
+- **Models** (`models/`): SQLModel entities + Strawberry GraphQL schemas in the same file. Inherit from `TenantBaseModel` (adds `organization_id`) or `SQLBaseModel` (timestamps + soft delete).
+
+### Key Architectural Details
+
+**Database**: The real async DB module is `src/josi/db/async_db.py` (NOT `src/josi/core/database.py` which is a test stub yielding `None`). Uses `EngineManager` with `asyncpg` driver. Session via `get_async_db()` dependency.
+
+**Authentication**: API key via `X-API-Key` header → `get_current_organization()` dependency resolves organization context. All tenant data is isolated by `organization_id`.
+
+**Caching**: Redis with `@cache(expire=3600, prefix="module_name")` decorator. `CacheInvalidator` handles model-specific cache busting. Falls back gracefully if Redis is unavailable.
+
+**Astrology Engine** (`services/astrology_service.py`): Core calculation engine using `pyswisseph`. Computes sidereal houses, planet positions (including Ketu as Rahu + 180°), nakshatras, and delegates to sub-calculators: `PanchangCalculator`, `DasaCalculator`, `DivisionalChartsCalculator`, `StrengthCalculator`, `BhavaCalculator`.
+
+**CRUD Generator** (`src/code_generator/`): Jinja2-based scaffolding that generates controller, service, repository, and GraphQL schema from a SQLModel class.
+
+### Database Conventions
+
+- Primary keys: `{table}_id` (UUID), e.g., `person_id`, `chart_id`
+- All tables (except Organization) have `organization_id` for multi-tenancy
+- Soft delete: `is_deleted` (bool) + `deleted_at` (timestamp) on all tables
+- Timestamps: `created_at`, `updated_at` (auto-managed)
+- Migrations: `src/alembic/` with `alembic.ini` at project root
+
+### API Response Format
+
+All REST endpoints return:
+```python
+{"success": bool, "message": str, "data": Any, "errors": Optional[List[str]]}
+```
+
+### Route Registration
+
+Routes are registered in `src/josi/api/v1/__init__.py` under prefix `/api/v1`. Key endpoints: `/persons`, `/charts`, `/panchang`, `/compatibility`, `/transits`, `/dasha`, `/predictions`, `/remedies`, `/location`, `/auth`, `/ai`, `/astrologers`, `/consultations`, `/muhurta`, `/health`, `/oauth`.
+
+GraphQL is mounted at `/graphql` with merged schema (Organization + Person + Chart).
+
+## Adding a New Model
+
+1. Create model in `src/josi/models/` inheriting from `TenantBaseModel`
+2. Use `{table}_id` as primary key name (UUID)
 3. Run CRUD generator: `poetry run generate-crud josi.models.{file}.{Model} --module {name}`
 4. Add router to `src/josi/api/v1/__init__.py`
 5. Update GraphQL schema in `src/josi/graphql/router.py`
-6. Generate and run migration
+6. Generate migration: `poetry run alembic revision --autogenerate -m "Add {model}"`
+7. Apply: `poetry run alembic upgrade head`
 
-### Implementing Astronomical Calculations
-- Use pyswisseph for Vedic/Western calculations
-- Use skyfield for modern astronomical data
-- Store results in chart_data JSON field
-- Cache calculations with person_id + chart_type key
+## Dependencies
 
-### Error Handling
-- Raise HTTPException in controllers
-- Use ValueError for business logic errors in services
-- Log errors with appropriate context
-- Return structured error responses via ResponseModel
+- Python 3.12+, FastAPI 0.115.x, SQLModel 0.0.22, Pydantic ~2.9.0
+- Strawberry GraphQL 0.243.x (pinned Pydantic 2.9.x for compatibility)
+- PostgreSQL 16 (uuid-ossp extension), Redis 7
+- pyswisseph for astronomical calculations, skyfield for modern data
+- Poetry for dependency management
 
-## Dependencies and Compatibility
+## Deployment
 
-- Python 3.12+
-- Pydantic 2.9.x (compatibility with Strawberry GraphQL)
-- SQLModel 0.0.22
-- FastAPI 0.115.x
-- Strawberry GraphQL 0.243.x
-- PostgreSQL 16 with UUID extension
-- Redis 7 for caching
-
-## Deployment Notes
-
-- Use Docker Compose for local development
-- PostgreSQL requires uuid-ossp extension
-- Redis requires at least 512MB memory
-- Swiss Ephemeris data files must be available at EPHEMERIS_PATH
-- Run with multiple workers in production (see WORKERS env var)
+- Docker Compose for local dev (PostgreSQL, Redis, API with hot reload)
+- `AUTO_DB_MIGRATION=True` runs Alembic on startup in Docker
+- Swiss Ephemeris data files at `EPHEMERIS_PATH` (defaults to `/usr/share/swisseph`)
+- See `.env.example` for all environment variables
