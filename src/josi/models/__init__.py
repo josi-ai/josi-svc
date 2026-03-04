@@ -24,7 +24,8 @@ from .chart_model import (
     PlanetPositionSchema,
     ChartInterpretation,
     ChartInterpretationSchema,
-    ChartInterpretationCreateInput
+    ChartInterpretationCreateInput,
+    InterpretationEmbedding,
 )
 
 __all__ = [
@@ -54,5 +55,6 @@ __all__ = [
     "PlanetPositionSchema",
     "ChartInterpretation",
     "ChartInterpretationSchema",
-    "ChartInterpretationCreateInput"
+    "ChartInterpretationCreateInput",
+    "InterpretationEmbedding",
 ]

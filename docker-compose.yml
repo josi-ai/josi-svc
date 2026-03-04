@@ -1,12 +1,12 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: josi
       POSTGRES_PASSWORD: josi
       POSTGRES_DB: josi
     ports:
-      - "5432:5432"
+      - "1961:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -25,7 +25,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "1982:6379"
     volumes:
       - redis_data:/data
     command: >
@@ -42,7 +42,7 @@ services:
   api:
     build: .
     ports:
-      - "8000:8000"
+      - "1954:8000"
     environment:
       DATABASE_URL: postgresql://josi:josi@db:5432/josi
       REDIS_URL: redis://redis:6379/0

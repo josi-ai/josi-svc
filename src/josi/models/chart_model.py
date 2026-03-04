@@ -5,8 +5,9 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 from enum import Enum
-from sqlalchemy import text, JSON, ForeignKey
+from sqlalchemy import text, JSON, ForeignKey, Column, String, Text
 from sqlmodel import Field, SQLModel, Relationship
+from pgvector.sqlalchemy import Vector
 import strawberry
 from pydantic import field_validator
 
@@ -216,6 +217,32 @@ class ChartInterpretation(ChartInterpretationModel, table=True):
     
     # Relationships
     chart: Optional["AstrologyChart"] = Relationship(back_populates="interpretations")
+
+
+# Interpretation Embedding Model (pgvector)
+class InterpretationEmbedding(TenantBaseModel, table=True):
+    """Stores interpretation embeddings for vector similarity search."""
+    __tablename__ = "interpretation_embedding"
+
+    embedding_id: Optional[UUID] = Field(
+        default=None,
+        primary_key=True,
+        sa_column_kwargs={
+            "server_default": text("gen_random_uuid()"),
+            "nullable": False
+        }
+    )
+    embedding: Optional[List[float]] = Field(
+        default=None,
+        sa_column=Column(Vector(384))
+    )
+    chart_features: str = Field(sa_column=Column(String, nullable=False))
+    question: str = Field(sa_column=Column(String, nullable=False))
+    interpretation: str = Field(sa_column=Column(Text, nullable=False))
+    chart_type: str = Field(sa_column=Column(String, nullable=False))
+    content_hash: str = Field(
+        sa_column=Column(String, nullable=False, unique=True)
+    )
 
 
 # Add back reference to Person model
