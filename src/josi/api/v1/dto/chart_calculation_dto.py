@@ -4,6 +4,8 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 import re
 
+from josi.models.chart_model import HouseSystem, Ayanamsa
+
 
 class CalculateChartRequest(BaseModel):
     """Request body for POST /api/v1/charts/calculate-chart."""
@@ -16,15 +18,15 @@ class CalculateChartRequest(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     timezone: Optional[str] = None
-    house_system: str = Field(default="placidus")
-    ayanamsa: str = Field(default="lahiri")
+    house_system: HouseSystem = Field(default=HouseSystem.PLACIDUS)
+    ayanamsa: Ayanamsa = Field(default=Ayanamsa.LAHIRI)
 
     parsed_time: Optional[time] = Field(default=None, exclude=True)
 
     @field_validator("time_of_birth")
     @classmethod
     def validate_time(cls, v: str) -> str:
-        cls._parse_time(v)
+        cls._parse_time(v)  # raises ValueError if format is invalid
         return v
 
     @field_validator("latitude")
@@ -43,6 +45,7 @@ class CalculateChartRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_location(self):
+        """Ensure either place_of_birth or lat/lng is provided, and populate parsed_time."""
         has_place = self.place_of_birth is not None
         has_lat = self.latitude is not None
         has_lng = self.longitude is not None
