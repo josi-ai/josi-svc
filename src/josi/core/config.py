@@ -80,7 +80,6 @@ class Settings(BaseSettings):
     # AI service settings
     openai_api_key: Optional[str] = Field(default=None)
     anthropic_api_key: Optional[str] = Field(default=None)
-    qdrant_url: Optional[str] = Field(default="http://localhost:6333")
     
     # Twilio settings for video consultations
     twilio_account_sid: Optional[str] = Field(default=None)

@@ -28,6 +28,7 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'josi')\gexec
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For text search
+CREATE EXTENSION IF NOT EXISTS "vector"; -- For pgvector similarity search
 
 -- Grant all privileges on the database to the josi user
 GRANT ALL PRIVILEGES ON DATABASE josi TO josi;
@@ -111,6 +112,6 @@ BEGIN
     RAISE NOTICE 'Josi database initialized successfully';
     RAISE NOTICE 'Database: josi';
     RAISE NOTICE 'User: josi';
-    RAISE NOTICE 'Extensions enabled: uuid-ossp, pgcrypto, pg_trgm';
+    RAISE NOTICE 'Extensions enabled: uuid-ossp, pgcrypto, pg_trgm, vector';
     RAISE NOTICE 'Cache invalidation schema created';
 END $$;
