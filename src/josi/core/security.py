@@ -193,18 +193,32 @@ class SecurityMiddleware:
             "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
         }
     
+    # Relaxed CSP for docs pages that need CDN resources and inline scripts
+    DOCS_CSP = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https://fastapi.tiangolo.com; "
+        "font-src 'self' https://cdn.jsdelivr.net"
+    )
+    DOCS_PATHS = {"/docs", "/redoc", "/openapi.json"}
+
     async def add_security_headers(self, request: Request, call_next):
         """Add security headers to response"""
         response = await call_next(request)
-        
+
         # Add security headers
         for header, value in self.security_headers.items():
             response.headers[header] = value
-        
+
+        # Relax CSP for Swagger UI / ReDoc pages
+        if request.url.path in self.DOCS_PATHS:
+            response.headers["Content-Security-Policy"] = self.DOCS_CSP
+
         # Add request ID for tracing
         import uuid
         response.headers["X-Request-ID"] = str(uuid.uuid4())
-        
+
         return response
 
 
