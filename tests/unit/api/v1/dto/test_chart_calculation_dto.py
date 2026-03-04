@@ -88,11 +88,12 @@ class TestCalculateChartRequest:
 
     def test_defaults(self):
         from josi.api.v1.dto.chart_calculation_dto import CalculateChartRequest
+        from josi.models.chart_model import HouseSystem, Ayanamsa
         req = CalculateChartRequest(
             date_of_birth="1990-06-15",
             time_of_birth="14:30",
             latitude=13.0,
             longitude=80.0,
         )
-        assert req.house_system == "porphyry"
-        assert req.ayanamsa == "lahiri"
+        assert req.house_system == HouseSystem.PORPHYRY
+        assert req.ayanamsa == Ayanamsa.LAHIRI

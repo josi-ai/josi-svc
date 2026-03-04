@@ -184,10 +184,11 @@ class AstrologyCalculator:
             'koch': b'K',
             'regiomontanus': b'R',
             'campanus': b'C',
-            'porphyrius': b'O'
+            'porphyrius': b'O',
+            'porphyry': b'O',
         }
         hsys = house_systems.get(house_system.lower(), b'P')
-        
+
         houses, ascmc = self._calculate_houses(julian_day, latitude, longitude, sidereal=True, house_system=hsys)
         
         logger.info(f"Vedic chart calculation summary:")
@@ -465,10 +466,11 @@ class AstrologyCalculator:
             'koch': b'K',
             'regiomontanus': b'R',
             'campanus': b'C',
-            'porphyrius': b'O'
+            'porphyrius': b'O',
+            'porphyry': b'O',
         }
         hsys = house_systems.get(house_system.lower(), b'P')
-        
+
         houses, ascmc = self._calculate_houses(julian_day, latitude, longitude, sidereal=False, house_system=hsys)
         
         logger.info(f"Western chart calculation summary:")

@@ -140,7 +140,7 @@ async def calculate_chart_stateless(
         # Geocode place name
         try:
             lat, lng, resolved_tz = geocoding.get_coordinates_and_timezone(
-                request.place_of_birth, country=""
+                request.place_of_birth, country=None
             )
             if not tz:
                 tz = resolved_tz

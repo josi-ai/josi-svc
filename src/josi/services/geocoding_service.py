@@ -10,26 +10,27 @@ class GeocodingService:
         self.tf = TimezoneFinder()
     
     def get_coordinates_and_timezone(
-        self, 
-        city: str, 
-        state: Optional[str] = None, 
-        country: str = "USA"
+        self,
+        city: str,
+        state: Optional[str] = None,
+        country: Optional[str] = "USA"
     ) -> Tuple[float, float, str]:
         """
         Get latitude, longitude, and timezone for a given location.
-        
+
         Args:
             city: City name
             state: State/Province name (optional)
-            country: Country name
-            
+            country: Country name (optional)
+
         Returns:
             Tuple of (latitude, longitude, timezone_name)
         """
         location_parts = [city]
         if state:
             location_parts.append(state)
-        location_parts.append(country)
+        if country:
+            location_parts.append(country)
         
         location_string = ", ".join(location_parts)
         
