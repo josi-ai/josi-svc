@@ -8,7 +8,7 @@ from uuid import UUID
 
 from josi.api.v1.dependencies import (
     ChartServiceDep, PersonServiceDep,
-    AstrologyCalculatorDep, GeocodingServiceDep
+    AstrologyCalculatorDep, GeocodingServiceDep, OrganizationDep
 )
 from josi.api.response import ResponseModel
 from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
@@ -112,6 +112,7 @@ async def calculate_chart_stateless(
     request: CalculateChartRequest,
     calculator: AstrologyCalculatorDep,
     geocoding: GeocodingServiceDep,
+    _org: OrganizationDep,
 ) -> ResponseModel:
     """
     Calculate a Vedic astrology chart from birth details (stateless).
