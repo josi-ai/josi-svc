@@ -1,13 +1,18 @@
 """
 Chart calculation and management controller - Clean Architecture.
 """
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from uuid import UUID
 
-from josi.api.v1.dependencies import ChartServiceDep, PersonServiceDep
+from josi.api.v1.dependencies import (
+    ChartServiceDep, PersonServiceDep,
+    AstrologyCalculatorDep, GeocodingServiceDep
+)
 from josi.api.response import ResponseModel
 from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
+from josi.api.v1.dto.chart_calculation_dto import CalculateChartRequest
 
 router = APIRouter(prefix="/charts", tags=["charts"])
 
@@ -100,6 +105,79 @@ async def calculate_chart(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate charts: {str(e)}")
+
+
+@router.post("/calculate-chart", response_model=ResponseModel)
+async def calculate_chart_stateless(
+    request: CalculateChartRequest,
+    calculator: AstrologyCalculatorDep,
+    geocoding: GeocodingServiceDep,
+) -> ResponseModel:
+    """
+    Calculate a Vedic astrology chart from birth details (stateless).
+
+    Accepts birth date, time, and location directly — no stored person required.
+    Returns the full Vedic chart without saving to the database.
+
+    Provide either place_of_birth (geocoded automatically) or latitude + longitude.
+    If both are given, lat/lng takes priority.
+    """
+    import pytz
+
+    # Resolve coordinates
+    lat = request.latitude
+    lng = request.longitude
+    tz = request.timezone
+
+    if lat is not None and lng is not None:
+        # Use provided coordinates; resolve timezone if missing
+        if not tz:
+            try:
+                tz = geocoding.get_timezone_from_coordinates(lat, lng)
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+    else:
+        # Geocode place name
+        try:
+            lat, lng, resolved_tz = geocoding.get_coordinates_and_timezone(
+                city=request.place_of_birth
+            )
+            if not tz:
+                tz = resolved_tz
+        except ValueError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not geocode location: {str(e)}",
+            )
+
+    # Build timezone-aware datetime
+    birth_dt = datetime.combine(request.date_of_birth, request.parsed_time)
+    try:
+        local_tz = pytz.timezone(tz)
+        birth_dt = local_tz.localize(birth_dt)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid timezone '{tz}': {str(e)}")
+
+    # Calculate chart
+    try:
+        calculator.set_ayanamsa(request.ayanamsa.value)
+        chart_data = calculator.calculate_vedic_chart(
+            dt=birth_dt,
+            latitude=float(lat),
+            longitude=float(lng),
+            timezone=tz,
+            house_system=request.house_system.value,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Chart calculation failed: {str(e)}"
+        )
+
+    return ResponseModel(
+        success=True,
+        message="Vedic chart calculated successfully",
+        data=chart_data,
+    )
 
 
 @router.get("/person/{person_id}", response_model=ResponseModel)
