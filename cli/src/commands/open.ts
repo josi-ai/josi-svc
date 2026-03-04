@@ -15,18 +15,21 @@ Targets:
   docs      Swagger UI (default)
   graphql   GraphQL Playground
   redoc     ReDoc documentation
+  adminer   Database management UI
 
 Examples:
   $ josi open              # Open Swagger docs
   $ josi open docs         # Open Swagger docs
   $ josi open graphql      # Open GraphQL Playground
-  $ josi open redoc        # Open ReDoc`
+  $ josi open redoc        # Open ReDoc
+  $ josi open adminer      # Open DB management UI`
     )
     .action((target?: string) => {
       const urlMap: Record<string, string> = {
         docs: URLS.docs,
         graphql: URLS.graphql,
         redoc: URLS.redoc,
+        adminer: URLS.adminer,
       };
 
       const key = target ?? 'docs';

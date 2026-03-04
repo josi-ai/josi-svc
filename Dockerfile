@@ -23,13 +23,14 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies (production only)
+# Install dependencies (including dev for CI testing)
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --without dev
+    && poetry install --no-interaction --no-ansi
 
 # Copy source code
 COPY src/ ./src/
-COPY alembic.ini ./
+COPY tests/ ./tests/
+COPY alembic.ini pytest.ini ./
 
 # Copy and set up alembic
 COPY src/alembic ./src/alembic/

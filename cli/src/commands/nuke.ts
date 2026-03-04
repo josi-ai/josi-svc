@@ -44,7 +44,7 @@ Examples:
 
       // Kill processes on known ports
       logger.step('Killing processes on josi ports...');
-      for (const port of [1954, 1961, 1982]) {
+      for (const port of [1954, 1961, 1962, 1980, 1982]) {
         const result = spawnSync('lsof', ['-i', `:${port}`, '-t'], {
           stdio: 'pipe',
           encoding: 'utf-8',

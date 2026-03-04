@@ -38,6 +38,7 @@ Examples:
       logger.dim('  Redis:     localhost:1982');
       logger.blank();
       logger.dim('Run "josi redock logs" to follow logs.');
+      logger.dim('Run "josi open adminer" for DB management UI.');
       logger.blank();
     });
 }

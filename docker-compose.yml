@@ -1,6 +1,8 @@
 services:
   db:
     image: pgvector/pgvector:pg16
+    container_name: josi-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: josi
       POSTGRES_PASSWORD: josi
@@ -22,8 +24,32 @@ services:
       -c log_statement=all
       -c log_duration=on
 
+  # Test database (uses tmpfs for speed, only starts with --profile test)
+  db-test:
+    image: pgvector/pgvector:pg16
+    container_name: josi-db-test
+    environment:
+      POSTGRES_USER: josi
+      POSTGRES_PASSWORD: josi
+      POSTGRES_DB: josi_test
+    ports:
+      - "1962:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U josi"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    profiles:
+      - test
+
   redis:
     image: redis:7-alpine
+    container_name: josi-redis
+    restart: unless-stopped
     ports:
       - "1982:6379"
     volumes:
@@ -41,6 +67,8 @@ services:
 
   api:
     build: .
+    container_name: josi-api
+    restart: unless-stopped
     ports:
       - "1954:8000"
     environment:
@@ -56,6 +84,18 @@ services:
       - ./src:/app/src
       - ./alembic.ini:/app/alembic.ini
     command: poetry run uvicorn josi.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Database management UI (only starts with --profile tools)
+  adminer:
+    image: adminer:latest
+    container_name: josi-adminer
+    restart: unless-stopped
+    ports:
+      - "1980:8080"
+    depends_on:
+      - db
+    profiles:
+      - tools
 
 volumes:
   postgres_data:

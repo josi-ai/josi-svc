@@ -241,3 +241,5 @@ test_data/vedicastro_api/
 # OS
 .DS_Store
 Thumbs.db
+
+VedAstro/
