@@ -53,66 +53,85 @@ git clone https://github.com/josi-ai/josi-svc.git
 cd josi-svc
 ```
 
-#### 2. Install Poetry (if not already installed)
+#### 2. Install the Josi CLI (recommended)
+
+The Josi CLI automates your entire development workflow — Docker, migrations, testing, linting, and more. It requires Node.js 18+.
+
 ```bash
-# macOS/Linux
+# Install Node.js if needed (macOS)
+brew install node
+
+# Build and link the CLI globally
+cd cli && npm install && npm run build && npm link && cd ..
+
+# Bootstrap your machine (installs Python, Poetry, Docker, etc.)
+josi init
+
+# Verify everything is set up
+josi doctor
+```
+
+Once installed, the `josi` command is available globally. See the [CLI Reference](#-josi-cli-reference) below for all commands.
+
+#### 3. Start all services
+```bash
+# Start db, redis, and api with one command
+josi redock up
+
+# Or without the CLI:
+docker-compose up -d --build
+```
+
+#### 4. Access the API
+The API will be available at:
+- REST API: `http://localhost:8000`
+- API Documentation: `http://localhost:8000/docs`
+- Alternative Docs: `http://localhost:8000/redoc`
+- GraphQL Playground: `http://localhost:8000/graphql`
+
+```bash
+# Or use the CLI to open docs in your browser
+josi open docs
+josi open graphql
+```
+
+#### Manual Setup (without CLI)
+
+<details>
+<summary>Click to expand manual setup steps</summary>
+
+**Install Poetry:**
+```bash
 curl -sSL https://install.python-poetry.org | python3 -
-
-# Windows (PowerShell)
-(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-
-# Add Poetry to PATH (macOS/Linux)
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-#### 3. Install Python dependencies
+**Install Python dependencies:**
 ```bash
-# Install all dependencies
 poetry install
-
-# Activate the virtual environment
 poetry shell
 ```
 
-#### 4. Set up environment variables
+**Set up environment variables:**
 ```bash
-# Copy the example environment file
 cp .env.example .env
-
 # Edit .env with your configuration
-# Required variables:
-# - DATABASE_URL=postgresql://josi:josi@localhost:5432/josi
-# - REDIS_URL=redis://localhost:6379/0
-# - SECRET_KEY=your-secret-key-here
-# - API_KEY_HEADER=X-API-Key
-# - AUTO_DB_MIGRATION=True
 ```
 
-#### 5. Start all services with Docker Compose
+**Start services:**
 ```bash
-# Use the redock alias (recommended)
-redock
-
-# Or use docker-compose directly
 docker-compose up -d
-
-# Verify services are running
-docker-compose ps
-
-# Optional: Start Qdrant vector database for AI features
-docker-compose -f docker-compose.vector.yml up -d
 ```
 
-#### 6. Database migrations
+**Database migrations:**
 ```bash
 # Migrations run automatically on startup if AUTO_DB_MIGRATION=True
 # Or run manually:
 poetry run alembic upgrade head
 ```
 
-#### 7. Download astronomical data files
+**Download astronomical data files:**
 ```bash
-# Swiss Ephemeris data files (required for calculations)
 mkdir -p /usr/share/swisseph
 cd /usr/share/swisseph
 wget https://www.astro.com/ftp/swisseph/ephe/sweph_18.tar.gz
@@ -120,12 +139,7 @@ tar -xzf sweph_18.tar.gz
 cd -
 ```
 
-#### 8. Access the API
-The API will be available at:
-- REST API: `http://localhost:8000`
-- API Documentation: `http://localhost:8000/docs`
-- Alternative Docs: `http://localhost:8000/redoc`
-- GraphQL Playground: `http://localhost:8000/graphql`
+</details>
 
 ### Verifying Installation
 
@@ -452,6 +466,55 @@ For complete API documentation, see the interactive docs at http://localhost:800
 - **Enhanced Testing**: 90% test coverage
 - **Remedy Engine**: AI-powered recommendations
 - **Transit Monitoring**: Real-time tracking
+
+## 🛠 Josi CLI Reference
+
+The Josi CLI (`cli/` directory) is a TypeScript developer toolkit that consolidates all common workflows into a single command.
+
+### Installation
+```bash
+cd josi-svc/cli
+npm install && npm run build && npm link
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `josi init` | Bootstrap your dev machine (installs Python, Poetry, Docker, etc.) |
+| `josi doctor` | Health check — verify tools, Docker, ports, project files |
+| `josi redock up` | Start all services (db, redis, api) with Docker Compose |
+| `josi redock up --no-build` | Start without rebuilding the API image |
+| `josi redock up --vector` | Also start Qdrant vector database |
+| `josi redock status` | Show running container status |
+| `josi redock logs [service]` | Follow container logs (e.g., `josi redock logs api`) |
+| `josi redock clean` | Stop containers |
+| `josi redock clean -v` | Stop containers and remove volumes (fresh DB) |
+| `josi db migrate "<msg>"` | Auto-generate Alembic migration with conflict detection |
+| `josi db upgrade` | Apply all pending migrations |
+| `josi db downgrade <rev>` | Downgrade to a specific revision |
+| `josi db rollback` | Undo the last migration |
+| `josi test` | Run all tests |
+| `josi test --unit` | Run unit tests only |
+| `josi test --coverage` | Run with HTML coverage report |
+| `josi test -k "pattern"` | Filter tests by keyword |
+| `josi lint` | Check code quality (black, flake8, mypy) |
+| `josi lint --fix` | Auto-format with black |
+| `josi crud <model> -m <name>` | Generate CRUD scaffolding |
+| `josi open [docs\|graphql\|redoc]` | Open API docs in browser |
+| `josi status` | Development environment dashboard |
+| `josi services` | List all services with ports and status |
+| `josi env check` | Validate .env has all required variables |
+| `josi env setup` | Create .env from .env.example |
+| `josi nuke` | Kill everything — containers, volumes, prune Docker |
+| `josi update` | Self-update the CLI (git pull + rebuild) |
+
+### Updating the CLI
+```bash
+josi update
+# Or manually:
+cd josi-svc/cli && git pull && npm install && npm run build
+```
 
 ## 🙏 Acknowledgments
 

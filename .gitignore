@@ -14,8 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -226,6 +226,10 @@ redis_data/
 
 # Claude conversation files
 2025-*.txt
+2026-*.txt
+
+# Test data with personal birth chart information
+test_data/vedicastro_api/
 
 # IDE
 .idea/
