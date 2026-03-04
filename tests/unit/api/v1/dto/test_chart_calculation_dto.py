@@ -94,5 +94,5 @@ class TestCalculateChartRequest:
             latitude=13.0,
             longitude=80.0,
         )
-        assert req.house_system == "placidus"
+        assert req.house_system == "porphyry"
         assert req.ayanamsa == "lahiri"

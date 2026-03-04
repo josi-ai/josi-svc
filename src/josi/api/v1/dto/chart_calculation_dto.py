@@ -18,7 +18,7 @@ class CalculateChartRequest(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     timezone: Optional[str] = None
-    house_system: HouseSystem = Field(default=HouseSystem.PLACIDUS)
+    house_system: HouseSystem = Field(default=HouseSystem.PORPHYRY)
     ayanamsa: Ayanamsa = Field(default=Ayanamsa.LAHIRI)
 
     parsed_time: Optional[time] = Field(default=None, exclude=True)
