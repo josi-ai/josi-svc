@@ -1,9 +1,28 @@
 import swisseph as swe
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import json
 import math
 import pytz
+import logging
+
+# Configure logging for astrology calculations
+logger = logging.getLogger(__name__)
+
+# Import Panchang calculator
+from .panchang_calculator import PanchangCalculator
+# Import Dasa calculator
+from .dasa_calculator import DasaCalculator
+# Import Divisional Charts calculator
+from .divisional_charts_calculator import DivisionalChartsCalculator
+# Import Strength calculator
+from .strength_calculator import StrengthCalculator
+# Import Bhava calculator  
+from .bhava_calculator import BhavaCalculator
+# Import new enhanced calculators
+from .divisional_chart_calculator import DivisionalChartCalculator as EnhancedDivisionalCalculator
+from .dasa_balance_calculator import DasaBalanceCalculator
+from .enhanced_nakshatra_calculator import EnhancedNakshatraCalculator
 
 
 class AstrologyCalculator:
@@ -15,8 +34,8 @@ class AstrologyCalculator:
         'Mars': swe.MARS,
         'Jupiter': swe.JUPITER,
         'Saturn': swe.SATURN,
-        'Rahu': swe.MEAN_NODE,  # North Node
-        'Ketu': swe.OSCU_APOG,  # South Node (180° from Rahu)
+        'Rahu': swe.MEAN_NODE,  # North Node (Mean Node for Vedic)
+        # Note: Ketu is calculated as 180° opposite to Rahu, not stored here
     }
     
     NAKSHATRAS = [
@@ -35,6 +54,15 @@ class AstrologyCalculator:
     def __init__(self):
         swe.set_ephe_path('')  # Use built-in ephemeris
         self.current_ayanamsa = 'lahiri'  # Default ayanamsa
+        self.panchang_calc = PanchangCalculator()  # Initialize panchang calculator
+        self.dasa_calc = DasaCalculator()  # Initialize dasa calculator
+        self.varga_calc = DivisionalChartsCalculator()  # Initialize divisional charts calculator
+        self.strength_calc = StrengthCalculator()  # Initialize strength calculator
+        self.bhava_calc = BhavaCalculator()  # Initialize bhava calculator
+        # Initialize enhanced calculators
+        self.enhanced_varga_calc = EnhancedDivisionalCalculator()
+        self.dasa_balance_calc = DasaBalanceCalculator()
+        self.enhanced_nakshatra_calc = EnhancedNakshatraCalculator()
     
     def set_ayanamsa(self, ayanamsa_name: str) -> None:
         """Set the ayanamsa system for Vedic calculations."""
@@ -54,14 +82,16 @@ class AstrologyCalculator:
         swe.set_sid_mode(mode)
         self.current_ayanamsa = ayanamsa_name
     
-    def _datetime_to_julian(self, dt: datetime) -> float:
-        """Convert datetime to Julian day number with improved precision."""
+    def _datetime_to_julian(self, dt: datetime, location: str = "") -> float:
+        """Convert datetime to Julian day number with high precision and logging."""
         # Convert to UTC if the datetime has timezone info
         if dt.tzinfo is not None:
             utc_dt = dt.astimezone(pytz.UTC)
+            logger.debug(f"Converting timezone-aware datetime to UTC: {dt} -> {utc_dt}")
         else:
             # Assume UTC if no timezone info
             utc_dt = dt
+            logger.warning(f"Datetime lacks timezone info, assuming UTC: {dt}")
         
         # Higher precision time calculation
         decimal_hour = (utc_dt.hour * 3600.0 + 
@@ -69,7 +99,15 @@ class AstrologyCalculator:
                        utc_dt.second + 
                        utc_dt.microsecond / 1e6) / 3600.0
         
-        return swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, decimal_hour)
+        julian_day = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, decimal_hour)
+        
+        logger.debug(f"Julian Day calculation for {location}:")
+        logger.debug(f"  Input datetime: {dt}")
+        logger.debug(f"  UTC datetime: {utc_dt}")
+        logger.debug(f"  Decimal hour: {decimal_hour:.8f}")
+        logger.debug(f"  Julian day: {julian_day:.8f}")
+        
+        return julian_day
     
     def _get_ayanamsa(self, julian_day: float, system: str = None) -> float:
         """Get ayanamsa value for Vedic calculations."""
@@ -79,14 +117,34 @@ class AstrologyCalculator:
         
         return swe.get_ayanamsa(julian_day)
     
-    def _calculate_houses(self, julian_day: float, latitude: float, longitude: float, sidereal: bool = False) -> List[float]:
-        """Calculate house cusps."""
+    def _calculate_houses(self, julian_day: float, latitude: float, longitude: float, sidereal: bool = False, house_system: bytes = b'P') -> Tuple[List[float], List[float]]:
+        """Calculate house cusps with enhanced precision tracking."""
         # Use sidereal flag for Vedic calculations
         if sidereal:
-            houses, ascmc = swe.houses_ex(julian_day, latitude, longitude, b'P', swe.FLG_SIDEREAL)
+            houses, ascmc = swe.houses_ex(julian_day, latitude, longitude, house_system, swe.FLG_SIDEREAL)
+            ayanamsa = swe.get_ayanamsa(julian_day)
+            logger.debug(f"Sidereal house calculation:")
+            logger.debug(f"  Ayanamsa: {ayanamsa:.6f}°")
         else:
-            houses, ascmc = swe.houses(julian_day, latitude, longitude, b'P')  # Placidus
-        return houses
+            houses, ascmc = swe.houses(julian_day, latitude, longitude, house_system)
+            logger.debug(f"Tropical house calculation")
+        
+        # Log detailed house calculation info
+        logger.debug(f"House calculation parameters:")
+        logger.debug(f"  Julian day: {julian_day:.8f}")
+        logger.debug(f"  Latitude: {latitude:.6f}°")
+        logger.debug(f"  Longitude: {longitude:.6f}°")
+        logger.debug(f"  House system: {house_system.decode('ascii')}")
+        logger.debug(f"  Ascendant: {houses[0]:.6f}° (sidereal={sidereal})")
+        logger.debug(f"  MC: {ascmc[2]:.6f}°")
+        logger.debug(f"  ARMC: {ascmc[0]:.6f}°")
+        logger.debug(f"  Vertex: {ascmc[3]:.6f}°")
+        
+        # Calculate Local Sidereal Time for verification
+        lst = (ascmc[0] * 15.0) % 360.0  # ARMC to degrees
+        logger.debug(f"  Local Sidereal Time: {lst:.6f}°")
+        
+        return houses, ascmc
     
     def _get_nakshatra_pada(self, longitude: float) -> Tuple[str, int]:
         """Get nakshatra and pada from longitude."""
@@ -99,7 +157,7 @@ class AstrologyCalculator:
         sign_index = int(longitude / 30)
         return self.SIGNS[sign_index]
     
-    def calculate_vedic_chart(self, dt: datetime, latitude: float, longitude: float, timezone: str = None) -> Dict:
+    def calculate_vedic_chart(self, dt: datetime, latitude: float, longitude: float, timezone: Optional[str] = None, ayanamsa: Optional[int] = None, house_system: str = 'placidus') -> Dict:
         """Calculate Vedic astrology chart."""
         # Ensure datetime is timezone-aware
         if dt.tzinfo is None and timezone:
@@ -107,30 +165,50 @@ class AstrologyCalculator:
             tz = pytz.timezone(timezone)
             dt = tz.localize(dt)
         
-        julian_day = self._datetime_to_julian(dt)
-        ayanamsa = self._get_ayanamsa(julian_day)
-        houses = self._calculate_houses(julian_day, latitude, longitude, sidereal=True)
+        # Enhanced location string for debugging
+        location_str = f"lat={latitude:.4f}, lon={longitude:.4f}"
+        
+        julian_day = self._datetime_to_julian(dt, location_str)
+        
+        # Set ayanamsa if specified
+        if ayanamsa is not None:
+            swe.set_sid_mode(ayanamsa)
+        
+        ayanamsa_value = self._get_ayanamsa(julian_day, self.current_ayanamsa if ayanamsa is None else None)
+        
+        # Map house system names to Swiss Ephemeris codes
+        house_systems = {
+            'placidus': b'P',
+            'whole_sign': b'W',
+            'equal': b'E',
+            'koch': b'K',
+            'regiomontanus': b'R',
+            'campanus': b'C',
+            'porphyrius': b'O'
+        }
+        hsys = house_systems.get(house_system.lower(), b'P')
+        
+        houses, ascmc = self._calculate_houses(julian_day, latitude, longitude, sidereal=True, house_system=hsys)
+        
+        logger.info(f"Vedic chart calculation summary:")
+        logger.info(f"  Location: {location_str}")
+        logger.info(f"  DateTime: {dt}")
+        logger.info(f"  Ayanamsa: {self.current_ayanamsa} = {ayanamsa_value:.6f}°")
+        logger.info(f"  House System: {house_system}")
+        logger.info(f"  Ascendant: {houses[0]:.6f}°")
         
         planet_positions = {}
         
+        # Calculate all planets from Swiss Ephemeris
         for planet_name, planet_id in self.PLANETS.items():
-            if planet_name == 'Ketu':
-                # Ketu is always 180° from Rahu
-                rahu_pos = planet_positions['Rahu']['longitude']
-                ketu_longitude = (rahu_pos + 180) % 360
-                planet_data = {
-                    'longitude': ketu_longitude,
-                    'latitude': -planet_positions['Rahu']['latitude'],
-                    'speed': -planet_positions['Rahu']['speed']
-                }
-            else:
-                # Use sidereal flag for Vedic calculations to get direct sidereal positions
-                result = swe.calc(julian_day, planet_id, swe.FLG_SIDEREAL)
-                planet_data = {
-                    'longitude': result[0][0],
-                    'latitude': result[0][1],
-                    'speed': result[0][3]
-                }
+            # Use sidereal flag for Vedic calculations to get direct sidereal positions
+            # Add FLG_SPEED flag to get planetary speeds for retrograde detection
+            result = swe.calc(julian_day, planet_id, swe.FLG_SIDEREAL | swe.FLG_SPEED)
+            planet_data = {
+                'longitude': result[0][0],
+                'latitude': result[0][1],
+                'speed': result[0][3]
+            }
             
             # Already have sidereal longitude from FLG_SIDEREAL flag
             sidereal_longitude = planet_data['longitude']
@@ -152,6 +230,9 @@ class AstrologyCalculator:
             nakshatra, pada = self._get_nakshatra_pada(sidereal_longitude)
             sign = self._get_sign(sidereal_longitude)
             
+            # Get enhanced nakshatra details
+            nakshatra_details = self.enhanced_nakshatra_calc.calculate_nakshatra_pada_details(sidereal_longitude)
+            
             planet_positions[planet_name] = {
                 'longitude': sidereal_longitude,
                 'latitude': planet_data['latitude'],
@@ -159,17 +240,186 @@ class AstrologyCalculator:
                 'house': house,
                 'sign': sign,
                 'nakshatra': nakshatra,
-                'pada': pada
+                'pada': pada,
+                'nakshatra_pada': nakshatra_details['pada'],
+                'nakshatra_ruler': nakshatra_details['ruler'],
+                'nakshatra_deity': nakshatra_details['deity'],
+                'navamsa_sign': nakshatra_details['navamsa_sign']
             }
+        
+        # Calculate Ketu as 180° opposite to Rahu
+        if 'Rahu' in planet_positions:
+            ketu_longitude = (planet_positions['Rahu']['longitude'] + 180.0) % 360.0
+            
+            # Determine Ketu's house
+            house = 1
+            for i in range(12):
+                house_start = houses[i]
+                house_end = houses[(i + 1) % 12]
+                
+                if house_start <= ketu_longitude < house_end:
+                    house = i + 1
+                    break
+                elif house_start > house_end:  # Crosses 0°
+                    if ketu_longitude >= house_start or ketu_longitude < house_end:
+                        house = i + 1
+                        break
+            
+            nakshatra, pada = self._get_nakshatra_pada(ketu_longitude)
+            sign = self._get_sign(ketu_longitude)
+            
+            # Get enhanced nakshatra details for Ketu
+            ketu_nakshatra_details = self.enhanced_nakshatra_calc.calculate_nakshatra_pada_details(ketu_longitude)
+            
+            planet_positions['Ketu'] = {
+                'longitude': ketu_longitude,
+                'latitude': -planet_positions['Rahu']['latitude'],  # Opposite latitude
+                'speed': -planet_positions['Rahu']['speed'],  # Opposite speed (always retrograde)
+                'house': house,
+                'sign': sign,
+                'nakshatra': nakshatra,
+                'pada': pada,
+                'nakshatra_pada': ketu_nakshatra_details['pada'],
+                'nakshatra_ruler': ketu_nakshatra_details['ruler'],
+                'nakshatra_deity': ketu_nakshatra_details['deity'],
+                'navamsa_sign': ketu_nakshatra_details['navamsa_sign']
+            }
+            
+            logger.debug(f"Ketu calculation from Rahu:")
+            logger.debug(f"  Rahu longitude: {planet_positions['Rahu']['longitude']:.6f}°")
+            logger.debug(f"  Ketu longitude: {ketu_longitude:.6f}°")
         
         # Calculate ascendant - houses are already sidereal
         asc_longitude = houses[0]
         nakshatra, pada = self._get_nakshatra_pada(asc_longitude)
         sign = self._get_sign(asc_longitude)
         
+        # Calculate Panchang elements
+        panchang = None
+        if 'Sun' in planet_positions and 'Moon' in planet_positions:
+            try:
+                moon_speed = planet_positions['Moon'].get('speed', 13.176)
+                sun_speed = planet_positions['Sun'].get('speed', 0.985)
+                panchang = self.panchang_calc.calculate_panchang(
+                    julian_day,
+                    planet_positions['Sun']['longitude'],
+                    planet_positions['Moon']['longitude'],
+                    latitude,
+                    longitude,
+                    moon_speed,
+                    sun_speed
+                )
+                logger.info(f"Panchang calculated successfully:")
+                logger.info(f"  Tithi: {panchang['tithi']['name']} ({panchang['tithi']['paksha']})")
+                logger.info(f"  Yoga: {panchang['yoga']['name']}")
+                logger.info(f"  Karana: {panchang['karana']['name']}")
+            except Exception as e:
+                logger.warning(f"Error calculating panchang: {e}")
+                panchang = None
+        
+        # Calculate Dasa-Bhukti periods
+        dasa = None
+        if 'Moon' in planet_positions:
+            try:
+                dasa = self.dasa_calc.get_current_dasa_bhukti(
+                    planet_positions['Moon']['longitude'],
+                    dt  # Use the datetime object passed to this method
+                )
+                
+                # Calculate enhanced dasa balance at birth
+                dasa_balance = self.dasa_balance_calc.calculate_dasa_balance_at_birth(
+                    planet_positions['Moon']['longitude'],
+                    dt
+                )
+                
+                # Add enhanced balance information to dasa
+                if dasa:
+                    dasa['balance_at_birth'] = dasa_balance
+                
+                logger.info(f"Dasa-Bhukti calculated successfully:")
+                logger.info(f"  Current Dasa: {dasa['current']['major']}")
+                logger.info(f"  Current Bhukti: {dasa['current']['minor']}")
+                logger.info(f"  Birth Balance: {dasa_balance['years']}Y {dasa_balance['months']}M {dasa_balance['days']}D")
+                logger.info(f"  Balance Planet: {dasa_balance['planet']}")
+            except Exception as e:
+                logger.warning(f"Error calculating dasa: {e}")
+                dasa = None
+        
+        # Calculate Divisional Charts
+        vargas = None
+        try:
+            # Use existing calculator for basic vargas
+            vargas = self.varga_calc.calculate_all_vargas(planet_positions)
+            
+            # Enhance with our detailed divisional chart calculations
+            enhanced_vargas = {}
+            planet_longitudes = {name: data['longitude'] for name, data in planet_positions.items()}
+            
+            # Add ascendant to planet longitudes
+            planet_longitudes['Ascendant'] = asc_longitude
+            
+            # Calculate all divisional charts with enhanced calculator
+            for division_name in self.enhanced_varga_calc.divisions:
+                enhanced_vargas[division_name] = self.enhanced_varga_calc.get_varga_chart(
+                    planet_longitudes, division_name
+                )
+            
+            # Merge enhanced data into existing vargas
+            if vargas:
+                vargas.update(enhanced_vargas)
+            else:
+                vargas = enhanced_vargas
+            
+            logger.info(f"Divisional charts calculated successfully with enhanced data")
+        except Exception as e:
+            logger.warning(f"Error calculating divisional charts: {e}")
+            vargas = None
+        
+        # Calculate Strengths
+        strengths = None
+        try:
+            shadbala = self.strength_calc.calculate_shadbala(
+                planet_positions, houses, dt, latitude
+            )
+            bhava_bala = self.strength_calc.calculate_bhava_bala(
+                houses, planet_positions
+            )
+            residential = self.strength_calc.calculate_residential_strength(
+                planet_positions
+            )
+            strengths = {
+                'shadbala': shadbala,
+                'bhava_bala': bhava_bala,
+                'residential_strength': residential
+            }
+            logger.info(f"Strength calculations completed successfully")
+        except Exception as e:
+            logger.warning(f"Error calculating strengths: {e}")
+            strengths = None
+        
+        # Calculate Bhava chart
+        bhava_chart = None
+        try:
+            bhava_chart = self.bhava_calc.calculate_bhava_chart(
+                houses, house_system
+            )
+            
+            # Add strength factors
+            bhava_strengths = self.bhava_calc.calculate_bhava_strength_factors(
+                bhava_chart, planet_positions
+            )
+            bhava_chart['strength_factors'] = bhava_strengths
+            
+            logger.info("Bhava chart calculated successfully")
+        except Exception as e:
+            logger.warning(f"Error calculating bhava chart: {e}")
+            bhava_chart = None
+        
         return {
             'chart_type': 'vedic',
-            'ayanamsa': ayanamsa,
+            'ayanamsa': ayanamsa_value,
+            'ayanamsa_name': self.current_ayanamsa,
+            'house_system': house_system,
             'ascendant': {
                 'longitude': asc_longitude,
                 'sign': sign,
@@ -177,7 +427,12 @@ class AstrologyCalculator:
                 'pada': pada
             },
             'houses': houses,  # Already sidereal
-            'planets': planet_positions
+            'planets': planet_positions,
+            'panchang': panchang,  # New addition
+            'dasa': dasa,  # Dasa-Bhukti periods
+            'vargas': vargas,  # Divisional charts
+            'strengths': strengths,  # Strength calculations
+            'bhava_chart': bhava_chart  # Bhava chart
         }
     
     def calculate_south_indian_chart(self, dt: datetime, latitude: float, longitude: float) -> Dict:
@@ -189,19 +444,43 @@ class AstrologyCalculator:
         # The display format would be different in the frontend
         return vedic_chart
     
-    def calculate_western_chart(self, dt: datetime, latitude: float, longitude: float) -> Dict:
+    def calculate_western_chart(self, dt: datetime, latitude: float, longitude: float, timezone: Optional[str] = None, house_system: str = 'placidus') -> Dict:
         """Calculate Western astrology chart (tropical zodiac)."""
-        julian_day = self._datetime_to_julian(dt)
-        houses = self._calculate_houses(julian_day, latitude, longitude)
+        # Enhanced location string for debugging
+        location_str = f"lat={latitude:.4f}, lon={longitude:.4f}"
+        
+        # Ensure datetime is timezone-aware
+        if dt.tzinfo is None and timezone:
+            import pytz
+            tz = pytz.timezone(timezone)
+            dt = tz.localize(dt)
+        
+        julian_day = self._datetime_to_julian(dt, location_str)
+        
+        # Map house system names
+        house_systems = {
+            'placidus': b'P',
+            'whole_sign': b'W',
+            'equal': b'E',
+            'koch': b'K',
+            'regiomontanus': b'R',
+            'campanus': b'C',
+            'porphyrius': b'O'
+        }
+        hsys = house_systems.get(house_system.lower(), b'P')
+        
+        houses, ascmc = self._calculate_houses(julian_day, latitude, longitude, sidereal=False, house_system=hsys)
+        
+        logger.info(f"Western chart calculation summary:")
+        logger.info(f"  Location: {location_str}")
+        logger.info(f"  DateTime: {dt}")
+        logger.info(f"  House System: {house_system}")
+        logger.info(f"  Ascendant: {houses[0]:.6f}°")
         
         planet_positions = {}
         
         for planet_name, planet_id in self.PLANETS.items():
-            if planet_name == 'Ketu':
-                # Skip Ketu for Western astrology
-                continue
-            
-            result = swe.calc(julian_day, planet_id)
+            result = swe.calc(julian_day, planet_id, swe.FLG_SPEED)
             longitude = result[0][0]
             
             # Determine house

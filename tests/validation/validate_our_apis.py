@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 OUR_API_BASE = "http://localhost:8000/api/v1"
-API_KEY = "your-api-key-here"  # Replace with actual API key
+API_KEY = "test-api-key"  # Replace with actual API key
 TEST_DATA_DIR = Path(__file__).parent.parent.parent / "test_data" / "vedicastro_api"
 
 class APIValidator:
