@@ -4,6 +4,7 @@ import { register as registerStatus } from './status.js';
 import { register as registerLogs } from './logs.js';
 import { register as registerClean } from './clean.js';
 import { register as registerAdminer } from './adminer.js';
+import { register as registerCheck } from './check.js';
 
 export function register(program: Command): void {
   const redock = program
@@ -15,4 +16,5 @@ export function register(program: Command): void {
   registerLogs(redock);
   registerClean(redock);
   registerAdminer(redock);
+  registerCheck(redock);
 }

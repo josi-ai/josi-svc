@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import * as logger from '../../lib/logger.js';
 import { getProjectRoot } from '../../lib/detect.js';
 import { containerExec, isDockerRunning } from '../../lib/docker.js';
-import { getCurrentBranch, getParentBranch, getNewMigrationFiles, pullAndRebase, hasUncommittedChanges } from '../../lib/git.js';
+import { getCurrentBranch, getParentBranch, getNewMigrationFiles, pullAndRebase, hasUncommittedChanges, gitExec } from '../../lib/git.js';
 import { confirmAction } from '../../lib/prompt.js';
 
 export function register(parent: Command): void {
@@ -84,7 +84,41 @@ Examples:
 
       logger.blank();
       logger.success('Migration generated! Review the file before applying.');
-      logger.dim('Apply with: josi db upgrade');
+
+      // Show new migration files
+      const { stdout: newFiles } = gitExec(
+        ['status', '--short', '--', 'src/alembic/versions/'],
+        root
+      );
+      if (newFiles) {
+        logger.info('New files:');
+        logger.dim(newFiles);
+      }
+
+      // Offer to commit
+      const shouldCommit = await confirmAction('Commit this migration?');
+      if (shouldCommit) {
+        const { status: addStatus } = gitExec(
+          ['add', 'src/alembic/versions/'],
+          root
+        );
+        if (addStatus !== 0) {
+          logger.error('Failed to stage migration files.');
+          process.exit(1);
+        }
+
+        const { status: commitStatus } = gitExec(
+          ['commit', '-m', `alembic: ${message}`],
+          root
+        );
+        if (commitStatus !== 0) {
+          logger.error('Commit failed.');
+          process.exit(1);
+        }
+        logger.success('Migration committed.');
+      } else {
+        logger.dim('Apply with: josi db upgrade');
+      }
       logger.blank();
     });
 }

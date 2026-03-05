@@ -9,6 +9,8 @@ import { register as registerDoctor } from '../src/commands/init/doctor.js';
 // Command groups
 import { register as registerRedock } from '../src/commands/redock/index.js';
 import { register as registerDb } from '../src/commands/db/index.js';
+import { register as registerSecrets } from '../src/commands/secrets/index.js';
+import { register as registerGcp } from '../src/commands/gcp/index.js';
 
 // Standalone commands
 import { register as registerTest } from '../src/commands/test.js';
@@ -42,5 +44,7 @@ registerNuke(program);
 registerUpdate(program);
 registerServices(program);
 registerEnv(program);
+registerSecrets(program);
+registerGcp(program);
 
 program.parse();
