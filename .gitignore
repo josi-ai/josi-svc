@@ -229,7 +229,7 @@ redis_data/
 2026-*.txt
 
 # Test data with personal birth chart information
-test_data/vedicastro_api/
+test_data/
 
 # IDE
 .idea/
