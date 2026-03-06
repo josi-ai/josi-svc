@@ -35,10 +35,12 @@ class Settings(BaseSettings):
     database_max_overflow: int = Field(default=20)
     auto_db_migration: bool = Field(default=False)
     
-    # Security settings
-    secret_key: str = Field(default="your-secret-key-here-change-in-production")
-    algorithm: str = Field(default="HS256")
-    access_token_expire_minutes: int = Field(default=30)
+    # Descope settings
+    descope_project_id: str = Field(default="")
+    descope_management_key: str = Field(default="")
+    descope_webhook_secret: str = Field(default="")
+
+    # Keep api_key_header
     api_key_header: str = Field(default="X-API-Key")
     
     # CORS settings
@@ -70,12 +72,6 @@ class Settings(BaseSettings):
     # Response compression
     gzip_minimum_size: int = Field(default=1000)
     
-    # OAuth settings
-    google_client_id: Optional[str] = Field(default=None)
-    google_client_secret: Optional[str] = Field(default=None)
-    github_client_id: Optional[str] = Field(default=None)
-    github_client_secret: Optional[str] = Field(default=None)
-    frontend_url: Optional[str] = Field(default="http://localhost:3000")
     
     # AI service settings
     openai_api_key: Optional[str] = Field(default=None)
@@ -126,7 +122,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="forbid"
+        extra="ignore"
     )
 
 
