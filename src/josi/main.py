@@ -7,7 +7,6 @@ from strawberry.fastapi import GraphQLRouter
 import structlog
 
 from josi.api.v1 import v1_router
-from josi.api.v1.auth import router as auth_router
 from josi.core.config import settings
 from josi.core.middleware import setup_middleware
 from josi.core.json_response import CustomJSONResponse
@@ -89,9 +88,6 @@ app = FastAPI(
 
 # Setup all middleware (security, CORS, logging, rate limiting, etc.)
 setup_middleware(app)
-
-# Include authentication routes
-app.include_router(auth_router, prefix="/api/v1")
 
 # Include API routes
 app.include_router(v1_router)
