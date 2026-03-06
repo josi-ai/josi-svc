@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, useEffect } from 'react';
 import { useSession, useUser, useDescope } from '@descope/nextjs-sdk/client';
 import { setTokenGetter } from '@/lib/api-client';
+import { setGraphQLTokenGetter } from '@/lib/graphql-client';
 
 interface AuthContextType {
   user: {
@@ -33,9 +34,10 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const { user: descopeUser, isUserLoading } = useUser();
   const { logout: descopeLogout } = useDescope();
 
-  // Wire the session token into the API client
+  // Wire the session token into the API and GraphQL clients
   useEffect(() => {
     setTokenGetter(() => sessionToken);
+    setGraphQLTokenGetter(() => sessionToken);
   }, [sessionToken]);
 
   const user = useMemo(() => {
