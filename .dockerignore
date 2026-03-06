@@ -59,7 +59,8 @@ k8s/
 
 # Development
 scripts/
-tests/
-pytest.ini
 .env
 .env.local
+
+# Web app (exclude from API image)
+web/

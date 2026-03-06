@@ -22,6 +22,8 @@ from josi.models import (
     ChartInterpretation,
     PlanetPosition
 )
+from josi.models.user_model import User
+from josi.models.api_key_model import ApiKey
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
