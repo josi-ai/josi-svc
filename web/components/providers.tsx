@@ -4,6 +4,7 @@ import { AuthProvider } from '@descope/nextjs-sdk';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ConfigProvider } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthContextProvider } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import themeConfig from '@/theme/themeConfig';
 
@@ -23,9 +24,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <AntdRegistry>
         <ConfigProvider theme={themeConfig}>
           <QueryClientProvider client={queryClient}>
-            <SubscriptionProvider>
-              {children}
-            </SubscriptionProvider>
+            <AuthContextProvider>
+              <SubscriptionProvider>
+                {children}
+              </SubscriptionProvider>
+            </AuthContextProvider>
           </QueryClientProvider>
         </ConfigProvider>
       </AntdRegistry>
