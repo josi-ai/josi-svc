@@ -9,7 +9,7 @@ import pytz
 
 from josi.api.v1.dependencies import (
     ChartServiceDep, PersonServiceDep,
-    AstrologyCalculatorDep, GeocodingServiceDep, OrganizationDep
+    AstrologyCalculatorDep, GeocodingServiceDep
 )
 from josi.api.response import ResponseModel
 from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
@@ -113,7 +113,6 @@ async def calculate_chart_stateless(
     request: CalculateChartRequest,
     calculator: AstrologyCalculatorDep,
     geocoding: GeocodingServiceDep,
-    _org: OrganizationDep,  # enforces X-API-Key authentication
 ) -> ResponseModel:
     """
     Calculate a Vedic astrology chart from birth details (stateless).

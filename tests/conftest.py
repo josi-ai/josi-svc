@@ -22,7 +22,8 @@ from httpx import AsyncClient, ASGITransport
 from josi.main import app
 from josi.core.config import Settings
 from josi.db.async_db import get_async_db
-from josi.api.v1.dependencies import get_current_organization
+from josi.auth.middleware import resolve_current_user
+from josi.auth.schemas import CurrentUser
 from josi.models.organization_model import Organization
 from josi.models.person_model import Person
 from josi.repositories.organization_repository import OrganizationRepository
@@ -135,15 +136,21 @@ def override_dependencies(db_session: AsyncSession, test_organization: Organizat
     """Override FastAPI dependencies for testing."""
     async def override_get_db():
         yield db_session
-    
-    async def override_get_organization():
-        return test_organization
-    
+
+    async def override_resolve_current_user():
+        return CurrentUser(
+            user_id=uuid4(),
+            descope_id="test-descope-id",
+            email="test@example.com",
+            subscription_tier="free",
+            roles=["user"],
+        )
+
     app.dependency_overrides[get_async_db] = override_get_db
-    app.dependency_overrides[get_current_organization] = override_get_organization
-    
+    app.dependency_overrides[resolve_current_user] = override_resolve_current_user
+
     yield
-    
+
     # Cleanup
     app.dependency_overrides.clear()
 

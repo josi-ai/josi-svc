@@ -15,8 +15,8 @@ from josi.services.ai.interpretation_service import (
     AIProvider
 )
 from josi.services.chart_service import ChartService
-from josi.services.auth_service import get_current_active_user
-from josi.models.user_model import User
+from josi.auth.middleware import resolve_current_user
+from josi.auth.schemas import CurrentUser
 from josi.api.response import ResponseModel
 from cache.cache_decorator import cache
 import structlog
@@ -46,7 +46,7 @@ class NeuralPathwayRequest(SQLModel):
 @cache(expire=3600, prefix="ai_interpretation")
 async def generate_interpretation(
     request: InterpretationRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Generate AI-powered interpretation for a chart."""
@@ -108,7 +108,7 @@ async def generate_interpretation(
 @router.post("/neural-pathway", response_model=ResponseModel)
 async def generate_neural_pathway_questions(
     request: NeuralPathwayRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Generate psychological self-awareness questions based on chart."""

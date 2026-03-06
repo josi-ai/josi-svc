@@ -8,10 +8,8 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from josi.core.database import get_db
-from josi.api.v1.dependencies import get_current_organization
-from josi.services.auth_service import get_current_user
-from josi.models.organization_model import Organization
-from josi.models.user_model import User
+from josi.auth.middleware import resolve_current_user
+from josi.auth.schemas import CurrentUser
 from josi.models.remedy_model import (
     RemedyCreate, RemedyUpdate, RemedyResponse, 
     RecommendationRequest, RecommendationResponse,
@@ -32,8 +30,8 @@ router = APIRouter(prefix="/remedies", tags=["Remedies"])
 async def get_remedy_recommendations(
     request: RecommendationRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    current_user: CurrentUser = Depends(resolve_current_user),
+
 ) -> ResponseModel:
     """
     Get AI-powered remedy recommendations based on chart analysis.
@@ -54,7 +52,7 @@ async def get_remedy_recommendations(
             user_id=str(current_user.user_id),
             chart_id=str(request.chart_id),
             recommendation_count=len(recommendations),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         
         return ResponseModel(
@@ -86,7 +84,7 @@ async def get_remedy_recommendations(
             "Failed to generate remedy recommendations",
             error=str(e),
             user_id=str(current_user.user_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         raise HTTPException(
             status_code=500,
@@ -97,7 +95,6 @@ async def get_remedy_recommendations(
 @router.get("/")
 async def list_remedies(
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization),
     tradition: Optional[Tradition] = Query(None, description="Filter by tradition"),
     remedy_type: Optional[RemedyType] = Query(None, description="Filter by remedy type"),
     planet: Optional[str] = Query(None, description="Filter by planet"),
@@ -111,7 +108,7 @@ async def list_remedies(
     List available remedies with optional filtering.
     """
     try:
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         
         remedies = await repository.list_remedies(
             tradition=tradition,
@@ -159,7 +156,7 @@ async def list_remedies(
         logger.error(
             "Failed to list remedies",
             error=str(e),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         raise HTTPException(
             status_code=500,
@@ -171,14 +168,13 @@ async def list_remedies(
 async def get_remedy(
     remedy_id: UUID = Path(..., description="Remedy ID"),
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization),
     language: str = Query("en", description="Language for localized content")
 ) -> ResponseModel:
     """
     Get detailed information about a specific remedy.
     """
     try:
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         remedy = await repository.get(remedy_id)
         
         if not remedy:
@@ -206,7 +202,7 @@ async def get_remedy(
             "Failed to get remedy",
             error=str(e),
             remedy_id=str(remedy_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         raise HTTPException(
             status_code=500,
@@ -218,8 +214,8 @@ async def get_remedy(
 async def create_remedy(
     remedy_data: RemedyCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    current_user: CurrentUser = Depends(resolve_current_user),
+
 ) -> ResponseModel:
     """
     Create a new remedy (admin/expert only).
@@ -232,14 +228,14 @@ async def create_remedy(
                 detail="Insufficient permissions to create remedies"
             )
         
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         remedy = await repository.create_remedy(remedy_data, str(current_user.user_id))
         
         logger.info(
             "Remedy created",
             remedy_id=str(remedy.remedy_id),
             created_by=str(current_user.user_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         
         return ResponseModel(
@@ -255,7 +251,7 @@ async def create_remedy(
             "Failed to create remedy",
             error=str(e),
             user_id=str(current_user.user_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         raise HTTPException(
             status_code=500,
@@ -268,8 +264,8 @@ async def update_remedy(
     remedy_id: UUID,
     remedy_data: RemedyUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    current_user: CurrentUser = Depends(resolve_current_user),
+
 ) -> ResponseModel:
     """
     Update an existing remedy (admin/expert only).
@@ -282,7 +278,7 @@ async def update_remedy(
                 detail="Insufficient permissions to update remedies"
             )
         
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         remedy = await repository.update_remedy(remedy_id, remedy_data)
         
         if not remedy:
@@ -292,7 +288,7 @@ async def update_remedy(
             "Remedy updated",
             remedy_id=str(remedy_id),
             updated_by=str(current_user.user_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         
         return ResponseModel(
@@ -308,7 +304,7 @@ async def update_remedy(
             "Failed to update remedy",
             error=str(e),
             remedy_id=str(remedy_id),
-            organization_id=str(organization.organization_id)
+            organization_id=str(None)
         )
         raise HTTPException(
             status_code=500,
@@ -320,15 +316,14 @@ async def update_remedy(
 async def start_remedy_progress(
     remedy_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization),
+    current_user: CurrentUser = Depends(resolve_current_user),
     target_days: Optional[int] = Query(None, ge=1, le=365, description="Target duration in days")
 ) -> ResponseModel:
     """
     Start tracking progress for a remedy.
     """
     try:
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         
         # Check if remedy exists
         remedy = await repository.get(remedy_id)
@@ -375,14 +370,14 @@ async def update_remedy_progress(
     progress_id: UUID,
     progress_data: ProgressUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    current_user: CurrentUser = Depends(resolve_current_user),
+
 ) -> ResponseModel:
     """
     Update progress for a remedy.
     """
     try:
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         progress = await repository.update_progress(progress_id, progress_data)
         
         if not progress:
@@ -416,14 +411,14 @@ async def update_remedy_progress(
 @router.get("/my-remedies/active")
 async def get_active_remedies(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    organization: Organization = Depends(get_current_organization)
+    current_user: CurrentUser = Depends(resolve_current_user),
+
 ) -> ResponseModel:
     """
     Get user's currently active remedies with progress.
     """
     try:
-        repository = RemedyRepository(db, organization.organization_id)
+        repository = RemedyRepository(db, None)
         active_remedies = await repository.get_user_active_remedies(current_user.user_id)
         
         return ResponseModel(
@@ -455,7 +450,7 @@ async def get_active_remedies(
 
 @router.get("/categories")
 async def get_remedy_categories(
-    organization: Organization = Depends(get_current_organization)
+
 ) -> ResponseModel:
     """
     Get available remedy categories and filters.

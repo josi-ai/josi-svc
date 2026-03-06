@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 
 from josi.core.database import get_db
-from josi.services.auth_service import get_current_active_user
-from josi.models.user_model import User
+from josi.auth.middleware import resolve_current_user
+from josi.auth.schemas import CurrentUser
 from josi.models.astrologer_model import (
     Astrologer, 
     AstrologerReview,
@@ -33,7 +33,7 @@ router = APIRouter(tags=["Astrologer Marketplace"], prefix="/astrologers")
 @router.post("/register", response_model=ResponseModel)
 async def register_as_astrologer(
     astrologer_data: AstrologerCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Register current user as an astrologer."""
@@ -301,7 +301,7 @@ async def get_astrologer_profile(
 @router.put("/profile", response_model=ResponseModel)
 async def update_astrologer_profile(
     updates: AstrologerUpdate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Update astrologer profile (for current user)."""
@@ -356,7 +356,7 @@ async def update_astrologer_profile(
 async def create_review(
     astrologer_id: UUID,
     review_data: ReviewCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Create a review for an astrologer."""

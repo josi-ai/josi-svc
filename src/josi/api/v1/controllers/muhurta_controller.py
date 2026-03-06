@@ -8,8 +8,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from josi.core.database import get_db
-from josi.api.v1.dependencies import get_current_organization
-from josi.models.organization_model import Organization
 from josi.services.vedic.muhurta_service import MuhurtaCalculator
 from josi.api.response import ResponseModel
 import structlog
@@ -51,7 +49,6 @@ class MonthlyCalendarRequest(BaseModel):
 async def find_muhurta(
     request: MuhurtaRequest,
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
 ) -> ResponseModel:
     """
     Find auspicious times (Muhurta) for specific activities.
@@ -132,7 +129,6 @@ async def find_muhurta(
 async def calculate_rahu_kaal(
     request: RahuKaalRequest,
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
 ) -> ResponseModel:
     """
     Calculate Rahu Kaal (inauspicious time) for a specific date and location.
@@ -177,7 +173,6 @@ async def calculate_rahu_kaal(
 async def get_monthly_calendar(
     request: MonthlyCalendarRequest,
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization)
 ) -> ResponseModel:
     """
     Get auspicious dates calendar for an entire month.
@@ -236,7 +231,6 @@ async def get_monthly_calendar(
 
 @router.get("/activities")
 async def get_supported_activities(
-    organization: Organization = Depends(get_current_organization)
 ) -> ResponseModel:
     """
     Get list of supported activities for Muhurta calculation.
@@ -290,7 +284,6 @@ async def get_best_times_today(
     longitude: float = Query(..., ge=-180, le=180, description="Location longitude"),
     timezone: str = Query(..., description="Location timezone"),
     db: AsyncSession = Depends(get_db),
-    organization: Organization = Depends(get_current_organization),
     purpose: str = Query(default="general", description="Activity purpose")
 ) -> ResponseModel:
     """

@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from josi.core.database import get_db
-from josi.services.auth_service import get_current_active_user
+from josi.auth.middleware import resolve_current_user
 from josi.services.consultation_service import ConsultationService
-from josi.models.user_model import User
+from josi.auth.schemas import CurrentUser
 from josi.models.consultation_model import (
     ConsultationRequest,
     ConsultationUpdate,
@@ -34,7 +34,7 @@ router = APIRouter(tags=["Consultations"], prefix="/consultations")
 @router.post("/book", response_model=ResponseModel)
 async def book_consultation(
     consultation_request: ConsultationRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Book a new consultation with an astrologer."""
@@ -82,7 +82,7 @@ async def book_consultation(
 
 @router.get("/my-consultations", response_model=ResponseModel)
 async def get_my_consultations(
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db),
     status_filter: Optional[ConsultationStatus] = Query(default=None),
     limit: int = Query(default=20, le=100),
@@ -145,7 +145,7 @@ async def get_my_consultations(
 @router.get("/{consultation_id}", response_model=ResponseModel)
 async def get_consultation_details(
     consultation_id: UUID,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Get detailed consultation information."""
@@ -248,7 +248,7 @@ async def get_consultation_details(
 async def respond_to_consultation(
     consultation_id: UUID,
     response: AstrologerResponse,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Submit astrologer's response to a consultation."""
@@ -305,7 +305,7 @@ async def respond_to_consultation(
 async def send_message(
     consultation_id: UUID,
     message_data: MessageCreate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ResponseModel:
     """Send a message in a consultation."""
@@ -346,7 +346,7 @@ async def send_message(
 @router.delete("/{consultation_id}/cancel", response_model=ResponseModel)
 async def cancel_consultation(
     consultation_id: UUID,
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db),
     reason: Optional[str] = Query(default=None)
 ) -> ResponseModel:
@@ -411,7 +411,7 @@ async def get_consultation_types() -> ResponseModel:
 
 @router.get("/astrologer/pending", response_model=ResponseModel)
 async def get_pending_consultations(
-    current_user: User = Depends(get_current_active_user),
+    current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db),
     limit: int = Query(default=20, le=100),
     offset: int = Query(default=0, ge=0)

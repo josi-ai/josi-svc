@@ -11,7 +11,6 @@ from strawberry.fastapi import BaseContext
 
 from josi.core.config import Settings, settings
 from josi.db.async_db import get_async_db
-from josi.api.v1.dependencies import get_current_organization
 from josi.models.organization_model import Organization
 
 # Import services
