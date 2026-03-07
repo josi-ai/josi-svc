@@ -1,10 +1,11 @@
 """Stack-aware configuration for Josi infrastructure.
 
-To add a new environment (e.g., UAT):
-1. Create infra/Pulumi.uat.yaml (copy from dev, adjust values)
-2. Run: pulumi stack init govindnewform/uat && pulumi up
-3. Create git branch: git checkout -b uat
-4. Push — Cloud Build auto-deploys
+To add a new environment (e.g., staging):
+1. Create infra/Pulumi.staging.yaml (copy from dev, adjust values)
+2. Create deploy/{api,web,infra}.cloudbuild.staging.yaml
+3. Run: pulumi stack init govindnewform/staging && pulumi up
+4. Create git branch: git checkout -b staging
+5. Push — Cloud Build auto-deploys
 """
 
 import pulumi
