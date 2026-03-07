@@ -2,11 +2,13 @@
 
 Pulumi manages the secret containers. Values are set manually via gcloud
 or CI/CD — never stored in Pulumi state.
+
+Note: SA credentials secret is managed in iam.py (auto-populated with JSON key).
 """
 
 import pulumi
 import pulumi_gcp as gcp
-from config import environment, project, name
+from config import environment, project, secret_name
 
 
 # Define all secrets this environment needs
@@ -24,9 +26,9 @@ SECRET_NAMES = [
 ]
 
 secrets = {}
-for secret_name in SECRET_NAMES:
-    full_name = f"josiam-{secret_name}-{environment}"
-    secrets[secret_name] = gcp.secretmanager.Secret(
+for sname in SECRET_NAMES:
+    full_name = secret_name(sname)
+    secrets[sname] = gcp.secretmanager.Secret(
         full_name,
         secret_id=full_name,
         project=project,
@@ -36,14 +38,14 @@ for secret_name in SECRET_NAMES:
     )
 
 
-def secret_ref(secret_name: str) -> str:
+def secret_ref(sname: str) -> str:
     """Return the secret reference string for Cloud Run --set-secrets."""
-    return f"josiam-{secret_name}-{environment}:latest"
+    return f"{secret_name(sname)}:latest"
 
 
-def secret_resource_name(secret_name: str) -> pulumi.Output:
+def secret_resource_name(sname: str) -> pulumi.Output:
     """Return the full resource name for a secret."""
-    return secrets[secret_name].name
+    return secrets[sname].name
 
 
 pulumi.export("secrets", {k: v.secret_id for k, v in secrets.items()})

@@ -9,6 +9,7 @@ from config import environment, project, bucket_location, name
 bucket = gcp.storage.Bucket(
     name("bucket"),
     name=f"josiam-{environment}",
+    opts=pulumi.ResourceOptions(aliases=[pulumi.Alias(name=f"josiam-bucket-{environment}")]),
     location=bucket_location,
     project=project,
     uniform_bucket_level_access=True,

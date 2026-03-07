@@ -1,4 +1,11 @@
-"""Stack-aware configuration for Josi infrastructure."""
+"""Stack-aware configuration for Josi infrastructure.
+
+To add a new environment (e.g., UAT):
+1. Create infra/Pulumi.uat.yaml (copy from dev, adjust values)
+2. Run: pulumi stack init govindnewform/uat && pulumi up
+3. Create git branch: git checkout -b uat
+4. Push — Cloud Build auto-deploys
+"""
 
 import pulumi
 
@@ -6,9 +13,18 @@ config = pulumi.Config("josi")
 gcp_config = pulumi.Config("gcp")
 
 # Core
-environment = config.require("environment")  # "dev" or "prod"
+environment = config.require("environment")
 project = gcp_config.require("project")
 region = gcp_config.get("region") or "us-central1"
+
+# Git branch this env deploys from
+branch_pattern = config.get("branch_pattern") or f"^{environment}$"
+# Override for prod which uses main
+if environment == "prod":
+    branch_pattern = config.get("branch_pattern") or "^main$"
+
+# GitHub repo (Cloud Build connection)
+repo_connection = config.get("repo_connection") or f"projects/{project}/locations/{region}/connections/josiam/repositories/josi-ai-josi-svc"
 
 # Database
 db_tier = config.get("db_tier") or "db-f1-micro"
@@ -30,14 +46,27 @@ web_cpu = config.get("web_cpu") or "1"
 web_min_instances = config.get_int("web_min_instances") or 0
 web_max_instances = config.get_int("web_max_instances") or 3
 
+# Domains
+api_domain = config.get("api_domain") or ""
+web_domain = config.get("web_domain") or ""
+enable_custom_domains = bool(api_domain and web_domain)
+
+# API Gateway
+enable_api_gateway = config.get_bool("enable_api_gateway") or False
+
 # Storage
 bucket_location = config.get("bucket_location") or "us-central1"
 
-# Artifact Registry
+# Artifact Registry (shared across envs)
 registry_location = region
 registry_repo = "josi"
 
 
 def name(resource: str) -> str:
-    """Generate environment-suffixed resource name."""
-    return f"josiam-{resource}-{environment}"
+    """Generate environment-suffixed resource name. e.g., name('api') -> 'josi-api-dev'"""
+    return f"josi-{resource}-{environment}"
+
+
+def secret_name(key: str) -> str:
+    """Generate secret name. e.g., secret_name('db-password') -> 'josiam-db-password-dev'"""
+    return f"josiam-{key}-{environment}"

@@ -3,14 +3,13 @@
 import pulumi
 import pulumi_gcp as gcp
 from config import (
-    environment, project, region, name,
+    environment, project, region, name, secret_name,
     api_memory, api_cpu, api_min_instances, api_max_instances,
     web_memory, web_cpu, web_min_instances, web_max_instances,
     registry_location, registry_repo,
 )
 from database import instance as db_instance, connection_name as db_connection_name
 from iam import service_account
-from secrets import secret_ref
 
 registry_url = f"{registry_location}-docker.pkg.dev/{project}/{registry_repo}"
 
@@ -78,7 +77,7 @@ api_service = gcp.cloudrunv2.Service(
                         name="AUTH_PROVIDER",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-auth-provider-{environment}",
+                                secret=secret_name("auth-provider"),
                                 version="latest",
                             ),
                         ),
@@ -87,7 +86,7 @@ api_service = gcp.cloudrunv2.Service(
                         name="CLERK_SECRET_KEY",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-clerk-secret-key-{environment}",
+                                secret=secret_name("clerk-secret-key"),
                                 version="latest",
                             ),
                         ),
@@ -96,7 +95,7 @@ api_service = gcp.cloudrunv2.Service(
                         name="CLERK_WEBHOOK_SECRET",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-clerk-webhook-secret-{environment}",
+                                secret=secret_name("clerk-webhook-secret"),
                                 version="latest",
                             ),
                         ),
@@ -105,7 +104,7 @@ api_service = gcp.cloudrunv2.Service(
                         name="DESCOPE_PROJECT_ID",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-descope-project-id-{environment}",
+                                secret=secret_name("descope-project-id"),
                                 version="latest",
                             ),
                         ),
@@ -114,7 +113,7 @@ api_service = gcp.cloudrunv2.Service(
                         name="DESCOPE_WEBHOOK_SECRET",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-descope-webhook-secret-{environment}",
+                                secret=secret_name("descope-webhook-secret"),
                                 version="latest",
                             ),
                         ),
@@ -182,7 +181,7 @@ web_service = gcp.cloudrunv2.Service(
                         name="NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
                         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(
                             secret_key_ref=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
-                                secret=f"josiam-clerk-publishable-key-{environment}",
+                                secret=secret_name("clerk-publishable-key"),
                                 version="latest",
                             ),
                         ),

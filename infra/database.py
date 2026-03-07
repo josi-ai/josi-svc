@@ -3,7 +3,7 @@
 import pulumi
 import pulumi_gcp as gcp
 from config import (
-    environment, project, region, name,
+    environment, project, region, name, secret_name,
     db_tier, db_edition, db_version, db_disk_size,
     db_availability, db_deletion_protection,
 )
@@ -13,6 +13,7 @@ from config import (
 instance = gcp.sql.DatabaseInstance(
     name("db"),
     name=f"josiam-{environment}",
+    opts=pulumi.ResourceOptions(aliases=[pulumi.Alias(name=f"josiam-db-{environment}")]),
     database_version=db_version,
     region=region,
     project=project,
@@ -21,7 +22,6 @@ instance = gcp.sql.DatabaseInstance(
         tier=db_tier,
         edition=db_edition,
         disk_size=db_disk_size,
-        disk_type="PD_SSD",
         disk_autoresize=True,
         availability_type=db_availability,
         ip_configuration=gcp.sql.DatabaseInstanceSettingsIpConfigurationArgs(
@@ -55,11 +55,12 @@ database = gcp.sql.Database(
     name="josi",
     instance=instance.name,
     project=project,
+    opts=pulumi.ResourceOptions(aliases=[pulumi.Alias(name=f"josiam-db-josi-{environment}")]),
 )
 
 # User — password is managed in Secret Manager, referenced here
 db_password_secret = gcp.secretmanager.get_secret_version(
-    secret=f"josiam-db-password-{environment}",
+    secret=secret_name("db-password"),
     project=project,
 )
 

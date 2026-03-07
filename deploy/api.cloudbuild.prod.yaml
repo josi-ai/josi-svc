@@ -1,0 +1,117 @@
+# Cloud Build — Josi API (Prod)
+# Trigger: Branch ^main$, Included files: src/**, tests/**, Dockerfile, pyproject.toml, poetry.lock, alembic.ini
+
+substitutions:
+  _REGION: us-central1
+  _ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/${PROJECT_ID}/josi
+  _SERVICE_NAME: josi-api-prod
+  _CLOUD_SQL_INSTANCE: ${PROJECT_ID}:us-central1:josiam-prod
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # Build
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build"
+    args: ["build", "-t", "${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA", "-t", "${_ARTIFACT_REGISTRY}/josi-api:prod-latest", "."]
+
+  # Start test DB
+  - name: "gcr.io/cloud-builders/docker"
+    id: "start-test-db"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        docker rm -f test-db 2>/dev/null || true
+        docker run -d --rm --name=test-db --network=cloudbuild \
+          -e POSTGRES_USER=josi -e POSTGRES_PASSWORD=josi -e POSTGRES_DB=josi_test \
+          pgvector/pgvector:pg16
+    waitFor: ["-"]
+
+  # Wait for DB
+  - name: "gcr.io/cloud-builders/docker"
+    id: "wait-for-db"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        for i in $(seq 1 30); do
+          docker exec test-db pg_isready -U josi && exit 0
+          sleep 2
+        done
+        exit 1
+    waitFor: ["start-test-db"]
+
+  # Migrate
+  - name: "gcr.io/cloud-builders/docker"
+    id: "migrate"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        docker run --rm --network cloudbuild \
+          -e DATABASE_URL=postgresql+asyncpg://josi:josi@test-db:5432/josi_test \
+          -e ENVIRONMENT=test \
+          ${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
+          alembic upgrade head
+    waitFor: ["build", "wait-for-db"]
+
+  # Test
+  - name: "gcr.io/cloud-builders/docker"
+    id: "test"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        docker run --rm --network cloudbuild \
+          -e DATABASE_URL=postgresql+asyncpg://josi:josi@test-db:5432/josi_test \
+          -e REDIS_URL= -e ENVIRONMENT=test -e RATE_LIMIT_ENABLED=false \
+          -e EPHEMERIS_PATH=/usr/share/swisseph \
+          ${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
+          pytest tests/ -v --tb=short
+    waitFor: ["migrate"]
+
+  # Push
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push"
+    args: ["push", "--all-tags", "${_ARTIFACT_REGISTRY}/josi-api"]
+    waitFor: ["test"]
+
+  # Deploy
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "deploy"
+    entrypoint: "gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "${_SERVICE_NAME}"
+      - "--image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA"
+      - "--region=${_REGION}"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+      - "--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}"
+      - "--set-env-vars=ENVIRONMENT=prod,AUTO_DB_MIGRATION=true,EPHEMERIS_PATH=/usr/share/swisseph,CORS_ORIGINS=*,LOG_LEVEL=INFO,RATE_LIMIT_ENABLED=true,DATABASE_URL=postgresql+asyncpg://josi@/josi?host=/cloudsql/${_CLOUD_SQL_INSTANCE}"
+      - "--set-secrets=AUTH_PROVIDER=josiam-auth-provider-prod:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-prod:latest,DESCOPE_PROJECT_ID=josiam-descope-project-id-prod:latest,DESCOPE_WEBHOOK_SECRET=josiam-descope-webhook-secret-prod:latest"
+      - "--min-instances=1"
+      - "--max-instances=10"
+      - "--memory=2Gi"
+      - "--cpu=2"
+      - "--timeout=300"
+      - "--port=8000"
+      - "--execution-environment=gen2"
+      - "--service-account=josi-prod@${PROJECT_ID}.iam.gserviceaccount.com"
+    waitFor: ["push"]
+
+  # Cleanup
+  - name: "gcr.io/cloud-builders/docker"
+    id: "cleanup"
+    entrypoint: "sh"
+    args: ["-c", "docker stop test-db && docker rm test-db || true"]
+    waitFor: ["test"]
+
+images:
+  - "${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA"
+  - "${_ARTIFACT_REGISTRY}/josi-api:prod-latest"
+
+timeout: "1200s"

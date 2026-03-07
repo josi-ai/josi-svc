@@ -2,6 +2,7 @@ config:
   gcp:project: josiam
   gcp:region: us-central1
   josi:environment: dev
+  josi:branch_pattern: "^dev$"
   # Database
   josi:db_tier: "db-f1-micro"
   josi:db_edition: "ENTERPRISE"
@@ -21,3 +22,6 @@ config:
   josi:web_max_instances: "3"
   # Storage
   josi:bucket_location: "us-central1"
+  # Domains (empty = no custom domains)
+  # josi:api_domain: "dev.api.josiam.com"
+  # josi:web_domain: "dev.app.josiam.com"

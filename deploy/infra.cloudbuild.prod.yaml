@@ -1,0 +1,29 @@
+# Cloud Build — Josi Infrastructure (Prod)
+# Trigger: Branch ^main$, Included files: infra/**
+
+substitutions:
+  _STACK: govindnewform/prod
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/${PROJECT_ID}/secrets/josiam-pulumi-access-token/versions/latest
+      env: "PULUMI_ACCESS_TOKEN"
+
+steps:
+  - name: "python:3.12-slim"
+    id: "pulumi-up"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        pip install --quiet pulumi pulumi-gcp>=8.0.0,<9.0.0
+        cd infra
+        pulumi login
+        pulumi stack select ${_STACK}
+        pulumi up --yes --skip-preview
+    secretEnv: ["PULUMI_ACCESS_TOKEN"]
+
+timeout: "600s"
