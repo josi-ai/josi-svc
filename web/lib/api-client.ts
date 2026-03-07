@@ -38,6 +38,11 @@ async function request<T>(
     throw new Error(error.detail || error.message || 'Request failed');
   }
 
+  // Handle 204 No Content (e.g., DELETE responses)
+  if (response.status === 204) {
+    return { success: true, message: 'OK', data: null as any };
+  }
+
   return response.json();
 }
 
