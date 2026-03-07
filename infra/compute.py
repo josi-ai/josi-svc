@@ -42,7 +42,7 @@ api_service = gcp.cloudrunv2.Service(
         containers=[
             gcp.cloudrunv2.ServiceTemplateContainerArgs(
                 image=f"{registry_url}/josi-api:latest",
-                ports=[gcp.cloudrunv2.ServiceTemplateContainerPortArgs(container_port=8000)],
+                ports=gcp.cloudrunv2.ServiceTemplateContainerPortsArgs(container_port=8000, name="http1"),
                 resources=gcp.cloudrunv2.ServiceTemplateContainerResourcesArgs(
                     limits={"memory": api_memory, "cpu": api_cpu},
                     cpu_idle=True,
@@ -161,7 +161,7 @@ web_service = gcp.cloudrunv2.Service(
         containers=[
             gcp.cloudrunv2.ServiceTemplateContainerArgs(
                 image=f"{registry_url}/josi-web:latest",
-                ports=[gcp.cloudrunv2.ServiceTemplateContainerPortArgs(container_port=3000)],
+                ports=gcp.cloudrunv2.ServiceTemplateContainerPortsArgs(container_port=3000, name="http1"),
                 resources=gcp.cloudrunv2.ServiceTemplateContainerResourcesArgs(
                     limits={"memory": web_memory, "cpu": web_cpu},
                     cpu_idle=True,

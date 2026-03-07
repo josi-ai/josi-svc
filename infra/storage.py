@@ -21,7 +21,6 @@ bucket = gcp.storage.Bucket(
             action=gcp.storage.BucketLifecycleRuleActionArgs(type="Delete"),
             condition=gcp.storage.BucketLifecycleRuleConditionArgs(
                 age=7,
-                matches_prefix=["tmp/"],
             ),
         ),
     ],
