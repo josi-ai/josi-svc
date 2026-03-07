@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import { spawnSync } from 'child_process';
 import * as logger from '../lib/logger.js';
 import { getProjectRoot } from '../lib/detect.js';
-import { composeExec, isDockerRunning } from '../lib/docker.js';
+import { exec, isDockerRunning } from '../lib/docker.js';
 
 export function register(program: Command): void {
   const test = program
@@ -88,7 +88,7 @@ Examples:
   test
     .command('db-up')
     .description('Start the test database (pgvector on tmpfs)')
-    .action(() => {
+    .action(async () => {
       logger.header('Starting Test Database');
 
       if (!isDockerRunning()) {
@@ -99,9 +99,9 @@ Examples:
       const root = getProjectRoot();
       logger.step('Starting test database...');
 
-      const result = composeExec(['--profile', 'test', 'up', '-d', 'db-test'], { cwd: root });
+      const result = await exec(['--profile', 'test', 'up', '-d', 'db-test'], { cwd: root });
 
-      if (result.status !== 0) {
+      if (result.code !== 0) {
         logger.error('Failed to start test database.');
         process.exit(1);
       }
@@ -117,11 +117,11 @@ Examples:
   test
     .command('db-down')
     .description('Stop the test database')
-    .action(() => {
+    .action(async () => {
       logger.header('Stopping Test Database');
       const root = getProjectRoot();
 
-      composeExec(['--profile', 'test', 'down'], { cwd: root });
+      await exec(['--profile', 'test', 'down'], { cwd: root });
 
       logger.blank();
       logger.success('Test database stopped.');

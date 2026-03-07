@@ -15,7 +15,7 @@ Examples:
   $ josi db upgrade            # Apply all pending migrations
   $ josi db upgrade -r abc123  # Upgrade to specific revision`
     )
-    .action((opts: { revision: string }) => {
+    .action(async (opts: { revision: string }) => {
       logger.header('Upgrade Database');
 
       if (!isDockerRunning()) {
@@ -26,15 +26,15 @@ Examples:
       const root = getProjectRoot();
       logger.step(`Upgrading to: ${opts.revision}`);
 
-      const result = containerExec(root, 'api', [
+      const result = await containerExec([], 'api', [
         'poetry',
         'run',
         'alembic',
         'upgrade',
         opts.revision,
-      ]);
+      ], { cwd: root });
 
-      if (result.status !== 0) {
+      if (result.code !== 0) {
         logger.error('Migration upgrade failed.');
         process.exit(1);
       }

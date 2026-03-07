@@ -66,7 +66,7 @@ Examples:
 
       // Generate migration
       logger.step(`Generating migration: "${message}"`);
-      const result = containerExec(root, 'api', [
+      const result = await containerExec([], 'api', [
         'poetry',
         'run',
         'alembic',
@@ -74,9 +74,9 @@ Examples:
         '--autogenerate',
         '-m',
         message,
-      ]);
+      ], { cwd: root });
 
-      if (result.status !== 0) {
+      if (result.code !== 0) {
         logger.error('Migration generation failed.');
         logger.dim('Make sure services are running: josi redock up');
         process.exit(1);

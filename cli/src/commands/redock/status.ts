@@ -1,15 +1,15 @@
 import type { Command } from 'commander';
 import * as logger from '../../lib/logger.js';
 import { getProjectRoot } from '../../lib/detect.js';
-import { composePs } from '../../lib/docker.js';
+import { exec } from '../../lib/docker.js';
 
 export function register(parent: Command): void {
   parent
     .command('status')
     .description('Show running container status')
-    .action(() => {
+    .action(async () => {
       logger.header('Container Status');
       const root = getProjectRoot();
-      composePs(root);
+      await exec(['ps', '--format', 'table'], { cwd: root });
     });
 }

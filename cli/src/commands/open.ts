@@ -16,15 +16,13 @@ Targets:
   graphql   GraphQL Playground
   redoc     ReDoc documentation
   web       Web app
-  adminer   Database management UI
 
 Examples:
   $ josi open              # Open Swagger docs
   $ josi open docs         # Open Swagger docs
   $ josi open graphql      # Open GraphQL Playground
   $ josi open redoc        # Open ReDoc
-  $ josi open web          # Open Web app
-  $ josi open adminer      # Open DB management UI`
+  $ josi open web          # Open Web app`
     )
     .action((target?: string) => {
       const urlMap: Record<string, string> = {
@@ -32,14 +30,13 @@ Examples:
         graphql: URLS.graphql,
         redoc: URLS.redoc,
         web: URLS.web,
-        adminer: URLS.adminer,
       };
 
       const key = target ?? 'docs';
       const url = urlMap[key];
 
       if (!url) {
-        logger.error(`Unknown target: "${key}". Use: docs, graphql, redoc, web, or adminer`);
+        logger.error(`Unknown target: "${key}". Use: docs, graphql, redoc, or web`);
         process.exit(1);
       }
 

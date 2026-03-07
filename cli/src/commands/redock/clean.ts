@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import * as logger from '../../lib/logger.js';
 import { getProjectRoot } from '../../lib/detect.js';
-import { composeDown } from '../../lib/docker.js';
+import { exec } from '../../lib/docker.js';
 import { confirmAction } from '../../lib/prompt.js';
 
 export function register(parent: Command): void {
@@ -33,7 +33,9 @@ Examples:
       }
 
       logger.step('Stopping containers...');
-      composeDown(root, opts.volumes);
+      const args = ['down'];
+      if (opts.volumes) args.push('-v', '--remove-orphans');
+      await exec(args, { cwd: root });
 
       logger.blank();
       logger.success(
