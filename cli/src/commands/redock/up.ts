@@ -32,12 +32,14 @@ Examples:
       logger.success('Services started!');
       logger.blank();
       logger.dim('  API:       http://localhost:1954');
+      logger.dim('  Web:       http://localhost:1989');
       logger.dim('  Docs:      http://localhost:1954/docs');
       logger.dim('  GraphQL:   http://localhost:1954/graphql');
       logger.dim('  Postgres:  localhost:1961');
       logger.dim('  Redis:     localhost:1982');
       logger.blank();
       logger.dim('Run "josi redock logs" to follow logs.');
+      logger.dim('Run "josi open web" to open the web app.');
       logger.dim('Run "josi open adminer" for DB management UI.');
       logger.blank();
     });

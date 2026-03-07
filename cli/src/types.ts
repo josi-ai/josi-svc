@@ -9,6 +9,7 @@ export const SERVICES: Record<string, ServiceConfig> = {
   db: { name: 'PostgreSQL', port: 1961, url: 'postgresql://josi:josi@localhost:1961/josi' },
   redis: { name: 'Redis', port: 1982, url: 'redis://localhost:1982/0' },
   'db-test': { name: 'Test DB', port: 1962, url: 'postgresql://josi:josi@localhost:1962/josi_test' },
+  web: { name: 'Josi Web', port: 1989, url: 'http://localhost:1989' },
   adminer: { name: 'Adminer', port: 1980, url: 'http://localhost:1980' },
 };
 
@@ -17,6 +18,7 @@ export const URLS = {
   redoc: 'http://localhost:1954/redoc',
   graphql: 'http://localhost:1954/graphql',
   health: 'http://localhost:1954/api/v1/health',
+  web: 'http://localhost:1989',
   adminer: 'http://localhost:1980',
 };
 
