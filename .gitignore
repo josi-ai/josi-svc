@@ -245,6 +245,10 @@ Thumbs.db
 
 VedAstro/
 
+# Pulumi
+infra/venv/
+infra/*.pyc
+
 # Web app
 web/node_modules/
 web/.next/

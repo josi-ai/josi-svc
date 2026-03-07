@@ -1,0 +1,23 @@
+config:
+  gcp:project: josiam
+  gcp:region: us-central1
+  josi:environment: dev
+  # Database
+  josi:db_tier: "db-f1-micro"
+  josi:db_edition: "ENTERPRISE"
+  josi:db_version: "POSTGRES_17"
+  josi:db_disk_size: "10"
+  josi:db_availability: "ZONAL"
+  josi:db_deletion_protection: "false"
+  # Cloud Run - API
+  josi:api_memory: "512Mi"
+  josi:api_cpu: "1"
+  josi:api_min_instances: "0"
+  josi:api_max_instances: "3"
+  # Cloud Run - Web
+  josi:web_memory: "512Mi"
+  josi:web_cpu: "1"
+  josi:web_min_instances: "0"
+  josi:web_max_instances: "3"
+  # Storage
+  josi:bucket_location: "us-central1"
