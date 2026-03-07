@@ -3,20 +3,8 @@ services:
     image: pgvector/pgvector:pg16
     container_name: josi-db
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: josi
-      POSTGRES_PASSWORD: josi
-      POSTGRES_DB: josi
-    ports:
-      - "1961:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U josi"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    profiles:
+      - local
     command: >
       postgres
       -c shared_buffers=256MB
@@ -45,6 +33,15 @@ services:
     profiles:
       - test
 
+  cloudsql-proxy:
+    container_name: josi-cloudsql-proxy
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.15.2
+    restart: unless-stopped
+    profiles:
+      - cloud
+    ports:
+      - "15432:5432"
+
   api:
     build: .
     container_name: josi-api
@@ -54,11 +51,8 @@ services:
     env_file:
       - .env.local
     environment:
-      DATABASE_URL: postgresql://josi:josi@db:5432/josi
       AUTO_DB_MIGRATION: "True"
-    depends_on:
-      db:
-        condition: service_healthy
+      EPHEMERIS_PATH: /usr/share/swisseph
     volumes:
       - ./src:/app/src
       - ./alembic.ini:/app/alembic.ini
@@ -86,5 +80,4 @@ services:
     command: npm run dev
 
 volumes:
-  postgres_data:
   web_node_modules:
