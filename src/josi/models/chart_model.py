@@ -4,7 +4,6 @@ Astrology Chart models using SQLModel.
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from uuid import UUID
-from enum import Enum
 from sqlalchemy import text, JSON, ForeignKey, Column, String, Text
 from sqlmodel import Field, SQLModel, Relationship
 from pgvector.sqlalchemy import Vector
@@ -12,39 +11,6 @@ import strawberry
 from pydantic import field_validator
 
 from .base import TenantBaseModel
-
-
-class AstrologySystem(str, Enum):
-    """Supported astrology systems."""
-    VEDIC = "vedic"
-    WESTERN = "western"
-    CHINESE = "chinese"
-    HELLENISTIC = "hellenistic"
-    MAYAN = "mayan"
-    CELTIC = "celtic"
-    SIDEREAL = "sidereal"
-    TROPICAL = "tropical"
-
-
-class HouseSystem(str, Enum):
-    """Supported house systems."""
-    PLACIDUS = "placidus"
-    KOCH = "koch"
-    EQUAL = "equal"
-    WHOLE_SIGN = "whole_sign"
-    REGIOMONTANUS = "regiomontanus"
-    CAMPANUS = "campanus"
-    PORPHYRY = "porphyry"
-    ALCABITIUS = "alcabitius"
-
-
-class Ayanamsa(str, Enum):
-    """Supported ayanamsa systems."""
-    LAHIRI = "lahiri"
-    KRISHNAMURTI = "krishnamurti"
-    RAMAN = "raman"
-    FAGAN_BRADLEY = "fagan_bradley"
-    TRUE_CHITRAPAKSHA = "true_chitrapaksha"
 
 
 class ChartEntity(SQLModel):

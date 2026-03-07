@@ -9,9 +9,11 @@ from sqlalchemy import select, func, and_, or_
 
 from josi.models.remedy_model import (
     Remedy, RemedyRecommendation, UserRemedyProgress,
-    RemedyType, DoshaType, Tradition,
     RecommendationRequest, RecommendationResponse, RemedyResponse
 )
+from josi.enums.remedy_type_enum import RemedyTypeEnum as RemedyType
+from josi.enums.dosha_type_enum import DoshaTypeEnum as DoshaType
+from josi.enums.tradition_enum import TraditionEnum as Tradition
 from josi.models.chart_model import AstrologyChart
 from josi.models.user_model import User
 from josi.services.ai.interpretation_service import AIInterpretationService
@@ -436,7 +438,9 @@ class RemedyRecommendationService:
         
         # Apply filters
         if tradition_preference:
-            query = query.where(Remedy.tradition == tradition_preference)
+            tradition_enum = Tradition.lookup(tradition_preference)
+            if tradition_enum:
+                query = query.where(Remedy.tradition_id == tradition_enum.id)
         
         if difficulty_preference:
             query = query.where(Remedy.difficulty_level <= difficulty_preference)
@@ -478,14 +482,15 @@ class RemedyRecommendationService:
                 reasons.append(f"Strengthens weak {remedy.planet}")
         
         # Dosha-specific remedies
-        if remedy.dosha_type:
+        if remedy.dosha_type_id:
             chart_doshas = [d["type"] for d in analysis["doshas"]]
-            if remedy.dosha_type in chart_doshas:
+            dosha_enum = DoshaType.from_id(remedy.dosha_type_id)
+            if dosha_enum and dosha_enum in chart_doshas:
                 score += 40
-                reasons.append(f"Directly addresses {remedy.dosha_type}")
-        
+                reasons.append(f"Directly addresses {remedy.dosha_type_name}")
+
         # General remedies get lower but still positive scores
-        if not remedy.planet and not remedy.dosha_type:
+        if not remedy.planet and not remedy.dosha_type_id:
             score += 10
             reasons.append("General spiritual remedy")
         
@@ -543,10 +548,13 @@ class RemedyRecommendationService:
             remedy=RemedyResponse(
                 remedy_id=remedy.remedy_id,
                 name=remedy.name,
-                type=remedy.type.value,
-                tradition=remedy.tradition.value,
+                type_id=remedy.type_id,
+                type_name=remedy.type_name,
+                tradition_id=remedy.tradition_id,
+                tradition_name=remedy.tradition_name,
                 planet=remedy.planet,
-                dosha_type=remedy.dosha_type.value if remedy.dosha_type else None,
+                dosha_type_id=remedy.dosha_type_id,
+                dosha_type_name=remedy.dosha_type_name,
                 description=remedy.description,
                 instructions=remedy.instructions,
                 benefits=remedy.benefits,
@@ -587,7 +595,7 @@ class RemedyRecommendationService:
             prompt = f"""
             Create personalized instructions for this astrological remedy:
             
-            Remedy: {remedy.name} ({remedy.type.value})
+            Remedy: {remedy.name} ({remedy.type_name})
             Standard Instructions: {remedy.get_localized_content('instructions', 'en')}
             
             Chart Issues: {relevance_data['reasons']}
@@ -626,7 +634,7 @@ class RemedyRecommendationService:
         if severity.get("high", 0) > 2:
             # High severity issues take longer
             return f"{base_duration * 2}-{base_duration * 3} days for initial results"
-        elif remedy.type in [RemedyType.MANTRA, RemedyType.MEDITATION]:
+        elif remedy.type_id in [RemedyType.MANTRA.id, RemedyType.MEDITATION.id]:
             return f"{base_duration // 2}-{base_duration} days for noticeable effects"
         else:
             return f"{base_duration}-{base_duration * 2} days for meaningful results"

@@ -81,7 +81,7 @@ async def generate_interpretation(
             "AI interpretation generated",
             user_id=str(current_user.user_id),
             chart_id=str(request.chart_id),
-            style=request.style.value
+            style=request.style.description
         )
         
         return ResponseModel(
@@ -163,8 +163,8 @@ async def get_interpretation_styles() -> ResponseModel:
     """Get available interpretation styles."""
     styles = [
         {
-            "value": style.value,
-            "name": style.value.title(),
+            "value": style.id,
+            "name": style.description,
             "description": {
                 InterpretationStyle.BALANCED: "A balanced blend of traditional and modern interpretations",
                 InterpretationStyle.PSYCHOLOGICAL: "Focus on psychological patterns and personal growth",
@@ -190,14 +190,14 @@ async def get_ai_providers() -> ResponseModel:
     
     if settings.openai_api_key:
         providers.append({
-            "value": AIProvider.OPENAI.value,
+            "value": AIProvider.OPENAI.id,
             "name": "OpenAI GPT-4",
             "description": "Advanced language model with broad knowledge"
         })
-    
+
     if settings.anthropic_api_key:
         providers.append({
-            "value": AIProvider.ANTHROPIC.value,
+            "value": AIProvider.ANTHROPIC.id,
             "name": "Anthropic Claude",
             "description": "Thoughtful and nuanced interpretations"
         })

@@ -12,7 +12,9 @@ from sqlalchemy import select, func
 from josi.repositories.person_repository import ChartRepository
 from josi.models.person_model import Person
 from josi.models.chart_model import AstrologyChart, ChartInterpretation, PlanetPosition
-from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
+from josi.enums.astrology_system_enum import AstrologySystemEnum as AstrologySystem
+from josi.enums.house_system_enum import HouseSystemEnum as HouseSystem
+from josi.enums.ayanamsa_enum import AyanamsaEnum as Ayanamsa
 
 # Import all calculation services
 from josi.services.astrology_service import AstrologyCalculator
@@ -73,7 +75,7 @@ class ChartService:
                 chart_data = await self._calculate_western_chart(
                     person, house_system
                 )
-                chart_data["system"] = system.value
+                chart_data["system"] = system.name.lower()
             
             # Create chart record - serialize JSON fields using custom serializer
             import json
@@ -81,9 +83,9 @@ class ChartService:
             
             chart_dict = {
                 "person_id": person.person_id,
-                "chart_type": system.value,
-                "house_system": house_system.value,
-                "ayanamsa": ayanamsa.value if system == AstrologySystem.VEDIC else None,
+                "chart_type": system.name.lower(),
+                "house_system": house_system.name.lower(),
+                "ayanamsa": ayanamsa.name.lower() if system == AstrologySystem.VEDIC else None,
                 "chart_data": json.loads(json.dumps(chart_data, default=custom_json_serializer)),
                 "calculated_at": datetime.utcnow(),
                 "calculation_version": "2.0",
@@ -114,7 +116,7 @@ class ChartService:
     ) -> Dict[str, Any]:
         """Calculate Vedic astrology chart."""
         # Set ayanamsa
-        self.astrology_calculator.set_ayanamsa(ayanamsa.value)
+        self.astrology_calculator.set_ayanamsa(ayanamsa.name.lower())
         
         # Calculate base chart with timezone
         chart_data = self.astrology_calculator.calculate_vedic_chart(
@@ -681,9 +683,10 @@ class ChartService:
             raise ValueError(f"Person {person_id} not found")
         
         # Convert chart types to enum values
-        systems = [AstrologySystem(ct) for ct in chart_types]
-        hs = HouseSystem(house_system)
-        ay = Ayanamsa(ayanamsa) if ayanamsa else Ayanamsa.LAHIRI
+        systems = [AstrologySystem.lookup(ct) for ct in chart_types]
+        systems = [s for s in systems if s is not None]
+        hs = HouseSystem.lookup(house_system) or HouseSystem.PLACIDUS
+        ay = Ayanamsa.lookup(ayanamsa) if ayanamsa else Ayanamsa.LAHIRI
         
         return await self.calculate_charts(
             person=person,

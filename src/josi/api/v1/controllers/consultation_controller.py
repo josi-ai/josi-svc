@@ -19,9 +19,9 @@ from josi.models.consultation_model import (
     ConsultationResponse,
     MessageCreate,
     MessageResponse,
-    ConsultationStatus,
-    ConsultationType
 )
+from josi.enums.consultation_status_enum import ConsultationStatusEnum as ConsultationStatus
+from josi.enums.consultation_type_enum import ConsultationTypeEnum as ConsultationType
 from josi.api.response import ResponseModel
 from cache.cache_decorator import cache
 import structlog
@@ -57,7 +57,8 @@ async def book_consultation(
             message="Consultation booked successfully",
             data={
                 "consultation_id": consultation.consultation_id,
-                "status": consultation.status.value,
+                "status_id": consultation.status_id,
+                "status_name": consultation.status_name,
                 "scheduled_at": consultation.scheduled_at,
                 "total_amount": consultation.total_amount,
                 "video_room_id": consultation.video_room_id,
@@ -84,16 +85,19 @@ async def book_consultation(
 async def get_my_consultations(
     current_user: CurrentUser = Depends(resolve_current_user),
     db: AsyncSession = Depends(get_db),
-    status_filter: Optional[ConsultationStatus] = Query(default=None),
+    status_filter: Optional[str] = Query(default=None, description="Filter by status"),
     limit: int = Query(default=20, le=100),
     offset: int = Query(default=0, ge=0)
 ) -> ResponseModel:
     """Get consultations for the current user."""
     try:
+        # Resolve status filter string to enum
+        status_enum = ConsultationStatus.lookup(status_filter) if status_filter else None
+
         consultation_service = ConsultationService(db)
         consultations = await consultation_service.get_user_consultations(
             user_id=current_user.user_id,
-            status_filter=status_filter,
+            status_filter=status_enum,
             limit=limit,
             offset=offset
         )
@@ -105,20 +109,23 @@ async def get_my_consultations(
                 user_id=consultation.user_id,
                 astrologer_id=consultation.astrologer_id,
                 chart_id=consultation.chart_id,
-                type=consultation.type.value,
-                status=consultation.status.value,
+                consultation_type_id=consultation.consultation_type_id,
+                consultation_type_name=consultation.consultation_type_name,
+                status_id=consultation.status_id,
+                status_name=consultation.status_name,
                 user_questions=consultation.user_questions,
                 focus_areas=consultation.focus_areas,
                 scheduled_at=consultation.scheduled_at,
                 duration_minutes=consultation.duration_minutes,
                 total_amount=consultation.total_amount,
                 currency=consultation.currency,
-                payment_status=consultation.payment_status.value,
+                payment_status_id=consultation.payment_status_id,
+                payment_status_name=consultation.payment_status_name,
                 ai_summary=consultation.ai_summary,
                 created_at=consultation.created_at,
                 completed_at=consultation.completed_at
             ))
-        
+
         return ResponseModel(
             success=True,
             message=f"Retrieved {len(consultation_list)} consultations",
@@ -129,7 +136,7 @@ async def get_my_consultations(
                 "offset": offset
             }
         )
-        
+
     except Exception as e:
         logger.error(
             "Failed to get user consultations",
@@ -208,15 +215,18 @@ async def get_consultation_details(
                     user_id=consultation.user_id,
                     astrologer_id=consultation.astrologer_id,
                     chart_id=consultation.chart_id,
-                    type=consultation.type.value,
-                    status=consultation.status.value,
+                    consultation_type_id=consultation.consultation_type_id,
+                    consultation_type_name=consultation.consultation_type_name,
+                    status_id=consultation.status_id,
+                    status_name=consultation.status_name,
                     user_questions=consultation.user_questions,
                     focus_areas=consultation.focus_areas,
                     scheduled_at=consultation.scheduled_at,
                     duration_minutes=consultation.duration_minutes,
                     total_amount=consultation.total_amount,
                     currency=consultation.currency,
-                    payment_status=consultation.payment_status.value,
+                    payment_status_id=consultation.payment_status_id,
+                    payment_status_name=consultation.payment_status_name,
                     ai_summary=consultation.ai_summary,
                     created_at=consultation.created_at,
                     completed_at=consultation.completed_at
@@ -281,7 +291,8 @@ async def respond_to_consultation(
             message="Response submitted successfully",
             data={
                 "consultation_id": consultation.consultation_id,
-                "status": consultation.status.value,
+                "status_id": consultation.status_id,
+                "status_name": consultation.status_name,
                 "completed_at": consultation.completed_at
             }
         )
@@ -392,14 +403,14 @@ async def get_consultation_types() -> ResponseModel:
     types = []
     for consult_type in ConsultationType:
         types.append({
-            "value": consult_type.value,
-            "name": consult_type.value.title(),
+            "value": consult_type.id,
+            "name": consult_type.description,
             "description": {
-                "video": "Live video consultation with screen sharing",
-                "chat": "Real-time text-based consultation",
-                "email": "Detailed written consultation via email",
-                "voice": "Voice-only consultation via phone"
-            }.get(consult_type.value, "")
+                ConsultationType.VIDEO: "Live video consultation with screen sharing",
+                ConsultationType.CHAT: "Real-time text-based consultation",
+                ConsultationType.EMAIL: "Detailed written consultation via email",
+                ConsultationType.VOICE: "Voice-only consultation via phone"
+            }.get(consult_type, "")
         })
     
     return ResponseModel(
@@ -441,7 +452,7 @@ async def get_pending_consultations(
             limit=limit,
             offset=offset
         )
-        
+
         consultation_list = []
         for consultation in consultations:
             consultation_list.append(ConsultationResponse(
@@ -449,15 +460,18 @@ async def get_pending_consultations(
                 user_id=consultation.user_id,
                 astrologer_id=consultation.astrologer_id,
                 chart_id=consultation.chart_id,
-                type=consultation.type.value,
-                status=consultation.status.value,
+                consultation_type_id=consultation.consultation_type_id,
+                consultation_type_name=consultation.consultation_type_name,
+                status_id=consultation.status_id,
+                status_name=consultation.status_name,
                 user_questions=consultation.user_questions,
                 focus_areas=consultation.focus_areas,
                 scheduled_at=consultation.scheduled_at,
                 duration_minutes=consultation.duration_minutes,
                 total_amount=consultation.total_amount,
                 currency=consultation.currency,
-                payment_status=consultation.payment_status.value,
+                payment_status_id=consultation.payment_status_id,
+                payment_status_name=consultation.payment_status_name,
                 ai_summary=consultation.ai_summary,
                 created_at=consultation.created_at,
                 completed_at=consultation.completed_at

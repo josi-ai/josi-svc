@@ -11,11 +11,13 @@ from josi.core.database import get_db
 from josi.auth.middleware import resolve_current_user
 from josi.auth.schemas import CurrentUser
 from josi.models.remedy_model import (
-    RemedyCreate, RemedyUpdate, RemedyResponse, 
+    RemedyCreate, RemedyUpdate, RemedyResponse,
     RecommendationRequest, RecommendationResponse,
     ProgressUpdate, ProgressResponse,
-    RemedyType, Tradition, DoshaType
 )
+from josi.enums.remedy_type_enum import RemedyTypeEnum as RemedyType
+from josi.enums.tradition_enum import TraditionEnum as Tradition
+from josi.enums.dosha_type_enum import DoshaTypeEnum as DoshaType
 from josi.services.remedy_recommendation_service import RemedyRecommendationService
 from josi.repositories.remedy_repository import RemedyRepository
 from josi.api.response import ResponseModel
@@ -95,10 +97,10 @@ async def get_remedy_recommendations(
 @router.get("/")
 async def list_remedies(
     db: AsyncSession = Depends(get_db),
-    tradition: Optional[Tradition] = Query(None, description="Filter by tradition"),
-    remedy_type: Optional[RemedyType] = Query(None, description="Filter by remedy type"),
+    tradition: Optional[str] = Query(None, description="Filter by tradition"),
+    remedy_type: Optional[str] = Query(None, description="Filter by remedy type"),
     planet: Optional[str] = Query(None, description="Filter by planet"),
-    dosha_type: Optional[DoshaType] = Query(None, description="Filter by dosha type"),
+    dosha_type: Optional[str] = Query(None, description="Filter by dosha type"),
     difficulty_max: Optional[int] = Query(None, ge=1, le=5, description="Maximum difficulty level"),
     cost_max: Optional[int] = Query(None, ge=1, le=5, description="Maximum cost level"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -108,24 +110,29 @@ async def list_remedies(
     List available remedies with optional filtering.
     """
     try:
+        # Resolve enum filters from string parameters
+        tradition_enum = Tradition.lookup(tradition) if tradition else None
+        remedy_type_enum = RemedyType.lookup(remedy_type) if remedy_type else None
+        dosha_type_enum = DoshaType.lookup(dosha_type) if dosha_type else None
+
         repository = RemedyRepository(db, None)
-        
+
         remedies = await repository.list_remedies(
-            tradition=tradition,
-            remedy_type=remedy_type,
+            tradition=tradition_enum,
+            remedy_type=remedy_type_enum,
             planet=planet,
-            dosha_type=dosha_type,
+            dosha_type=dosha_type_enum,
             difficulty_max=difficulty_max,
             cost_max=cost_max,
             skip=skip,
             limit=limit
         )
-        
+
         total_count = await repository.count_remedies(
-            tradition=tradition,
-            remedy_type=remedy_type,
+            tradition=tradition_enum,
+            remedy_type=remedy_type_enum,
             planet=planet,
-            dosha_type=dosha_type,
+            dosha_type=dosha_type_enum,
             difficulty_max=difficulty_max,
             cost_max=cost_max
         )
@@ -222,7 +229,7 @@ async def create_remedy(
     """
     try:
         # Check if user has permission to create remedies
-        if current_user.subscription_tier not in ["MASTER"]:  # Add admin check later
+        if current_user.subscription_tier.upper() not in ["MASTER"]:  # Add admin check later
             raise HTTPException(
                 status_code=403,
                 detail="Insufficient permissions to create remedies"
@@ -272,7 +279,7 @@ async def update_remedy(
     """
     try:
         # Check permissions
-        if current_user.subscription_tier not in ["MASTER"]:
+        if current_user.subscription_tier.upper() not in ["MASTER"]:
             raise HTTPException(
                 status_code=403,
                 detail="Insufficient permissions to update remedies"

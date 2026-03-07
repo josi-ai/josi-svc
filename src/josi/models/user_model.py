@@ -3,20 +3,13 @@ from sqlmodel import Field, SQLModel, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
-import enum
+
+from josi.enums.subscription_tier_enum import SubscriptionTierEnum
 
 if TYPE_CHECKING:
     from josi.models.consultation_model import Consultation
     from josi.models.saved_chart_model import SavedChart
     from josi.models.quiz_response_model import QuizResponse
-
-
-class SubscriptionTier(str, enum.Enum):
-    """Subscription tier levels for users."""
-    FREE = "free"
-    EXPLORER = "explorer"
-    MYSTIC = "mystic"
-    MASTER = "master"
 
 
 class User(SQLModel, table=True):
@@ -36,7 +29,8 @@ class User(SQLModel, table=True):
     birth_location: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
 
     # Subscription
-    subscription_tier: SubscriptionTier = Field(default=SubscriptionTier.FREE)
+    subscription_tier_id: Optional[int] = Field(default=1)
+    subscription_tier_name: Optional[str] = Field(default="Free")
     subscription_end_date: Optional[datetime] = Field(default=None)
     stripe_customer_id: Optional[str] = Field(default=None, index=True)
 
@@ -64,15 +58,16 @@ class User(SQLModel, table=True):
                 "email": "user@example.com",
                 "full_name": "John Doe",
                 "descope_id": "U3AXkLL5ULmyFWqbfyRwVpL2WjCi",
-                "subscription_tier": "free",
+                "subscription_tier_id": 1,
+                "subscription_tier_name": "Free",
             }
         }
 
     def has_premium_features(self) -> bool:
-        return self.subscription_tier != SubscriptionTier.FREE
+        return self.subscription_tier_id != SubscriptionTierEnum.FREE.id
 
     def is_subscription_active(self) -> bool:
-        if self.subscription_tier == SubscriptionTier.FREE:
+        if self.subscription_tier_id == SubscriptionTierEnum.FREE.id:
             return True
         return (
             self.subscription_end_date is not None
@@ -81,32 +76,32 @@ class User(SQLModel, table=True):
 
     def get_tier_limits(self) -> Dict[str, int]:
         limits = {
-            SubscriptionTier.FREE: {
+            SubscriptionTierEnum.FREE.id: {
                 "charts_per_month": 3,
                 "ai_interpretations_per_month": 5,
                 "saved_charts": 1,
                 "consultations_per_month": 0,
             },
-            SubscriptionTier.EXPLORER: {
+            SubscriptionTierEnum.EXPLORER.id: {
                 "charts_per_month": 50,
                 "ai_interpretations_per_month": 100,
                 "saved_charts": 10,
                 "consultations_per_month": 1,
             },
-            SubscriptionTier.MYSTIC: {
+            SubscriptionTierEnum.MYSTIC.id: {
                 "charts_per_month": 500,
                 "ai_interpretations_per_month": 500,
                 "saved_charts": 100,
                 "consultations_per_month": 3,
             },
-            SubscriptionTier.MASTER: {
+            SubscriptionTierEnum.MASTER.id: {
                 "charts_per_month": -1,
                 "ai_interpretations_per_month": -1,
                 "saved_charts": -1,
                 "consultations_per_month": 10,
             },
         }
-        return limits.get(self.subscription_tier, limits[SubscriptionTier.FREE])
+        return limits.get(self.subscription_tier_id, limits[SubscriptionTierEnum.FREE.id])
 
 
 class UserCreate(SQLModel):
@@ -135,7 +130,8 @@ class UserResponse(SQLModel):
     full_name: str
     phone: Optional[str]
     avatar_url: Optional[str]
-    subscription_tier: SubscriptionTier
+    subscription_tier_id: Optional[int]
+    subscription_tier_name: Optional[str]
     subscription_end_date: Optional[datetime]
     roles: List[str]
     is_active: bool

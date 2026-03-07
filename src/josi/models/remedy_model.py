@@ -5,47 +5,14 @@ from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
-import enum
+
+from josi.enums.remedy_type_enum import RemedyTypeEnum
+from josi.enums.tradition_enum import TraditionEnum
+from josi.enums.dosha_type_enum import DoshaTypeEnum
 
 if TYPE_CHECKING:
     from josi.models.user_model import User
     from josi.models.chart_model import AstrologyChart
-
-
-class RemedyType(str, enum.Enum):
-    """Types of astrological remedies."""
-    MANTRA = "mantra"
-    GEMSTONE = "gemstone"
-    YANTRA = "yantra"
-    RITUAL = "ritual"
-    CHARITY = "charity"
-    FASTING = "fasting"
-    PILGRIMAGE = "pilgrimage"
-    LIFESTYLE = "lifestyle"
-    MEDITATION = "meditation"
-    PRAYER = "prayer"
-
-
-class Tradition(str, enum.Enum):
-    """Astrological traditions."""
-    VEDIC = "vedic"
-    WESTERN = "western"
-    CHINESE = "chinese"
-    HELLENISTIC = "hellenistic"
-    TANTRIC = "tantric"
-
-
-class DoshaType(str, enum.Enum):
-    """Types of doshas that remedies can address."""
-    MANGAL_DOSHA = "mangal_dosha"
-    KAAL_SARP_DOSHA = "kaal_sarp_dosha"
-    PITRA_DOSHA = "pitra_dosha"
-    GURU_CHANDAL_DOSHA = "guru_chandal_dosha"
-    NADI_DOSHA = "nadi_dosha"
-    RAHU_DOSHA = "rahu_dosha"
-    KETU_DOSHA = "ketu_dosha"
-    SHANI_DOSHA = "shani_dosha"
-    GENERAL_AFFLICTION = "general_affliction"
 
 
 class Remedy(SQLModel, table=True):
@@ -57,12 +24,15 @@ class Remedy(SQLModel, table=True):
     
     # Basic Information
     name: str = Field(index=True)
-    type: RemedyType
-    tradition: Tradition = Field(default=Tradition.VEDIC)
-    
+    type_id: Optional[int] = Field(default=None)
+    type_name: Optional[str] = Field(default=None)
+    tradition_id: Optional[int] = Field(default=1)
+    tradition_name: Optional[str] = Field(default="Vedic")
+
     # Associations
     planet: Optional[str] = Field(default=None, index=True)
-    dosha_type: Optional[DoshaType] = Field(default=None, index=True)
+    dosha_type_id: Optional[int] = Field(default=None, index=True)
+    dosha_type_name: Optional[str] = Field(default=None)
     affliction_type: Optional[str] = Field(default=None)  # More specific afflictions
     
     # Multi-language content
@@ -116,8 +86,10 @@ class Remedy(SQLModel, table=True):
         json_schema_extra = {
             "example": {
                 "name": "Ganesha Mantra for Jupiter",
-                "type": "mantra",
-                "tradition": "vedic",
+                "type_id": 1,
+                "type_name": "Mantra",
+                "tradition_id": 1,
+                "tradition_name": "Vedic",
                 "planet": "Jupiter",
                 "description": {
                     "en": "Powerful mantra to strengthen Jupiter and remove obstacles",
@@ -227,10 +199,13 @@ class RemedyRecommendation(SQLModel, table=True):
 class RemedyCreate(SQLModel):
     """Schema for creating a remedy."""
     name: str
-    type: RemedyType
-    tradition: Tradition = Tradition.VEDIC
+    type_id: Optional[int] = None
+    type_name: Optional[str] = None
+    tradition_id: Optional[int] = 1
+    tradition_name: Optional[str] = "Vedic"
     planet: Optional[str] = None
-    dosha_type: Optional[DoshaType] = None
+    dosha_type_id: Optional[int] = None
+    dosha_type_name: Optional[str] = None
     description: Dict
     instructions: Dict
     benefits: Dict = {}
@@ -263,10 +238,13 @@ class RemedyResponse(SQLModel):
     """Schema for remedy response."""
     remedy_id: UUID
     name: str
-    type: str
-    tradition: str
+    type_id: Optional[int]
+    type_name: Optional[str]
+    tradition_id: Optional[int]
+    tradition_name: Optional[str]
     planet: Optional[str]
-    dosha_type: Optional[str]
+    dosha_type_id: Optional[int]
+    dosha_type_name: Optional[str]
     description: Dict
     instructions: Dict
     benefits: Dict

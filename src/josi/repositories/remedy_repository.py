@@ -11,8 +11,10 @@ from josi.repositories.base_repository import BaseRepository
 from josi.models.remedy_model import (
     Remedy, RemedyRecommendation, UserRemedyProgress,
     RemedyCreate, RemedyUpdate, ProgressUpdate,
-    RemedyType, Tradition, DoshaType
 )
+from josi.enums.remedy_type_enum import RemedyTypeEnum as RemedyType
+from josi.enums.tradition_enum import TraditionEnum as Tradition
+from josi.enums.dosha_type_enum import DoshaTypeEnum as DoshaType
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -43,16 +45,16 @@ class RemedyRepository(BaseRepository[Remedy]):
         
         # Apply filters
         if tradition:
-            query = query.where(Remedy.tradition == tradition)
+            query = query.where(Remedy.tradition_id == tradition.id)
         
         if remedy_type:
-            query = query.where(Remedy.type == remedy_type)
+            query = query.where(Remedy.type_id == remedy_type.id)
         
         if planet:
             query = query.where(Remedy.planet == planet)
         
         if dosha_type:
-            query = query.where(Remedy.dosha_type == dosha_type)
+            query = query.where(Remedy.dosha_type_id == dosha_type.id)
         
         if difficulty_max:
             query = query.where(Remedy.difficulty_level <= difficulty_max)
@@ -84,16 +86,16 @@ class RemedyRepository(BaseRepository[Remedy]):
         
         # Apply same filters as list_remedies
         if tradition:
-            query = query.where(Remedy.tradition == tradition)
+            query = query.where(Remedy.tradition_id == tradition.id)
         
         if remedy_type:
-            query = query.where(Remedy.type == remedy_type)
+            query = query.where(Remedy.type_id == remedy_type.id)
         
         if planet:
             query = query.where(Remedy.planet == planet)
         
         if dosha_type:
-            query = query.where(Remedy.dosha_type == dosha_type)
+            query = query.where(Remedy.dosha_type_id == dosha_type.id)
         
         if difficulty_max:
             query = query.where(Remedy.difficulty_level <= difficulty_max)
@@ -308,7 +310,7 @@ class RemedyRepository(BaseRepository[Remedy]):
         )
         
         if tradition:
-            query = query.where(Remedy.tradition == tradition)
+            query = query.where(Remedy.tradition_id == tradition.id)
         
         query = query.order_by(
             Remedy.effectiveness_rating.desc(),
@@ -337,7 +339,7 @@ class RemedyRepository(BaseRepository[Remedy]):
         )
         
         if tradition:
-            query = query.where(Remedy.tradition == tradition)
+            query = query.where(Remedy.tradition_id == tradition.id)
         
         query = query.order_by(Remedy.effectiveness_rating.desc()).limit(limit)
         

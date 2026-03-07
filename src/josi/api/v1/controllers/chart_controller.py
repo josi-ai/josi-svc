@@ -12,7 +12,9 @@ from josi.api.v1.dependencies import (
     AstrologyCalculatorDep, GeocodingServiceDep
 )
 from josi.api.response import ResponseModel
-from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
+from josi.enums.astrology_system_enum import AstrologySystemEnum as AstrologySystem
+from josi.enums.house_system_enum import HouseSystemEnum as HouseSystem
+from josi.enums.ayanamsa_enum import AyanamsaEnum as Ayanamsa
 from josi.api.v1.dto.chart_calculation_dto import CalculateChartRequest
 
 router = APIRouter(prefix="/charts", tags=["charts"])
@@ -24,8 +26,8 @@ async def calculate_chart(
     chart_service: ChartServiceDep,
     person_service: PersonServiceDep,
     systems: str = Query(default="vedic,western", description="Comma-separated list of systems"),
-    house_system: HouseSystem = Query(default=HouseSystem.PLACIDUS),
-    ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI),
+    house_system: str = Query(default="placidus", description="House calculation system"),
+    ayanamsa: str = Query(default="lahiri", description="Ayanamsa for Vedic calculations"),
     include_interpretations: bool = Query(default=False)
 ) -> ResponseModel:
     """
@@ -78,24 +80,33 @@ async def calculate_chart(
     # Parse systems
     systems_list = [s.strip() for s in systems.split(",") if s.strip()]
     try:
-        astrology_systems = [AstrologySystem(system) for system in systems_list]
+        astrology_systems = []
+        for system in systems_list:
+            resolved = AstrologySystem.lookup(system)
+            if resolved is None:
+                raise ValueError(f"Unknown system: {system}")
+            astrology_systems.append(resolved)
     except ValueError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid astrology system. Valid options: {[s.value for s in AstrologySystem]}"
+            detail=f"Invalid astrology system. Valid options: {AstrologySystem.get_all_descriptions()}"
         )
     
+    # Resolve house system and ayanamsa
+    house_system_enum = HouseSystem.lookup(house_system) or HouseSystem.PLACIDUS
+    ayanamsa_enum = Ayanamsa.lookup(ayanamsa) or Ayanamsa.LAHIRI
+
     # Get person
     person = await person_service.get_person(person_id)
     if not person:
         raise HTTPException(status_code=404, detail=f"Person with id {person_id} not found")
-    
+
     try:
         charts = await chart_service.calculate_charts(
             person=person,
             systems=astrology_systems,
-            house_system=house_system,
-            ayanamsa=ayanamsa,
+            house_system=house_system_enum,
+            ayanamsa=ayanamsa_enum,
             include_interpretations=include_interpretations
         )
         
@@ -162,15 +173,19 @@ async def calculate_chart_stateless(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid timezone '{tz}': {str(e)}")
 
+    # Resolve enums from string parameters
+    req_ayanamsa = Ayanamsa.lookup(request.ayanamsa) or Ayanamsa.LAHIRI
+    req_house_system = HouseSystem.lookup(request.house_system) or HouseSystem.PORPHYRY
+
     # Calculate chart
     try:
-        calculator.set_ayanamsa(request.ayanamsa.value)
+        calculator.set_ayanamsa(req_ayanamsa.name.lower())
         chart_data = calculator.calculate_vedic_chart(
             dt=birth_dt,
             latitude=lat,
             longitude=lng,
             timezone=tz,
-            house_system=request.house_system.value,
+            house_system=req_house_system.name.lower(),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -190,7 +205,7 @@ async def calculate_chart_stateless(
 async def get_person_charts(
     person_id: UUID,
     chart_service: ChartServiceDep,
-    system: Optional[AstrologySystem] = None,
+    system: Optional[str] = None,
     chart_type: Optional[str] = None
 ) -> ResponseModel:
     """
@@ -312,7 +327,7 @@ async def calculate_divisional_chart(
     chart_service: ChartServiceDep,
     person_service: PersonServiceDep,
     division: int = Query(..., ge=1, le=300, description="Division number (D1-D300)"),
-    ayanamsa: Ayanamsa = Query(default=Ayanamsa.LAHIRI)
+    ayanamsa: str = Query(default="lahiri", description="Ayanamsa for Vedic calculations")
 ) -> ResponseModel:
     """
     Calculate Vedic divisional chart (Varga).
@@ -357,16 +372,19 @@ async def calculate_divisional_chart(
     Example:
         GET /api/v1/charts/divisional/123e4567?division=9
     """
+    # Resolve ayanamsa
+    ayanamsa_enum = Ayanamsa.lookup(ayanamsa) or Ayanamsa.LAHIRI
+
     # Get person
     person = await person_service.get_person(person_id)
     if not person:
         raise HTTPException(status_code=404, detail=f"Person with id {person_id} not found")
-    
+
     try:
         divisional_chart = await chart_service.calculate_divisional_chart(
             person=person,
             division=division,
-            ayanamsa=ayanamsa
+            ayanamsa=ayanamsa_enum
         )
         
         return ResponseModel(
@@ -420,7 +438,12 @@ async def calculate_transit_chart(
     # Parse systems
     systems_list = [s.strip() for s in systems.split(",") if s.strip()]
     try:
-        astrology_systems = [AstrologySystem(system) for system in systems_list]
+        astrology_systems = []
+        for system in systems_list:
+            resolved = AstrologySystem.lookup(system)
+            if resolved is None:
+                raise ValueError(f"Unknown system: {system}")
+            astrology_systems.append(resolved)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid astrology system")
     

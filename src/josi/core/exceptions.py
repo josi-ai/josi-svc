@@ -2,41 +2,12 @@
 Production-ready exception handling with structured error responses
 """
 from typing import Any, Dict, List, Optional, Union
-from enum import Enum
 from fastapi import HTTPException, status
 import structlog
 
+from josi.enums.error_code_enum import ErrorCodeEnum as ErrorCode
+
 logger = structlog.get_logger()
-
-
-class ErrorCode(str, Enum):
-    """Standardized error codes for API responses"""
-    
-    # Authentication & Authorization
-    INVALID_API_KEY = "INVALID_API_KEY"
-    EXPIRED_TOKEN = "EXPIRED_TOKEN"
-    INSUFFICIENT_PERMISSIONS = "INSUFFICIENT_PERMISSIONS"
-    
-    # Validation Errors
-    INVALID_INPUT = "INVALID_INPUT"
-    MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD"
-    INVALID_DATE_FORMAT = "INVALID_DATE_FORMAT"
-    INVALID_COORDINATES = "INVALID_COORDINATES"
-    
-    # Business Logic Errors
-    PERSON_NOT_FOUND = "PERSON_NOT_FOUND"
-    CHART_CALCULATION_FAILED = "CHART_CALCULATION_FAILED"
-    EPHEMERIS_ERROR = "EPHEMERIS_ERROR"
-    GEOCODING_FAILED = "GEOCODING_FAILED"
-    
-    # System Errors
-    DATABASE_ERROR = "DATABASE_ERROR"
-    CACHE_ERROR = "CACHE_ERROR"
-    EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR"
-    
-    # Rate Limiting
-    RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED"
-    QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
 
 
 class JosiException(Exception):
@@ -199,7 +170,7 @@ class ErrorResponse:
         response = {
             "success": False,
             "error": {
-                "code": error_code.value,
+                "code": error_code.name,
                 "message": message,
                 "timestamp": "2024-01-01T00:00:00Z"  # Would be actual timestamp
             }
@@ -222,7 +193,7 @@ class ErrorResponse:
         return {
             "success": False,
             "error": {
-                "code": ErrorCode.INVALID_INPUT.value,
+                "code": ErrorCode.INVALID_INPUT.name,
                 "message": "Input validation failed",
                 "validation_errors": validation_errors,
                 "timestamp": "2024-01-01T00:00:00Z",
@@ -264,7 +235,7 @@ def log_exception(
     
     if isinstance(exc, JosiException):
         log_data.update({
-            "error_code": exc.error_code.value,
+            "error_code": exc.error_code.name,
             "status_code": exc.status_code,
             "details": exc.details
         })

@@ -6,7 +6,6 @@ from datetime import datetime
 import hashlib
 import json
 import asyncio
-from enum import Enum
 
 import structlog
 from openai import AsyncOpenAI
@@ -18,23 +17,10 @@ from sentence_transformers import SentenceTransformer
 
 from josi.core.config import settings
 from josi.models.chart_model import InterpretationEmbedding
+from josi.enums.interpretation_style_enum import InterpretationStyleEnum as InterpretationStyle
+from josi.enums.ai_provider_enum import AIProviderEnum as AIProvider
 
 logger = structlog.get_logger(__name__)
-
-
-class InterpretationStyle(str, Enum):
-    """Interpretation style preferences."""
-    BALANCED = "balanced"
-    PSYCHOLOGICAL = "psychological"
-    SPIRITUAL = "spiritual"
-    PRACTICAL = "practical"
-    PREDICTIVE = "predictive"
-
-
-class AIProvider(str, Enum):
-    """AI provider options."""
-    OPENAI = "openai"
-    ANTHROPIC = "anthropic"
 
 
 ASTROLOGY_SYSTEM_PROMPT = """You are an expert astrologer with deep knowledge of multiple astrological systems including Vedic, Western, Chinese, Hellenistic, Mayan, and Celtic astrology. You provide insightful, compassionate, and nuanced interpretations that empower people to understand themselves better.
@@ -117,8 +103,8 @@ class AIInterpretationService:
                 "confidence": confidence,
                 "sources": self._extract_sources(similar_interpretations),
                 "follow_up_questions": follow_up_questions,
-                "style": style.value,
-                "provider": provider.value,
+                "style": style.description,
+                "provider": provider.description,
                 "generated_at": datetime.utcnow().isoformat()
             }
 
@@ -127,7 +113,7 @@ class AIInterpretationService:
                 "Failed to generate interpretation",
                 error=str(e),
                 question=question,
-                style=style.value
+                style=style.description
             )
             raise
 

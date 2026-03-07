@@ -5,39 +5,15 @@ from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
-import enum
+
+from josi.enums.consultation_status_enum import ConsultationStatusEnum
+from josi.enums.consultation_type_enum import ConsultationTypeEnum
+from josi.enums.payment_status_enum import PaymentStatusEnum
 
 if TYPE_CHECKING:
     from josi.models.user_model import User
     from josi.models.astrologer_model import Astrologer
     from josi.models.chart_model import AstrologyChart
-
-
-class ConsultationStatus(str, enum.Enum):
-    """Consultation status options."""
-    PENDING = "pending"
-    SCHEDULED = "scheduled"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-    REFUNDED = "refunded"
-
-
-class ConsultationType(str, enum.Enum):
-    """Types of consultations."""
-    VIDEO = "video"
-    CHAT = "chat"
-    EMAIL = "email"
-    VOICE = "voice"
-
-
-class PaymentStatus(str, enum.Enum):
-    """Payment status for consultations."""
-    PENDING = "pending"
-    PAID = "paid"
-    FAILED = "failed"
-    REFUNDED = "refunded"
-    PARTIALLY_REFUNDED = "partially_refunded"
 
 
 class Consultation(SQLModel, table=True):
@@ -51,8 +27,10 @@ class Consultation(SQLModel, table=True):
     chart_id: UUID = Field(foreign_key="astrology_chart.chart_id", index=True)
     
     # Consultation Details
-    type: ConsultationType
-    status: ConsultationStatus = Field(default=ConsultationStatus.PENDING)
+    consultation_type_id: Optional[int] = Field(default=None)
+    consultation_type_name: Optional[str] = Field(default=None)
+    status_id: Optional[int] = Field(default=1)
+    status_name: Optional[str] = Field(default="Pending")
     
     # Questions and Focus Areas
     user_questions: List[str] = Field(default_factory=list, sa_column=Column(JSON))
@@ -83,7 +61,8 @@ class Consultation(SQLModel, table=True):
     # Payment Information
     total_amount: float
     currency: str = Field(default="USD")
-    payment_status: PaymentStatus = Field(default=PaymentStatus.PENDING)
+    payment_status_id: Optional[int] = Field(default=1)
+    payment_status_name: Optional[str] = Field(default="Pending")
     payment_intent_id: Optional[str] = Field(default=None)
     stripe_session_id: Optional[str] = Field(default=None)
     
@@ -109,7 +88,8 @@ class Consultation(SQLModel, table=True):
         """SQLModel config."""
         json_schema_extra = {
             "example": {
-                "type": "video",
+                "consultation_type_id": 1,
+                "consultation_type_name": "Video",
                 "user_questions": ["What does my chart say about my career path?"],
                 "focus_areas": ["career", "life_purpose"],
                 "duration_minutes": 60,
@@ -126,11 +106,11 @@ class Consultation(SQLModel, table=True):
         """Check if consultation is upcoming."""
         if not self.scheduled_at:
             return False
-        return self.scheduled_at > datetime.utcnow() and self.status == ConsultationStatus.SCHEDULED
+        return self.scheduled_at > datetime.utcnow() and self.status_id == ConsultationStatusEnum.SCHEDULED.id
     
     def can_be_cancelled(self) -> bool:
         """Check if consultation can be cancelled."""
-        if self.status in [ConsultationStatus.COMPLETED, ConsultationStatus.CANCELLED]:
+        if self.status_id in [ConsultationStatusEnum.COMPLETED.id, ConsultationStatusEnum.CANCELLED.id]:
             return False
         
         # Allow cancellation up to 2 hours before scheduled time
@@ -176,7 +156,8 @@ class ConsultationRequest(SQLModel):
     """Schema for requesting a consultation."""
     astrologer_id: UUID
     chart_id: UUID
-    type: ConsultationType
+    consultation_type_id: Optional[int] = None
+    consultation_type_name: Optional[str] = None
     user_questions: List[str]
     focus_areas: List[str] = []
     special_requests: Optional[str] = None
@@ -187,7 +168,8 @@ class ConsultationRequest(SQLModel):
 
 class ConsultationUpdate(SQLModel):
     """Schema for updating consultation."""
-    status: Optional[ConsultationStatus] = None
+    status_id: Optional[int] = None
+    status_name: Optional[str] = None
     scheduled_at: Optional[datetime] = None
     astrologer_notes: Optional[str] = None
     interpretation: Optional[Dict] = None
@@ -210,15 +192,18 @@ class ConsultationResponse(SQLModel):
     user_id: UUID
     astrologer_id: UUID
     chart_id: UUID
-    type: str
-    status: str
+    consultation_type_id: Optional[int]
+    consultation_type_name: Optional[str]
+    status_id: Optional[int]
+    status_name: Optional[str]
     user_questions: List[str]
     focus_areas: List[str]
     scheduled_at: Optional[datetime]
     duration_minutes: int
     total_amount: float
     currency: str
-    payment_status: str
+    payment_status_id: Optional[int]
+    payment_status_name: Optional[str]
     ai_summary: Optional[str]
     created_at: datetime
     completed_at: Optional[datetime]

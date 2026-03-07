@@ -5,41 +5,12 @@ from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
-import enum
+
+from josi.enums.verification_status_enum import VerificationStatusEnum
 
 if TYPE_CHECKING:
     from josi.models.user_model import User
     from josi.models.consultation_model import Consultation
-
-
-class AstrologerSpecialization(str, enum.Enum):
-    """Astrologer specialization areas."""
-    VEDIC = "vedic"
-    WESTERN = "western"
-    CHINESE = "chinese"
-    HELLENISTIC = "hellenistic"
-    MEDICAL = "medical"
-    KARMIC = "karmic"
-    RELATIONSHIP = "relationship"
-    CAREER = "career"
-    SPIRITUAL = "spiritual"
-    PREDICTIVE = "predictive"
-
-
-class ConsultationType(str, enum.Enum):
-    """Types of consultations offered."""
-    VIDEO = "video"
-    CHAT = "chat"
-    EMAIL = "email"
-    VOICE = "voice"
-
-
-class VerificationStatus(str, enum.Enum):
-    """Astrologer verification status."""
-    PENDING = "pending"
-    VERIFIED = "verified"
-    REJECTED = "rejected"
-    SUSPENDED = "suspended"
 
 
 class Astrologer(SQLModel, table=True):
@@ -82,7 +53,8 @@ class Astrologer(SQLModel, table=True):
     portfolio_urls: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     
     # Verification and Status
-    verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
+    verification_status_id: Optional[int] = Field(default=1)
+    verification_status_name: Optional[str] = Field(default="Pending")
     verification_date: Optional[datetime] = Field(default=None)
     verification_notes: Optional[str] = Field(default=None)
     is_active: bool = Field(default=True)
@@ -130,7 +102,7 @@ class Astrologer(SQLModel, table=True):
     
     def is_available_now(self) -> bool:
         """Check if astrologer is currently available."""
-        if not self.is_active or self.verification_status != VerificationStatus.VERIFIED:
+        if not self.is_active or self.verification_status_id != VerificationStatusEnum.VERIFIED.id:
             return False
         
         # TODO: Implement actual availability checking based on schedule
@@ -229,7 +201,8 @@ class AstrologerResponse(SQLModel):
     rating: float
     total_consultations: int
     total_reviews: int
-    verification_status: str
+    verification_status_id: Optional[int]
+    verification_status_name: Optional[str]
     is_active: bool
     is_featured: bool
     profile_image_url: Optional[str]

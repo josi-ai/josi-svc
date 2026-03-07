@@ -3,7 +3,8 @@ from datetime import date, time
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from josi.models.chart_model import HouseSystem, Ayanamsa
+from josi.enums.house_system_enum import HouseSystemEnum
+from josi.enums.ayanamsa_enum import AyanamsaEnum
 from josi.api.v1.dto.validators import parse_birth_time
 
 
@@ -18,8 +19,24 @@ class CalculateChartRequest(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     timezone: Optional[str] = None
-    house_system: HouseSystem = Field(default=HouseSystem.PORPHYRY)
-    ayanamsa: Ayanamsa = Field(default=Ayanamsa.LAHIRI)
+    house_system: str = Field(default="porphyry", description="House calculation system")
+    ayanamsa: str = Field(default="lahiri", description="Ayanamsa for Vedic calculations")
+
+    @field_validator("house_system")
+    @classmethod
+    def validate_house_system(cls, v: str) -> str:
+        resolved = HouseSystemEnum.lookup(v)
+        if resolved is None:
+            raise ValueError(f"Invalid house system: {v}. Valid: {HouseSystemEnum.get_all_descriptions()}")
+        return v
+
+    @field_validator("ayanamsa")
+    @classmethod
+    def validate_ayanamsa(cls, v: str) -> str:
+        resolved = AyanamsaEnum.lookup(v)
+        if resolved is None:
+            raise ValueError(f"Invalid ayanamsa: {v}. Valid: {AyanamsaEnum.get_all_descriptions()}")
+        return v
 
     @field_validator("time_of_birth")
     @classmethod

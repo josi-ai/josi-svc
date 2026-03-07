@@ -9,7 +9,9 @@ import re
 import bleach
 from decimal import Decimal
 
-from josi.models.chart_model import AstrologySystem, HouseSystem, Ayanamsa
+from josi.enums.astrology_system_enum import AstrologySystemEnum as AstrologySystem
+from josi.enums.house_system_enum import HouseSystemEnum as HouseSystem
+from josi.enums.ayanamsa_enum import AyanamsaEnum as Ayanamsa
 
 
 class ValidationError(Exception):
@@ -121,23 +123,39 @@ class ChartCalculationRequest(BaseModel):
         regex=r'^(vedic|western|chinese|hellenistic|mayan|celtic)(,(vedic|western|chinese|hellenistic|mayan|celtic))*$',
         description="Comma-separated list of astrology systems"
     )
-    house_system: HouseSystem = Field(default=HouseSystem.PLACIDUS, description="House calculation system")
-    ayanamsa: Ayanamsa = Field(default=Ayanamsa.LAHIRI, description="Ayanamsa for Vedic calculations")
+    house_system: str = Field(default="placidus", description="House calculation system")
+    ayanamsa: str = Field(default="lahiri", description="Ayanamsa for Vedic calculations")
     include_interpretations: bool = Field(default=False, description="Include AI interpretations")
-    
+
+    @validator('house_system')
+    def validate_house_system(cls, v):
+        """Validate house system"""
+        resolved = HouseSystem.lookup(v)
+        if resolved is None:
+            raise ValueError(f"Invalid house system: {v}. Valid: {HouseSystem.get_all_descriptions()}")
+        return v
+
+    @validator('ayanamsa')
+    def validate_ayanamsa(cls, v):
+        """Validate ayanamsa"""
+        resolved = Ayanamsa.lookup(v)
+        if resolved is None:
+            raise ValueError(f"Invalid ayanamsa: {v}. Valid: {Ayanamsa.get_all_descriptions()}")
+        return v
+
     @validator('systems')
     def validate_systems(cls, v):
         """Validate astrology systems"""
         valid_systems = {'vedic', 'western', 'chinese', 'hellenistic', 'mayan', 'celtic'}
         systems = {s.strip() for s in v.split(',') if s.strip()}
-        
+
         if not systems:
             raise ValueError("At least one astrology system must be specified")
-        
+
         if not systems.issubset(valid_systems):
             invalid_systems = systems - valid_systems
             raise ValueError(f"Invalid systems: {invalid_systems}. Valid: {valid_systems}")
-        
+
         return v
 
 
@@ -164,18 +182,26 @@ class DivisionalChartRequest(BaseModel):
     
     person_id: UUID = Field(..., description="Person's unique identifier")
     division: int = Field(..., ge=1, le=300, description="Division number (D1-D300)")
-    ayanamsa: Ayanamsa = Field(default=Ayanamsa.LAHIRI, description="Ayanamsa system")
-    
+    ayanamsa: str = Field(default="lahiri", description="Ayanamsa system")
+
+    @validator('ayanamsa')
+    def validate_ayanamsa(cls, v):
+        """Validate ayanamsa"""
+        resolved = Ayanamsa.lookup(v)
+        if resolved is None:
+            raise ValueError(f"Invalid ayanamsa: {v}. Valid: {Ayanamsa.get_all_descriptions()}")
+        return v
+
     @validator('division')
     def validate_division(cls, v):
         """Validate divisional chart number"""
         # Common divisional charts
         common_divisions = {1, 2, 3, 4, 7, 9, 10, 12, 16, 20, 24, 27, 30, 40, 45, 60}
-        
+
         if v not in common_divisions and v > 60:
             # Allow up to D300 but warn about uncommon divisions
             pass
-        
+
         return v
 
 

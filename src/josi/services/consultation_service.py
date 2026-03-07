@@ -9,14 +9,14 @@ from sqlalchemy import select, func, and_, or_
 from sqlalchemy.exc import IntegrityError
 
 from josi.models.consultation_model import (
-    Consultation, 
+    Consultation,
     ConsultationMessage,
     ConsultationRequest,
     ConsultationUpdate,
     AstrologerResponse,
-    ConsultationStatus,
-    PaymentStatus
 )
+from josi.enums.consultation_status_enum import ConsultationStatusEnum as ConsultationStatus
+from josi.enums.payment_status_enum import PaymentStatusEnum as PaymentStatus
 from josi.models.astrologer_model import Astrologer
 from josi.models.user_model import User
 # from josi.services.video_service import VideoConsultationService  # Commented out due to missing twilio dependency
@@ -48,7 +48,7 @@ class ConsultationService:
             if not astrologer:
                 raise ValueError("Astrologer not found")
             
-            if not astrologer.is_active or astrologer.verification_status != "verified":
+            if not astrologer.is_active or astrologer.verification_status_name != "Verified":
                 raise ValueError("Astrologer is not available")
             
             # Check astrologer's availability
@@ -73,7 +73,8 @@ class ConsultationService:
                 "user_id": user_id,
                 "astrologer_id": consultation_request.astrologer_id,
                 "chart_id": consultation_request.chart_id,
-                "type": consultation_request.type,
+                "consultation_type_id": consultation_request.consultation_type_id,
+                "consultation_type_name": consultation_request.consultation_type_name,
                 "user_questions": consultation_request.user_questions,
                 "focus_areas": consultation_request.focus_areas,
                 "special_requests": consultation_request.special_requests,
@@ -89,7 +90,7 @@ class ConsultationService:
             await self.db.flush()  # Get the ID
             
             # Create video room if it's a video consultation
-            if consultation_request.type == "video" and available_slot and self.video_service:
+            if consultation_request.consultation_type_name == "Video" and available_slot and self.video_service:
                 try:
                     video_details = self.video_service.create_room_for_consultation(
                         str(consultation.consultation_id),
@@ -108,7 +109,7 @@ class ConsultationService:
                         error=str(e),
                         consultation_id=str(consultation.consultation_id)
                     )
-            elif consultation_request.type == "video" and not self.video_service:
+            elif consultation_request.consultation_type_name == "Video" and not self.video_service:
                 logger.warning(
                     "Video consultation requested but video service not available",
                     consultation_id=str(consultation.consultation_id)
@@ -136,7 +137,7 @@ class ConsultationService:
                 consultation_id=str(consultation.consultation_id),
                 user_id=str(user_id),
                 astrologer_id=str(consultation_request.astrologer_id),
-                type=consultation_request.type.value
+                consultation_type=consultation_request.consultation_type_name
             )
             
             return consultation
@@ -167,7 +168,7 @@ class ConsultationService:
             if consultation.astrologer_id != astrologer_id:
                 raise ValueError("Unauthorized to respond to this consultation")
             
-            if consultation.status != ConsultationStatus.SCHEDULED:
+            if consultation.status_id != ConsultationStatus.SCHEDULED.id:
                 raise ValueError("Consultation is not in a state to receive responses")
             
             # Update consultation with astrologer's response
@@ -175,7 +176,8 @@ class ConsultationService:
             consultation.recommendations = response.recommendations
             consultation.follow_up_suggestions = response.follow_up_suggestions
             consultation.astrologer_notes = response.astrologer_notes
-            consultation.status = ConsultationStatus.COMPLETED
+            consultation.status_id = ConsultationStatus.COMPLETED.id
+            consultation.status_name = ConsultationStatus.COMPLETED.description
             consultation.completed_at = datetime.utcnow()
             
             # Generate AI summary of the consultation
@@ -275,13 +277,13 @@ class ConsultationService:
         )
         
         if status_filter:
-            query = query.where(Consultation.status == status_filter)
-        
+            query = query.where(Consultation.status_id == status_filter.id)
+
         query = query.order_by(Consultation.created_at.desc()).limit(limit).offset(offset)
-        
+
         result = await self.db.execute(query)
         return result.scalars().all()
-    
+
     async def get_astrologer_consultations(
         self,
         astrologer_id: UUID,
@@ -294,9 +296,9 @@ class ConsultationService:
             Consultation.astrologer_id == astrologer_id,
             Consultation.is_deleted == False
         )
-        
+
         if status_filter:
-            query = query.where(Consultation.status == status_filter)
+            query = query.where(Consultation.status_id == status_filter.id)
         
         query = query.order_by(Consultation.created_at.desc()).limit(limit).offset(offset)
         
@@ -321,7 +323,8 @@ class ConsultationService:
             if not consultation.can_be_cancelled():
                 raise ValueError("Consultation cannot be cancelled at this time")
             
-            consultation.status = ConsultationStatus.CANCELLED
+            consultation.status_id = ConsultationStatus.CANCELLED.id
+            consultation.status_name = ConsultationStatus.CANCELLED.description
             consultation.updated_at = datetime.utcnow()
             
             # End video room if exists
@@ -398,9 +401,9 @@ class ConsultationService:
                             time_slot - timedelta(hours=1),
                             time_slot + timedelta(hours=1)
                         ),
-                        Consultation.status.in_([
-                            ConsultationStatus.SCHEDULED,
-                            ConsultationStatus.IN_PROGRESS
+                        Consultation.status_id.in_([
+                            ConsultationStatus.SCHEDULED.id,
+                            ConsultationStatus.IN_PROGRESS.id
                         ])
                     )
                 )
@@ -505,7 +508,7 @@ class ConsultationService:
             completed_count = await self.db.execute(
                 select(func.count(Consultation.consultation_id)).where(
                     Consultation.astrologer_id == astrologer_id,
-                    Consultation.status == ConsultationStatus.COMPLETED,
+                    Consultation.status_id == ConsultationStatus.COMPLETED.id,
                     Consultation.is_deleted == False
                 )
             )

@@ -12,15 +12,15 @@ from josi.core.database import get_db
 from josi.auth.middleware import resolve_current_user
 from josi.auth.schemas import CurrentUser
 from josi.models.astrologer_model import (
-    Astrologer, 
+    Astrologer,
     AstrologerReview,
     AstrologerCreate,
     AstrologerUpdate,
     AstrologerResponse,
     ReviewCreate,
     ReviewResponse,
-    VerificationStatus
 )
+from josi.enums.verification_status_enum import VerificationStatusEnum as VerificationStatus
 from josi.api.response import ResponseModel
 from cache.cache_decorator import cache
 import structlog
@@ -72,7 +72,8 @@ async def register_as_astrologer(
             message="Astrologer registration submitted for review",
             data={
                 "astrologer_id": astrologer.astrologer_id,
-                "verification_status": astrologer.verification_status
+                "verification_status_id": astrologer.verification_status_id,
+                "verification_status_name": astrologer.verification_status_name
             }
         )
         
@@ -110,7 +111,7 @@ async def search_astrologers(
         # Build query
         query = select(Astrologer).where(
             Astrologer.is_active == True,
-            Astrologer.verification_status == VerificationStatus.VERIFIED,
+            Astrologer.verification_status_id == VerificationStatus.VERIFIED.id,
             Astrologer.is_deleted == False
         )
         
@@ -173,7 +174,8 @@ async def search_astrologers(
                 rating=astrologer.rating,
                 total_consultations=astrologer.total_consultations,
                 total_reviews=astrologer.total_reviews,
-                verification_status=astrologer.verification_status.value,
+                verification_status_id=astrologer.verification_status_id,
+                verification_status_name=astrologer.verification_status_name,
                 is_active=astrologer.is_active,
                 is_featured=astrologer.is_featured,
                 profile_image_url=astrologer.profile_image_url,
@@ -273,7 +275,8 @@ async def get_astrologer_profile(
                     rating=astrologer.rating,
                     total_consultations=astrologer.total_consultations,
                     total_reviews=astrologer.total_reviews,
-                    verification_status=astrologer.verification_status.value,
+                    verification_status_id=astrologer.verification_status_id,
+                verification_status_name=astrologer.verification_status_name,
                     is_active=astrologer.is_active,
                     is_featured=astrologer.is_featured,
                     profile_image_url=astrologer.profile_image_url,
@@ -362,14 +365,15 @@ async def create_review(
     """Create a review for an astrologer."""
     try:
         # Verify consultation exists and was completed
-        from josi.models.consultation_model import Consultation, ConsultationStatus
-        
+        from josi.models.consultation_model import Consultation
+        from josi.enums.consultation_status_enum import ConsultationStatusEnum
+
         consultation_result = await db.execute(
             select(Consultation).where(
                 Consultation.consultation_id == review_data.consultation_id,
                 Consultation.user_id == current_user.user_id,
                 Consultation.astrologer_id == astrologer_id,
-                Consultation.status == ConsultationStatus.COMPLETED,
+                Consultation.status_id == ConsultationStatusEnum.COMPLETED.id,
                 Consultation.is_deleted == False
             )
         )
@@ -449,25 +453,25 @@ async def create_review(
 @router.get("/specializations", response_model=ResponseModel)
 async def get_specializations() -> ResponseModel:
     """Get available astrologer specializations."""
-    from josi.models.astrologer_model import AstrologerSpecialization
-    
+    from josi.enums.astrologer_specialization_enum import AstrologerSpecializationEnum
+
     specializations = []
-    for spec in AstrologerSpecialization:
+    for spec in AstrologerSpecializationEnum:
         specializations.append({
-            "value": spec.value,
-            "name": spec.value.replace("_", " ").title(),
+            "value": spec.id,
+            "name": spec.description,
             "description": {
-                "vedic": "Traditional Indian astrology with emphasis on karma and spiritual growth",
-                "western": "Modern psychological astrology focusing on personality and life patterns",
-                "chinese": "Ancient Chinese divination including BaZi and feng shui",
-                "hellenistic": "Classical Greco-Roman astrology with traditional techniques",
-                "medical": "Astrology applied to health and wellness",
-                "karmic": "Focus on past-life influences and soul evolution",
-                "relationship": "Compatibility analysis and relationship counseling",
-                "career": "Professional guidance and life path analysis",
-                "spiritual": "Spiritual development and consciousness evolution",
-                "predictive": "Future trends and timing of events"
-            }.get(spec.value, "")
+                AstrologerSpecializationEnum.VEDIC: "Traditional Indian astrology with emphasis on karma and spiritual growth",
+                AstrologerSpecializationEnum.WESTERN: "Modern psychological astrology focusing on personality and life patterns",
+                AstrologerSpecializationEnum.CHINESE: "Ancient Chinese divination including BaZi and feng shui",
+                AstrologerSpecializationEnum.HELLENISTIC: "Classical Greco-Roman astrology with traditional techniques",
+                AstrologerSpecializationEnum.MEDICAL: "Astrology applied to health and wellness",
+                AstrologerSpecializationEnum.KARMIC: "Focus on past-life influences and soul evolution",
+                AstrologerSpecializationEnum.RELATIONSHIP: "Compatibility analysis and relationship counseling",
+                AstrologerSpecializationEnum.CAREER: "Professional guidance and life path analysis",
+                AstrologerSpecializationEnum.SPIRITUAL: "Spiritual development and consciousness evolution",
+                AstrologerSpecializationEnum.PREDICTIVE: "Future trends and timing of events"
+            }.get(spec, "")
         })
     
     return ResponseModel(
