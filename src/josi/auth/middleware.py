@@ -1,15 +1,18 @@
-"""Auth middleware — resolves CurrentUser from JWT or API key."""
+"""Auth middleware — resolves CurrentUser from JWT or API key.
+
+Supports multiple auth providers (Descope, Clerk) via AUTH_PROVIDER config.
+"""
 import hashlib
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
-from descope import AuthException
 
-from josi.auth.descope_client import get_descope_client
 from josi.auth.schemas import CurrentUser
+from josi.core.config import settings
 from josi.db.async_db import get_async_db
 from josi.models.api_key_model import ApiKey
 from josi.models.user_model import User
@@ -19,8 +22,13 @@ import structlog
 logger = structlog.get_logger()
 
 
+# --- JWT Validation Strategies ---
+
 def validate_descope_jwt(token: str) -> dict:
     """Validate a Descope session JWT and return claims."""
+    from descope import AuthException
+    from josi.auth.descope_client import get_descope_client
+
     client = get_descope_client()
     try:
         jwt_response = client.validate_session(token)
@@ -33,6 +41,109 @@ def validate_descope_jwt(token: str) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
+def validate_clerk_jwt(token: str) -> dict:
+    """Validate a Clerk session JWT and return claims."""
+    import jwt as pyjwt
+    from jwt import PyJWKClient
+
+    try:
+        jwks_url = "https://api.clerk.com/.well-known/jwks.json"
+        jwks_client = PyJWKClient(jwks_url)
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        claims = pyjwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            options={"verify_aud": False},
+        )
+        return claims
+    except Exception as e:
+        logger.warning("Clerk JWT validation failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def validate_jwt(token: str) -> dict:
+    """Validate JWT using the configured auth provider."""
+    if settings.auth_provider == "clerk":
+        return validate_clerk_jwt(token)
+    return validate_descope_jwt(token)
+
+
+def extract_user_from_claims(claims: dict) -> CurrentUser:
+    """Extract CurrentUser from JWT claims — works for both providers.
+
+    Both providers inject the same custom claims via their respective
+    webhook/enrichment mechanisms:
+      - josi_user_id, josi_subscription_tier, josi_subscription_tier_id,
+        josi_roles, josi_is_active, josi_is_verified
+
+    If josi_user_id is missing (e.g. first Clerk login before webhook fires),
+    returns None so the caller can fall back to DB lookup.
+    """
+    josi_user_id = claims.get("josi_user_id")
+    if not josi_user_id:
+        return None
+
+    try:
+        user_id = UUID(josi_user_id)
+    except ValueError:
+        return None
+
+    return CurrentUser(
+        user_id=user_id,
+        auth_provider_id=claims.get("sub", ""),
+        email=claims.get("email", ""),
+        subscription_tier=claims.get("josi_subscription_tier", "Free"),
+        subscription_tier_id=claims.get("josi_subscription_tier_id"),
+        roles=claims.get("josi_roles", ["user"]),
+        is_active=claims.get("josi_is_active", True),
+        is_verified=claims.get("josi_is_verified", False),
+    )
+
+
+async def resolve_user_from_db(auth_provider_id: str, email: str, db: AsyncSession) -> CurrentUser:
+    """Fall back to DB lookup when JWT doesn't have josi_* claims yet.
+
+    This handles the first Clerk login before the webhook sets publicMetadata.
+    """
+    result = await db.execute(
+        select(User).where(
+            and_(User.descope_id == auth_provider_id, User.is_deleted == False)
+        )
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        logger.info("User not yet provisioned, creating from JWT", sub=auth_provider_id, email=email)
+        user = User(
+            descope_id=auth_provider_id,
+            email=email,
+            full_name=email.split("@")[0] if email else "User",
+            last_login=datetime.utcnow(),
+        )
+        db.add(user)
+        await db.flush()
+        await db.refresh(user)
+        await db.commit()
+
+    return CurrentUser(
+        user_id=user.user_id,
+        auth_provider_id=user.descope_id,
+        email=user.email,
+        subscription_tier=user.subscription_tier_name or "Free",
+        subscription_tier_id=user.subscription_tier_id,
+        roles=user.roles,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+    )
+
+
+# --- API Key Resolution (provider-agnostic) ---
 
 async def resolve_api_key_user(
     api_key_raw: str, db: AsyncSession
@@ -56,21 +167,16 @@ async def resolve_api_key_user(
             detail="Invalid API key",
         )
 
-    # Check expiry
     if api_key.expires_at:
-        from datetime import datetime
         if api_key.expires_at < datetime.utcnow():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="API key has expired",
             )
 
-    # Update last_used_at
-    from datetime import datetime
     api_key.last_used_at = datetime.utcnow()
     await db.flush()
 
-    # Load user
     user_result = await db.execute(
         select(User).where(
             and_(User.user_id == api_key.user_id, User.is_deleted == False)
@@ -87,6 +193,8 @@ async def resolve_api_key_user(
     return user
 
 
+# --- Main Resolver ---
+
 async def resolve_current_user(
     request: Request,
     db: AsyncSession = Depends(get_async_db),
@@ -94,6 +202,7 @@ async def resolve_current_user(
     """Resolve CurrentUser from either JWT or API key.
 
     Checks Authorization header first, then X-API-Key.
+    Works with any configured auth provider (Descope, Clerk).
     """
     auth_header: Optional[str] = request.headers.get("authorization")
     api_key_header: Optional[str] = request.headers.get("x-api-key")
@@ -101,14 +210,18 @@ async def resolve_current_user(
     # Path 1: JWT (B2C)
     if auth_header and auth_header.lower().startswith("bearer "):
         token = auth_header[7:]
-        claims = validate_descope_jwt(token)
+        claims = validate_jwt(token)
 
-        return CurrentUser(
-            user_id=UUID(claims["josi_user_id"]),
-            descope_id=claims["sub"],
-            email=claims["email"],
-            subscription_tier=claims["josi_subscription_tier"],
-            roles=claims["josi_roles"],
+        # Try extracting from custom claims first (fast path)
+        current_user = extract_user_from_claims(claims)
+        if current_user:
+            return current_user
+
+        # Fall back to DB lookup (first login before webhook sets claims)
+        return await resolve_user_from_db(
+            auth_provider_id=claims.get("sub", ""),
+            email=claims.get("email", ""),
+            db=db,
         )
 
     # Path 2: API Key (B2B)
@@ -116,10 +229,13 @@ async def resolve_current_user(
         user = await resolve_api_key_user(api_key_header, db)
         return CurrentUser(
             user_id=user.user_id,
-            descope_id=user.descope_id,
+            auth_provider_id=user.descope_id,
             email=user.email,
-            subscription_tier=user.subscription_tier.value if hasattr(user.subscription_tier, 'value') else user.subscription_tier,
+            subscription_tier=user.subscription_tier_name or "Free",
+            subscription_tier_id=user.subscription_tier_id,
             roles=user.roles,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
         )
 
     # No auth provided

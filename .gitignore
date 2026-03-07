@@ -136,6 +136,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
 .envrc
 .venv
 env/
@@ -243,3 +244,10 @@ test_data/
 Thumbs.db
 
 VedAstro/
+
+# Web app
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
+node_modules

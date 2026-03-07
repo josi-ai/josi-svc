@@ -35,10 +35,18 @@ class Settings(BaseSettings):
     database_max_overflow: int = Field(default=20)
     auto_db_migration: bool = Field(default=False)
     
+    # Auth provider: "clerk" or "descope"
+    auth_provider: str = Field(default="clerk")
+
     # Descope settings
     descope_project_id: str = Field(default="")
     descope_management_key: str = Field(default="")
     descope_webhook_secret: str = Field(default="")
+
+    # Clerk settings
+    clerk_secret_key: str = Field(default="")
+    clerk_publishable_key: str = Field(default="")
+    clerk_webhook_secret: str = Field(default="")
 
     # Keep api_key_header
     api_key_header: str = Field(default="X-API-Key")
@@ -119,7 +127,7 @@ class Settings(BaseSettings):
         return v
     
     model_config = ConfigDict(
-        env_file=".env",
+        env_file=(".env", ".env.local"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore"
