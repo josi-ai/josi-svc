@@ -7,9 +7,12 @@ then runs the corresponding cloudbuild YAML.
 import pulumi
 import pulumi_gcp as gcp
 from config import environment, project, region, name, branch_pattern, repo_connection
+from iam import service_account
 
-# Cloud Build default SA (required for 2nd-gen repo triggers)
-_cb_sa = f"projects/{project}/serviceAccounts/6486647520@cloudbuild.gserviceaccount.com"
+# Per-env SA for Cloud Build (2nd-gen repos require user-managed SA)
+_cb_sa = service_account.email.apply(
+    lambda e: f"projects/{project}/serviceAccounts/{e}"
+)
 
 
 # --- API trigger ---
@@ -19,6 +22,7 @@ api_trigger = gcp.cloudbuild.Trigger(
     project=project,
     location=region,
     service_account=_cb_sa,
+    include_build_logs="INCLUDE_BUILD_LOGS_WITH_STATUS",
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(
@@ -43,6 +47,7 @@ web_trigger = gcp.cloudbuild.Trigger(
     project=project,
     location=region,
     service_account=_cb_sa,
+    include_build_logs="INCLUDE_BUILD_LOGS_WITH_STATUS",
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(
@@ -60,6 +65,7 @@ infra_trigger = gcp.cloudbuild.Trigger(
     project=project,
     location=region,
     service_account=_cb_sa,
+    include_build_logs="INCLUDE_BUILD_LOGS_WITH_STATUS",
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(

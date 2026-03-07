@@ -14,14 +14,18 @@ service_account = gcp.serviceaccount.Account(
 )
 
 # IAM roles for the service account
+# This SA is used for both Cloud Run runtime AND Cloud Build triggers
 _roles = {
+    # Runtime
     "sql-client": "roles/cloudsql.client",
     "secret-accessor": "roles/secretmanager.secretAccessor",
     "storage-user": "roles/storage.objectUser",
-    "ar-reader": "roles/artifactregistry.reader",
-    "log-writer": "roles/logging.logWriter",
-    # signBlob allows generating signed URLs without a JSON key
     "token-creator": "roles/iam.serviceAccountTokenCreator",
+    # Build + deploy
+    "ar-writer": "roles/artifactregistry.writer",
+    "run-admin": "roles/run.admin",
+    "log-writer": "roles/logging.logWriter",
+    "sa-user": "roles/iam.serviceAccountUser",
 }
 
 iam_bindings = {}
@@ -32,16 +36,5 @@ for suffix, role in _roles.items():
         role=role,
         member=service_account.email.apply(lambda e: f"serviceAccount:{e}"),
     )
-
-# Cloud Build SA needs to act as this SA for deployments
-# Project number is 6486647520 (not project ID)
-_cb_sa = "6486647520@cloudbuild.gserviceaccount.com"
-
-cloud_build_act_as = gcp.serviceaccount.IAMMember(
-    name("cb-act-as"),
-    service_account_id=service_account.name,
-    role="roles/iam.serviceAccountUser",
-    member=f"serviceAccount:{_cb_sa}",
-)
 
 pulumi.export("service_account_email", service_account.email)

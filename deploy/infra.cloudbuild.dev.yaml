@@ -19,7 +19,8 @@ steps:
     args:
       - "-c"
       - |
-        pip install --quiet pulumi pulumi-gcp>=8.0.0,<9.0.0
+        pip install --quiet 'pulumi>=3.0.0,<4.0.0' 'pulumi-gcp>=8.0.0,<9.0.0'
+        export PATH="$$PATH:$$HOME/.local/bin:/root/.local/bin"
         cd infra
         pulumi login
         pulumi stack select ${_STACK}
