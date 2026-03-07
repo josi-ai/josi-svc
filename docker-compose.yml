@@ -24,7 +24,6 @@ services:
       -c log_statement=all
       -c log_duration=on
 
-  # Test database (uses tmpfs for speed, only starts with --profile test)
   db-test:
     image: pgvector/pgvector:pg16
     container_name: josi-db-test
@@ -46,25 +45,6 @@ services:
     profiles:
       - test
 
-  redis:
-    image: redis:7-alpine
-    container_name: josi-redis
-    restart: unless-stopped
-    ports:
-      - "1982:6379"
-    volumes:
-      - redis_data:/data
-    command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 512mb
-      --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   api:
     build: .
     container_name: josi-api
@@ -75,12 +55,9 @@ services:
       - .env.local
     environment:
       DATABASE_URL: postgresql://josi:josi@db:5432/josi
-      REDIS_URL: redis://redis:6379/0
       AUTO_DB_MIGRATION: "True"
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     volumes:
       - ./src:/app/src
@@ -108,19 +85,6 @@ services:
       - /app/.next
     command: npm run dev
 
-  # Database management UI (only starts with --profile tools)
-  adminer:
-    image: adminer:latest
-    container_name: josi-adminer
-    restart: unless-stopped
-    ports:
-      - "1980:8080"
-    depends_on:
-      - db
-    profiles:
-      - tools
-
 volumes:
   postgres_data:
-  redis_data:
   web_node_modules:

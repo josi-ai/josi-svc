@@ -21,28 +21,12 @@ services:
       -c shared_buffers=256MB
       -c max_connections=200
 
-  test-redis:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379"  # Different port to avoid conflicts
-    command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 512mb
-      --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   test-runner:
     build:
       context: .
       dockerfile: Dockerfile.test
     environment:
       DATABASE_URL: postgresql://josi:josi@test-db:5432/josi_test
-      REDIS_URL: redis://test-redis:6379/1
       ENVIRONMENT: test
       AUTO_DB_MIGRATION: "false"
       SECRET_KEY: test-secret-key-for-testing
@@ -59,8 +43,6 @@ services:
       API_KEY_HEADER: X-API-Key
     depends_on:
       test-db:
-        condition: service_healthy
-      test-redis:
         condition: service_healthy
     volumes:
       - ./src:/app/src

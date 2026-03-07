@@ -3,7 +3,6 @@ import { register as registerUp } from './up.js';
 import { register as registerStatus } from './status.js';
 import { register as registerLogs } from './logs.js';
 import { register as registerClean } from './clean.js';
-import { register as registerAdminer } from './adminer.js';
 import { register as registerCheck } from './check.js';
 
 export function register(program: Command): void {
@@ -15,6 +14,5 @@ export function register(program: Command): void {
   registerStatus(redock);
   registerLogs(redock);
   registerClean(redock);
-  registerAdminer(redock);
   registerCheck(redock);
 }
