@@ -22,10 +22,10 @@ steps:
     args:
       - "-c"
       - |
-        API_URL=$(gcloud run services describe josi-api-dev \
+        API_URL=$$(gcloud run services describe josi-api-dev \
           --region=${_REGION} --format='value(status.url)' 2>/dev/null || echo "")
-        echo "$API_URL" > /workspace/api_url.txt
-        echo "API URL: $API_URL"
+        echo "$$API_URL" > /workspace/api_url.txt
+        echo "API URL: $$API_URL"
 
   # Build
   - name: "gcr.io/cloud-builders/docker"
@@ -34,11 +34,11 @@ steps:
     args:
       - "-c"
       - |
-        API_URL=$(cat /workspace/api_url.txt)
+        API_URL=$$(cat /workspace/api_url.txt)
         docker build \
           -t "${_ARTIFACT_REGISTRY}/josi-web:$COMMIT_SHA" \
           -t "${_ARTIFACT_REGISTRY}/josi-web:dev-latest" \
-          --build-arg "NEXT_PUBLIC_API_URL=$API_URL" \
+          --build-arg "NEXT_PUBLIC_API_URL=$$API_URL" \
           --build-arg "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$$CLERK_PUBLISHABLE_KEY" \
           -f web/Dockerfile \
           web/

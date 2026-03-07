@@ -36,6 +36,7 @@ api_trigger = gcp.cloudbuild.Trigger(
         "pyproject.toml",
         "poetry.lock",
         "alembic.ini",
+        f"deploy/api.cloudbuild.{environment}.yaml",
     ],
     filename=f"deploy/api.cloudbuild.{environment}.yaml",
 )
@@ -54,7 +55,7 @@ web_trigger = gcp.cloudbuild.Trigger(
             branch=branch_pattern,
         ),
     ),
-    included_files=["web/**"],
+    included_files=["web/**", f"deploy/web.cloudbuild.{environment}.yaml"],
     filename=f"deploy/web.cloudbuild.{environment}.yaml",
 )
 
@@ -72,7 +73,7 @@ infra_trigger = gcp.cloudbuild.Trigger(
             branch=branch_pattern,
         ),
     ),
-    included_files=["infra/**"],
+    included_files=["infra/**", f"deploy/infra.cloudbuild.{environment}.yaml"],
     filename=f"deploy/infra.cloudbuild.{environment}.yaml",
 )
 
