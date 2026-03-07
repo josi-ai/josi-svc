@@ -1,15 +1,18 @@
-import { authMiddleware } from '@descope/nextjs-sdk/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-export default authMiddleware({
-  projectId: process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID || 'P3AXgK6L8OgCfFSKcrNaA99vVChw',
-  redirectUrl: '/auth/login',
-  publicRoutes: [
-    '/',
-    '/auth/login',
-    '/chart-calculator',
-    '/pricing',
-    '/api/v1/webhooks/(.*)',
-  ],
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/auth/login(.*)',
+  '/auth/sign-up(.*)',
+  '/chart-calculator',
+  '/pricing',
+  '/api/v1/webhooks/(.*)',
+]);
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect();
+  }
 });
 
 export const config = {

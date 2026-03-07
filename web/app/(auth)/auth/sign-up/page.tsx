@@ -1,8 +1,8 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
+import { SignUp } from '@clerk/nextjs';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div style={{
       display: 'flex',
@@ -11,8 +11,7 @@ export default function LoginPage() {
       minHeight: '100vh',
       background: 'radial-gradient(ellipse at top, #1a1230 0%, #0f0a1e 50%)',
     }}>
-      <SignIn
-        afterSignInUrl="/dashboard"
+      <SignUp
         afterSignUpUrl="/dashboard"
         appearance={{
           elements: {

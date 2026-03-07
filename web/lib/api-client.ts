@@ -1,8 +1,13 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-let getSessionToken: (() => string | undefined) | null = null;
+let getSessionToken: (() => Promise<string | null>) | null = null;
 
 export function setTokenGetter(getter: () => string | undefined) {
+  // Wrap sync getter in async for backward compat
+  getSessionToken = async () => getter() ?? null;
+}
+
+export function setAsyncTokenGetter(getter: () => Promise<string | null>) {
   getSessionToken = getter;
 }
 
@@ -17,7 +22,7 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const token = getSessionToken?.();
+  const token = await getSessionToken?.();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

@@ -3,14 +3,19 @@ import { GraphQLClient } from 'graphql-request';
 const GRAPHQL_URL =
   (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000') + '/graphql';
 
-let getSessionToken: (() => string | undefined) | null = null;
+let getSessionToken: (() => Promise<string | null>) | null = null;
 
 export function setGraphQLTokenGetter(getter: () => string | undefined) {
+  // Wrap sync getter in async for backward compat
+  getSessionToken = async () => getter() ?? null;
+}
+
+export function setAsyncGraphQLTokenGetter(getter: () => Promise<string | null>) {
   getSessionToken = getter;
 }
 
-export function graphqlClient(): GraphQLClient {
-  const token = getSessionToken?.();
+export async function graphqlClient(): Promise<GraphQLClient> {
+  const token = await getSessionToken?.();
   const headers: Record<string, string> = {};
 
   if (token) {

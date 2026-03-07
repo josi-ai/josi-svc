@@ -11,7 +11,8 @@
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
     "@ant-design/nextjs-registry": "^1.0.2",
-    "@descope/nextjs-sdk": "^0.15.16",
+    "@clerk/nextjs": "^6.39.0",
+    "@clerk/themes": "^2.4.57",
     "@tailwindcss/postcss": "^4.1.3",
     "@tanstack/react-query": "^5.74.4",
     "antd": "^5.25.1",
@@ -21,6 +22,7 @@
     "postcss": "^8.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "svix": "^1.86.0",
     "tailwindcss": "^4.1.3",
     "zod": "^3.24.3"
   },

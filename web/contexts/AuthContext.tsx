@@ -1,14 +1,14 @@
 'use client';
 
 import { createContext, useContext, useMemo, useEffect } from 'react';
-import { useSession, useUser, useDescope } from '@descope/nextjs-sdk/client';
-import { setTokenGetter } from '@/lib/api-client';
-import { setGraphQLTokenGetter } from '@/lib/graphql-client';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
+import { setAsyncTokenGetter } from '@/lib/api-client';
+import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
 interface AuthContextType {
   user: {
     id: string;
-    descope_id: string;
+    auth_provider_id: string;
     email: string;
     name: string;
     phone?: string;
@@ -17,7 +17,7 @@ interface AuthContextType {
   } | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  sessionToken: string | undefined;
+  getToken: () => Promise<string | null>;
   logout: () => Promise<void>;
 }
 
@@ -25,48 +25,38 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
-  sessionToken: undefined,
+  getToken: async () => null,
   logout: async () => {},
 });
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isSessionLoading, sessionToken } = useSession();
-  const { user: descopeUser, isUserLoading } = useUser();
-  const { logout: descopeLogout } = useDescope();
+  const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
+  const { user: clerkUser, isLoaded: isUserLoaded } = useClerkUser();
 
-  // Wire the session token into the API and GraphQL clients
+  // Wire the async token getter into the API and GraphQL clients
   useEffect(() => {
-    setTokenGetter(() => sessionToken);
-    setGraphQLTokenGetter(() => sessionToken);
-  }, [sessionToken]);
+    setAsyncTokenGetter(getToken);
+    setAsyncGraphQLTokenGetter(getToken);
+  }, [getToken]);
 
   const user = useMemo(() => {
-    if (!isAuthenticated || !descopeUser) return null;
+    if (!isSignedIn || !clerkUser) return null;
 
-    // Read custom claims from the session token
-    let claims: Record<string, any> = {};
-    if (sessionToken) {
-      try {
-        const payload = JSON.parse(atob(sessionToken.split('.')[1]));
-        claims = payload;
-      } catch {
-        // Token parse error — use defaults
-      }
-    }
+    const publicMetadata = (clerkUser.publicMetadata as Record<string, any>) || {};
 
     return {
-      id: claims.josi_user_id || '',
-      descope_id: descopeUser.userId || '',
-      email: descopeUser.email || '',
-      name: descopeUser.name || '',
-      phone: descopeUser.phone || undefined,
-      subscription_tier: claims.josi_subscription_tier || 'free',
-      roles: claims.josi_roles || ['user'],
+      id: publicMetadata.josi_user_id || '',
+      auth_provider_id: clerkUser.id,
+      email: clerkUser.primaryEmailAddress?.emailAddress || '',
+      name: clerkUser.fullName || clerkUser.firstName || '',
+      phone: clerkUser.primaryPhoneNumber?.phoneNumber || undefined,
+      subscription_tier: publicMetadata.josi_subscription_tier || 'Free',
+      roles: publicMetadata.josi_roles || ['user'],
     };
-  }, [isAuthenticated, descopeUser, sessionToken]);
+  }, [isSignedIn, clerkUser]);
 
   const logout = async () => {
-    await descopeLogout();
+    await signOut();
     window.location.href = '/auth/login';
   };
 
@@ -74,9 +64,9 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     <AuthContext.Provider
       value={{
         user,
-        isLoading: isSessionLoading || isUserLoading,
-        isAuthenticated,
-        sessionToken,
+        isLoading: !isLoaded || !isUserLoaded,
+        isAuthenticated: !!isSignedIn,
+        getToken,
         logout,
       }}
     >

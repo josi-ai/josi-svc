@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  descope_id: string;
+  auth_provider_id: string;
   email: string;
   name: string;
   phone?: string;

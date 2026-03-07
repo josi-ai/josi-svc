@@ -32,11 +32,16 @@ class ClerkWebhookResponse(BaseModel):
 
 
 def verify_clerk_webhook(request: Request, body: bytes) -> bool:
-    """Verify Clerk webhook via Svix headers.
+    """Verify Clerk webhook via Svix HMAC signature.
 
-    Clerk uses Svix for webhook delivery. For production, install the `svix`
-    package and verify properly. For now, we check the secret is configured.
+    Clerk uses Svix for webhook delivery. The signing secret is base64-encoded
+    after stripping the 'whsec_' prefix.
     """
+    import base64
+    import hashlib
+    import hmac
+    import time
+
     svix_id = request.headers.get("svix-id")
     svix_timestamp = request.headers.get("svix-timestamp")
     svix_signature = request.headers.get("svix-signature")
@@ -53,8 +58,44 @@ def verify_clerk_webhook(request: Request, body: bytes) -> bool:
             detail="Webhook secret not configured",
         )
 
-    # TODO: Full Svix signature verification with `svix` package
-    return True
+    # Check timestamp is within 5 minutes to prevent replay attacks
+    try:
+        ts = int(svix_timestamp)
+        if abs(time.time() - ts) > 300:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Webhook timestamp too old",
+            )
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid webhook timestamp",
+        )
+
+    # Decode the signing secret (strip 'whsec_' prefix, base64 decode)
+    secret = settings.clerk_webhook_secret
+    if secret.startswith("whsec_"):
+        secret = secret[6:]
+    secret_bytes = base64.b64decode(secret)
+
+    # Build the signature payload: "{svix_id}.{svix_timestamp}.{body}"
+    to_sign = f"{svix_id}.{svix_timestamp}.".encode() + body
+    expected_signature = base64.b64encode(
+        hmac.new(secret_bytes, to_sign, hashlib.sha256).digest()
+    ).decode()
+
+    # Svix-Signature header can have multiple signatures: "v1,sig1 v1,sig2"
+    signatures = svix_signature.split(" ")
+    for sig in signatures:
+        parts = sig.split(",", 1)
+        if len(parts) == 2 and parts[0] == "v1":
+            if hmac.compare_digest(parts[1], expected_signature):
+                return True
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid webhook signature",
+    )
 
 
 async def set_clerk_public_metadata(clerk_user_id: str, metadata: dict) -> bool:
