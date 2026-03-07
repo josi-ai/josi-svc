@@ -7,10 +7,10 @@ then runs the corresponding cloudbuild YAML.
 import pulumi
 import pulumi_gcp as gcp
 from config import environment, project, region, name, branch_pattern, repo_connection
-from iam import service_account
+from iam import infra_sa
 
-# Per-env SA for Cloud Build (2nd-gen repos require user-managed SA)
-_cb_sa = service_account.email.apply(
+# Infra SA for Cloud Build (2nd-gen repos require user-managed SA)
+_cb_sa = infra_sa.email.apply(
     lambda e: f"projects/{project}/serviceAccounts/{e}"
 )
 
