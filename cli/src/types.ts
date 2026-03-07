@@ -27,3 +27,31 @@ export interface Tool {
   installLinux?: string;
   required: boolean;
 }
+
+export const VALID_ENVS = ['dev', 'prod'] as const;
+export type Env = (typeof VALID_ENVS)[number];
+
+export const VALID_MODES = ['cloud', 'local'] as const;
+export type Mode = (typeof VALID_MODES)[number];
+
+export interface UpOptions {
+  local?: boolean;
+  logs?: boolean;
+  web?: boolean;
+  build?: boolean;
+}
+
+export interface ComposeConfig {
+  files: string[];
+  profiles: string[];
+}
+
+export interface EnvConfig {
+  project: string;
+  instance: string;
+}
+
+export const ENV_CONFIGS: Record<Env, EnvConfig> = {
+  dev:  { project: 'josiam', instance: 'josiam:us-central1:josiam-dev' },
+  prod: { project: 'josiam', instance: 'josiam:us-central1:josiam-prod' },
+};
