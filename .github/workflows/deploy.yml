@@ -3,6 +3,7 @@ name: Deploy Pipeline
 on:
   push:
     branches: [dev, main]
+  workflow_dispatch:
 
 env:
   GCP_PROJECT: josiam
