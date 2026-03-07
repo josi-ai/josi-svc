@@ -92,7 +92,7 @@ steps:
       - "--allow-unauthenticated"
       - "--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}"
       - "--set-env-vars=ENVIRONMENT=prod,AUTO_DB_MIGRATION=true,EPHEMERIS_PATH=/usr/share/swisseph,CORS_ORIGINS=*,LOG_LEVEL=INFO,RATE_LIMIT_ENABLED=true,DATABASE_URL=postgresql+asyncpg://josi@/josi?host=/cloudsql/${_CLOUD_SQL_INSTANCE}"
-      - "--set-secrets=AUTH_PROVIDER=josiam-auth-provider-prod:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-prod:latest,DESCOPE_PROJECT_ID=josiam-descope-project-id-prod:latest,DESCOPE_WEBHOOK_SECRET=josiam-descope-webhook-secret-prod:latest"
+      - "--set-secrets=CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-prod:latest"
       - "--min-instances=1"
       - "--max-instances=10"
       - "--memory=2Gi"

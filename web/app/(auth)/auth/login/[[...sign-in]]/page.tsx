@@ -12,8 +12,7 @@ export default function LoginPage() {
       background: 'radial-gradient(ellipse at top, #1a1230 0%, #0f0a1e 50%)',
     }}>
       <SignIn
-        afterSignInUrl="/dashboard"
-        afterSignUpUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
             rootBox: { width: '100%', maxWidth: 400 },

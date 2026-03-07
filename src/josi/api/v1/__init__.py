@@ -15,7 +15,6 @@ from josi.api.v1.controllers.astrologer_controller import router as astrologer_r
 from josi.api.v1.controllers.consultation_controller import router as consultation_router
 from josi.api.v1.controllers.muhurta_controller import router as muhurta_router
 from josi.api.v1.controllers.remedy_controller import router as remedy_router
-from josi.api.v1.controllers.webhook_controller import router as webhook_router
 from josi.api.v1.controllers.clerk_webhook_controller import router as clerk_webhook_router
 from josi.api.v1.controllers.api_key_controller import router as api_key_router
 from josi.api.v1.controllers.lookup_controller import router as lookup_router
@@ -40,7 +39,6 @@ v1_router.include_router(consultation_router)
 v1_router.include_router(muhurta_router)
 v1_router.include_router(remedy_router)
 v1_router.include_router(health_router)
-v1_router.include_router(webhook_router)
 v1_router.include_router(clerk_webhook_router)
 v1_router.include_router(api_key_router)
 v1_router.include_router(lookup_router)

@@ -149,7 +149,7 @@ async def clerk_user_webhook(
 
     clerk_user_id = user_data.get("id")
     if not clerk_user_id:
-        logger.warning("Clerk webhook missing user id", event=event_type)
+        logger.warning("Clerk webhook missing user id", event_type=event_type)
         return ClerkWebhookResponse(success=False)
 
     # Extract email from Clerk's email_addresses array
@@ -175,13 +175,22 @@ async def clerk_user_webhook(
     if not full_name:
         full_name = primary_email.split("@")[0] if primary_email else "User"
 
-    logger.info("Clerk webhook received", event=event_type, clerk_user_id=clerk_user_id, email=primary_email)
+    logger.info("Clerk webhook received", event_type=event_type, clerk_user_id=clerk_user_id, email=primary_email)
 
-    # Look up existing user
+    # Look up existing user by auth provider ID, then fall back to email
     result = await db.execute(
-        select(User).where(User.descope_id == clerk_user_id)
+        select(User).where(User.clerk_id == clerk_user_id)
     )
     user = result.scalar_one_or_none()
+
+    if not user and primary_email:
+        result = await db.execute(
+            select(User).where(User.email == primary_email)
+        )
+        user = result.scalar_one_or_none()
+        if user:
+            user.clerk_id = clerk_user_id
+            logger.info("Linked existing user to Clerk", user_id=str(user.user_id), clerk_user_id=clerk_user_id)
 
     if user:
         user.last_login = datetime.utcnow()
@@ -210,7 +219,7 @@ async def clerk_user_webhook(
 
     # New user
     new_user = User(
-        descope_id=clerk_user_id,
+        clerk_id=clerk_user_id,
         email=primary_email or "",
         full_name=full_name,
         phone=primary_phone,

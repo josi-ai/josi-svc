@@ -1,4 +1,4 @@
-"""User model with Descope authentication and subscription tiers."""
+"""User model with Clerk authentication and subscription tiers."""
 from sqlmodel import Field, SQLModel, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 
 
 class User(SQLModel, table=True):
-    """User model — identity owned by Descope, profile and authz owned by us."""
+    """User model — identity owned by Clerk, profile and authz owned by us."""
 
     __tablename__ = "users"
 
     user_id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    descope_id: str = Field(unique=True, index=True)
+    clerk_id: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
     phone: Optional[str] = Field(default=None, index=True)
 
@@ -38,7 +38,7 @@ class User(SQLModel, table=True):
     preferences: Dict = Field(default_factory=dict, sa_column=Column(JSON))
     notification_settings: Dict = Field(default_factory=dict, sa_column=Column(JSON))
 
-    # Authorization (owned by us, not Descope)
+    # Authorization (owned by us, not Clerk)
     roles: List[str] = Field(default=["user"], sa_column=Column(JSON))
 
     # Status
@@ -57,7 +57,7 @@ class User(SQLModel, table=True):
             "example": {
                 "email": "user@example.com",
                 "full_name": "John Doe",
-                "descope_id": "U3AXkLL5ULmyFWqbfyRwVpL2WjCi",
+                "clerk_id": "user_2abc123",
                 "subscription_tier_id": 1,
                 "subscription_tier_name": "Free",
             }
@@ -105,8 +105,8 @@ class User(SQLModel, table=True):
 
 
 class UserCreate(SQLModel):
-    """Schema for creating a user from Descope webhook data."""
-    descope_id: str
+    """Schema for creating a user from Clerk webhook data."""
+    clerk_id: str
     email: str
     full_name: str
     phone: Optional[str] = None

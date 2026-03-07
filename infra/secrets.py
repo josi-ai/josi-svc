@@ -16,13 +16,9 @@ SECRET_NAMES = [
     "db-password",
     "db-user",
     "db-instance-password",
-    "auth-provider",
     "clerk-secret-key",
     "clerk-publishable-key",
     "clerk-webhook-secret",
-    "descope-project-id",
-    "descope-management-key",
-    "descope-webhook-secret",
 ]
 
 secrets = {}
