@@ -2,6 +2,10 @@
 
 Each module defines resources for its concern.
 Import order matters — modules with dependencies come after their deps.
+
+Cloud Run services are NOT managed here — they are created and updated
+by Cloud Build via `gcloud run deploy` in the cloudbuild YAML files.
+This avoids config drift between Pulumi and Cloud Build.
 """
 
 import pulumi
@@ -11,9 +15,8 @@ from config import environment, project, region
 import registry    # Artifact Registry (no deps)
 import storage     # GCS buckets (no deps)
 import secrets     # Secret Manager (no deps)
-import iam         # Service accounts + JSON key (no deps)
+import iam         # Service accounts (no deps)
 import database    # Cloud SQL (reads secrets)
-import compute     # Cloud Run (depends on database, iam, registry, secrets)
 import triggers    # Cloud Build triggers (no deps, references deploy/ YAMLs)
 
 pulumi.export("environment", environment)

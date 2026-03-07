@@ -8,6 +8,9 @@ import pulumi
 import pulumi_gcp as gcp
 from config import environment, project, region, name, branch_pattern, repo_connection
 
+# Cloud Build default SA (required for 2nd-gen repo triggers)
+_cb_sa = f"projects/{project}/serviceAccounts/6486647520@cloudbuild.gserviceaccount.com"
+
 
 # --- API trigger ---
 api_trigger = gcp.cloudbuild.Trigger(
@@ -15,6 +18,7 @@ api_trigger = gcp.cloudbuild.Trigger(
     name=f"josi-api-{environment}",
     project=project,
     location=region,
+    service_account=_cb_sa,
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(
@@ -38,6 +42,7 @@ web_trigger = gcp.cloudbuild.Trigger(
     name=f"josi-web-{environment}",
     project=project,
     location=region,
+    service_account=_cb_sa,
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(
@@ -54,6 +59,7 @@ infra_trigger = gcp.cloudbuild.Trigger(
     name=f"josi-infra-{environment}",
     project=project,
     location=region,
+    service_account=_cb_sa,
     repository_event_config=gcp.cloudbuild.TriggerRepositoryEventConfigArgs(
         repository=repo_connection,
         push=gcp.cloudbuild.TriggerRepositoryEventConfigPushArgs(
