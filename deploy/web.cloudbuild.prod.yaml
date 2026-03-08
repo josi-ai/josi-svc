@@ -64,7 +64,7 @@ steps:
       - "--platform=managed"
       - "--allow-unauthenticated"
       - "--set-env-vars=NODE_ENV=production"
-      - "--set-secrets=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=josiam-clerk-publishable-key-prod:latest"
+      - "--set-secrets=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=josiam-clerk-publishable-key-prod:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest"
       - "--min-instances=1"
       - "--max-instances=10"
       - "--memory=512Mi"
