@@ -28,8 +28,11 @@ class CacheManager:
         }
     
     async def initialize(self):
-        """Initialize Redis connection"""
+        """Initialize Redis connection, using settings.redis_url if available."""
         try:
+            from josi.core.config import settings
+            if settings.redis_url:
+                self.redis_url = settings.redis_url
             import redis.asyncio as redis
             self.redis_client = redis.from_url(self.redis_url, decode_responses=False)
             await self.redis_client.ping()
@@ -302,7 +305,7 @@ class AstrologyCache:
         logger.info("Cache invalidated for person", person_id=person_id)
 
 
-# Global cache instances
+# Global cache instances — URL resolved lazily from settings at initialize() time
 cache_manager = CacheManager()
 astrology_cache = AstrologyCache(cache_manager)
 
