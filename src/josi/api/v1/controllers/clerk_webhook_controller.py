@@ -11,6 +11,7 @@ from typing import Optional
 from josi.core.config import settings
 from josi.auth.providers import get_auth_provider
 from josi.services.user_service import UserService
+from josi.services.session_cache_service import invalidate_user
 
 import structlog
 
@@ -198,3 +199,24 @@ async def sync_claims(request: Request):
         josi_user_id=str(user.user_id),
         synced=True,
     )
+
+
+@auth_router.post("/logout")
+async def logout(request: Request):
+    """Invalidate the user's session cache on logout."""
+    auth_header = request.headers.get("authorization", "")
+    if not auth_header.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Bearer token required",
+        )
+
+    token = auth_header[7:]
+    provider = get_auth_provider()
+    claims = provider.validate_jwt(token)
+    auth_provider_id = claims.get("sub", "")
+
+    if auth_provider_id:
+        await invalidate_user(auth_provider_id)
+
+    return {"success": True}
