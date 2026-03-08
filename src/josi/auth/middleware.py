@@ -4,39 +4,13 @@ from typing import Optional
 from fastapi import HTTPException, Request, status
 
 from josi.auth.schemas import CurrentUser
+from josi.auth.providers import get_auth_provider
 from josi.services.user_service import UserService
 from josi.services.api_key_service import ApiKeyService
 
 import structlog
 
 logger = structlog.get_logger()
-
-
-# --- JWT Validation ---
-
-def validate_jwt(token: str) -> dict:
-    """Validate a Clerk session JWT and return claims."""
-    import jwt as pyjwt
-    from jwt import PyJWKClient
-
-    try:
-        jwks_url = "https://api.clerk.com/.well-known/jwks.json"
-        jwks_client = PyJWKClient(jwks_url)
-        signing_key = jwks_client.get_signing_key_from_jwt(token)
-        claims = pyjwt.decode(
-            token,
-            signing_key.key,
-            algorithms=["RS256"],
-            options={"verify_aud": False},
-        )
-        return claims
-    except Exception as e:
-        logger.warning("Clerk JWT validation failed", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
 
 # --- Main Resolver ---
@@ -52,7 +26,8 @@ async def resolve_current_user(request: Request) -> CurrentUser:
     # Path 1: JWT (B2C)
     if auth_header and auth_header.lower().startswith("bearer "):
         token = auth_header[7:]
-        claims = validate_jwt(token)
+        provider = get_auth_provider()
+        claims = provider.validate_jwt(token)
 
         user_service = UserService()
 

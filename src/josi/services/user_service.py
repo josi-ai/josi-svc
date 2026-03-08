@@ -1,14 +1,12 @@
-"""User service — business logic for user management and Clerk sync."""
+"""User service — business logic for user management and auth provider sync."""
 from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
-import httpx
-
 import structlog
 
 from josi.auth.schemas import CurrentUser
-from josi.core.config import settings
+from josi.auth.providers import get_auth_provider
 from josi.models.user_model import User
 from josi.repositories.user_repository import UserRepository
 
@@ -16,7 +14,7 @@ logger = structlog.get_logger()
 
 
 class UserService:
-    """Business logic for users, Clerk metadata sync, and auth resolution."""
+    """Business logic for users, provider metadata sync, and auth resolution."""
 
     def __init__(self, current_user: Optional[CurrentUser] = None):
         self.current_user = current_user
@@ -25,32 +23,11 @@ class UserService:
         self.roles = current_user.roles if current_user else None
         self.user_repository = UserRepository(current_user=current_user)
 
-    # --- Clerk publicMetadata sync ---
+    # --- Auth provider metadata sync ---
 
-    async def set_clerk_public_metadata(self, clerk_user_id: str, metadata: dict) -> bool:
-        """Call Clerk API to set publicMetadata on a user."""
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.patch(
-                    f"https://api.clerk.com/v1/users/{clerk_user_id}",
-                    headers={
-                        "Authorization": f"Bearer {settings.clerk_secret_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={"public_metadata": metadata},
-                )
-                if response.status_code != 200:
-                    logger.error(
-                        "Failed to set Clerk publicMetadata",
-                        clerk_user_id=clerk_user_id,
-                        status=response.status_code,
-                        body=response.text,
-                    )
-                    return False
-                return True
-        except Exception as e:
-            logger.error("Clerk API call failed", error=str(e), clerk_user_id=clerk_user_id)
-            return False
+    async def sync_provider_metadata(self, provider_user_id: str, metadata: dict) -> bool:
+        provider = get_auth_provider()
+        return await provider.set_user_metadata(provider_user_id, metadata)
 
     def _build_metadata(self, user: User) -> dict:
         return {
@@ -105,7 +82,7 @@ class UserService:
             user = await self.user_repository.create(user)
             logger.info("New user created", user_id=str(user.user_id), email=user.email)
 
-        await self.set_clerk_public_metadata(clerk_user_id, self._build_metadata(user))
+        await self.sync_provider_metadata(clerk_user_id, self._build_metadata(user))
         return user
 
     # --- Auth resolution (used by middleware) ---

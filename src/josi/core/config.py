@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     clerk_secret_key: str = Field(default="")
     clerk_publishable_key: str = Field(default="")
     clerk_webhook_secret: str = Field(default="")
+    auth_provider_name: str = Field(default="clerk")
 
     # Keep api_key_header
     api_key_header: str = Field(default="X-API-Key")

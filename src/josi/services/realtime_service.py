@@ -11,7 +11,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 import structlog
 
-from josi.auth.middleware import validate_jwt
+from josi.auth.providers import get_auth_provider
 from josi.models.user_model import User
 
 logger = structlog.get_logger(__name__)
@@ -397,7 +397,8 @@ async def verify_websocket_token(token: str, db: AsyncSession) -> Optional[User]
     """Verify WebSocket authentication token via Descope JWT."""
     try:
         from sqlalchemy import select
-        claims = validate_jwt(token)
+        provider = get_auth_provider()
+        claims = provider.validate_jwt(token)
         result = await db.execute(
             select(User).where(User.auth_provider_id == claims["sub"])
         )

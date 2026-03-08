@@ -1,42 +1,42 @@
-"""Clerk webhook endpoints — called by Clerk on user events.
+"""Clerk webhook and auth-sync controllers — I/O validation only.
 
-Flow:
-1. User signs up/in via Clerk
-2. Clerk sends user.created/user.updated webhook here
-3. We upsert the user in our DB
-4. We call Clerk API to set publicMetadata with josi_* fields
-5. Clerk reads publicMetadata into session token via the JWT template
+Business logic lives in UserService. These controllers handle:
+- Request parsing, header validation, webhook signature verification
+- Delegating to UserService for user upsert and Clerk metadata sync
 """
-import httpx
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from typing import Optional
-from datetime import datetime
 
 from josi.core.config import settings
-from josi.db.async_db import get_async_db
-from josi.models.user_model import User
+from josi.auth.providers import get_auth_provider
+from josi.services.user_service import UserService
 
 import structlog
 
 logger = structlog.get_logger()
 
 router = APIRouter(prefix="/webhooks/clerk", tags=["webhooks"])
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
+
+# --- Response schemas ---
 
 class ClerkWebhookResponse(BaseModel):
     success: bool
     josi_user_id: Optional[str] = None
 
 
-def verify_clerk_webhook(request: Request, body: bytes) -> bool:
-    """Verify Clerk webhook via Svix HMAC signature.
+class SyncClaimsResponse(BaseModel):
+    success: bool
+    josi_user_id: Optional[str] = None
+    synced: bool = False
 
-    Clerk uses Svix for webhook delivery. The signing secret is base64-encoded
-    after stripping the 'whsec_' prefix.
-    """
+
+# --- Webhook signature verification ---
+
+def verify_clerk_webhook(request: Request, body: bytes) -> bool:
+    """Verify Clerk webhook via Svix HMAC signature."""
     import base64
     import hashlib
     import hmac
@@ -58,7 +58,6 @@ def verify_clerk_webhook(request: Request, body: bytes) -> bool:
             detail="Webhook secret not configured",
         )
 
-    # Check timestamp is within 5 minutes to prevent replay attacks
     try:
         ts = int(svix_timestamp)
         if abs(time.time() - ts) > 300:
@@ -72,19 +71,16 @@ def verify_clerk_webhook(request: Request, body: bytes) -> bool:
             detail="Invalid webhook timestamp",
         )
 
-    # Decode the signing secret (strip 'whsec_' prefix, base64 decode)
     secret = settings.clerk_webhook_secret
     if secret.startswith("whsec_"):
         secret = secret[6:]
     secret_bytes = base64.b64decode(secret)
 
-    # Build the signature payload: "{svix_id}.{svix_timestamp}.{body}"
     to_sign = f"{svix_id}.{svix_timestamp}.".encode() + body
     expected_signature = base64.b64encode(
         hmac.new(secret_bytes, to_sign, hashlib.sha256).digest()
     ).decode()
 
-    # Svix-Signature header can have multiple signatures: "v1,sig1 v1,sig2"
     signatures = svix_signature.split(" ")
     for sig in signatures:
         parts = sig.split(",", 1)
@@ -98,61 +94,10 @@ def verify_clerk_webhook(request: Request, body: bytes) -> bool:
     )
 
 
-async def set_clerk_public_metadata(clerk_user_id: str, metadata: dict) -> bool:
-    """Call Clerk API to set publicMetadata on a user.
+# --- Webhook payload parsing ---
 
-    This is what feeds the session token custom claims template.
-    """
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.patch(
-                f"https://api.clerk.com/v1/users/{clerk_user_id}",
-                headers={
-                    "Authorization": f"Bearer {settings.clerk_secret_key}",
-                    "Content-Type": "application/json",
-                },
-                json={"public_metadata": metadata},
-            )
-            if response.status_code != 200:
-                logger.error(
-                    "Failed to set Clerk publicMetadata",
-                    clerk_user_id=clerk_user_id,
-                    status=response.status_code,
-                    body=response.text,
-                )
-                return False
-            return True
-    except Exception as e:
-        logger.error("Clerk API call failed", error=str(e), clerk_user_id=clerk_user_id)
-        return False
-
-
-@router.post("/user")
-async def clerk_user_webhook(
-    request: Request,
-    db: AsyncSession = Depends(get_async_db),
-):
-    """Called by Clerk on user.created and user.updated events.
-
-    Upserts the user in our DB, then sets publicMetadata on the Clerk user
-    so the session token contains our custom claims.
-    """
-    body = await request.body()
-    verify_clerk_webhook(request, body)
-
-    payload = await request.json()
-    event_type = payload.get("type")
-    user_data = payload.get("data", {})
-
-    if event_type not in ("user.created", "user.updated"):
-        return ClerkWebhookResponse(success=True)
-
-    clerk_user_id = user_data.get("id")
-    if not clerk_user_id:
-        logger.warning("Clerk webhook missing user id", event_type=event_type)
-        return ClerkWebhookResponse(success=False)
-
-    # Extract email from Clerk's email_addresses array
+def _extract_clerk_user_fields(user_data: dict) -> dict:
+    """Parse Clerk webhook payload into flat user fields."""
     email_addresses = user_data.get("email_addresses", [])
     primary_email_id = user_data.get("primary_email_address_id")
     primary_email = next(
@@ -160,7 +105,6 @@ async def clerk_user_webhook(
         email_addresses[0]["email_address"] if email_addresses else None,
     )
 
-    # Extract phone
     phone_numbers = user_data.get("phone_numbers", [])
     primary_phone_id = user_data.get("primary_phone_number_id")
     primary_phone = next(
@@ -168,79 +112,89 @@ async def clerk_user_webhook(
         phone_numbers[0]["phone_number"] if phone_numbers else None,
     )
 
-    # Build name
     first_name = user_data.get("first_name") or ""
     last_name = user_data.get("last_name") or ""
     full_name = f"{first_name} {last_name}".strip()
     if not full_name:
         full_name = primary_email.split("@")[0] if primary_email else "User"
 
-    logger.info("Clerk webhook received", event_type=event_type, clerk_user_id=clerk_user_id, email=primary_email)
+    return {
+        "clerk_user_id": user_data.get("id"),
+        "email": primary_email,
+        "full_name": full_name,
+        "phone": primary_phone,
+    }
 
-    # Look up existing user by auth provider ID, then fall back to email
-    result = await db.execute(
-        select(User).where(User.clerk_id == clerk_user_id)
+
+# --- Endpoints ---
+
+@router.post("/user")
+async def clerk_user_webhook(request: Request):
+    """Called by Clerk on user.created and user.updated events."""
+    body = await request.body()
+    verify_clerk_webhook(request, body)
+
+    payload = await request.json()
+    event_type = payload.get("type")
+
+    if event_type not in ("user.created", "user.updated"):
+        return ClerkWebhookResponse(success=True)
+
+    user_data = payload.get("data", {})
+    fields = _extract_clerk_user_fields(user_data)
+
+    if not fields["clerk_user_id"]:
+        logger.warning("Clerk webhook missing user id", event_type=event_type)
+        return ClerkWebhookResponse(success=False)
+
+    logger.info("Clerk webhook received", event_type=event_type, clerk_user_id=fields["clerk_user_id"], email=fields["email"])
+
+    user_service = UserService()
+    user = await user_service.upsert_from_clerk(
+        clerk_user_id=fields["clerk_user_id"],
+        email=fields["email"],
+        full_name=fields["full_name"],
+        phone=fields["phone"],
     )
-    user = result.scalar_one_or_none()
 
-    if not user and primary_email:
-        result = await db.execute(
-            select(User).where(User.email == primary_email)
+    return ClerkWebhookResponse(success=True, josi_user_id=str(user.user_id))
+
+
+@auth_router.post("/sync-claims", response_model=SyncClaimsResponse)
+async def sync_claims(request: Request):
+    """Called by the client after first sign-in to ensure publicMetadata is set."""
+    auth_header = request.headers.get("authorization", "")
+    if not auth_header.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Bearer token required",
         )
-        user = result.scalar_one_or_none()
-        if user:
-            user.clerk_id = clerk_user_id
-            logger.info("Linked existing user to Clerk", user_id=str(user.user_id), clerk_user_id=clerk_user_id)
 
-    if user:
-        user.last_login = datetime.utcnow()
-        if primary_email and user.email != primary_email:
-            user.email = primary_email
-        if primary_phone and user.phone != primary_phone:
-            user.phone = primary_phone
-        if full_name and user.full_name != full_name:
-            user.full_name = full_name
-        await db.flush()
-        await db.commit()
+    token = auth_header[7:]
+    provider = get_auth_provider()
+    claims = provider.validate_jwt(token)
 
-        logger.info("Existing user updated via Clerk", user_id=str(user.user_id))
+    clerk_user_id = claims.get("sub", "")
+    email = claims.get("email", "")
+    name = claims.get("name", "")
 
-        # Set publicMetadata so Clerk session token has our claims
-        await set_clerk_public_metadata(clerk_user_id, {
-            "josi_user_id": str(user.user_id),
-            "josi_subscription_tier_id": user.subscription_tier_id or 1,
-            "josi_subscription_tier": user.subscription_tier_name or "Free",
-            "josi_roles": user.roles,
-            "josi_is_active": user.is_active,
-            "josi_is_verified": user.is_verified,
-        })
+    if not clerk_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing sub claim in JWT",
+        )
 
-        return ClerkWebhookResponse(success=True, josi_user_id=str(user.user_id))
+    logger.info("Sync-claims requested", clerk_user_id=clerk_user_id, email=email)
 
-    # New user
-    new_user = User(
-        clerk_id=clerk_user_id,
-        email=primary_email or "",
-        full_name=full_name,
-        phone=primary_phone,
-        is_verified=bool(primary_email),
-        last_login=datetime.utcnow(),
+    user_service = UserService()
+    user = await user_service.upsert_from_clerk(
+        clerk_user_id=clerk_user_id,
+        email=email,
+        full_name=name,
     )
-    db.add(new_user)
-    await db.flush()
-    await db.refresh(new_user)
-    await db.commit()
 
-    logger.info("New user created via Clerk", user_id=str(new_user.user_id), email=new_user.email)
-
-    # Set publicMetadata so Clerk session token has our claims
-    await set_clerk_public_metadata(clerk_user_id, {
-        "josi_user_id": str(new_user.user_id),
-        "josi_subscription_tier_id": new_user.subscription_tier_id or 1,
-        "josi_subscription_tier": new_user.subscription_tier_name or "Free",
-        "josi_roles": new_user.roles,
-        "josi_is_active": new_user.is_active,
-        "josi_is_verified": new_user.is_verified,
-    })
-
-    return ClerkWebhookResponse(success=True, josi_user_id=str(new_user.user_id))
+    return SyncClaimsResponse(
+        success=True,
+        josi_user_id=str(user.user_id),
+        synced=True,
+    )
