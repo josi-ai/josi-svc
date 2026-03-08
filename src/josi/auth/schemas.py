@@ -7,8 +7,10 @@ from uuid import UUID
 class CurrentUser(BaseModel):
     """Resolved user context — same shape regardless of auth provider or path."""
     user_id: UUID
-    auth_provider_id: str  # Clerk user ID (sub claim)
+    auth_provider_id: str  # Provider user ID (e.g. Clerk sub claim)
+    auth_provider: str = "clerk"
     email: str
+    full_name: str = ""
     subscription_tier: str
     subscription_tier_id: Optional[int] = None
     roles: List[str]

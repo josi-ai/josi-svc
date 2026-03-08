@@ -131,7 +131,9 @@ class UserService:
         return CurrentUser(
             user_id=user.user_id,
             auth_provider_id=user.auth_provider_id,
+            auth_provider=user.auth_provider,
             email=user.email,
+            full_name=user.full_name,
             subscription_tier=user.subscription_tier_name or "Free",
             subscription_tier_id=user.subscription_tier_id,
             roles=user.roles,
