@@ -1,4 +1,4 @@
-"""User model with Clerk authentication and subscription tiers."""
+"""User model with auth provider authentication and subscription tiers."""
 from sqlmodel import Field, SQLModel, Column, JSON
 from typing import Optional, List, Dict, TYPE_CHECKING
 from datetime import datetime
@@ -13,12 +13,13 @@ if TYPE_CHECKING:
 
 
 class User(SQLModel, table=True):
-    """User model — identity owned by Clerk, profile and authz owned by us."""
+    """User model — identity owned by auth provider, profile and authz owned by us."""
 
     __tablename__ = "users"
 
     user_id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    clerk_id: str = Field(unique=True, index=True)
+    auth_provider_id: str = Field(unique=True, index=True)
+    auth_provider: str = Field(default="clerk", index=True)
     email: str = Field(unique=True, index=True)
     phone: Optional[str] = Field(default=None, index=True)
 
@@ -57,7 +58,7 @@ class User(SQLModel, table=True):
             "example": {
                 "email": "user@example.com",
                 "full_name": "John Doe",
-                "clerk_id": "user_2abc123",
+                "auth_provider_id": "user_2abc123",
                 "subscription_tier_id": 1,
                 "subscription_tier_name": "Free",
             }
@@ -105,8 +106,9 @@ class User(SQLModel, table=True):
 
 
 class UserCreate(SQLModel):
-    """Schema for creating a user from Clerk webhook data."""
-    clerk_id: str
+    """Schema for creating a user from auth provider webhook data."""
+    auth_provider_id: str
+    auth_provider: str = "clerk"
     email: str
     full_name: str
     phone: Optional[str] = None
