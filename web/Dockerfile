@@ -1,7 +1,10 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
+# Lockfile from macOS ARM may not include linux-x64-musl native binaries
+# needed for Alpine on x64 Cloud Build.
+RUN npm install --no-save lightningcss-linux-x64-musl @next/swc-linux-x64-musl 2>/dev/null || true
 
 FROM node:20-alpine AS builder
 WORKDIR /app
