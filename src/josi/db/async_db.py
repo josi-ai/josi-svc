@@ -10,7 +10,7 @@ from datetime import datetime
 
 from sqlalchemy import text, event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy.exc import OperationalError, DBAPIError
 from josi.core.config import settings
 
@@ -47,7 +47,7 @@ class EngineManager:
             max_overflow=settings.database_max_overflow,
             pool_pre_ping=True,
             pool_recycle=3600,
-            poolclass=QueuePool,
+            poolclass=AsyncAdaptedQueuePool,
         )
         
         # Add event listeners for debugging if enabled
