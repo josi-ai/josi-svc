@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     workers: int = Field(default=1)
     
     # Database settings
-    database_url: str = Field(default="postgresql://josi:josi@localhost:5432/josi")
+    database_url: str = Field(default="postgresql+asyncpg://josi:josi@localhost:5432/josi")
     database_pool_size: int = Field(default=10)
     database_max_overflow: int = Field(default=20)
     auto_db_migration: bool = Field(default=False)

@@ -6,8 +6,8 @@ export interface ServiceConfig {
 
 export const SERVICES: Record<string, ServiceConfig> = {
   api: { name: 'Josi API', port: 1954, url: 'http://localhost:1954' },
-  db: { name: 'PostgreSQL', port: 1961, url: 'postgresql://josi:josi@localhost:1961/josi' },
-  'db-test': { name: 'Test DB', port: 1962, url: 'postgresql://josi:josi@localhost:1962/josi_test' },
+  db: { name: 'PostgreSQL', port: 1961, url: 'postgresql+asyncpg://josi:josi@localhost:1961/josi' },
+  'db-test': { name: 'Test DB', port: 1962, url: 'postgresql+asyncpg://josi:josi@localhost:1962/josi_test' },
   web: { name: 'Josi Web', port: 1989, url: 'http://localhost:1989' },
 };
 

@@ -80,11 +80,11 @@ CONNECTION_NAME=$(gcloud sql instances describe $INSTANCE_NAME \
 
 echo "Cloud SQL setup complete!"
 echo "Connection name: $CONNECTION_NAME"
-echo "Database URL format: postgresql://$DB_USER:PASSWORD@127.0.0.1:5432/$DB_NAME"
+echo "Database URL format: postgresql+asyncpg://$DB_USER:PASSWORD@127.0.0.1:5432/$DB_NAME"
 echo ""
 echo "To connect using Cloud SQL Proxy:"
 echo "cloud_sql_proxy -instances=$CONNECTION_NAME=tcp:5432"
 echo ""
 echo "IMPORTANT: Change the passwords for root and $DB_USER users!"
 echo "Store the database URL in Google Secret Manager:"
-echo "echo -n 'postgresql://$DB_USER:PASSWORD@127.0.0.1:5432/$DB_NAME' | gcloud secrets create josi-database-url --data-file=-"
+echo "echo -n 'postgresql+asyncpg://$DB_USER:PASSWORD@127.0.0.1:5432/$DB_NAME' | gcloud secrets create josi-database-url --data-file=-"

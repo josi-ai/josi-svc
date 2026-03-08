@@ -58,9 +58,8 @@ async def test_engine(test_settings):
     import subprocess
     import os
     
-    # Set environment variable for alembic (convert asyncpg to psycopg2 URL)
-    alembic_url = test_settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
-    os.environ["DATABASE_URL"] = alembic_url
+    # Set environment variable for alembic
+    os.environ["DATABASE_URL"] = test_settings.database_url
     
     # Run migrations for test database
     try:

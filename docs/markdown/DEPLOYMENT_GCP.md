@@ -62,7 +62,7 @@ export SECRET_KEY=$(openssl rand -hex 32)
 
 # Create secrets in Secret Manager
 echo -n "$SECRET_KEY" | gcloud secrets create josi-secret-key --data-file=-
-echo -n "postgresql://josi:PASSWORD@/josi?host=/cloudsql/CONNECTION_NAME" | \
+echo -n "postgresql+asyncpg://josi:PASSWORD@/josi?host=/cloudsql/CONNECTION_NAME" | \
     gcloud secrets create josi-database-url --data-file=-
 echo -n "redis://10.x.x.x:6379/0" | gcloud secrets create josi-redis-url --data-file=-
 ```
@@ -98,7 +98,7 @@ INSTANCE_CONNECTION_NAME=$(gcloud sql instances describe josi-db \
     --format="value(connectionName)")
 
 # Update database secret
-echo -n "postgresql://josi:YOUR_PASSWORD@127.0.0.1:5432/josi" | \
+echo -n "postgresql+asyncpg://josi:YOUR_PASSWORD@127.0.0.1:5432/josi" | \
     gcloud secrets versions add josi-database-url --data-file=-
 
 # Get Redis details and update secret

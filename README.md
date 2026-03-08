@@ -372,7 +372,7 @@ poetry run python scripts/utilities/generate_coverage_report.py
 Key environment variables:
 ```bash
 # Database
-DATABASE_URL=postgresql://josi:josi@localhost:5432/josi
+DATABASE_URL=postgresql+asyncpg://josi:josi@localhost:5432/josi
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
