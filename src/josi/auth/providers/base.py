@@ -20,6 +20,14 @@ class AuthProvider(ABC):
         """
         ...
 
+    @abstractmethod
+    async def set_user_metadata(self, provider_user_id: str, metadata: dict) -> bool:
+        """Set public metadata on the auth provider user (e.g. Clerk publicMetadata).
+
+        Returns True on success, False on failure.
+        """
+        ...
+
 
 @lru_cache()
 def get_auth_provider() -> AuthProvider:

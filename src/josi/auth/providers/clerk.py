@@ -112,3 +112,32 @@ class ClerkProvider(AuthProvider):
         except Exception as e:
             logger.error("Clerk API call failed", error=str(e), provider_user_id=provider_user_id)
             return None
+
+    async def set_user_metadata(self, provider_user_id: str, metadata: dict) -> bool:
+        """Set publicMetadata on a Clerk user so subsequent JWTs carry josi_* claims."""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.patch(
+                    f"https://api.clerk.com/v1/users/{provider_user_id}",
+                    headers={
+                        "Authorization": f"Bearer {settings.clerk_secret_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={"public_metadata": metadata},
+                )
+                if response.status_code != 200:
+                    logger.error(
+                        "Failed to set Clerk publicMetadata",
+                        provider_user_id=provider_user_id,
+                        status=response.status_code,
+                        body=response.text,
+                    )
+                    return False
+                return True
+        except Exception as e:
+            logger.error(
+                "Clerk API call failed",
+                error=str(e),
+                provider_user_id=provider_user_id,
+            )
+            return False

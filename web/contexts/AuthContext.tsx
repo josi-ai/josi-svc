@@ -1,21 +1,20 @@
 'use client';
 
-import { createContext, useContext, useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { useAuth as useClerkAuth } from '@clerk/nextjs';
+import { createContext, useContext, useMemo, useEffect, useCallback } from 'react';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
 import { setAsyncTokenGetter } from '@/lib/api-client';
 import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1500;
 
 interface UserProfile {
   user_id: string;
+  auth_provider_id: string;
   email: string;
   full_name: string;
   phone?: string;
-  subscription_tier_id?: number;
   subscription_tier_name?: string;
+  subscription_tier_id?: number;
   roles: string[];
   is_active: boolean;
   is_verified: boolean;
@@ -41,9 +40,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const retryCount = useRef(0);
+  const { user: clerkUser, isLoaded: isUserLoaded } = useClerkUser();
 
   // Wire the async token getter into the API and GraphQL clients
   useEffect(() => {
@@ -51,50 +48,25 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     setAsyncGraphQLTokenGetter(getToken);
   }, [getToken]);
 
-  const fetchProfile = useCallback(async () => {
-    if (!isSignedIn) return;
-    setIsFetching(true);
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await fetch(`${API_URL}/api/v1/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-        retryCount.current = 0;
-      } else if (retryCount.current < MAX_RETRIES) {
-        retryCount.current += 1;
-        console.warn(`Profile fetch failed (${res.status}), retry ${retryCount.current}/${MAX_RETRIES}`);
-        setTimeout(() => fetchProfile(), RETRY_DELAY_MS);
-        return; // Don't clear isFetching yet — retry in progress
-      } else {
-        console.error('Profile fetch failed after max retries');
-        retryCount.current = 0;
-      }
-    } catch (err) {
-      if (retryCount.current < MAX_RETRIES) {
-        retryCount.current += 1;
-        console.warn(`Profile fetch error, retry ${retryCount.current}/${MAX_RETRIES}:`, err);
-        setTimeout(() => fetchProfile(), RETRY_DELAY_MS);
-        return;
-      }
-      console.error('Profile fetch failed after max retries:', err);
-      retryCount.current = 0;
-    } finally {
-      setIsFetching(false);
-    }
-  }, [isSignedIn, getToken]);
+  // Build user profile from Clerk user + publicMetadata (no API call needed)
+  const user: UserProfile | null = useMemo(() => {
+    if (!isSignedIn || !clerkUser) return null;
 
-  useEffect(() => {
-    if (isSignedIn) {
-      retryCount.current = 0;
-      fetchProfile();
-    } else {
-      setUser(null);
-    }
-  }, [isSignedIn, fetchProfile]);
+    const publicMetadata = (clerkUser.publicMetadata || {}) as Record<string, unknown>;
+
+    return {
+      user_id: (publicMetadata.josi_user_id as string) || '',
+      auth_provider_id: clerkUser.id,
+      email: clerkUser.primaryEmailAddress?.emailAddress || '',
+      full_name: clerkUser.fullName || clerkUser.firstName || '',
+      phone: clerkUser.primaryPhoneNumber?.phoneNumber,
+      subscription_tier_name: (publicMetadata.josi_subscription_tier as string) || 'Free',
+      subscription_tier_id: (publicMetadata.josi_subscription_tier_id as number) || 1,
+      roles: (publicMetadata.josi_roles as string[]) || ['user'],
+      is_active: (publicMetadata.josi_is_active as boolean) ?? true,
+      is_verified: (publicMetadata.josi_is_verified as boolean) ?? false,
+    };
+  }, [isSignedIn, clerkUser]);
 
   const logout = useCallback(async () => {
     try {
@@ -112,16 +84,24 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     window.location.href = '/auth/login';
   }, [getToken, signOut]);
 
+  const refreshUser = useCallback(async () => {
+    // Clerk SDK automatically reflects updated publicMetadata after
+    // the next token refresh. Calling clerkUser.reload() forces it.
+    if (clerkUser) {
+      await clerkUser.reload();
+    }
+  }, [clerkUser]);
+
   const value = useMemo(
     () => ({
       user,
-      isLoading: !isLoaded || isFetching,
+      isLoading: !isLoaded || !isUserLoaded,
       isAuthenticated: !!isSignedIn,
       getToken,
       logout,
-      refreshUser: fetchProfile,
+      refreshUser,
     }),
-    [user, isLoaded, isFetching, isSignedIn, getToken, logout, fetchProfile],
+    [user, isLoaded, isUserLoaded, isSignedIn, getToken, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

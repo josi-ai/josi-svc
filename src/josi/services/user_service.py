@@ -24,6 +24,40 @@ class UserService:
         self.roles = current_user.roles if current_user else None
         self.user_repository = UserRepository(current_user=current_user)
 
+    # --- Clerk publicMetadata sync ---
+
+    def _build_metadata(self, user: User) -> dict:
+        """Build the josi_* claims dict to store in Clerk publicMetadata."""
+        return {
+            "josi_user_id": str(user.user_id),
+            "josi_email": user.email,
+            "josi_full_name": user.full_name,
+            "josi_auth_provider": user.auth_provider,
+            "josi_subscription_tier": user.subscription_tier_name or "Free",
+            "josi_subscription_tier_id": user.subscription_tier_id or 1,
+            "josi_roles": user.roles,
+            "josi_is_active": user.is_active,
+            "josi_is_verified": user.is_verified,
+        }
+
+    async def sync_provider_metadata(self, user: User) -> None:
+        """Push josi_* claims to the auth provider so they appear in future JWTs."""
+        provider = get_auth_provider()
+        metadata = self._build_metadata(user)
+        success = await provider.set_user_metadata(user.auth_provider_id, metadata)
+        if success:
+            logger.info(
+                "Synced provider metadata",
+                user_id=str(user.user_id),
+                auth_provider_id=user.auth_provider_id,
+            )
+        else:
+            logger.warning(
+                "Failed to sync provider metadata",
+                user_id=str(user.user_id),
+                auth_provider_id=user.auth_provider_id,
+            )
+
     # --- User upsert (called by webhook) ---
 
     async def upsert_from_clerk(
@@ -66,6 +100,9 @@ class UserService:
             )
             user = await self.user_repository.create(user)
             logger.info("New user created", user_id=str(user.user_id), email=user.email)
+
+        # Sync josi_* claims to Clerk publicMetadata so future JWTs carry them
+        await self.sync_provider_metadata(user)
 
         await invalidate_user(clerk_user_id)
         return user
