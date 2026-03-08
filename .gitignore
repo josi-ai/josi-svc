@@ -255,3 +255,4 @@ web/.next/
 web/out/
 web/.env.local
 node_modules
+.playwright-mcp/

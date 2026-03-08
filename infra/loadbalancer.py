@@ -19,17 +19,12 @@ import pulumi
 import pulumi_gcp as gcp
 from config import (
     environment, project, region, name,
-    api_domain, web_domain, enable_custom_domains,
+    api_domain, web_domain, www_redirect, enable_custom_domains,
 )
 
 if not enable_custom_domains:
     pulumi.log.info("Custom domains not configured — skipping load balancer setup")
 else:
-    # ---- Project number (needed for LB service agent) ----
-    project_info = gcp.organizations.get_project(project_id=project)
-    project_number = project_info.number
-    lb_service_agent = f"serviceAccount:service-{project_number}@gcp-sa-loadbalancing.iam.gserviceaccount.com"
-
     # ---- Static IP ----
     global_ip = gcp.compute.GlobalAddress(
         name("lb-ip"),
@@ -46,10 +41,15 @@ else:
         project=project,
     )
 
+    # SSL cert domains: web_domain + www.web_domain if redirect enabled
+    web_ssl_domains = [web_domain]
+    if www_redirect:
+        web_ssl_domains.append(f"www.{web_domain}")
+
     web_ssl_cert = gcp.compute.ManagedSslCertificate(
         name("web-ssl"),
         managed=gcp.compute.ManagedSslCertificateManagedArgs(
-            domains=[web_domain],
+            domains=web_ssl_domains,
         ),
         project=project,
     )
@@ -173,6 +173,7 @@ else:
         cdn_policy=gcp.compute.BackendServiceCdnPolicyArgs(
             cache_mode="CACHE_ALL_STATIC",
             default_ttl=3600,
+            signed_url_cache_max_age_sec=0,
         ),
         log_config=gcp.compute.BackendServiceLogConfigArgs(
             enable=True,
@@ -181,30 +182,49 @@ else:
     )
 
     # ---- URL Map (host-based routing) ----
+    host_rules = [
+        gcp.compute.URLMapHostRuleArgs(
+            hosts=[api_domain],
+            path_matcher="api",
+        ),
+        gcp.compute.URLMapHostRuleArgs(
+            hosts=[web_domain],
+            path_matcher="web",
+        ),
+    ]
+    path_matchers = [
+        gcp.compute.URLMapPathMatcherArgs(
+            name="api",
+            default_service=api_backend.id,
+        ),
+        gcp.compute.URLMapPathMatcherArgs(
+            name="web",
+            default_service=web_backend.id,
+        ),
+    ]
+
+    # Redirect www.{web_domain} → web_domain
+    if www_redirect:
+        host_rules.append(gcp.compute.URLMapHostRuleArgs(
+            hosts=[f"www.{web_domain}"],
+            path_matcher="www-redirect",
+        ))
+        path_matchers.append(gcp.compute.URLMapPathMatcherArgs(
+            name="www-redirect",
+            default_url_redirect=gcp.compute.URLMapPathMatcherDefaultUrlRedirectArgs(
+                host_redirect=web_domain,
+                https_redirect=True,
+                strip_query=False,
+                redirect_response_code="MOVED_PERMANENTLY_DEFAULT",
+            ),
+        ))
+
     url_map = gcp.compute.URLMap(
         name("url-map"),
         project=project,
         default_service=web_backend.id,
-        host_rules=[
-            gcp.compute.URLMapHostRuleArgs(
-                hosts=[api_domain],
-                path_matcher="api",
-            ),
-            gcp.compute.URLMapHostRuleArgs(
-                hosts=[web_domain],
-                path_matcher="web",
-            ),
-        ],
-        path_matchers=[
-            gcp.compute.URLMapPathMatcherArgs(
-                name="api",
-                default_service=api_backend.id,
-            ),
-            gcp.compute.URLMapPathMatcherArgs(
-                name="web",
-                default_service=web_backend.id,
-            ),
-        ],
+        host_rules=host_rules,
+        path_matchers=path_matchers,
     )
 
     # ---- HTTPS Proxy + Forwarding Rule ----
@@ -250,9 +270,12 @@ else:
         load_balancing_scheme="EXTERNAL_MANAGED",
     )
 
-    # ---- IAM: Allow LB service agent to invoke Cloud Run ----
-    # This avoids needing allUsers (which org policy may block).
-    # The LB authenticates to Cloud Run using its service agent.
+    # ---- IAM: Allow unauthenticated invocation via LB ----
+    # EXTERNAL_MANAGED LBs don't authenticate to Cloud Run with a service agent.
+    # Security is handled at two layers:
+    #   1. Network: --ingress=internal-and-cloud-load-balancing (only LB traffic)
+    #   2. Application: JWT validation in the app
+    # Org policy overridden at project level to allow allUsers.
     for svc in ["api", "web"]:
         gcp.cloudrun.IamMember(
             name(f"{svc}-lb-invoker"),
@@ -260,16 +283,19 @@ else:
             location=region,
             project=project,
             role="roles/run.invoker",
-            member=lb_service_agent,
+            member="allUsers",
         )
 
     # ---- Exports ----
     pulumi.export("lb_ip", global_ip.address)
     pulumi.export("api_domain", api_domain)
     pulumi.export("web_domain", web_domain)
-    pulumi.export("dns_instructions", pulumi.Output.concat(
+    dns_lines = [
         "Add these A records in GoDaddy:\n",
         "  ", api_domain, " → ", global_ip.address, "\n",
         "  ", web_domain, " → ", global_ip.address, "\n",
-        "SSL certs auto-provision once DNS resolves (15-60 min).",
-    ))
+    ]
+    if www_redirect:
+        dns_lines.extend(["  www.", web_domain, " → ", global_ip.address, "\n"])
+    dns_lines.append("SSL certs auto-provision once DNS resolves (15-60 min).")
+    pulumi.export("dns_instructions", pulumi.Output.concat(*dns_lines))

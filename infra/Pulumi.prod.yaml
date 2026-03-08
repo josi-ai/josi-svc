@@ -24,4 +24,5 @@ config:
   josi:bucket_location: "us-central1"
   # Domains
   josi:api_domain: "api.josiam.com"
-  josi:web_domain: "app.josiam.com"
+  josi:web_domain: "josiam.com"
+  josi:www_redirect: "true"

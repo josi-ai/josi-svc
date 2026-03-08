@@ -100,7 +100,7 @@ steps:
           --image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
           --region=${_REGION} \
           --platform=managed \
-          --no-allow-unauthenticated \
+          --allow-unauthenticated \
           --ingress=internal-and-cloud-load-balancing \
           --add-cloudsql-instances=${_CLOUD_SQL_INSTANCE} \
           --set-env-vars="^||^ENVIRONMENT=prod||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=INFO||RATE_LIMIT_ENABLED=true" \

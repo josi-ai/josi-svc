@@ -50,6 +50,7 @@ web_max_instances = config.get_int("web_max_instances") or 3
 # Domains
 api_domain = config.get("api_domain") or ""
 web_domain = config.get("web_domain") or ""
+www_redirect = config.get_bool("www_redirect") or False  # redirect www.{web_domain} → web_domain
 enable_custom_domains = bool(api_domain and web_domain)
 
 # API Gateway

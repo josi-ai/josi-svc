@@ -27,6 +27,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         variables: {
           colorPrimary: '#6b5ce7',
           colorBackground: '#1a1230',
+          colorNeutral: 'white',
+          colorForeground: 'white',
+          colorInputForeground: 'white',
+          colorInput: '#241b3d',
+        },
+        elements: {
+          providerIcon__apple: { filter: 'none' },
+          providerIcon__github: { filter: 'invert(1)' },
+          providerIcon__x: { filter: 'invert(1)' },
         },
       }}
     >

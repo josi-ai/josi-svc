@@ -31,7 +31,8 @@ from josi.models.api_key_model import ApiKey
 config = context.config
 
 # Set the database URL from settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Escape % for configparser interpolation (e.g. URL-encoded passwords)
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
