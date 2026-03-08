@@ -1,6 +1,7 @@
 """Abstract auth provider interface for pluggable JWT validation."""
 from abc import ABC, abstractmethod
 from functools import lru_cache
+from typing import Optional
 
 
 class AuthProvider(ABC):
@@ -12,7 +13,12 @@ class AuthProvider(ABC):
     def validate_jwt(self, token: str) -> dict: ...
 
     @abstractmethod
-    async def set_user_metadata(self, provider_user_id: str, metadata: dict) -> bool: ...
+    async def get_user_info(self, provider_user_id: str) -> Optional[dict]:
+        """Fetch user details (email, full_name, phone) from the auth provider.
+
+        Returns dict with keys: email, full_name, phone. Or None on failure.
+        """
+        ...
 
 
 @lru_cache()

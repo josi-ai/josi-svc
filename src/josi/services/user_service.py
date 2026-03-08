@@ -1,4 +1,4 @@
-"""User service — business logic for user management and auth provider sync."""
+"""User service — business logic for user management and auth resolution."""
 from typing import Optional
 from datetime import datetime
 from uuid import UUID
@@ -15,7 +15,7 @@ logger = structlog.get_logger()
 
 
 class UserService:
-    """Business logic for users, provider metadata sync, and auth resolution."""
+    """Business logic for users and auth resolution."""
 
     def __init__(self, current_user: Optional[CurrentUser] = None):
         self.current_user = current_user
@@ -24,23 +24,7 @@ class UserService:
         self.roles = current_user.roles if current_user else None
         self.user_repository = UserRepository(current_user=current_user)
 
-    # --- Auth provider metadata sync ---
-
-    async def sync_provider_metadata(self, provider_user_id: str, metadata: dict) -> bool:
-        provider = get_auth_provider()
-        return await provider.set_user_metadata(provider_user_id, metadata)
-
-    def _build_metadata(self, user: User) -> dict:
-        return {
-            "josi_user_id": str(user.user_id),
-            "josi_subscription_tier_id": user.subscription_tier_id or 1,
-            "josi_subscription_tier": user.subscription_tier_name or "Free",
-            "josi_roles": user.roles,
-            "josi_is_active": user.is_active,
-            "josi_is_verified": user.is_verified,
-        }
-
-    # --- User upsert (shared by webhook + sync-claims) ---
+    # --- User upsert (called by webhook) ---
 
     async def upsert_from_clerk(
         self,
@@ -49,7 +33,7 @@ class UserService:
         full_name: Optional[str],
         phone: Optional[str] = None,
     ) -> User:
-        """Find-or-create a user from Clerk data and sync publicMetadata."""
+        """Find-or-create a user from Clerk webhook data."""
         user = await self.user_repository.get_by_auth_provider_id(clerk_user_id)
 
         if not user and email:
@@ -83,25 +67,47 @@ class UserService:
             user = await self.user_repository.create(user)
             logger.info("New user created", user_id=str(user.user_id), email=user.email)
 
-        await self.sync_provider_metadata(clerk_user_id, self._build_metadata(user))
         await invalidate_user(clerk_user_id)
         return user
 
     # --- Auth resolution (used by middleware) ---
 
     async def resolve_user_from_db(self, auth_provider_id: str, email: str) -> CurrentUser:
-        """Fallback: look up user by auth_provider_id, create if missing."""
+        """Look up user by auth_provider_id. If missing, fetch details from
+        the auth provider API and create the user."""
         user = await self.user_repository.get_by_auth_provider_id(auth_provider_id)
 
         if not user:
-            logger.info("User not yet provisioned, creating from JWT", sub=auth_provider_id, email=email)
-            user = User(
-                auth_provider_id=auth_provider_id,
-                email=email,
-                full_name=email.split("@")[0] if email else "User",
-                last_login=datetime.utcnow(),
+            # Fetch real user info from auth provider (email isn't in JWT by default)
+            provider = get_auth_provider()
+            user_info = await provider.get_user_info(auth_provider_id)
+
+            actual_email = (user_info or {}).get("email") or email
+            actual_name = (user_info or {}).get("full_name") or (
+                actual_email.split("@")[0] if actual_email else "User"
             )
-            user = await self.user_repository.create(user)
+            actual_phone = (user_info or {}).get("phone")
+
+            # Check if a user already exists with this email (link accounts)
+            if actual_email:
+                user = await self.user_repository.get_by_email(actual_email)
+                if user:
+                    user.auth_provider_id = auth_provider_id
+                    user.last_login = datetime.utcnow()
+                    user = await self.user_repository.update(user)
+                    logger.info("Linked existing user to auth provider", user_id=str(user.user_id))
+
+            if not user:
+                logger.info("Auto-creating user from auth provider", sub=auth_provider_id, email=actual_email)
+                user = User(
+                    auth_provider_id=auth_provider_id,
+                    email=actual_email,
+                    full_name=actual_name,
+                    phone=actual_phone,
+                    is_verified=bool(actual_email),
+                    last_login=datetime.utcnow(),
+                )
+                user = await self.user_repository.create(user)
 
         return CurrentUser(
             user_id=user.user_id,

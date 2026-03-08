@@ -12,6 +12,7 @@ export default function SignUpPage() {
       background: 'radial-gradient(ellipse at top, #1a1230 0%, #0f0a1e 50%)',
     }}>
       <SignUp
+        signInUrl="/auth/login"
         fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
