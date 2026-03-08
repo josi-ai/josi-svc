@@ -92,26 +92,26 @@ steps:
   # Deploy
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy"
-    entrypoint: "gcloud"
+    entrypoint: "bash"
     args:
-      - "run"
-      - "deploy"
-      - "${_SERVICE_NAME}"
-      - "--image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA"
-      - "--region=${_REGION}"
-      - "--platform=managed"
-      - "--allow-unauthenticated"
-      - "--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}"
-      - "--set-env-vars=^||^ENVIRONMENT=dev||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=DEBUG||RATE_LIMIT_ENABLED=true||DATABASE_URL=postgresql+asyncpg://josi@/josi?host=/cloudsql/${_CLOUD_SQL_INSTANCE}"
-      - "--set-secrets=CLERK_SECRET_KEY=josiam-clerk-secret-key-dev:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-dev:latest"
-      - "--min-instances=0"
-      - "--max-instances=3"
-      - "--memory=2Gi"
-      - "--cpu=2"
-      - "--timeout=300"
-      - "--port=8000"
-      - "--execution-environment=gen2"
-      - "--service-account=josi-dev@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "-c"
+      - |
+        gcloud run deploy ${_SERVICE_NAME} \
+          --image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
+          --region=${_REGION} \
+          --platform=managed \
+          --allow-unauthenticated \
+          --add-cloudsql-instances=${_CLOUD_SQL_INSTANCE} \
+          --set-env-vars="^||^ENVIRONMENT=dev||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=DEBUG||RATE_LIMIT_ENABLED=true" \
+          --set-secrets="DATABASE_URL=josiam-db-url-dev:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-dev:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-dev:latest" \
+          --min-instances=0 \
+          --max-instances=3 \
+          --memory=2Gi \
+          --cpu=2 \
+          --timeout=300 \
+          --port=8000 \
+          --execution-environment=gen2 \
+          --service-account=josi-dev@${PROJECT_ID}.iam.gserviceaccount.com
     waitFor: ["push"]
 
   # Cleanup

@@ -92,18 +92,18 @@ steps:
   # Deploy
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy"
-    entrypoint: "gcloud"
+    entrypoint: "bash"
     args:
-      - "run"
-      - "deploy"
-      - "${_SERVICE_NAME}"
-      - "--image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA"
-      - "--region=${_REGION}"
-      - "--platform=managed"
-      - "--allow-unauthenticated"
-      - "--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}"
-      - "--set-env-vars=^||^ENVIRONMENT=prod||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=INFO||RATE_LIMIT_ENABLED=true||DATABASE_URL=postgresql+asyncpg://josi@/josi?host=/cloudsql/${_CLOUD_SQL_INSTANCE}"
-      - "--set-secrets=CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-prod:latest"
+      - "-c"
+      - |
+        gcloud run deploy ${_SERVICE_NAME} \
+          --image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
+          --region=${_REGION} \
+          --platform=managed \
+          --allow-unauthenticated \
+          --add-cloudsql-instances=${_CLOUD_SQL_INSTANCE} \
+          --set-env-vars="^||^ENVIRONMENT=prod||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=INFO||RATE_LIMIT_ENABLED=true" \
+          --set-secrets="DATABASE_URL=josiam-db-url-prod:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-prod:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-prod:latest" \
       - "--min-instances=1"
       - "--max-instances=10"
       - "--memory=2Gi"
