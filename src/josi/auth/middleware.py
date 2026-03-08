@@ -7,6 +7,7 @@ from josi.auth.schemas import CurrentUser
 from josi.auth.providers import get_auth_provider
 from josi.services.user_service import UserService
 from josi.services.api_key_service import ApiKeyService
+from josi.services.session_cache_service import get_cached_user, cache_user
 
 import structlog
 
@@ -19,6 +20,7 @@ async def resolve_current_user(request: Request) -> CurrentUser:
     """Resolve CurrentUser from either JWT or API key.
 
     Checks Authorization header first, then X-API-Key.
+    JWT path: Redis cache → DB fallback.
     """
     auth_header: Optional[str] = request.headers.get("authorization")
     api_key_header: Optional[str] = request.headers.get("x-api-key")
@@ -29,18 +31,21 @@ async def resolve_current_user(request: Request) -> CurrentUser:
         provider = get_auth_provider()
         claims = provider.validate_jwt(token)
 
+        auth_provider_id = claims.get("sub", "")
+
+        # Check Redis cache first
+        cached = await get_cached_user(auth_provider_id)
+        if cached:
+            return cached
+
+        # Cache miss — resolve from DB
         user_service = UserService()
-
-        # Try extracting from custom claims first (fast path)
-        current_user = user_service.extract_user_from_claims(claims)
-        if current_user:
-            return current_user
-
-        # Fall back to DB lookup (first login before webhook sets claims)
-        return await user_service.resolve_user_from_db(
-            auth_provider_id=claims.get("sub", ""),
+        current_user = await user_service.resolve_user_from_db(
+            auth_provider_id=auth_provider_id,
             email=claims.get("email", ""),
         )
+        await cache_user(current_user)
+        return current_user
 
     # Path 2: API Key (B2B)
     if api_key_header:

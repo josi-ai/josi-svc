@@ -9,6 +9,7 @@ from josi.auth.schemas import CurrentUser
 from josi.auth.providers import get_auth_provider
 from josi.models.user_model import User
 from josi.repositories.user_repository import UserRepository
+from josi.services.session_cache_service import invalidate_user
 
 logger = structlog.get_logger()
 
@@ -83,6 +84,7 @@ class UserService:
             logger.info("New user created", user_id=str(user.user_id), email=user.email)
 
         await self.sync_provider_metadata(clerk_user_id, self._build_metadata(user))
+        await invalidate_user(clerk_user_id)
         return user
 
     # --- Auth resolution (used by middleware) ---
