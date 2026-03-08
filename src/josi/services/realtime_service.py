@@ -399,7 +399,7 @@ async def verify_websocket_token(token: str, db: AsyncSession) -> Optional[User]
         from sqlalchemy import select
         claims = validate_jwt(token)
         result = await db.execute(
-            select(User).where(User.clerk_id == claims["sub"])
+            select(User).where(User.auth_provider_id == claims["sub"])
         )
         return result.scalar_one_or_none()
     except Exception as e:
