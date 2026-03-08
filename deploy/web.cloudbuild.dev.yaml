@@ -63,7 +63,7 @@ steps:
       - "--region=${_REGION}"
       - "--platform=managed"
       - "--allow-unauthenticated"
-      - "--set-env-vars=NODE_ENV=production"
+      - "--set-env-vars=NODE_ENV=production,CLERK_IS_SATELLITE=true,CLERK_DOMAIN=dev.josiam.com,CLERK_SIGN_IN_URL=https://dev.josiam.com/auth/login"
       - "--set-secrets=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=josiam-clerk-publishable-key-dev:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-dev:latest"
       - "--min-instances=0"
       - "--max-instances=3"
