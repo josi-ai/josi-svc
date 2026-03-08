@@ -1,7 +1,7 @@
 services:
   api:
     environment:
-      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@cloudsql-proxy:5432/josi"
+      DATABASE_URL: "postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@cloudsql-proxy:5432/josi"
       ENVIRONMENT: production
     depends_on:
       cloudsql-proxy:

@@ -26,7 +26,7 @@ services:
       context: .
       dockerfile: Dockerfile.test
     environment:
-      DATABASE_URL: postgresql://josi:josi@test-db:5432/josi_test
+      DATABASE_URL: postgresql+asyncpg://josi:josi@test-db:5432/josi_test
       ENVIRONMENT: test
       AUTO_DB_MIGRATION: "false"
       SECRET_KEY: test-secret-key-for-testing
