@@ -40,9 +40,6 @@ steps:
           -t "${_ARTIFACT_REGISTRY}/josi-web:dev-latest" \
           --build-arg "NEXT_PUBLIC_API_URL=$$API_URL" \
           --build-arg "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$$CLERK_PUBLISHABLE_KEY" \
-          --build-arg "NEXT_PUBLIC_CLERK_IS_SATELLITE=true" \
-          --build-arg "NEXT_PUBLIC_CLERK_DOMAIN=dev.josiam.com" \
-          --build-arg "NEXT_PUBLIC_CLERK_SIGN_IN_URL=https://dev.josiam.com/auth/login" \
           -f web/Dockerfile \
           web/
     secretEnv: ["CLERK_PUBLISHABLE_KEY"]
@@ -66,7 +63,7 @@ steps:
       - "--region=${_REGION}"
       - "--platform=managed"
       - "--allow-unauthenticated"
-      - "--set-env-vars=NODE_ENV=production,CLERK_IS_SATELLITE=true,CLERK_DOMAIN=dev.josiam.com,CLERK_SIGN_IN_URL=https://dev.josiam.com/auth/login"
+      - "--set-env-vars=NODE_ENV=production"
       - "--set-secrets=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=josiam-clerk-publishable-key-dev:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-dev:latest"
       - "--min-instances=0"
       - "--max-instances=3"
