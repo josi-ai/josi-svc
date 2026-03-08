@@ -16,12 +16,24 @@ class ClerkProvider(AuthProvider):
     def provider_name(self) -> str:
         return "clerk"
 
+    @staticmethod
+    def _derive_jwks_url() -> str:
+        """Derive JWKS URL from Clerk publishable key."""
+        import base64
+        pk = settings.clerk_publishable_key or ""
+        # publishable key format: pk_test_<base64-encoded-domain>
+        encoded = pk.split("_", 2)[-1] if "_" in pk else ""
+        try:
+            domain = base64.b64decode(encoded + "==").decode().rstrip("$")
+            return f"https://{domain}/.well-known/jwks.json"
+        except Exception:
+            logger.warning("Could not derive JWKS URL from publishable key, using fallback")
+            return "https://api.clerk.com/.well-known/jwks.json"
+
     def _get_jwks_client(self):
         if ClerkProvider._jwks_client is None:
             from jwt import PyJWKClient
-            ClerkProvider._jwks_client = PyJWKClient(
-                "https://api.clerk.com/.well-known/jwks.json"
-            )
+            ClerkProvider._jwks_client = PyJWKClient(self._derive_jwks_url())
         return ClerkProvider._jwks_client
 
     def validate_jwt(self, token: str) -> dict:

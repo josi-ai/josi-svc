@@ -42,7 +42,7 @@ export default function DashboardHeader() {
     },
   ];
 
-  const displayName = user?.name || user?.email || 'User';
+  const displayName = user?.full_name || user?.email || 'User';
 
   return (
     <div
