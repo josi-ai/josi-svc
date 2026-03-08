@@ -1,0 +1,27 @@
+services:
+  api:
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://josi:josi@db:5432/josi"
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    environment:
+      POSTGRES_USER: josi
+      POSTGRES_PASSWORD: josi
+      POSTGRES_DB: josi
+    ports:
+      - "1961:5432"
+    volumes:
+      - josi-db:/var/lib/postgresql/data
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U josi -d josi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  josi-db:

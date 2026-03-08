@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import * as logger from '../../lib/logger.js';
 import { getProjectRoot } from '../../lib/detect.js';
-import { composeLogs } from '../../lib/docker.js';
+import { exec } from '../../lib/docker.js';
 
 export function register(parent: Command): void {
   parent
@@ -17,9 +17,12 @@ Examples:
   $ josi redock logs db        # Follow database logs
   $ josi redock logs --no-follow`
     )
-    .action((service: string | undefined, opts: { follow: boolean }) => {
+    .action(async (service: string | undefined, opts: { follow: boolean }) => {
       logger.header('Container Logs');
       const root = getProjectRoot();
-      composeLogs(root, service, opts.follow);
+      const args = ['logs'];
+      if (opts.follow) args.push('-f');
+      if (service) args.push(service);
+      await exec(args, { cwd: root });
     });
 }

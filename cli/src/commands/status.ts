@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import { spawnSync } from 'child_process';
 import * as logger from '../lib/logger.js';
-import { isDockerRunning, composeExec } from '../lib/docker.js';
+import { isDockerRunning } from '../lib/docker.js';
 import { SERVICES } from '../types.js';
 
 export function register(program: Command): void {
@@ -29,7 +29,8 @@ export function register(program: Command): void {
       try {
         const { getProjectRoot } = await import('../lib/detect.js');
         const root = getProjectRoot();
-        const result = composeExec(['ps', '--format', 'json'], {
+        // exec with silent mode doesn't give us stdout, so use spawnSync for JSON parsing
+        const result = spawnSync('docker', ['compose', 'ps', '--format', 'json'], {
           cwd: root,
           stdio: 'pipe',
         });

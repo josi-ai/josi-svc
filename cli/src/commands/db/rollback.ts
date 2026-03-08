@@ -30,15 +30,15 @@ export function register(parent: Command): void {
       const root = getProjectRoot();
       logger.step('Rolling back last migration...');
 
-      const result = containerExec(root, 'api', [
+      const result = await containerExec([], 'api', [
         'poetry',
         'run',
         'alembic',
         'downgrade',
         '-1',
-      ]);
+      ], { cwd: root });
 
-      if (result.status !== 0) {
+      if (result.code !== 0) {
         logger.error('Rollback failed.');
         process.exit(1);
       }

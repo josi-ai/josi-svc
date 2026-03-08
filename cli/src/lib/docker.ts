@@ -1,56 +1,43 @@
-import { spawnSync, SpawnSyncReturns } from 'child_process';
-import * as logger from './logger.js';
+import { spawnSync, spawn, type SpawnOptions } from 'node:child_process';
 
-export interface ExecOptions {
-  cwd: string;
-  env?: Record<string, string>;
-  stdio?: 'inherit' | 'pipe';
+export interface ExecResult {
+  code: number;
 }
 
-export function composeExec(
+export function exec(
   args: string[],
-  opts: ExecOptions
-): SpawnSyncReturns<Buffer> {
-  return spawnSync('docker', ['compose', ...args], {
-    cwd: opts.cwd,
-    stdio: opts.stdio ?? 'inherit',
-    env: { ...process.env, ...opts.env },
+  opts?: { cwd?: string; silent?: boolean; env?: Record<string, string> },
+): Promise<ExecResult> {
+  return new Promise((resolve, reject) => {
+    const spawnOpts: SpawnOptions = {
+      cwd: opts?.cwd,
+      stdio: opts?.silent ? ['ignore', 'pipe', 'pipe'] : 'inherit',
+      env: opts?.env ? { ...process.env, ...opts.env } : undefined,
+    };
+
+    const child = spawn('docker', ['compose', ...args], spawnOpts);
+
+    child.on('error', (err) => {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        reject(new Error('docker not found. Is Docker installed and in your PATH?'));
+      } else {
+        reject(err);
+      }
+    });
+
+    child.on('close', (code) => {
+      resolve({ code: code ?? 1 });
+    });
   });
 }
 
-export function composeUp(cwd: string, build = true): void {
-  const args = ['up', '-d'];
-  if (build) args.push('--build');
-  const result = composeExec(args, { cwd });
-  if (result.status !== 0) {
-    logger.error('Failed to start services.');
-    process.exit(1);
-  }
-}
-
-export function composeDown(cwd: string, volumes = false): void {
-  const args = ['down'];
-  if (volumes) args.push('-v', '--remove-orphans');
-  composeExec(args, { cwd });
-}
-
-export function composeLogs(cwd: string, service?: string, follow = true): void {
-  const args = ['logs'];
-  if (follow) args.push('-f');
-  if (service) args.push(service);
-  composeExec(args, { cwd });
-}
-
-export function composePs(cwd: string): SpawnSyncReturns<Buffer> {
-  return composeExec(['ps', '--format', 'table'], { cwd });
-}
-
 export function containerExec(
-  cwd: string,
-  service: string,
-  command: string[]
-): SpawnSyncReturns<Buffer> {
-  return composeExec(['exec', service, ...command], { cwd });
+  composeArgs: string[],
+  container: string,
+  command: string[],
+  opts?: { cwd?: string },
+): Promise<ExecResult> {
+  return exec([...composeArgs, 'exec', container, ...command], opts);
 }
 
 export function isDockerRunning(): boolean {

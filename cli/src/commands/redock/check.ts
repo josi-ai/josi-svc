@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { getProjectRoot } from '../../lib/detect.js';
-import { composeExec } from '../../lib/docker.js';
+import { exec } from '../../lib/docker.js';
 import * as logger from '../../lib/logger.js';
 
 export function register(program: Command): void {
@@ -14,6 +14,7 @@ export function register(program: Command): void {
       `
 Validates:
   - docker-compose.yml exists and parses correctly
+  - Environment overlay files exist
   - Dockerfile exists
   - Python version in Dockerfile matches pyproject.toml
   - Required project files exist (src/, pyproject.toml, poetry.lock)
@@ -23,7 +24,7 @@ Validates:
 Examples:
   $ josi redock check`
     )
-    .action(() => {
+    .action(async () => {
       const root = getProjectRoot();
       let issues = 0;
 
@@ -37,6 +38,16 @@ Examples:
       } else {
         logger.fail('docker-compose.yml is missing');
         issues++;
+      }
+
+      const envFiles = ['docker-compose.dev.yml', 'docker-compose.prod.yml', 'docker-compose.local.yml'];
+      for (const file of envFiles) {
+        if (existsSync(resolve(root, file))) {
+          logger.pass(`${file} exists`);
+        } else {
+          logger.fail(`${file} is missing`);
+          issues++;
+        }
       }
 
       // --- Dockerfile ---
@@ -82,14 +93,12 @@ Examples:
       logger.info('Docker Compose validation');
 
       if (existsSync(resolve(root, 'docker-compose.yml'))) {
-        const result = composeExec(['config', '--services'], {
+        const result = await exec(['config', '--services'], {
           cwd: root,
-          stdio: 'pipe',
+          silent: true,
         });
-        if (result.status === 0) {
+        if (result.code === 0) {
           logger.pass('docker-compose.yml parses correctly');
-          const services = (result.stdout?.toString() ?? '').trim().split('\n').filter(Boolean);
-          logger.dim(`  Services: ${services.join(', ')}`);
         } else {
           logger.fail('docker-compose.yml has errors');
           logger.dim('  Run: docker compose config');

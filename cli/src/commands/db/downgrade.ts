@@ -37,15 +37,15 @@ Examples:
       const root = getProjectRoot();
       logger.step(`Downgrading to: ${revision}`);
 
-      const result = containerExec(root, 'api', [
+      const result = await containerExec([], 'api', [
         'poetry',
         'run',
         'alembic',
         'downgrade',
         revision,
-      ]);
+      ], { cwd: root });
 
-      if (result.status !== 0) {
+      if (result.code !== 0) {
         logger.error('Migration downgrade failed.');
         process.exit(1);
       }

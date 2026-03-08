@@ -1,0 +1,16 @@
+services:
+  api:
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@cloudsql-proxy:5432/josi"
+      ENVIRONMENT: production
+    depends_on:
+      cloudsql-proxy:
+        condition: service_started
+
+  cloudsql-proxy:
+    command: ["--address", "0.0.0.0", "--port", "5432", "josiam:us-central1:josiam-prod"]
+    volumes:
+      - type: bind
+        source: ~/.config/gcloud
+        target: /home/nonroot/.config/gcloud
+        read_only: true

@@ -16,8 +16,7 @@ from josi.core.config import settings
 
 log = logging.getLogger("uvicorn")
 
-# Convert sync database URL to async
-DATABASE_URL = settings.database_url.replace("postgresql://", "postgresql+asyncpg://")
+DATABASE_URL = settings.database_url
 
 
 class EngineManager:
