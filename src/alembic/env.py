@@ -25,6 +25,7 @@ from josi.models import (
 )
 from josi.models.user_model import User
 from josi.models.api_key_model import ApiKey
+from josi.models.user_usage_model import UserUsage
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
