@@ -30,9 +30,8 @@ from josi.models.api_key_model import ApiKey
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the database URL from settings — Alembic needs a sync driver
-db_url = settings.database_url.replace("+asyncpg", "")
-config.set_main_option("sqlalchemy.url", db_url)
+# Set the database URL from settings
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
