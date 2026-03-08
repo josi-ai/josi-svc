@@ -46,7 +46,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const tier = ((user.subscription_tier_name || user.subscription_tier || 'Free').toLowerCase() as SubscriptionTier) || 'free';
+      const tier = ((user.subscription_tier_name || 'Free').toLowerCase() as SubscriptionTier) || 'free';
       setState((prev) => ({
         ...prev,
         tier,
