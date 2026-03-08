@@ -1,11 +1,13 @@
 'use client';
 
-import { createContext, useContext, useMemo, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth as useClerkAuth } from '@clerk/nextjs';
 import { setAsyncTokenGetter } from '@/lib/api-client';
 import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1500;
 
 interface UserProfile {
   user_id: string;
@@ -41,6 +43,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const retryCount = useRef(0);
 
   // Wire the async token getter into the API and GraphQL clients
   useEffect(() => {
@@ -60,9 +63,25 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       if (res.ok) {
         const data = await res.json();
         setUser(data);
+        retryCount.current = 0;
+      } else if (retryCount.current < MAX_RETRIES) {
+        retryCount.current += 1;
+        console.warn(`Profile fetch failed (${res.status}), retry ${retryCount.current}/${MAX_RETRIES}`);
+        setTimeout(() => fetchProfile(), RETRY_DELAY_MS);
+        return; // Don't clear isFetching yet — retry in progress
+      } else {
+        console.error('Profile fetch failed after max retries');
+        retryCount.current = 0;
       }
     } catch (err) {
-      console.warn('Failed to fetch user profile:', err);
+      if (retryCount.current < MAX_RETRIES) {
+        retryCount.current += 1;
+        console.warn(`Profile fetch error, retry ${retryCount.current}/${MAX_RETRIES}:`, err);
+        setTimeout(() => fetchProfile(), RETRY_DELAY_MS);
+        return;
+      }
+      console.error('Profile fetch failed after max retries:', err);
+      retryCount.current = 0;
     } finally {
       setIsFetching(false);
     }
@@ -70,6 +89,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (isSignedIn) {
+      retryCount.current = 0;
       fetchProfile();
     } else {
       setUser(null);
