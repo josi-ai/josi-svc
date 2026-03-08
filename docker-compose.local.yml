@@ -1,7 +1,7 @@
 services:
   api:
     environment:
-      DATABASE_URL: "postgresql+asyncpg://josi:josi@db:5432/josi"
+      DATABASE_URL: "postgresql://josi:josi@db:5432/josi"
       ENVIRONMENT: development
     depends_on:
       db:
