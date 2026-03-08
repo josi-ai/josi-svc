@@ -100,7 +100,8 @@ steps:
           --image=${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA \
           --region=${_REGION} \
           --platform=managed \
-          --allow-unauthenticated \
+          --no-allow-unauthenticated \
+          --ingress=internal-and-cloud-load-balancing \
           --add-cloudsql-instances=${_CLOUD_SQL_INSTANCE} \
           --set-env-vars="^||^ENVIRONMENT=dev||AUTO_DB_MIGRATION=true||EPHEMERIS_PATH=/usr/share/swisseph||CORS_ORIGINS=[\"*\"]||LOG_LEVEL=DEBUG||RATE_LIMIT_ENABLED=true" \
           --set-secrets="DATABASE_URL=josiam-db-url-dev:latest,CLERK_SECRET_KEY=josiam-clerk-secret-key-dev:latest,CLERK_WEBHOOK_SECRET=josiam-clerk-webhook-secret-dev:latest" \
@@ -125,4 +126,4 @@ images:
   - "${_ARTIFACT_REGISTRY}/josi-api:$COMMIT_SHA"
   - "${_ARTIFACT_REGISTRY}/josi-api:dev-latest"
 
-timeout: "1800s"
+timeout: "3600s"

@@ -12,12 +12,13 @@ import pulumi
 from config import environment, project, region
 
 # Import all resource modules (order: independent -> dependent)
-import registry    # Artifact Registry (no deps)
-import storage     # GCS buckets (no deps)
-import secrets     # Secret Manager (no deps)
-import iam         # Service accounts (no deps)
-import database    # Cloud SQL (reads secrets)
-import triggers    # Cloud Build triggers (no deps, references deploy/ YAMLs)
+import registry      # Artifact Registry (no deps)
+import storage       # GCS buckets (no deps)
+import secrets       # Secret Manager (no deps)
+import iam           # Service accounts (no deps)
+import database      # Cloud SQL (reads secrets)
+import triggers      # Cloud Build triggers (no deps, references deploy/ YAMLs)
+import loadbalancer  # Global LB + Cloud Armor (reads config domains)
 
 pulumi.export("environment", environment)
 pulumi.export("project", project)

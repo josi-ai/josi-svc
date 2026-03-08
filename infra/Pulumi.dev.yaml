@@ -22,6 +22,6 @@ config:
   josi:web_max_instances: "3"
   # Storage
   josi:bucket_location: "us-central1"
-  # Domains (empty = no custom domains)
-  # josi:api_domain: "dev.api.josiam.com"
-  # josi:web_domain: "dev.app.josiam.com"
+  # Domains
+  josi:api_domain: "dev-api.josiam.com"
+  josi:web_domain: "dev.josiam.com"
