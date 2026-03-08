@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    optimizePackageImports: ['antd', '@ant-design/icons'],
-  },
   images: {
     remotePatterns: [
       {
