@@ -89,31 +89,6 @@ class UserService:
 
     # --- Auth resolution (used by middleware) ---
 
-    def extract_user_from_claims(self, claims: dict) -> Optional[CurrentUser]:
-        """Extract CurrentUser from JWT custom claims (fast path).
-
-        Returns None if josi_user_id is missing (first login before webhook).
-        """
-        josi_user_id = claims.get("josi_user_id")
-        if not josi_user_id:
-            return None
-
-        try:
-            user_id = UUID(josi_user_id)
-        except ValueError:
-            return None
-
-        return CurrentUser(
-            user_id=user_id,
-            auth_provider_id=claims.get("sub", ""),
-            email=claims.get("email", ""),
-            subscription_tier=claims.get("josi_subscription_tier", "Free"),
-            subscription_tier_id=claims.get("josi_subscription_tier_id"),
-            roles=claims.get("josi_roles", ["user"]),
-            is_active=claims.get("josi_is_active", True),
-            is_verified=claims.get("josi_is_verified", False),
-        )
-
     async def resolve_user_from_db(self, auth_provider_id: str, email: str) -> CurrentUser:
         """Fallback: look up user by auth_provider_id, create if missing."""
         user = await self.user_repository.get_by_auth_provider_id(auth_provider_id)

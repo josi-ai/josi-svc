@@ -28,12 +28,6 @@ class ClerkWebhookResponse(BaseModel):
     josi_user_id: Optional[str] = None
 
 
-class SyncClaimsResponse(BaseModel):
-    success: bool
-    josi_user_id: Optional[str] = None
-    synced: bool = False
-
-
 # --- Webhook signature verification ---
 
 def verify_clerk_webhook(request: Request, body: bytes) -> bool:
@@ -159,46 +153,6 @@ async def clerk_user_webhook(request: Request):
     )
 
     return ClerkWebhookResponse(success=True, josi_user_id=str(user.user_id))
-
-
-@auth_router.post("/sync-claims", response_model=SyncClaimsResponse)
-async def sync_claims(request: Request):
-    """Called by the client after first sign-in to ensure publicMetadata is set."""
-    auth_header = request.headers.get("authorization", "")
-    if not auth_header.lower().startswith("bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Bearer token required",
-        )
-
-    token = auth_header[7:]
-    provider = get_auth_provider()
-    claims = provider.validate_jwt(token)
-
-    clerk_user_id = claims.get("sub", "")
-    email = claims.get("email", "")
-    name = claims.get("name", "")
-
-    if not clerk_user_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Missing sub claim in JWT",
-        )
-
-    logger.info("Sync-claims requested", clerk_user_id=clerk_user_id, email=email)
-
-    user_service = UserService()
-    user = await user_service.upsert_from_clerk(
-        clerk_user_id=clerk_user_id,
-        email=email,
-        full_name=name,
-    )
-
-    return SyncClaimsResponse(
-        success=True,
-        josi_user_id=str(user.user_id),
-        synced=True,
-    )
 
 
 @auth_router.post("/logout")

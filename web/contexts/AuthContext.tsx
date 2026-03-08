@@ -1,24 +1,31 @@
 'use client';
 
-import { createContext, useContext, useMemo, useEffect } from 'react';
-import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
+import { createContext, useContext, useMemo, useEffect, useState, useCallback } from 'react';
+import { useAuth as useClerkAuth } from '@clerk/nextjs';
 import { setAsyncTokenGetter } from '@/lib/api-client';
 import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+interface UserProfile {
+  user_id: string;
+  email: string;
+  full_name: string;
+  phone?: string;
+  subscription_tier_id?: number;
+  subscription_tier_name?: string;
+  roles: string[];
+  is_active: boolean;
+  is_verified: boolean;
+}
+
 interface AuthContextType {
-  user: {
-    id: string;
-    auth_provider_id: string;
-    email: string;
-    name: string;
-    phone?: string;
-    subscription_tier: string;
-    roles: string[];
-  } | null;
+  user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   getToken: () => Promise<string | null>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,11 +34,13 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   getToken: async () => null,
   logout: async () => {},
+  refreshUser: async () => {},
 });
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
-  const { user: clerkUser, isLoaded: isUserLoaded } = useClerkUser();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   // Wire the async token getter into the API and GraphQL clients
   useEffect(() => {
@@ -39,40 +48,63 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     setAsyncGraphQLTokenGetter(getToken);
   }, [getToken]);
 
-  const user = useMemo(() => {
-    if (!isSignedIn || !clerkUser) return null;
+  const fetchProfile = useCallback(async () => {
+    if (!isSignedIn) return;
+    setIsFetching(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await fetch(`${API_URL}/api/v1/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch user profile:', err);
+    } finally {
+      setIsFetching(false);
+    }
+  }, [isSignedIn, getToken]);
 
-    const publicMetadata = (clerkUser.publicMetadata as Record<string, any>) || {};
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchProfile();
+    } else {
+      setUser(null);
+    }
+  }, [isSignedIn, fetchProfile]);
 
-    return {
-      id: publicMetadata.josi_user_id || '',
-      auth_provider_id: clerkUser.id,
-      email: clerkUser.primaryEmailAddress?.emailAddress || '',
-      name: clerkUser.fullName || clerkUser.firstName || '',
-      phone: clerkUser.primaryPhoneNumber?.phoneNumber || undefined,
-      subscription_tier: publicMetadata.josi_subscription_tier || 'Free',
-      roles: publicMetadata.josi_roles || ['user'],
-    };
-  }, [isSignedIn, clerkUser]);
-
-  const logout = async () => {
+  const logout = useCallback(async () => {
+    try {
+      const token = await getToken();
+      if (token) {
+        await fetch(`${API_URL}/api/v1/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch {
+      // Non-fatal — proceed with sign-out regardless
+    }
     await signOut();
     window.location.href = '/auth/login';
-  };
+  }, [getToken, signOut]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading: !isLoaded || !isUserLoaded,
-        isAuthenticated: !!isSignedIn,
-        getToken,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      isLoading: !isLoaded || isFetching,
+      isAuthenticated: !!isSignedIn,
+      getToken,
+      logout,
+      refreshUser: fetchProfile,
+    }),
+    [user, isLoaded, isFetching, isSignedIn, getToken, logout, fetchProfile],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);
