@@ -10,18 +10,25 @@ logger = structlog.get_logger()
 
 
 class ClerkProvider(AuthProvider):
+    _jwks_client = None
+
     @property
     def provider_name(self) -> str:
         return "clerk"
 
+    def _get_jwks_client(self):
+        if ClerkProvider._jwks_client is None:
+            from jwt import PyJWKClient
+            ClerkProvider._jwks_client = PyJWKClient(
+                "https://api.clerk.com/.well-known/jwks.json"
+            )
+        return ClerkProvider._jwks_client
+
     def validate_jwt(self, token: str) -> dict:
         import jwt as pyjwt
-        from jwt import PyJWKClient
 
         try:
-            jwks_url = "https://api.clerk.com/.well-known/jwks.json"
-            jwks_client = PyJWKClient(jwks_url)
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            signing_key = self._get_jwks_client().get_signing_key_from_jwt(token)
             claims = pyjwt.decode(
                 token,
                 signing_key.key,

@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, update, and_
 
 from josi.auth.schemas import CurrentUser
 from josi.db.async_db import get_async_session
@@ -35,12 +35,21 @@ class UsageRepository:
             return usage
 
     async def increment(self, user_id: UUID, field: str, amount: int = 1) -> UserUsage:
-        usage = await self.get_or_create(user_id)
+        period = self._current_period()
+        await self.get_or_create(user_id, period)
         async with get_async_session() as session:
-            current_val = getattr(usage, field, 0)
-            setattr(usage, field, current_val + amount)
-            usage.updated_at = datetime.utcnow()
-            merged = await session.merge(usage)
+            await session.execute(
+                update(UserUsage)
+                .where(and_(UserUsage.user_id == user_id, UserUsage.period == period))
+                .values(
+                    **{field: getattr(UserUsage, field) + amount},
+                    updated_at=datetime.utcnow(),
+                )
+            )
             await session.flush()
-            await session.refresh(merged)
-            return merged
+            result = await session.execute(
+                select(UserUsage).where(
+                    and_(UserUsage.user_id == user_id, UserUsage.period == period)
+                )
+            )
+            return result.scalar_one()

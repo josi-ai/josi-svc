@@ -52,8 +52,3 @@ async def invalidate_user(auth_provider_id: str) -> None:
         logger.warning("Session cache invalidation failed", error=str(e))
 
 
-async def invalidate_user_by_id(user_id: str) -> None:
-    try:
-        await cache_manager.delete(f"josi:user_session:*")
-    except Exception as e:
-        logger.warning("Session cache bulk invalidation failed", error=str(e))

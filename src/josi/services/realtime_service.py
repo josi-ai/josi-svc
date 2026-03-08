@@ -394,13 +394,15 @@ realtime_manager = RealtimeConnectionManager()
 
 
 async def verify_websocket_token(token: str, db: AsyncSession) -> Optional[User]:
-    """Verify WebSocket authentication token via Descope JWT."""
+    """Verify WebSocket authentication token via auth provider JWT."""
     try:
-        from sqlalchemy import select
+        from sqlalchemy import select, and_
         provider = get_auth_provider()
         claims = provider.validate_jwt(token)
         result = await db.execute(
-            select(User).where(User.auth_provider_id == claims["sub"])
+            select(User).where(
+                and_(User.auth_provider_id == claims["sub"], User.is_deleted == False)
+            )
         )
         return result.scalar_one_or_none()
     except Exception as e:
