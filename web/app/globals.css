@@ -1,116 +1,281 @@
 @import "tailwindcss";
 
-/* Base styles */
+/* ============================================================
+   JOSI DESIGN SYSTEM — Dual Theme
+   :root  = Light (Stripe + Gold)
+   .dark  = Dark  (Observatory)
+   ============================================================ */
+
+@layer base {
+  :root {
+    /* === Light Theme (Stripe + Gold) — default === */
+    --background: #FFFFFF;
+    --foreground: #111828;
+
+    --surface: #F4F6FA;
+    --frame: #FFFFFF;
+
+    --card: #FFFFFF;
+    --card-foreground: #111828;
+    --card-hover: #F8F9FC;
+
+    --popover: #FFFFFF;
+    --popover-foreground: #111828;
+
+    --primary: #C8913A;
+    --primary-foreground: #000000;
+
+    --secondary: #F4F6FA;
+    --secondary-foreground: #4A5268;
+
+    --muted: #F4F6FA;
+    --muted-foreground: #6A7488;
+
+    --accent: #F4F6FA;
+    --accent-foreground: #111828;
+
+    --destructive: #B85545;
+    --destructive-foreground: #FFFFFF;
+
+    --border: #DDE2EB;
+    --border-subtle: #E4E8EE;
+    --border-strong: #CDD4E0;
+    --border-divider: #E8ECF2;
+    --input: #DDE2EB;
+    --ring: #C8913A;
+    --radius: 0.875rem;
+
+    /* Text hierarchy */
+    --text-primary: #111828;
+    --text-secondary: #4A5268;
+    --text-body: #5A6478;
+    --text-body-reading: #4A5268;
+    --text-muted: #6A7488;
+    --text-faint: #94A0B8;
+
+    /* Accent palette */
+    --gold: #A87E30;
+    --gold-bright: #BA8E3A;
+    --gold-bg: rgba(168,126,48,0.09);
+    --gold-bg-subtle: rgba(168,126,48,0.04);
+
+    --blue: #4A7FB5;
+    --blue-bg: rgba(74,127,181,0.09);
+
+    --green: #528E62;
+    --green-bg: rgba(82,142,98,0.08);
+
+    --red: #B85545;
+    --red-bg: rgba(184,85,69,0.07);
+
+    /* Avatar */
+    --avatar-bg: linear-gradient(135deg, #A87E30, #BA8E3A);
+    --avatar-text: #FFFFFF;
+    --avatar-placeholder: linear-gradient(135deg, #DDE2EB, #CDD4E0);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.08);
+    --shadow-lg: 0 20px 80px rgba(0,0,0,0.05);
+    --shadow-card: 0 1px 3px rgba(26,31,46,0.06), 0 1px 2px rgba(26,31,46,0.04);
+    --shadow-dropdown: 0 12px 48px rgba(26,31,46,0.12), 0 0 0 1px rgba(221,225,235,0.5);
+
+    /* Hero gradient */
+    --hero-gradient: linear-gradient(135deg, #FFFFFF 0%, #FCFCFE 50%, #F8F9FC 100%);
+    --hero-glow: rgba(200,145,58,0.04);
+
+    /* Semantic: Muhurta */
+    --bar-good: #528E62;
+    --bar-neutral: #CDD4E0;
+    --bar-avoid: #B85545;
+    --bar-special: #BA8E3A;
+
+    /* Sidebar (Stripe + Gold) */
+    --sb-bg: #F8F9FB;
+    --sb-border: #E4E6EA;
+    --sb-text: #0F1520;
+    --sb-text-muted: #3A4560;
+    --sb-text-active: #000000;
+    --sb-active-bg: rgba(200,145,58,0.12);
+    --sb-active-weight: 700;
+    --sb-hover-bg: rgba(200,145,58,0.04);
+    --sb-top-line: linear-gradient(90deg, transparent 10%, #C8913A 50%, transparent 90%);
+    --sb-divider: #E4E6EA;
+    --sb-group-color: #5A6680;
+    --btn-add-text: #000000;
+
+    /* Nav icon colors (light) */
+    --ic-dashboard: #C8913A;
+    --ic-charts: #4A7FB5;
+    --ic-ai: #7B5AAF;
+    --ic-compatibility: #C4627A;
+    --ic-transits: #3A9DB5;
+    --ic-panchang: #D48A30;
+    --ic-dasha: #3A8F7A;
+    --ic-muhurta: #BA8040;
+    --ic-astrologers: #528E62;
+    --ic-consultations: #C46A50;
+
+    /* Counter badge colors */
+    --ct-charts-bg: rgba(74,127,181,0.12);
+    --ct-charts-text: #4A7FB5;
+    --ct-ai-bg: rgba(123,90,175,0.12);
+    --ct-ai-text: #7B5AAF;
+    --ct-consultations-bg: rgba(196,106,80,0.12);
+    --ct-consultations-text: #C46A50;
+  }
+
+  .dark {
+    /* === Dark Theme (Observatory) === */
+    --background: #060A14;
+    --foreground: #D4DAE6;
+
+    --surface: #080E1C;
+    --frame: #0A0F1E;
+
+    --card: #111828;
+    --card-foreground: #D4DAE6;
+    --card-hover: #151E30;
+
+    --popover: #111828;
+    --popover-foreground: #D4DAE6;
+
+    --primary: #C8913A;
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #111828;
+    --secondary-foreground: #8B99B5;
+
+    --muted: #0A0F1E;
+    --muted-foreground: #5B6A8A;
+
+    --accent: #111828;
+    --accent-foreground: #D4DAE6;
+
+    --destructive: #C45D4A;
+    --destructive-foreground: #FFFFFF;
+
+    --border: #1A2340;
+    --border-subtle: #151C30;
+    --border-strong: #253050;
+    --border-divider: #14203A;
+    --input: #1A2340;
+    --ring: #C8913A;
+
+    /* Text hierarchy */
+    --text-primary: #D4DAE6;
+    --text-secondary: #8B99B5;
+    --text-body: #7B8CA8;
+    --text-body-reading: #7080A0;
+    --text-muted: #5B6A8A;
+    --text-faint: #3A4A6A;
+
+    /* Accent palette */
+    --gold: #C8913A;
+    --gold-bright: #D4A04A;
+    --gold-bg: rgba(200,145,58,0.12);
+    --gold-bg-subtle: rgba(200,145,58,0.06);
+
+    --blue: #6A9FD8;
+    --blue-bg: rgba(106,159,216,0.1);
+
+    --green: #6AAF7A;
+    --green-bg: rgba(106,175,122,0.1);
+
+    --red: #C45D4A;
+    --red-bg: rgba(196,93,74,0.1);
+
+    /* Avatar */
+    --avatar-bg: linear-gradient(135deg, #C8913A, #D4A04A);
+    --avatar-text: #0A0F1E;
+    --avatar-placeholder: linear-gradient(135deg, #1A2340, #253050);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.3);
+    --shadow-lg: 0 20px 80px rgba(0,0,0,0.4);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-dropdown: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,35,64,0.5);
+
+    /* Hero gradient */
+    --hero-gradient: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+    --hero-glow: rgba(200,145,58,0.06);
+
+    /* Semantic: Muhurta */
+    --bar-good: #6AAF7A;
+    --bar-neutral: #3A4A6A;
+    --bar-avoid: #C45D4A;
+    --bar-special: #D4A04A;
+
+    /* Sidebar (Observatory) */
+    --sb-bg: linear-gradient(180deg, #141C30 0%, #0F1724 100%);
+    --sb-border: #1E2A42;
+    --sb-text: #8B99B5;
+    --sb-text-muted: #5A6A85;
+    --sb-text-active: #FFFFFF;
+    --sb-active-bg: rgba(200,145,58,0.10);
+    --sb-active-weight: 500;
+    --sb-hover-bg: rgba(255,255,255,0.04);
+    --sb-top-line: linear-gradient(90deg, transparent, #D4A04A, transparent);
+    --sb-divider: linear-gradient(90deg, transparent 10%, rgba(200,145,58,0.15) 50%, transparent 90%);
+    --sb-group-color: #4A5A7A;
+    --btn-add-text: #FFFFFF;
+
+    /* Nav icon colors (bright for dark bg) */
+    --ic-dashboard: #E0A848;
+    --ic-charts: #5E9AD0;
+    --ic-ai: #9678C8;
+    --ic-compatibility: #DA7A94;
+    --ic-transits: #50B8D0;
+    --ic-panchang: #F0A040;
+    --ic-dasha: #50B098;
+    --ic-muhurta: #D49850;
+    --ic-astrologers: #6AB07A;
+    --ic-consultations: #E08060;
+
+    /* Counter badge colors (brighter for dark bg) */
+    --ct-charts-bg: rgba(94,154,208,0.18);
+    --ct-charts-text: #5E9AD0;
+    --ct-ai-bg: rgba(150,120,200,0.18);
+    --ct-ai-text: #9678C8;
+    --ct-consultations-bg: rgba(224,128,96,0.18);
+    --ct-consultations-text: #E08060;
+  }
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #0f0a1e;
-  color: #e8e0f0;
+  font-family: var(--font-inter, 'Inter'), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code, pre, .font-mono {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-}
-
-/* Ant Design dark theme overrides */
-.ant-popover .ant-popover-inner {
-  background-color: #231845;
-  border: 1px solid #2d2055;
-}
-
-.ant-dropdown .ant-dropdown-menu {
-  background-color: #231845;
-  border: 1px solid #2d2055;
-}
-
-.ant-dropdown .ant-dropdown-menu-item {
-  color: #e8e0f0;
-}
-
-.ant-dropdown .ant-dropdown-menu-item:hover {
-  background-color: #362968;
-}
-
-.ant-select-dropdown {
-  background-color: #231845 !important;
-  border: 1px solid #2d2055;
-}
-
-.ant-select-item {
-  color: #e8e0f0 !important;
-}
-
-.ant-select-item-option-active {
-  background-color: #362968 !important;
-}
-
-.ant-select-item-option-selected {
-  background-color: #6B5CE7 !important;
-}
-
-.ant-modal .ant-modal-content {
-  background-color: #1a1230;
-  border: 1px solid #2d2055;
-}
-
-.ant-modal .ant-modal-header {
-  background-color: #1a1230;
-  border-bottom: 1px solid #2d2055;
-}
-
-.ant-modal .ant-modal-title {
-  color: #e8e0f0;
-}
-
-.ant-message .ant-message-notice-content {
-  background-color: #231845;
-  border: 1px solid #2d2055;
-  color: #e8e0f0;
-}
-
-.ant-tooltip .ant-tooltip-inner {
-  background-color: #231845;
-  border: 1px solid #2d2055;
-}
-
-/* Scrollbar styling */
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f0a1e;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2d2055;
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6B5CE7;
+  background: var(--gold);
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2d2055 #0f0a1e;
-}
-
-/* Utility classes */
-.cosmic-glow {
-  box-shadow: 0 0 20px rgba(107, 92, 231, 0.3), 0 0 60px rgba(107, 92, 231, 0.1);
-}
-
-.cosmic-glow-text {
-  text-shadow: 0 0 10px rgba(107, 92, 231, 0.5), 0 0 30px rgba(107, 92, 231, 0.2);
-}
-
-.glass-card {
-  background: rgba(26, 18, 48, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(45, 32, 85, 0.5);
+  scrollbar-color: var(--border) var(--background);
 }

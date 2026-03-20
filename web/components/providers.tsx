@@ -2,12 +2,10 @@
 
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider } from 'antd';
+import { ThemeProvider, useTheme } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContextProvider } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
-import themeConfig from '@/theme/themeConfig';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,37 +17,34 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { resolvedTheme } = useTheme();
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: dark,
+        baseTheme: resolvedTheme === 'dark' ? dark : undefined,
         variables: {
-          colorPrimary: '#6b5ce7',
-          colorBackground: '#1a1230',
-          colorNeutral: 'white',
-          colorForeground: 'white',
-          colorInputForeground: 'white',
-          colorInput: '#241b3d',
-        },
-        elements: {
-          providerIcon__apple: { filter: 'none' },
-          providerIcon__github: { filter: 'invert(1)' },
-          providerIcon__x: { filter: 'invert(1)' },
+          colorPrimary: '#C8913A',
         },
       }}
     >
-      <AntdRegistry>
-        <ConfigProvider theme={themeConfig}>
-          <QueryClientProvider client={queryClient}>
-            <AuthContextProvider>
-              <SubscriptionProvider>
-                {children}
-              </SubscriptionProvider>
-            </AuthContextProvider>
-          </QueryClientProvider>
-        </ConfigProvider>
-      </AntdRegistry>
+      {children}
     </ClerkProvider>
+  );
+}
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ClerkThemeWrapper>
+        <QueryClientProvider client={queryClient}>
+          <AuthContextProvider>
+            <SubscriptionProvider>
+              {children}
+            </SubscriptionProvider>
+          </AuthContextProvider>
+        </QueryClientProvider>
+      </ClerkThemeWrapper>
+    </ThemeProvider>
   );
 }

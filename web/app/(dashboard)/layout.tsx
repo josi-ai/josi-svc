@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layout } from 'antd';
-import Sidebar from '@/components/layout/sidebar';
-import DashboardHeader from '@/components/layout/dashboard-header';
-
-const { Sider, Header, Content } = Layout;
+import AppSidebar from '@/components/layout/app-sidebar';
+import UserDropdown from '@/components/layout/user-dropdown';
+import { useAuth } from '@/contexts/AuthContext';
+import { PanelLeftClose, PanelLeftOpen, Plus } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -13,52 +12,56 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth();
+
+  const displayName = user?.full_name || user?.email || 'User';
+  const initials = displayName.charAt(0).toUpperCase();
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        width={240}
-        theme="dark"
-        style={{
-          background: '#0f0a1e',
-          borderRight: '1px solid #2d2060',
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-        }}
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar */}
+      <aside
+        className="fixed inset-y-0 left-0 z-30 overflow-y-auto transition-[width] duration-200"
+        style={{ width: collapsed ? 64 : 240 }}
       >
-        <Sidebar collapsed={collapsed} />
-      </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'margin-left 0.2s' }}>
-        <Header
-          style={{
-            padding: 0,
-            background: '#1a1230',
-            borderBottom: '1px solid #2d2060',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-          }}
-        >
-          <DashboardHeader />
-        </Header>
-        <Content
-          style={{
-            padding: 24,
-            overflow: 'auto',
-            background: '#0f0a1e',
-            minHeight: 'calc(100vh - 64px)',
-          }}
-        >
-          {children}
-        </Content>
-      </Layout>
-    </Layout>
+        <AppSidebar collapsed={collapsed} />
+      </aside>
+
+      {/* Main area */}
+      <div
+        className="flex flex-1 flex-col transition-[margin-left] duration-200"
+        style={{ marginLeft: collapsed ? 64 : 240 }}
+      >
+        {/* Header */}
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-subtle bg-surface px-7 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-card hover:text-text-secondary transition-colors"
+            >
+              {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            </button>
+            <div className="text-sm text-text-muted">
+              {greeting}, <strong className="text-text-primary font-semibold">{displayName}</strong>
+              <span className="ml-3 text-text-faint">{dateStr}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="bg-[var(--gold)] text-[var(--btn-add-text)] px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+              <Plus className="h-3.5 w-3.5" /> Add Widget
+            </button>
+            <UserDropdown initials={initials} />
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-7">{children}</main>
+      </div>
+    </div>
   );
 }
