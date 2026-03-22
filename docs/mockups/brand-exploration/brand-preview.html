@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi Brand Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #09061A; color: #EDEBF4; font-family: 'Inter', sans-serif; padding: 40px 60px; }
+
+    h1.section { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; color: #6B5CE7; margin: 50px 0 24px; border-bottom: 1px solid #2D2055; padding-bottom: 12px; font-family: 'Inter', sans-serif; font-weight: 600; }
+    h1.section:first-child { margin-top: 0; }
+
+    /* Color Palette */
+    .palette { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .swatch { width: 130px; border-radius: 12px; overflow: hidden; border: 1px solid #2D2055; }
+    .swatch-color { height: 72px; }
+    .swatch-info { padding: 10px; background: #110D24; font-size: 11px; }
+    .swatch-name { font-weight: 600; margin-bottom: 4px; color: #EDEBF4; }
+    .swatch-hex { color: #9B93B3; font-family: monospace; font-size: 10px; }
+    .palette-label { font-size: 12px; color: #9B93B3; margin-bottom: 8px; font-weight: 500; }
+
+    /* Typography */
+    .type-row { display: flex; gap: 24px; margin-bottom: 24px; }
+    .type-option { flex: 1; background: #110D24; border-radius: 16px; padding: 32px; border: 1px solid #2D2055; }
+    .type-option.recommended { border-color: #6B5CE7; box-shadow: 0 0 20px rgba(107, 92, 231, 0.15); position: relative; }
+    .type-option.recommended::after { content: 'RECOMMENDED'; position: absolute; top: 12px; right: 16px; font-size: 9px; letter-spacing: 1.5px; color: #34D399; background: rgba(52,211,153,0.12); padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+    .type-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #6B5CE7; margin-bottom: 20px; font-weight: 600; }
+    .type-heading-sample { font-size: 30px; line-height: 1.2; margin-bottom: 8px; color: #EDEBF4; }
+    .type-subheading { font-size: 18px; line-height: 1.3; margin-bottom: 16px; color: #EDEBF4; }
+    .type-body { font-size: 14px; line-height: 1.7; color: #9B93B3; }
+    .type-meta { margin-top: 16px; font-size: 11px; color: #6B6183; border-top: 1px solid #2D2055; padding-top: 12px; }
+
+    /* Tagline Preview */
+    .tagline-row { display: flex; gap: 20px; margin-top: 16px; }
+    .tagline-preview { text-align: center; padding: 48px 32px; background: linear-gradient(180deg, #110D24 0%, #09061A 100%); border-radius: 20px; border: 1px solid #2D2055; flex: 1; }
+    .tagline-preview.hero { flex: none; width: 100%; padding: 64px 40px; }
+    .tagline-preview .logo { font-family: 'DM Serif Display', serif; font-size: 48px; color: #6B5CE7; margin-bottom: 16px; letter-spacing: 2px; }
+    .tagline-preview .logo-sm { font-family: 'DM Serif Display', serif; font-size: 36px; color: #6B5CE7; margin-bottom: 12px; letter-spacing: 2px; }
+    .tagline-preview .tagline { font-size: 18px; color: #9B93B3; font-weight: 300; letter-spacing: 0.5px; }
+    .tagline-preview .tagline-sm { font-size: 14px; color: #9B93B3; font-weight: 300; letter-spacing: 0.5px; }
+    .glow { box-shadow: 0 0 40px rgba(107, 92, 231, 0.15), 0 0 80px rgba(107, 92, 231, 0.05); }
+
+    /* UI Preview */
+    .preview-section { display: flex; gap: 20px; margin-top: 16px; }
+    .preview-card { flex: 1; background: #1A1432; border-radius: 16px; padding: 24px; border: 1px solid #2D2055; }
+    .preview-card.elevated { background: #231845; }
+    .preview-card h3 { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; color: #EDEBF4; }
+    .preview-card p { font-size: 13px; line-height: 1.7; color: #9B93B3; }
+    .preview-btn { display: inline-block; margin-top: 16px; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+    .preview-btn.primary { background: #6B5CE7; color: white; box-shadow: 0 2px 12px rgba(107, 92, 231, 0.35); }
+    .preview-btn.secondary { background: transparent; color: #6B5CE7; border: 1px solid #6B5CE7; }
+    .preview-btn.gold { background: #D4A853; color: #09061A; }
+    .preview-btn.amber { background: #E78A5C; color: #09061A; }
+    .preview-stat { text-align: center; }
+    .preview-stat .number { font-family: 'DM Serif Display', serif; font-size: 40px; color: #6B5CE7; }
+    .preview-stat .label { font-size: 11px; color: #9B93B3; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .preview-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .preview-badge.free { background: rgba(107, 92, 231, 0.15); color: #8B7FF0; }
+    .preview-badge.premium { background: rgba(212, 168, 83, 0.15); color: #D4A853; }
+
+    /* Helvetica analysis */
+    .comparison-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .comparison-table th { text-align: left; padding: 12px 16px; border-bottom: 1px solid #2D2055; color: #6B5CE7; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .comparison-table td { padding: 12px 16px; border-bottom: 1px solid rgba(45,32,85,0.4); font-size: 13px; color: #9B93B3; vertical-align: top; }
+    .comparison-table td:first-child { color: #EDEBF4; font-weight: 500; }
+    .pro { color: #34D399 !important; }
+    .con { color: #F87171 !important; }
+    .neutral { color: #D4A853 !important; }
+
+    /* Nav preview */
+    .nav-preview { display: flex; align-items: center; justify-content: space-between; background: #1A1432; padding: 16px 32px; border-radius: 12px; border: 1px solid #2D2055; margin-top: 16px; }
+    .nav-logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #6B5CE7; }
+    .nav-links { display: flex; gap: 28px; font-size: 13px; color: #9B93B3; }
+    .nav-links span:hover { color: #EDEBF4; cursor: pointer; }
+    .nav-links .active { color: #6B5CE7; }
+    .nav-cta { padding: 8px 20px; background: #6B5CE7; color: white; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- SECTION: COLOR PALETTE -->
+  <h1 class="section">Color Palette — Josi Design System</h1>
+
+  <div class="palette-label">Primary Scale</div>
+  <div class="palette">
+    <div class="swatch"><div class="swatch-color" style="background:#4F3DC4"></div><div class="swatch-info"><div class="swatch-name">Deep Violet</div><div class="swatch-hex">#4F3DC4 · pressed</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#6B5CE7"></div><div class="swatch-info"><div class="swatch-name">Cosmic Violet</div><div class="swatch-hex">#6B5CE7 · primary</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#8B7FF0"></div><div class="swatch-info"><div class="swatch-name">Lavender</div><div class="swatch-hex">#8B7FF0 · hover</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:rgba(107,92,231,0.15)"></div><div class="swatch-info"><div class="swatch-name">Aura</div><div class="swatch-hex">rgba(107,92,231,0.15)</div></div></div>
+  </div>
+
+  <div class="palette-label">Backgrounds (darkest → lightest)</div>
+  <div class="palette">
+    <div class="swatch"><div class="swatch-color" style="background:#09061A"></div><div class="swatch-info"><div class="swatch-name">Void</div><div class="swatch-hex">#09061A · base</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#110D24"></div><div class="swatch-info"><div class="swatch-name">Nebula</div><div class="swatch-hex">#110D24 · page bg</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#1A1432"></div><div class="swatch-info"><div class="swatch-name">Stardust</div><div class="swatch-hex">#1A1432 · card</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#231845"></div><div class="swatch-info"><div class="swatch-name">Twilight</div><div class="swatch-hex">#231845 · elevated</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#362968"></div><div class="swatch-info"><div class="swatch-name">Dusk Hover</div><div class="swatch-hex">#362968 · hover bg</div></div></div>
+  </div>
+
+  <div class="palette-label">Accents</div>
+  <div class="palette">
+    <div class="swatch"><div class="swatch-color" style="background:#E78A5C"></div><div class="swatch-info"><div class="swatch-name">Amber</div><div class="swatch-hex">#E78A5C · warm accent</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#D4A853"></div><div class="swatch-info"><div class="swatch-name">Starlight</div><div class="swatch-hex">#D4A853 · gold/premium</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#34D399"></div><div class="swatch-info"><div class="swatch-name">Verdant</div><div class="swatch-hex">#34D399 · success</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F87171"></div><div class="swatch-info"><div class="swatch-name">Ember</div><div class="swatch-hex">#F87171 · error</div></div></div>
+  </div>
+
+  <div class="palette-label">Text & Borders</div>
+  <div class="palette">
+    <div class="swatch"><div class="swatch-color" style="background:#EDEBF4"></div><div class="swatch-info"><div class="swatch-name">Moonlight</div><div class="swatch-hex">#EDEBF4 · primary text</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#9B93B3"></div><div class="swatch-info"><div class="swatch-name">Mist</div><div class="swatch-hex">#9B93B3 · secondary</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#6B6183"></div><div class="swatch-info"><div class="swatch-name">Dusk</div><div class="swatch-hex">#6B6183 · disabled</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#2D2055"></div><div class="swatch-info"><div class="swatch-name">Haze</div><div class="swatch-hex">#2D2055 · border</div></div></div>
+  </div>
+
+  <!-- SECTION: TYPOGRAPHY -->
+  <h1 class="section">Typography — Helvetica Deep Dive & Comparison</h1>
+
+  <table class="comparison-table">
+    <tr>
+      <th>Criterion</th>
+      <th>Helvetica (Neue)</th>
+      <th>Inter</th>
+      <th>DM Serif Display + Inter</th>
+    </tr>
+    <tr>
+      <td>Origin</td>
+      <td>1957, Swiss. Max Miedinger. Designed for print signage.</td>
+      <td>2017, Rasmus Andersson. Designed specifically for screens.</td>
+      <td>DM Serif: 2019, Colophon. Inter: 2017. Both screen-native.</td>
+    </tr>
+    <tr>
+      <td>Screen rendering</td>
+      <td class="con">Weak at small sizes. Tight spacing causes readability issues below 14px. "milliliter" is hard to read.</td>
+      <td class="pro">Excellent. Tall x-height, open counters. Legible down to 11px.</td>
+      <td class="pro">Excellent. Serif headings are large, Inter body handles small sizes.</td>
+    </tr>
+    <tr>
+      <td>Dark theme</td>
+      <td class="neutral">Decent but thin strokes can wash out on dark backgrounds.</td>
+      <td class="pro">Designed for screens — renders well on any background.</td>
+      <td class="pro">DM Serif's thick strokes shine on dark bg. Inter body is clean.</td>
+    </tr>
+    <tr>
+      <td>Personality</td>
+      <td class="neutral">Intentionally none. "Pursuit of neutrality." Can feel cold/corporate.</td>
+      <td class="neutral">Warm neutral. Friendly but unremarkable.</td>
+      <td class="pro">Serif = ancient wisdom, sans-serif = modern clarity. THE ALCHEMIST.</td>
+    </tr>
+    <tr>
+      <td>Brand fit</td>
+      <td class="con">Says "corporation" or "airport signage." Not spiritual, not premium-unique.</td>
+      <td class="neutral">Safe, modern, but doesn't differentiate Josi from any other SaaS.</td>
+      <td class="pro">The font pairing IS the brand story — tradition meets technology.</td>
+    </tr>
+    <tr>
+      <td>Licensing</td>
+      <td class="con">Paid. Monotype license required. $$$.</td>
+      <td class="pro">Free. Open source. Google Fonts.</td>
+      <td class="pro">Both free. Google Fonts. Zero licensing cost.</td>
+    </tr>
+    <tr>
+      <td>Cross-platform</td>
+      <td class="con">Not available on all systems. Falls back to Arial (which defeats the purpose).</td>
+      <td class="pro">Web font, consistent everywhere.</td>
+      <td class="pro">Both web fonts, consistent everywhere.</td>
+    </tr>
+    <tr>
+      <td>Used by</td>
+      <td>BMW, American Airlines, Lufthansa, NYC Subway</td>
+      <td>GitHub, Mozilla, most modern SaaS</td>
+      <td>Editorial brands, luxury wellness products</td>
+    </tr>
+  </table>
+
+  <!-- SECTION: TYPOGRAPHY PREVIEW -->
+  <h1 class="section">Typography — Visual Preview</h1>
+
+  <div class="type-row">
+    <div class="type-option recommended">
+      <div class="type-label">T1 — DM Serif Display + Inter</div>
+      <div class="type-heading-sample" style="font-family:'DM Serif Display',serif">Ancient eyes on an infinite sky.</div>
+      <div class="type-subheading" style="font-family:'DM Serif Display',serif">Find your place in the cosmos</div>
+      <div class="type-body">The cosmos is incomprehensibly vast. You are a tiny part of it. And that's not terrifying — it's freeing. Josi helps you find your thread in that infinite tapestry, guided by wisdom that spans thousands of years.</div>
+      <div class="type-meta">Headings: DM Serif Display · Body: Inter 400 · The serif/sans contrast embodies the Alchemist</div>
+    </div>
+    <div class="type-option">
+      <div class="type-label">T2 — Playfair Display + Inter</div>
+      <div class="type-heading-sample" style="font-family:'Playfair Display',serif;font-weight:700">Ancient eyes on an infinite sky.</div>
+      <div class="type-subheading" style="font-family:'Playfair Display',serif;font-weight:600">Find your place in the cosmos</div>
+      <div class="type-body">The cosmos is incomprehensibly vast. You are a tiny part of it. And that's not terrifying — it's freeing. Josi helps you find your thread in that infinite tapestry, guided by wisdom that spans thousands of years.</div>
+      <div class="type-meta">Headings: Playfair Display 700 · Body: Inter 400 · More dramatic, editorial luxury feel</div>
+    </div>
+  </div>
+  <div class="type-row">
+    <div class="type-option">
+      <div class="type-label">T3 — Inter Only (monofont)</div>
+      <div class="type-heading-sample" style="font-family:'Inter',sans-serif;font-weight:700">Ancient eyes on an infinite sky.</div>
+      <div class="type-subheading" style="font-family:'Inter',sans-serif;font-weight:600">Find your place in the cosmos</div>
+      <div class="type-body">The cosmos is incomprehensibly vast. You are a tiny part of it. And that's not terrifying — it's freeing. Josi helps you find your thread in that infinite tapestry, guided by wisdom that spans thousands of years.</div>
+      <div class="type-meta">All Inter · Clean, consistent, Co-Star-like · Low personality, high clarity</div>
+    </div>
+    <div class="type-option">
+      <div class="type-label">T4 — Helvetica Neue (for reference)</div>
+      <div class="type-heading-sample" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700">Ancient eyes on an infinite sky.</div>
+      <div class="type-subheading" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:500">Find your place in the cosmos</div>
+      <div class="type-body" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">The cosmos is incomprehensibly vast. You are a tiny part of it. And that's not terrifying — it's freeing. Josi helps you find your thread in that infinite tapestry, guided by wisdom that spans thousands of years.</div>
+      <div class="type-meta">All Helvetica Neue · Falls back to Arial on most systems · Paid license required · Neutral/corporate</div>
+    </div>
+  </div>
+
+  <!-- SECTION: TAGLINE LOCKUPS -->
+  <h1 class="section">Logo + Tagline Lockup Previews</h1>
+
+  <div class="tagline-preview hero glow">
+    <div class="logo">Josi</div>
+    <div class="tagline">Ancient wisdom. Your place in the cosmos.</div>
+  </div>
+
+  <div class="tagline-row">
+    <div class="tagline-preview">
+      <div class="logo-sm">Josi</div>
+      <div class="tagline-sm">Ancient eyes on an infinite sky.</div>
+    </div>
+    <div class="tagline-preview">
+      <div class="logo-sm">Josi</div>
+      <div class="tagline-sm">Find your place in the cosmos.</div>
+    </div>
+    <div class="tagline-preview">
+      <div class="logo-sm">Josi</div>
+      <div class="tagline-sm">The universe, decoded.</div>
+    </div>
+  </div>
+
+  <!-- SECTION: NAVIGATION -->
+  <h1 class="section">Navigation Bar Preview</h1>
+  <div class="nav-preview">
+    <div class="nav-logo">Josi</div>
+    <div class="nav-links">
+      <span class="active">Dashboard</span>
+      <span>Charts</span>
+      <span>Compatibility</span>
+      <span>AI Insights</span>
+      <span>Consultations</span>
+    </div>
+    <button class="nav-cta">New Chart</button>
+  </div>
+
+  <!-- SECTION: DASHBOARD CARDS -->
+  <h1 class="section">Dashboard Card Previews</h1>
+  <div class="preview-section">
+    <div class="preview-card">
+      <h3>Your Birth Chart</h3>
+      <p>Sun in Pisces, Moon in Scorpio, Ascendant in Cancer. Your water-dominant chart speaks to deep emotional intelligence and intuitive knowing.</p>
+      <div style="margin-top:16px">
+        <button class="preview-btn primary">View Full Chart</button>
+        <button class="preview-btn secondary" style="margin-left:8px">AI Reading</button>
+      </div>
+    </div>
+    <div class="preview-card elevated">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>Subscription</h3>
+        <span class="preview-badge premium">Mystic</span>
+      </div>
+      <p>25 charts remaining · 10 AI readings · Unlimited consultations</p>
+      <div style="margin-top:16px">
+        <button class="preview-btn gold">Upgrade to Master</button>
+      </div>
+    </div>
+    <div class="preview-card" style="display:flex;gap:32px;justify-content:center;align-items:center">
+      <div class="preview-stat"><div class="number">12</div><div class="label">Charts</div></div>
+      <div class="preview-stat"><div class="number" style="color:#D4A853">7</div><div class="label">AI Reads</div></div>
+      <div class="preview-stat"><div class="number" style="color:#34D399">3</div><div class="label">Consults</div></div>
+    </div>
+  </div>
+
+  <!-- SECTION: BUTTON STATES -->
+  <h1 class="section">Button Variants</h1>
+  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:16px">
+    <button class="preview-btn primary">Primary Action</button>
+    <button class="preview-btn secondary">Secondary</button>
+    <button class="preview-btn gold">Premium / Gold</button>
+    <button class="preview-btn amber">Warm Accent</button>
+    <button class="preview-btn" style="background:#34D399;color:#09061A">Success</button>
+    <button class="preview-btn" style="background:#F87171;color:#09061A">Destructive</button>
+    <button class="preview-btn" style="background:transparent;color:#6B6183;border:1px solid #2D2055;cursor:not-allowed">Disabled</button>
+  </div>
+
+  <!-- SECTION: TEXT HIERARCHY -->
+  <h1 class="section">Text Hierarchy (DM Serif + Inter)</h1>
+  <div style="background:#110D24;border-radius:16px;padding:32px;border:1px solid #2D2055;margin-top:16px">
+    <div style="font-family:'DM Serif Display',serif;font-size:48px;color:#EDEBF4;margin-bottom:8px">Display Heading</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:32px;color:#EDEBF4;margin-bottom:8px">Page Heading (H1)</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:24px;color:#EDEBF4;margin-bottom:8px">Section Heading (H2)</div>
+    <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:600;color:#EDEBF4;margin-bottom:8px">Subsection Heading (H3)</div>
+    <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:#EDEBF4;margin-bottom:8px">Card Title (H4)</div>
+    <div style="font-family:'Inter',sans-serif;font-size:15px;color:#9B93B3;margin-bottom:8px;line-height:1.7">Body text — The cosmos is incomprehensibly vast. You are a tiny part of it. And that's not terrifying — it's freeing.</div>
+    <div style="font-family:'Inter',sans-serif;font-size:13px;color:#9B93B3;margin-bottom:8px">Small text — Secondary descriptions and metadata</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:#6B6183;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px">OVERLINE — Labels, Categories</div>
+    <div style="font-family:monospace;font-size:13px;color:#8B7FF0;background:#1A1432;display:inline-block;padding:4px 12px;border-radius:6px">code: api/v1/charts</div>
+  </div>
+
+</body>
+</html>

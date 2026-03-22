@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 5C: Progressive — Dashboard Card + Dedicated Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-amber: #D4A04A;
+      --accent-amber-bg: rgba(212,160,74,0.12);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --avatar-placeholder: linear-gradient(135deg, #1A2340, #253050);
+      --bar-good: #6AAF7A;
+      --bar-neutral: #3A4A6A;
+      --bar-avoid: #C45D4A;
+      --bar-special: #D4A04A;
+      --muhurta-now-bg: rgba(200,145,58,0.06);
+      --muhurta-now-border: rgba(200,145,58,0.15);
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-amber: #C8913A;
+      --accent-amber-bg: rgba(200,145,58,0.08);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --avatar-placeholder: linear-gradient(135deg, #DDE1EB, #CED4E0);
+      --bar-good: #5A8F6A;
+      --bar-neutral: #CED4E0;
+      --bar-avoid: #C45D4A;
+      --bar-special: #C8913A;
+      --muhurta-now-bg: rgba(184,131,46,0.06);
+      --muhurta-now-border: rgba(184,131,46,0.18);
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== TOP BAR ========== */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 6px; flex-wrap: wrap;
+    }
+    body.light .top-bar { background: rgba(255,255,255,0.95); }
+    .top-bar .label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
+    .tg-btn {
+      padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); transition: all 0.15s;
+    }
+    .tg-btn.active { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); }
+    .tg-sep { width: 1px; height: 24px; background: var(--border-default); margin: 0 10px; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--accent-gold-bg-subtle); border: 1px solid var(--accent-gold-bg);
+      border-radius: 12px; border-left: 4px solid var(--accent-gold);
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 8px;
+    }
+    .annotation p { font-size: 13px; color: var(--text-body); line-height: 1.7; }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .main { display: flex; flex-direction: column; overflow-y: auto; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .greeting { font-size: 14px; color: var(--text-muted); }
+    .topbar .greeting strong { color: var(--text-primary); }
+    .topbar .page-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text-primary); }
+    .topbar-controls { display: flex; gap: 12px; align-items: center; }
+    .w-btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .w-btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ========== SHARED ========== */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .section-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+
+    /* View toggling */
+    .view-panel { display: none; }
+    .view-panel.visible { display: block; }
+
+    /* ================================================================
+       VIEW 1: DASHBOARD
+       ================================================================ */
+
+    /* Hero card */
+    .dash-hero-row { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-bottom: 24px; }
+    .sky-card {
+      background: var(--bg-hero); border-radius: 16px; border: 1px solid var(--border-default);
+      padding: 28px; position: relative; overflow: hidden;
+    }
+    .sky-card::before {
+      content: ''; position: absolute; top: -60px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .sky-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 10px; position: relative;
+    }
+    .sky-title {
+      font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text-primary);
+      line-height: 1.25; margin-bottom: 10px; position: relative;
+    }
+    .sky-text {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.7;
+      color: var(--text-body); margin-bottom: 16px; position: relative;
+    }
+    .sky-pills { display: flex; gap: 8px; position: relative; margin-bottom: 16px; }
+
+    /* Muhurta strip in dashboard */
+    .muhurta-strip-card {
+      background: var(--bg-card); border-radius: 14px; border: 1px solid var(--border-default);
+      padding: 20px; display: flex; flex-direction: column;
+    }
+    .muhurta-strip-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+    .mstrip { display: flex; gap: 0; flex: 1; }
+    .mslot {
+      flex: 1; text-align: center; padding: 8px 0;
+      border-right: 1px solid var(--border-divider);
+    }
+    .mslot:first-child { border-left: 1px solid var(--border-divider); border-radius: 6px 0 0 6px; }
+    .mslot:last-child { border-radius: 0 6px 6px 0; }
+    .mslot .time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .mslot .bar { width: 28px; height: 5px; border-radius: 3px; margin: 0 auto 4px; }
+    .mslot .mlbl { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .mslot.now {
+      background: var(--muhurta-now-bg); border: 1px solid var(--muhurta-now-border);
+      border-radius: 6px;
+    }
+    .mslot.now .time, .mslot.now .mlbl { color: var(--accent-gold-bright); }
+    .bar-g { background: var(--bar-good); } .bar-n { background: var(--bar-neutral); }
+    .bar-a { background: var(--bar-avoid); } .bar-e { background: var(--bar-special); }
+
+    .sky-cta {
+      position: relative; font-size: 12px; color: var(--accent-gold);
+      font-weight: 600; cursor: pointer; margin-top: 12px;
+    }
+
+    /* Dashboard stat cards */
+    .dash-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--bg-card); border-radius: 14px; padding: 22px;
+      border: 1px solid var(--border-default);
+    }
+    .stat-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 10px;
+    }
+    .stat-value { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--text-primary); margin-bottom: 2px; }
+    .stat-value.gold { color: var(--accent-gold-bright); }
+    .stat-desc { font-size: 12px; color: var(--text-muted); }
+    .stat-cta { font-size: 12px; color: var(--accent-gold); font-weight: 600; cursor: pointer; margin-top: 12px; }
+
+    /* Mini chart */
+    .wcm {
+      width: 64px; height: 64px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .wcm::before {
+      content: ''; position: absolute; width: 65%; height: 65%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .wcm-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
+    .wcm-d1 { top: 16%; left: 55%; background: var(--accent-gold-bright); }
+    .wcm-d2 { top: 34%; right: 10%; background: var(--text-secondary); }
+    .wcm-d3 { bottom: 24%; right: 14%; background: var(--accent-red); }
+    .wcm-lbl {
+      font-size: 7px; color: var(--text-faint); text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600; z-index: 1;
+    }
+
+    /* Bottom row */
+    .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .bottom-card {
+      background: var(--bg-card); border-radius: 14px; padding: 24px;
+      border: 1px solid var(--border-default);
+    }
+    .wa-item {
+      display: flex; gap: 14px; align-items: center; padding: 12px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .wa-item:last-child { border-bottom: none; }
+    .wa-av {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--avatar-placeholder);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text-primary); flex-shrink: 0;
+    }
+    .wa-info { flex: 1; }
+    .wa-info .name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .wa-info .spec { font-size: 11px; color: var(--text-muted); }
+    .wa-avail { font-size: 10px; color: var(--accent-green); font-weight: 500; }
+    .wa-btn {
+      padding: 7px 14px; background: var(--accent-gold); color: #fff; border: none;
+      border-radius: 8px; font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ================================================================
+       VIEW 2: PANCHANG PAGE
+       ================================================================ */
+
+    .location-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .location-btn .change { color: var(--accent-gold); font-weight: 600; margin-left: 4px; }
+    .date-nav { display: flex; align-items: center; gap: 12px; }
+    .date-nav .arrow {
+      width: 28px; height: 28px; border-radius: 6px; background: var(--bg-card);
+      border: 1px solid var(--border-default); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 14px;
+    }
+    .date-nav .date-text { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 120px; text-align: center; }
+
+    /* Daily header */
+    .daily-header {
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Sunrise card */
+    .sunrise-card {
+      background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px;
+      padding: 16px 20px; display: flex; gap: 32px; align-items: center; margin-bottom: 20px;
+    }
+    .sunrise-item { display: flex; flex-direction: column; }
+    .sunrise-item .sr-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 3px; }
+    .sunrise-item .sr-value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .sunrise-item .sr-value.gold { color: var(--accent-gold-bright); }
+
+    /* Five elements */
+    .five-elements { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+    .element-card {
+      background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px;
+      padding: 16px; position: relative; overflow: hidden;
+    }
+    .element-card .el-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 8px;
+    }
+    .element-card .el-name {
+      font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text-primary);
+      margin-bottom: 4px; line-height: 1.3;
+    }
+    .element-card .el-time { font-size: 11px; color: var(--accent-gold); margin-bottom: 6px; }
+    .element-card .el-then { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .element-card .el-detail { font-size: 10px; color: var(--text-faint); line-height: 1.4; }
+    .element-card .el-indicator {
+      position: absolute; top: 0; right: 0; width: 6px; height: 100%;
+    }
+    .el-indicator.auspicious { background: var(--accent-green); }
+    .el-indicator.neutral { background: var(--accent-amber); }
+
+    /* Timeline bar */
+    .timeline-section { margin-bottom: 24px; }
+    .timeline-bar-container {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 12px; padding: 20px;
+    }
+    .timeline-hours { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .timeline-hours span { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .timeline-bar {
+      height: 32px; border-radius: 6px; display: flex; position: relative;
+      overflow: hidden; background: var(--bar-good); margin-bottom: 12px;
+    }
+    .timeline-segment {
+      height: 100%; position: absolute; display: flex; align-items: center;
+      justify-content: center; font-size: 8px; font-weight: 600; color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .timeline-now {
+      position: absolute; top: -4px; bottom: -4px; width: 2px;
+      background: var(--accent-gold-bright); z-index: 10;
+    }
+    .timeline-now::after {
+      content: 'NOW'; position: absolute; top: -16px; left: -10px;
+      font-size: 8px; font-weight: 700; color: var(--accent-gold-bright);
+      letter-spacing: 1px;
+    }
+    .timeline-legend { display: flex; gap: 20px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+    .legend-text { font-size: 11px; color: var(--text-muted); }
+    .legend-time { font-size: 10px; color: var(--text-faint); }
+
+    /* Choghadiya */
+    .choghadiya-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .chog-table {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 12px; overflow: hidden;
+    }
+    .chog-table .chog-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border-divider);
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .chog-row {
+      display: grid; grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr;
+      padding: 10px 16px; border-bottom: 1px solid var(--border-divider);
+      font-size: 12px; align-items: center;
+    }
+    .chog-row:last-child { border-bottom: none; }
+    .chog-row.shubh { background: rgba(106,175,122,0.06); }
+    .chog-row.amrit { background: rgba(106,175,122,0.1); }
+    .chog-row.labh { background: rgba(106,175,122,0.04); }
+    .chog-row.char { background: rgba(212,160,74,0.06); }
+    .chog-row.rog { background: rgba(196,93,74,0.06); }
+    .chog-row.kaal { background: rgba(196,93,74,0.08); }
+    .chog-row.udveg { background: rgba(196,93,74,0.04); }
+    .chog-time { color: var(--text-secondary); font-family: monospace; font-size: 11px; }
+    .chog-name { color: var(--text-primary); font-weight: 500; }
+    .chog-type { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; text-align: center; }
+    .type-good { background: var(--accent-green-bg); color: var(--accent-green); }
+    .type-neutral { background: var(--accent-amber-bg); color: var(--accent-amber); }
+    .type-bad { background: rgba(196,93,74,0.12); color: var(--accent-red); }
+    .chog-planet { color: var(--text-faint); font-size: 11px; text-align: right; }
+
+    /* Coming soon card */
+    .coming-soon {
+      background: var(--bg-card); border: 1px dashed var(--border-strong);
+      border-radius: 14px; padding: 28px; text-align: center;
+    }
+    .coming-soon .cs-icon { font-size: 28px; margin-bottom: 12px; color: var(--text-faint); }
+    .coming-soon .cs-title {
+      font-family: 'DM Serif Display', serif; font-size: 16px;
+      color: var(--text-primary); margin-bottom: 8px;
+    }
+    .coming-soon .cs-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    .coming-soon .cs-pills { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+    .cs-pill {
+      font-size: 10px; padding: 5px 14px; border-radius: 16px;
+      border: 1px solid var(--border-default); color: var(--text-faint); font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <span class="label">Decision 5C:</span>
+  <span class="label">View:</span>
+  <button class="tg-btn active" onclick="switchView('dashboard')">Dashboard View</button>
+  <button class="tg-btn" onclick="switchView('panchang')">Panchang Page</button>
+  <div class="tg-sep"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ================================================================
+     VIEW 1: DASHBOARD
+     ================================================================ -->
+<div class="view-panel visible" id="view-dashboard">
+  <div class="web-frame">
+    <div class="browser-bar">
+      <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="browser-url">app.josiam.com/dashboard</div>
+    </div>
+    <div class="layout">
+      <!-- SIDEBAR (Dashboard active) -->
+      <div class="sidebar">
+        <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+        <div class="sb-nav">
+          <div class="sb-group">Overview</div>
+          <div class="sb-item active"><span class="ic">&#9673;</span> Dashboard</div>
+          <div class="sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+          <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+          <div class="sb-group" style="margin-top:8px">Explore</div>
+          <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+          <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+          <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+          <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+          <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+          <div class="sb-group" style="margin-top:8px">Connect</div>
+          <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+          <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        </div>
+        <div class="sb-footer">
+          <div class="sb-av">G</div>
+          <div>
+            <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+            <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="topbar">
+          <div class="greeting">Good morning, <strong>Govind</strong> &middot; Wednesday, March 12</div>
+          <div style="display:flex;gap:8px">
+            <button class="w-btn-ghost">Export</button>
+            <button class="w-btn-gold">+ New Chart</button>
+          </div>
+        </div>
+        <div class="content">
+          <!-- Hero row -->
+          <div class="dash-hero-row">
+            <div class="sky-card">
+              <div class="sky-label">Today's Sky</div>
+              <div class="sky-title">Shukla Chaturthi in Rohini</div>
+              <div class="sky-text">The Moon transits through Taurus today. A day for grounding creative energy and beginning things that need patience.</div>
+              <div class="sky-pills">
+                <span class="pill pill-gold">Shubh Muhurta</span>
+                <span class="pill pill-blue">Moon in Taurus</span>
+                <span class="pill pill-green">Wednesday &middot; Mercury</span>
+              </div>
+              <div class="sky-cta">View full Panchang &#8594;</div>
+            </div>
+            <div class="muhurta-strip-card">
+              <div class="muhurta-strip-label">Muhurta Timeline</div>
+              <div class="mstrip">
+                <div class="mslot"><div class="time">6AM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+                <div class="mslot"><div class="time">7AM</div><div class="bar bar-a"></div><div class="mlbl">Rahu</div></div>
+                <div class="mslot"><div class="time">8AM</div><div class="bar bar-a"></div><div class="mlbl">Rahu</div></div>
+                <div class="mslot"><div class="time">9AM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+                <div class="mslot now"><div class="time">10</div><div class="bar bar-e"></div><div class="mlbl">Now</div></div>
+                <div class="mslot"><div class="time">11</div><div class="bar bar-e"></div><div class="mlbl">Shubh</div></div>
+                <div class="mslot"><div class="time">12</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+                <div class="mslot"><div class="time">1PM</div><div class="bar bar-n"></div><div class="mlbl">Neut</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="dash-stats">
+            <div class="stat-card">
+              <div class="stat-label">Your Chart</div>
+              <div style="display:flex;gap:14px;align-items:center;margin-top:10px">
+                <div class="wcm"><div class="wcm-dot wcm-d1"></div><div class="wcm-dot wcm-d2"></div><div class="wcm-dot wcm-d3"></div><span class="wcm-lbl">Rasi</span></div>
+                <div>
+                  <div style="font-family:'DM Serif Display',serif;font-size:14px;color:var(--text-primary)">Sun Pisces, Moon Scorpio</div>
+                  <div style="font-size:11px;color:var(--text-muted)">Asc Cancer &middot; Anuradha 3</div>
+                </div>
+              </div>
+              <div class="stat-cta">Explore chart &#8594;</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Charts Created</div>
+              <div class="stat-value">12</div>
+              <div class="stat-desc">Across 3 traditions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">AI Readings</div>
+              <div class="stat-value gold">7</div>
+              <div class="stat-desc">3 remaining this month</div>
+            </div>
+          </div>
+
+          <!-- Bottom row -->
+          <div class="dash-bottom">
+            <div class="bottom-card">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent-gold);font-weight:600;margin-bottom:10px">Latest AI Reading</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text-primary);margin-bottom:10px;line-height:1.3">The Water Within</div>
+              <div style="font-family:'DM Serif Text',serif;font-size:14px;line-height:1.75;color:var(--text-body-reading);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing...</div>
+              <div style="font-size:12px;color:var(--accent-gold);font-weight:600;cursor:pointer">Continue reading &#8594;</div>
+            </div>
+            <div class="bottom-card">
+              <div class="stat-label">Available Astrologers</div>
+              <div class="wa-item"><div class="wa-av">P</div><div class="wa-info"><div class="name">Priya Shankar</div><div class="spec">Vedic &middot; 15 years</div></div><div class="wa-avail">&#9679; Now</div><button class="wa-btn">Book</button></div>
+              <div class="wa-item"><div class="wa-av">R</div><div class="wa-info"><div class="name">Raj Krishnamurthy</div><div class="spec">Vedic &middot; Nadi</div></div><div class="wa-avail" style="color:var(--accent-gold-bright)">Tomorrow</div><button class="wa-btn">Book</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     VIEW 2: PANCHANG PAGE
+     ================================================================ -->
+<div class="view-panel" id="view-panchang">
+  <div class="web-frame">
+    <div class="browser-bar">
+      <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="browser-url">app.josiam.com/panchang</div>
+    </div>
+    <div class="layout">
+      <!-- SIDEBAR (Panchang active) -->
+      <div class="sidebar">
+        <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+        <div class="sb-nav">
+          <div class="sb-group">Overview</div>
+          <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+          <div class="sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+          <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+          <div class="sb-group" style="margin-top:8px">Explore</div>
+          <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+          <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+          <div class="sb-item active"><span class="ic">&#9789;</span> Panchang</div>
+          <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+          <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+          <div class="sb-group" style="margin-top:8px">Connect</div>
+          <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+          <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        </div>
+        <div class="sb-footer">
+          <div class="sb-av">G</div>
+          <div>
+            <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+            <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="topbar">
+          <div class="page-title">Panchang</div>
+          <div class="topbar-controls">
+            <div class="location-btn">
+              <span>&#128205;</span>
+              Chennai, Tamil Nadu
+              <span class="change">Change</span>
+            </div>
+            <div class="date-nav">
+              <div class="arrow">&#8592;</div>
+              <div class="date-text">Mar 12, 2026</div>
+              <div class="arrow">&#8594;</div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <!-- Daily Header -->
+          <div class="daily-header">Panchang for Wednesday, March 12, 2026</div>
+
+          <!-- Sunrise/Sunset -->
+          <div class="sunrise-card">
+            <div class="sunrise-item">
+              <span class="sr-label">Sunrise</span>
+              <span class="sr-value">6:14 AM</span>
+            </div>
+            <div class="sunrise-item">
+              <span class="sr-label">Sunset</span>
+              <span class="sr-value">6:22 PM</span>
+            </div>
+            <div class="sunrise-item">
+              <span class="sr-label">Day Duration</span>
+              <span class="sr-value gold">12h 08m</span>
+            </div>
+            <div class="sunrise-item">
+              <span class="sr-label">Moonrise</span>
+              <span class="sr-value">9:48 AM</span>
+            </div>
+            <div class="sunrise-item">
+              <span class="sr-label">Moonset</span>
+              <span class="sr-value">10:56 PM</span>
+            </div>
+          </div>
+
+          <!-- Five Panchang Elements -->
+          <div class="section-title">Five Panchang Elements</div>
+          <div class="five-elements">
+            <div class="element-card">
+              <div class="el-indicator auspicious"></div>
+              <div class="el-label">Tithi</div>
+              <div class="el-name">Shukla Chaturthi</div>
+              <div class="el-time">Until 3:42 PM</div>
+              <div class="el-then">Then: Shukla Panchami</div>
+              <div class="el-detail">Deity: Ganapati<br>Auspicious for new beginnings</div>
+            </div>
+            <div class="element-card">
+              <div class="el-indicator auspicious"></div>
+              <div class="el-label">Nakshatra</div>
+              <div class="el-name">Rohini</div>
+              <div class="el-time">Until 1:15 PM</div>
+              <div class="el-then">Then: Mrigashira</div>
+              <div class="el-detail">Deity: Brahma<br>Ruling Planet: Moon</div>
+            </div>
+            <div class="element-card">
+              <div class="el-indicator auspicious"></div>
+              <div class="el-label">Yoga</div>
+              <div class="el-name">Shubha</div>
+              <div class="el-time">Until 11:30 AM</div>
+              <div class="el-then">Then: Shukla</div>
+              <div class="el-detail">Nature: Auspicious<br>Good for all activities</div>
+            </div>
+            <div class="element-card">
+              <div class="el-indicator neutral"></div>
+              <div class="el-label">Karana</div>
+              <div class="el-name">Baalava</div>
+              <div class="el-time">Until 3:42 PM</div>
+              <div class="el-then">Then: Kaulava</div>
+              <div class="el-detail">Type: Movable<br>Favorable for trade</div>
+            </div>
+            <div class="element-card">
+              <div class="el-indicator neutral"></div>
+              <div class="el-label">Vara</div>
+              <div class="el-name">Wednesday</div>
+              <div class="el-time">Budha Vara</div>
+              <div class="el-then">Ruling: Mercury</div>
+              <div class="el-detail">Good for learning, trade, communication</div>
+            </div>
+          </div>
+
+          <!-- Muhurta Timeline -->
+          <div class="timeline-section">
+            <div class="section-title">Muhurta Timeline</div>
+            <div class="timeline-bar-container">
+              <div class="timeline-hours">
+                <span>6 AM</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span>
+                <span>12 PM</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6 PM</span>
+              </div>
+              <div class="timeline-bar">
+                <div class="timeline-segment" style="left:12.5%;width:12.5%;background:rgba(212,160,74,0.85);">Yama</div>
+                <div class="timeline-segment" style="left:25%;width:12.5%;background:rgba(200,145,58,0.65);">Gulika</div>
+                <div class="timeline-segment" style="left:49%;width:6.7%;background:var(--bar-special);border-radius:4px;">Abhijit</div>
+                <div class="timeline-segment" style="left:50%;width:12.5%;background:var(--bar-avoid);">Rahu</div>
+                <div class="timeline-now" style="left:35.4%"></div>
+              </div>
+              <div class="timeline-legend">
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--bar-good)"></div>
+                  <span class="legend-text">Safe</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--bar-avoid)"></div>
+                  <span class="legend-text">Rahu Kalam</span>
+                  <span class="legend-time">12:00 - 1:30 PM</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:rgba(212,160,74,0.85)"></div>
+                  <span class="legend-text">Yamagandam</span>
+                  <span class="legend-time">7:30 - 9:00 AM</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--bar-special)"></div>
+                  <span class="legend-text">Abhijit Muhurta</span>
+                  <span class="legend-time">11:54 AM - 12:42 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Choghadiya -->
+          <div class="section-title">Choghadiya</div>
+          <div class="choghadiya-grid">
+            <div class="chog-table">
+              <div class="chog-header">Day Choghadiya (Sunrise to Sunset)</div>
+              <div class="chog-row amrit">
+                <span class="chog-time">6:14 - 7:45</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+              <div class="chog-row kaal">
+                <span class="chog-time">7:45 - 9:16</span>
+                <span class="chog-name">Kaal</span>
+                <span class="chog-type type-bad">Kaal</span>
+                <span class="chog-planet">Saturn</span>
+              </div>
+              <div class="chog-row shubh">
+                <span class="chog-time">9:16 - 10:47</span>
+                <span class="chog-name">Shubh</span>
+                <span class="chog-type type-good">Shubh</span>
+                <span class="chog-planet">Jupiter</span>
+              </div>
+              <div class="chog-row rog">
+                <span class="chog-time">10:47 - 12:18</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+              <div class="chog-row udveg">
+                <span class="chog-time">12:18 - 1:49</span>
+                <span class="chog-name">Udveg</span>
+                <span class="chog-type type-bad">Udveg</span>
+                <span class="chog-planet">Sun</span>
+              </div>
+              <div class="chog-row char">
+                <span class="chog-time">1:49 - 3:20</span>
+                <span class="chog-name">Char</span>
+                <span class="chog-type type-neutral">Char</span>
+                <span class="chog-planet">Venus</span>
+              </div>
+              <div class="chog-row labh">
+                <span class="chog-time">3:20 - 4:51</span>
+                <span class="chog-name">Labh</span>
+                <span class="chog-type type-good">Labh</span>
+                <span class="chog-planet">Mercury</span>
+              </div>
+              <div class="chog-row amrit">
+                <span class="chog-time">4:51 - 6:22</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+            </div>
+            <div class="chog-table">
+              <div class="chog-header">Night Choghadiya (Sunset to Sunrise)</div>
+              <div class="chog-row rog">
+                <span class="chog-time">6:22 - 7:53</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+              <div class="chog-row kaal">
+                <span class="chog-time">7:53 - 9:24</span>
+                <span class="chog-name">Kaal</span>
+                <span class="chog-type type-bad">Kaal</span>
+                <span class="chog-planet">Saturn</span>
+              </div>
+              <div class="chog-row labh">
+                <span class="chog-time">9:24 - 10:55</span>
+                <span class="chog-name">Labh</span>
+                <span class="chog-type type-good">Labh</span>
+                <span class="chog-planet">Mercury</span>
+              </div>
+              <div class="chog-row udveg">
+                <span class="chog-time">10:55 - 12:26</span>
+                <span class="chog-name">Udveg</span>
+                <span class="chog-type type-bad">Udveg</span>
+                <span class="chog-planet">Sun</span>
+              </div>
+              <div class="chog-row shubh">
+                <span class="chog-time">12:26 - 1:57</span>
+                <span class="chog-name">Shubh</span>
+                <span class="chog-type type-good">Shubh</span>
+                <span class="chog-planet">Jupiter</span>
+              </div>
+              <div class="chog-row amrit">
+                <span class="chog-time">1:57 - 3:28</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+              <div class="chog-row char">
+                <span class="chog-time">3:28 - 4:59</span>
+                <span class="chog-name">Char</span>
+                <span class="chog-type type-neutral">Char</span>
+                <span class="chog-planet">Venus</span>
+              </div>
+              <div class="chog-row rog">
+                <span class="chog-time">4:59 - 6:14</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coming Soon -->
+          <div class="coming-soon">
+            <div class="cs-icon">&#9789;</div>
+            <div class="cs-title">More Coming Soon</div>
+            <div class="cs-text">The panchang page will grow progressively. These features are planned for future updates:</div>
+            <div class="cs-pills">
+              <span class="cs-pill">Monthly Calendar Grid</span>
+              <span class="cs-pill">Festival Alerts</span>
+              <span class="cs-pill">Regional Variants</span>
+              <span class="cs-pill">Hora Table</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNOTATION -->
+<div class="annotation">
+  <div class="ann-title">Design Decision Analysis</div>
+  <p>Best of both worlds. Dashboard card for daily engagement + dedicated page for detail. Builds on what the API already calculates (tithi, nakshatra, muhurta, rahu kalam). Calendar grid and festival database can be added later without restructuring. Progressive investment -- start useful, grow comprehensive.</p>
+</div>
+
+<script>
+function switchView(view) {
+  document.querySelectorAll('.tg-btn:not(.theme-btn)').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('visible'));
+  document.getElementById('view-' + view).classList.add('visible');
+}
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

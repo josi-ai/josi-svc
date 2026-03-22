@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Light Mode Sidebar -- Final Variants v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== ICON COLORS (always visible) ========== */
+    :root {
+      --ic-dashboard: #C8913A;
+      --ic-charts: #4A7FB5;
+      --ic-ai: #7B5AAF;
+      --ic-compatibility: #C4627A;
+      --ic-transits: #3A9DB5;
+      --ic-panchang: #D48A30;
+      --ic-dasha: #3A8F7A;
+      --ic-muhurta: #BA8040;
+      --ic-astrologers: #528E62;
+      --ic-consultations: #C46A50;
+
+      /* Brighter versions for dark backgrounds */
+      --ic-dashboard-bright: #E0A848;
+      --ic-charts-bright: #5E9AD0;
+      --ic-ai-bright: #9678C8;
+      --ic-compatibility-bright: #DA7A94;
+      --ic-transits-bright: #50B8D0;
+      --ic-panchang-bright: #F0A040;
+      --ic-dasha-bright: #50B098;
+      --ic-muhurta-bright: #D49850;
+      --ic-astrologers-bright: #6AB07A;
+      --ic-consultations-bright: #E08060;
+
+      /* Counter badge colors */
+      --ct-charts-bg: rgba(74,127,181,0.12);
+      --ct-charts-text: #4A7FB5;
+      --ct-ai-bg: rgba(123,90,175,0.12);
+      --ct-ai-text: #7B5AAF;
+      --ct-consultations-bg: rgba(196,106,80,0.12);
+      --ct-consultations-text: #C46A50;
+
+      /* Brighter counter colors for dark bgs */
+      --ct-charts-bg-dark: rgba(94,154,208,0.18);
+      --ct-charts-text-dark: #5E9AD0;
+      --ct-ai-bg-dark: rgba(150,120,200,0.18);
+      --ct-ai-text-dark: #9678C8;
+      --ct-consultations-bg-dark: rgba(224,128,96,0.18);
+      --ct-consultations-text-dark: #E08060;
+
+      /* ========== CONTENT AREA (constant across light variants) ========== */
+      --bg-page: #FFFFFF;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F4F6FA;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #FCFCFE 50%, #F8F9FC 100%);
+      --bg-hero-glow: rgba(180,140,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.04);
+      --border-subtle: #E4E8EE;
+      --border-default: #DDE2EB;
+      --border-strong: #CDD4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #111828;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4A5268;
+      --text-muted: #6A7488;
+      --text-faint: #94A0B8;
+      --accent-gold: #A87E30;
+      --accent-gold-bright: #BA8E3A;
+      --accent-gold-bg: rgba(168,126,48,0.09);
+      --accent-gold-bg-subtle: rgba(168,126,48,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.09);
+      --accent-green: #528E62;
+      --accent-green-bg: rgba(82,142,98,0.08);
+      --accent-red: #B85545;
+      --accent-red-bg: rgba(184,85,69,0.07);
+      --accent-purple: #7B5AAF;
+      --accent-purple-bg: rgba(123,90,175,0.08);
+      --avatar-gradient: linear-gradient(135deg, #A87E30, #BA8E3A);
+      --avatar-text: #FFFFFF;
+      --bar-good: #528E62;
+      --bar-neutral: #CDD4E0;
+      --bar-avoid: #B85545;
+      --bar-special: #BA8E3A;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.05);
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --browser-bar-bg: #EEF1F6;
+      --input-bg: #EEF1F6;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== TOGGLE BAR ========== */
+    .toggle-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(20,25,40,0.97); backdrop-filter: blur(16px);
+      border-bottom: 1px solid #253050;
+      padding: 10px 20px 8px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .toggle-title {
+      text-align: center; font-size: 11px; color: #5B6A8A;
+      font-weight: 500; letter-spacing: 0.5px; padding-bottom: 4px;
+    }
+    .toggle-title strong { color: #D4A04A; font-weight: 600; }
+    .toggle-row {
+      display: flex; align-items: stretch; justify-content: center; gap: 5px; flex-wrap: wrap;
+    }
+    .tg-btn {
+      padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      border: 1px solid #253050; background: transparent;
+      color: #5B6A8A; transition: all 0.15s; position: relative;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      min-width: 90px; text-align: center;
+    }
+    .tg-btn:hover { border-color: #3A4A6A; color: #8B99B5; }
+    .tg-btn.active { background: #C8913A; color: #fff; border-color: #C8913A; }
+    .tg-btn .swatch {
+      display: flex; width: 48px; height: 16px; border-radius: 3px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .tg-btn .swatch span { flex: 1; }
+    .tg-btn .sub-label {
+      font-size: 8px; font-weight: 400; opacity: 0.6; margin-top: -1px; line-height: 1.2;
+    }
+    .tg-btn.active .sub-label { opacity: 0.85; }
+
+    .variant-description {
+      text-align: center; font-size: 11px; color: #8B99B5; padding: 2px 0 0;
+      min-height: 16px; transition: opacity 0.2s;
+    }
+    .variant-description em { color: #D4A04A; font-style: normal; font-weight: 500; }
+
+    .spacer { height: 112px; }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 0 auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame); transition: all 0.3s;
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+      transition: background 0.3s;
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle); transition: all 0.3s;
+    }
+
+    /* ========== LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 880px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      display: flex; flex-direction: column; transition: all 0.35s ease;
+      position: relative; overflow: hidden;
+    }
+    .sidebar .sb-glow-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none; z-index: 0;
+    }
+    .sidebar .sb-top-line {
+      position: absolute; top: 0; left: 0; right: 0; height: 0;
+      z-index: 2; pointer-events: none;
+    }
+    .sb-header {
+      padding: 20px 20px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; z-index: 1;
+    }
+    .sb-header .logo {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      transition: color 0.35s;
+      display: flex; align-items: baseline; gap: 0;
+    }
+    .sb-header .logo .sparkle {
+      font-size: 10px; transition: opacity 0.35s;
+    }
+    .sb-header .logo .j-letter {
+      transition: color 0.35s;
+    }
+    .sb-header .logo .gold-underline {
+      display: none;
+      height: 2px; background: #C8913A; border-radius: 1px;
+      margin-top: -2px;
+    }
+
+    /* Mystic badge - always gold with visible presence */
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: rgba(200,145,58,0.12);
+      color: #C8913A;
+      border: 1px solid rgba(200,145,58,0.3);
+      font-weight: 700; transition: all 0.35s; letter-spacing: 0.5px;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; position: relative; z-index: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      font-weight: 600; padding: 10px 10px 5px;
+      transition: color 0.35s; display: flex; align-items: center; gap: 6px;
+    }
+    .sb-divider {
+      height: 1px; margin: 4px 16px;
+      transition: background 0.35s; position: relative; z-index: 1;
+    }
+
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      margin-bottom: 1px; font-size: 13px;
+      cursor: pointer; transition: all 0.2s;
+      position: relative;
+    }
+    .sb-item .ic {
+      width: 16px; text-align: center; font-size: 14px;
+      transition: color 0.2s, opacity 0.2s, filter 0.2s;
+      flex-shrink: 0;
+    }
+    .sb-item .label { transition: color 0.2s, font-weight 0.2s; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px;
+      padding: 2px 7px; border-radius: 8px; font-weight: 600;
+      transition: all 0.35s;
+    }
+
+    /* ========== SIDEBAR FOOTER ========== */
+    .sb-footer {
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      position: relative; z-index: 1;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, #C8913A, #D4A04A);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; transition: all 0.35s;
+    }
+    .sb-footer .user-name {
+      font-size: 12px; transition: color 0.35s;
+    }
+    .sb-footer .user-plan {
+      font-size: 10px; transition: color 0.35s;
+    }
+
+    /* ========================================================
+       VARIANT 1: OBSERVATORY (refined dark sidebar)
+       ======================================================== */
+    body.v-observatory .sidebar {
+      background: linear-gradient(180deg, #141C30 0%, #0F1724 100%);
+      border-right: none;
+    }
+    body.v-observatory .sb-glow-overlay {
+      background: radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.03) 0%, transparent 70%);
+    }
+    body.v-observatory .sb-top-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #D4A04A, transparent);
+    }
+    body.v-observatory .sb-header {
+      border-bottom: 1px solid #1E2A42;
+    }
+    body.v-observatory .sb-header .logo {
+      color: #FFFFFF;
+    }
+    body.v-observatory .sb-header .logo .sparkle {
+      color: #D4A04A; opacity: 1;
+    }
+    body.v-observatory .sb-header .badge {
+      background: rgba(200,145,58,0.15);
+      color: #D4A04A;
+      border-color: rgba(200,145,58,0.35);
+    }
+    body.v-observatory .sb-group { color: #4A5A7A; }
+    body.v-observatory .sb-divider {
+      background: linear-gradient(90deg, transparent 10%, rgba(200,145,58,0.15) 50%, transparent 90%);
+    }
+    body.v-observatory .sb-item {
+      color: #8B99B5; border-radius: 7px;
+      border-left: 3px solid transparent;
+    }
+    body.v-observatory .sb-item:hover {
+      background: rgba(255,255,255,0.04); color: #B0BCCE;
+    }
+    body.v-observatory .sb-item.active {
+      background: rgba(200,145,58,0.10);
+      color: #FFFFFF;
+      border-left-color: #D4A04A;
+      box-shadow: 0 0 12px rgba(200,145,58,0.06);
+      font-weight: 500;
+    }
+    /* Icon colors on dark bg - use bright versions */
+    body.v-observatory .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard-bright); }
+    body.v-observatory .sb-item[data-icon="charts"] .ic { color: var(--ic-charts-bright); }
+    body.v-observatory .sb-item[data-icon="ai"] .ic { color: var(--ic-ai-bright); }
+    body.v-observatory .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility-bright); }
+    body.v-observatory .sb-item[data-icon="transits"] .ic { color: var(--ic-transits-bright); }
+    body.v-observatory .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang-bright); }
+    body.v-observatory .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha-bright); }
+    body.v-observatory .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta-bright); }
+    body.v-observatory .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers-bright); }
+    body.v-observatory .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations-bright); }
+    /* Counters - colored on dark bg */
+    body.v-observatory .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg-dark); color: var(--ct-charts-text-dark);
+    }
+    body.v-observatory .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg-dark); color: var(--ct-ai-text-dark);
+    }
+    body.v-observatory .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg-dark); color: var(--ct-consultations-text-dark);
+    }
+    body.v-observatory .sb-footer { border-top: 1px solid #1E2A42; }
+    body.v-observatory .sb-av { color: #0F1724; }
+    body.v-observatory .sb-footer .user-name { color: #D4DAE6; }
+    body.v-observatory .sb-footer .user-plan { color: #5A6A85; }
+    body.v-observatory .main {
+      box-shadow: -2px 0 8px rgba(0,0,0,0.03);
+      position: relative; z-index: 1;
+    }
+
+    /* ========================================================
+       VARIANT 2: ICE SLATE (white pop-out active card)
+       ======================================================== */
+    body.v-iceslate .sidebar {
+      background: #E4E8F2;
+      border-right: 1px solid #CDD4E2;
+    }
+    body.v-iceslate .sb-header {
+      border-bottom: 1px solid #CDD4E2;
+    }
+    body.v-iceslate .sb-header .logo {
+      color: #0F1520;
+    }
+    body.v-iceslate .sb-header .logo .sparkle { opacity: 0; }
+    body.v-iceslate .sb-group { color: #5A6680; }
+    body.v-iceslate .sb-divider { background: #CDD4E2; }
+    body.v-iceslate .sb-item {
+      color: #3A4560; border-radius: 8px;
+      border-left: 3px solid transparent;
+    }
+    body.v-iceslate .sb-item .label { color: #1A2236; }
+    body.v-iceslate .sb-item:hover {
+      background: rgba(0,0,0,0.03); color: #0F1520;
+    }
+    body.v-iceslate .sb-item:hover .label { color: #0F1520; }
+    /* THE SIGNATURE: white pop-out card for active state */
+    body.v-iceslate .sb-item.active {
+      background: #FFFFFF;
+      border-left-color: #C8913A;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      font-weight: 600;
+    }
+    body.v-iceslate .sb-item.active .label { color: #0F1520; }
+    /* Icon colors - standard versions on light bg */
+    body.v-iceslate .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard); }
+    body.v-iceslate .sb-item[data-icon="charts"] .ic { color: var(--ic-charts); }
+    body.v-iceslate .sb-item[data-icon="ai"] .ic { color: var(--ic-ai); }
+    body.v-iceslate .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility); }
+    body.v-iceslate .sb-item[data-icon="transits"] .ic { color: var(--ic-transits); }
+    body.v-iceslate .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang); }
+    body.v-iceslate .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha); }
+    body.v-iceslate .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta); }
+    body.v-iceslate .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers); }
+    body.v-iceslate .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations); }
+    /* Counters - colored */
+    body.v-iceslate .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg); color: var(--ct-charts-text);
+    }
+    body.v-iceslate .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg); color: var(--ct-ai-text);
+    }
+    body.v-iceslate .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg); color: var(--ct-consultations-text);
+    }
+    body.v-iceslate .sb-footer { border-top: 1px solid #CDD4E2; }
+    body.v-iceslate .sb-av { color: #FFFFFF; }
+    body.v-iceslate .sb-footer .user-name { color: #0F1520; }
+    body.v-iceslate .sb-footer .user-plan { color: #5A6680; }
+
+    /* ========================================================
+       VARIANT 3: STRIPE + GOLD (gold-forward active state)
+       ======================================================== */
+    body.v-stripegold .sidebar {
+      background: #F8F9FB;
+      border-right: 1px solid #E4E6EA;
+    }
+    body.v-stripegold .sb-top-line {
+      height: 2px;
+      background: linear-gradient(90deg, transparent 10%, #C8913A 50%, transparent 90%);
+    }
+    body.v-stripegold .sb-header {
+      border-bottom: 1px solid #CED5E4;
+    }
+    body.v-stripegold .sb-header .logo {
+      color: #0F1520;
+    }
+    body.v-stripegold .sb-header .logo .j-letter {
+      color: inherit;
+    }
+    body.v-stripegold .sb-header .logo .sparkle { opacity: 0; }
+    body.v-stripegold .sb-header .logo .gold-underline {
+      display: block;
+    }
+    body.v-stripegold .sb-group { color: #5A6680; }
+    body.v-stripegold .sb-divider { background: #CED5E4; }
+    body.v-stripegold .sb-item {
+      color: #3A4560; border-radius: 7px;
+      border-left: 3px solid transparent;
+    }
+    body.v-stripegold .sb-item .label { color: #0F1520; }
+    body.v-stripegold .sb-item:hover {
+      background: rgba(200,145,58,0.04); color: #0F1520;
+    }
+    body.v-stripegold .sb-item:hover .label { color: #0F1520; }
+    /* THE SIGNATURE: gold-tinted active row */
+    body.v-stripegold .sb-item.active {
+      background: rgba(200,145,58,0.12);
+      border-left-color: #C8913A;
+      box-shadow: 0 0 0 1px rgba(200,145,58,0.08);
+      font-weight: 600;
+    }
+    body.v-stripegold .sb-item.active .label { color: #000000; font-weight: 700; }
+    /* Icon colors - standard on light bg */
+    body.v-stripegold .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard); }
+    body.v-stripegold .sb-item[data-icon="charts"] .ic { color: var(--ic-charts); }
+    body.v-stripegold .sb-item[data-icon="ai"] .ic { color: var(--ic-ai); }
+    body.v-stripegold .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility); }
+    body.v-stripegold .sb-item[data-icon="transits"] .ic { color: var(--ic-transits); }
+    body.v-stripegold .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang); }
+    body.v-stripegold .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha); }
+    body.v-stripegold .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta); }
+    body.v-stripegold .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers); }
+    body.v-stripegold .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations); }
+    /* Counters - colored */
+    body.v-stripegold .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg); color: var(--ct-charts-text);
+    }
+    body.v-stripegold .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg); color: var(--ct-ai-text);
+    }
+    body.v-stripegold .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg); color: var(--ct-consultations-text);
+    }
+    body.v-stripegold .sb-footer { border-top: 1px solid #CED5E4; }
+    body.v-stripegold .sb-av { color: #FFFFFF; }
+    body.v-stripegold .sb-footer .user-name { color: #0F1520; }
+    body.v-stripegold .sb-footer .user-plan { color: #5A6680; }
+
+    /* ========================================================
+       VARIANT 4: FROSTED INDIGO (medium-toned sidebar)
+       ======================================================== */
+    body.v-indigo .sidebar {
+      background: #2E3650;
+      border-right: none;
+    }
+    body.v-indigo .sb-header {
+      border-bottom: 1px solid #3A4260;
+    }
+    body.v-indigo .sb-header .logo {
+      color: #FFFFFF;
+    }
+    body.v-indigo .sb-header .logo .sparkle { opacity: 0; }
+    body.v-indigo .sb-header .badge {
+      background: rgba(200,145,58,0.15);
+      color: #D4A04A;
+      border-color: rgba(200,145,58,0.35);
+    }
+    body.v-indigo .sb-group { color: #7080A0; }
+    body.v-indigo .sb-divider { background: #3A4260; }
+    body.v-indigo .sb-item {
+      color: #B0BAD0; border-radius: 7px;
+      border-left: 3px solid transparent;
+    }
+    body.v-indigo .sb-item:hover {
+      background: rgba(255,255,255,0.06); color: #D0D8E8;
+    }
+    body.v-indigo .sb-item.active {
+      background: rgba(200,145,58,0.12);
+      color: #FFFFFF;
+      border-left-color: #D4A04A;
+      font-weight: 500;
+    }
+    /* Icon colors - bright versions for medium bg */
+    body.v-indigo .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard-bright); }
+    body.v-indigo .sb-item[data-icon="charts"] .ic { color: var(--ic-charts-bright); }
+    body.v-indigo .sb-item[data-icon="ai"] .ic { color: var(--ic-ai-bright); }
+    body.v-indigo .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility-bright); }
+    body.v-indigo .sb-item[data-icon="transits"] .ic { color: var(--ic-transits-bright); }
+    body.v-indigo .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang-bright); }
+    body.v-indigo .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha-bright); }
+    body.v-indigo .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta-bright); }
+    body.v-indigo .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers-bright); }
+    body.v-indigo .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations-bright); }
+    /* Counters - bright colored for medium bg */
+    body.v-indigo .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg-dark); color: var(--ct-charts-text-dark);
+    }
+    body.v-indigo .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg-dark); color: var(--ct-ai-text-dark);
+    }
+    body.v-indigo .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg-dark); color: var(--ct-consultations-text-dark);
+    }
+    body.v-indigo .sb-footer { border-top: 1px solid #3A4260; }
+    body.v-indigo .sb-av { color: #2E3650; }
+    body.v-indigo .sb-footer .user-name { color: #D0D8E8; }
+    body.v-indigo .sb-footer .user-plan { color: #7080A0; }
+
+    /* ========================================================
+       VARIANT 5: VERCEL (monochrome + surgical gold)
+       ======================================================== */
+    body.v-vercel .sidebar {
+      background: #F8F9FB;
+      border-right: 1px solid #E4E6EA;
+    }
+    body.v-vercel .sb-header {
+      border-bottom: 1px solid #E4E6EA;
+    }
+    body.v-vercel .sb-header .logo {
+      color: #111111;
+    }
+    body.v-vercel .sb-header .logo .sparkle { opacity: 0; }
+    body.v-vercel .sb-header .badge {
+      background: rgba(200,145,58,0.10);
+      color: #C8913A;
+      border-color: rgba(200,145,58,0.25);
+    }
+    body.v-vercel .sb-group { color: #888888; }
+    body.v-vercel .sb-divider { background: #E4E6EA; }
+    body.v-vercel .sb-item {
+      color: #555555; border-radius: 7px;
+      border-left: 2px solid transparent;
+    }
+    body.v-vercel .sb-item .label { color: #111111; }
+    body.v-vercel .sb-item:hover {
+      background: #F0F0F0; color: #111111;
+    }
+    body.v-vercel .sb-item:hover .label { color: #111111; }
+    body.v-vercel .sb-item.active {
+      background: #F0F0F0;
+      border-left-color: #000000;
+      font-weight: 600;
+    }
+    body.v-vercel .sb-item.active .label { color: #111111; }
+    /* Icon colors - YES, colorful even in monochrome */
+    body.v-vercel .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard); }
+    body.v-vercel .sb-item[data-icon="charts"] .ic { color: var(--ic-charts); }
+    body.v-vercel .sb-item[data-icon="ai"] .ic { color: var(--ic-ai); }
+    body.v-vercel .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility); }
+    body.v-vercel .sb-item[data-icon="transits"] .ic { color: var(--ic-transits); }
+    body.v-vercel .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang); }
+    body.v-vercel .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha); }
+    body.v-vercel .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta); }
+    body.v-vercel .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers); }
+    body.v-vercel .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations); }
+    /* Active icon turns gold - the ONLY gold on page */
+    body.v-vercel .sb-item.active .ic { color: #D4A04A !important; }
+    /* Counters - colored */
+    body.v-vercel .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg); color: var(--ct-charts-text);
+    }
+    body.v-vercel .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg); color: var(--ct-ai-text);
+    }
+    body.v-vercel .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg); color: var(--ct-consultations-text);
+    }
+    body.v-vercel .sb-footer { border-top: 1px solid #E4E6EA; }
+    body.v-vercel .sb-av { color: #FFFFFF; }
+    body.v-vercel .sb-footer .user-name { color: #111111; }
+    body.v-vercel .sb-footer .user-plan { color: #888888; }
+
+    /* ========================================================
+       VARIANT 6: DARK MODE (full dark reference)
+       ======================================================== */
+    body.v-dark .sidebar {
+      background: linear-gradient(180deg, #0C1220 0%, #080E1C 100%);
+      border-right: 1px solid #1A2238;
+    }
+    body.v-dark .sb-glow-overlay {
+      background: radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.02) 0%, transparent 70%);
+    }
+    body.v-dark .sb-top-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,145,58,0.4), transparent);
+    }
+    body.v-dark .sb-header { border-bottom: 1px solid #1A2238; }
+    body.v-dark .sb-header .logo { color: #E8ECF2; }
+    body.v-dark .sb-header .logo .sparkle { color: #D4A04A; opacity: 1; }
+    body.v-dark .sb-header .badge {
+      background: rgba(200,145,58,0.15);
+      color: #D4A04A; border-color: rgba(200,145,58,0.35);
+    }
+    body.v-dark .sb-group { color: #3A4A6A; }
+    body.v-dark .sb-divider {
+      background: linear-gradient(90deg, transparent 10%, rgba(200,145,58,0.1) 50%, transparent 90%);
+    }
+    body.v-dark .sb-item {
+      color: #6A7A9A; border-radius: 7px;
+      border-left: 3px solid transparent;
+    }
+    body.v-dark .sb-item:hover {
+      background: rgba(255,255,255,0.03); color: #8B99B5;
+    }
+    body.v-dark .sb-item.active {
+      background: rgba(200,145,58,0.08);
+      color: #D4A04A;
+      border-left-color: #D4A04A;
+      box-shadow: 0 0 12px rgba(200,145,58,0.04);
+      font-weight: 500;
+    }
+    body.v-dark .sb-item[data-icon="dashboard"] .ic { color: var(--ic-dashboard-bright); }
+    body.v-dark .sb-item[data-icon="charts"] .ic { color: var(--ic-charts-bright); }
+    body.v-dark .sb-item[data-icon="ai"] .ic { color: var(--ic-ai-bright); }
+    body.v-dark .sb-item[data-icon="compatibility"] .ic { color: var(--ic-compatibility-bright); }
+    body.v-dark .sb-item[data-icon="transits"] .ic { color: var(--ic-transits-bright); }
+    body.v-dark .sb-item[data-icon="panchang"] .ic { color: var(--ic-panchang-bright); }
+    body.v-dark .sb-item[data-icon="dasha"] .ic { color: var(--ic-dasha-bright); }
+    body.v-dark .sb-item[data-icon="muhurta"] .ic { color: var(--ic-muhurta-bright); }
+    body.v-dark .sb-item[data-icon="astrologers"] .ic { color: var(--ic-astrologers-bright); }
+    body.v-dark .sb-item[data-icon="consultations"] .ic { color: var(--ic-consultations-bright); }
+    body.v-dark .sb-item[data-icon="charts"] .ct {
+      background: var(--ct-charts-bg-dark); color: var(--ct-charts-text-dark);
+    }
+    body.v-dark .sb-item[data-icon="ai"] .ct {
+      background: var(--ct-ai-bg-dark); color: var(--ct-ai-text-dark);
+    }
+    body.v-dark .sb-item[data-icon="consultations"] .ct {
+      background: var(--ct-consultations-bg-dark); color: var(--ct-consultations-text-dark);
+    }
+    body.v-dark .sb-footer { border-top: 1px solid #1A2238; }
+    body.v-dark .sb-av { color: #080E1C; }
+    body.v-dark .sb-footer .user-name { color: #C4CCE0; }
+    body.v-dark .sb-footer .user-plan { color: #4A5A7A; }
+    /* Dark mode content overrides */
+    body.v-dark {
+      --bg-page: #0A0F1A;
+      --bg-frame: #0E1322;
+      --bg-surface: #141C2E;
+      --bg-card: #141C2E;
+      --bg-hero: linear-gradient(135deg, #141C2E 0%, #181F32 50%, #1A2338 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --border-subtle: #1E2A40;
+      --border-default: #1A2238;
+      --border-strong: #253050;
+      --border-divider: #1E2A40;
+      --text-primary: #E0E4EC;
+      --text-secondary: #A0AAC0;
+      --text-body: #8090AA;
+      --text-muted: #6A7A96;
+      --text-faint: #4A5A76;
+      --browser-bar-bg: #0E1322;
+      --input-bg: #1A2238;
+      --shadow-frame: 0 8px 40px rgba(0,0,0,0.3);
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    body.v-dark .main {
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      position: relative; z-index: 1;
+    }
+
+    /* Dark variant button text overrides */
+    body.v-observatory .btn-add-widget,
+    body.v-indigo .btn-add-widget,
+    body.v-dark .btn-add-widget { color: #FFFFFF; }
+
+    /* ========== MAIN CONTENT ========== */
+    .main { display: flex; flex-direction: column; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 28px; border-bottom: 1px solid var(--border-subtle);
+      transition: border-color 0.3s;
+    }
+    .topbar .greeting { font-size: 15px; color: var(--text-muted); transition: color 0.3s; }
+    .topbar .greeting strong { color: var(--text-primary); font-weight: 600; }
+    .topbar .date-line { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+    .btn-add-widget {
+      display: flex; align-items: center; gap: 6px;
+      border: none; background: #C8913A;
+      color: #000000; padding: 8px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-add-widget:hover { background: #D4A04A; }
+    .btn-add-widget .plus { font-size: 16px; font-weight: 700; }
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ========== CARDS ========== */
+    .wc {
+      background: var(--bg-card); border-radius: 14px;
+      border: 1px solid var(--border-default); transition: all 0.3s;
+      box-shadow: var(--shadow-card, none);
+    }
+    .tradition-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 9px; font-weight: 700; padding: 3px 8px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .badge-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-western { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-ai { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .wc-slabel {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 10px;
+    }
+    .wc-cta { font-size: 12px; color: var(--accent-gold); font-weight: 600; cursor: pointer; margin-top: 12px; }
+
+    /* Hero card */
+    .hero-card {
+      padding: 28px; background: var(--bg-hero);
+      position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 20px;
+      box-shadow: var(--shadow-card, none);
+    }
+    .hero-card::before {
+      content: ''; position: absolute; top: -60px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 10px; position: relative;
+    }
+    .hero-title {
+      font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text-primary);
+      line-height: 1.25; margin-bottom: 10px; position: relative;
+    }
+    .hero-text {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.7;
+      color: var(--text-body); margin-bottom: 16px; position: relative; max-width: 700px;
+    }
+    .hero-pills { display: flex; gap: 8px; position: relative; flex-wrap: wrap; }
+
+    /* Widget grids */
+    .widget-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .widget-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* South Indian chart */
+    .si-chart {
+      width: 100px; height: 100px; position: relative; flex-shrink: 0;
+      border: 1.5px solid var(--border-strong);
+    }
+    .si-chart .si-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      width: 100%; height: 100%;
+    }
+    .si-chart .si-cell {
+      border: 0.5px solid var(--border-default); font-size: 6px;
+      color: var(--text-faint); display: flex; align-items: center;
+      justify-content: center; padding: 1px; text-align: center; line-height: 1.2;
+    }
+    .si-chart .si-center {
+      grid-column: 2 / 4; grid-row: 2 / 4;
+      border: 1px solid var(--border-default);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7px; color: var(--text-muted); font-weight: 600;
+      background: var(--bg-card);
+    }
+    .si-chart .si-planet { color: var(--accent-gold-bright); font-weight: 600; }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%; height: 6px; background: var(--border-subtle);
+      border-radius: 3px; overflow: hidden; margin: 8px 0 6px;
+    }
+    .progress-fill { height: 100%; border-radius: 3px; background: var(--accent-gold-bright); }
+
+    /* AI avatar */
+    .ai-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--avatar-text); flex-shrink: 0;
+    }
+    .input-preview {
+      width: 100%; padding: 8px 14px; border-radius: 8px; font-size: 12px;
+      background: var(--input-bg); border: 1px solid var(--border-default);
+      color: var(--text-faint); font-family: 'Inter', sans-serif;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 12px; border-radius: 16px; font-size: 11px; font-weight: 500;
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      color: var(--text-secondary); cursor: pointer;
+    }
+
+    /* Muhurta bar */
+    .muhurta-bar {
+      display: flex; height: 28px; border-radius: 6px; overflow: hidden;
+      border: 1px solid var(--border-default); margin-bottom: 8px;
+    }
+    .muhurta-segment { position: relative; }
+    .muhurta-now-marker {
+      position: absolute; top: -4px; width: 2px; height: 36px;
+      background: var(--accent-gold-bright); z-index: 2;
+      box-shadow: 0 0 6px rgba(212,160,74,0.4);
+    }
+    .muhurta-now-marker::after {
+      content: ''; position: absolute; top: -3px; left: -3px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gold-bright);
+    }
+
+    /* Circle chart */
+    .circle-chart {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 1.5px solid var(--border-strong); position: relative;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .circle-chart::before {
+      content: ''; position: absolute; width: 60%; height: 60%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .cc-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
+    .cc-d1 { top: 12%; left: 58%; background: var(--accent-gold-bright); }
+    .cc-d2 { top: 38%; right: 8%; background: var(--accent-blue); }
+    .cc-d3 { bottom: 20%; right: 18%; background: #B85545; }
+    .cc-d4 { bottom: 14%; left: 22%; background: var(--accent-green); }
+
+    /* ========== COMPARISON TABLE ========== */
+    .comparison-section {
+      max-width: 1280px; margin: 32px auto 48px; padding: 0 20px;
+    }
+    .comparison-section h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 16px; text-align: center;
+    }
+    .comparison-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--bg-card); border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border-default);
+    }
+    .comparison-table thead th {
+      background: var(--bg-surface); padding: 12px 14px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-secondary); border-bottom: 1px solid var(--border-default);
+      text-align: left;
+    }
+    .comparison-table thead th:first-child { width: 110px; }
+    .comparison-table tbody td {
+      padding: 10px 14px; font-size: 11px; color: var(--text-body); line-height: 1.5;
+      border-bottom: 1px solid var(--border-subtle); vertical-align: top;
+    }
+    .comparison-table tbody tr:last-child td { border-bottom: none; }
+    .comparison-table tbody td:first-child {
+      font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+    }
+    .dim-label {
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .spectrum-bar {
+      display: flex; align-items: center; gap: 4px; margin-top: 2px;
+    }
+    .spectrum-bar .bar-track {
+      flex: 1; height: 4px; background: var(--border-subtle); border-radius: 2px;
+      position: relative; max-width: 60px;
+    }
+    .spectrum-bar .bar-fill {
+      height: 100%; border-radius: 2px; background: var(--accent-gold-bright);
+    }
+    .spectrum-bar .bar-label {
+      font-size: 9px; color: var(--text-faint); white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="v-observatory">
+
+<!-- ========== TOGGLE BAR ========== -->
+<div class="toggle-bar">
+  <div class="toggle-title">Light Mode Sidebar -- <strong>Final Variants v2</strong></div>
+  <div class="toggle-row">
+    <button class="tg-btn active" onclick="setVariation('v-observatory')" data-var="v-observatory">
+      <div class="swatch">
+        <span style="background:#141C30"></span>
+        <span style="background:#D4A04A;flex:0.2"></span>
+        <span style="background:#0F1724"></span>
+        <span style="background:#FFFFFF;flex:0.8"></span>
+      </div>
+      1. Observatory
+      <span class="sub-label">Refined dark + gold</span>
+    </button>
+    <button class="tg-btn" onclick="setVariation('v-iceslate')" data-var="v-iceslate">
+      <div class="swatch">
+        <span style="background:#E4E8F2"></span>
+        <span style="background:#FFFFFF;flex:0.3"></span>
+        <span style="background:#C8913A;flex:0.15"></span>
+        <span style="background:#FFFFFF;flex:0.8"></span>
+      </div>
+      2. Ice Slate
+      <span class="sub-label">White pop-out active</span>
+    </button>
+    <button class="tg-btn" onclick="setVariation('v-stripegold')" data-var="v-stripegold">
+      <div class="swatch">
+        <span style="background:#EDF0F8"></span>
+        <span style="background:#C8913A;flex:0.3"></span>
+        <span style="background:#FFFFFF;flex:0.8"></span>
+      </div>
+      3. Stripe + Gold
+      <span class="sub-label">Gold-forward active</span>
+    </button>
+    <button class="tg-btn" onclick="setVariation('v-indigo')" data-var="v-indigo">
+      <div class="swatch">
+        <span style="background:#2E3650"></span>
+        <span style="background:#D4A04A;flex:0.15"></span>
+        <span style="background:#FFFFFF;flex:0.8"></span>
+      </div>
+      4. Frosted Indigo
+      <span class="sub-label">Medium navy sidebar</span>
+    </button>
+    <button class="tg-btn" onclick="setVariation('v-vercel')" data-var="v-vercel">
+      <div class="swatch">
+        <span style="background:#F8F9FB"></span>
+        <span style="background:#000;flex:0.1"></span>
+        <span style="background:#FFFFFF;flex:0.8"></span>
+      </div>
+      5. Vercel
+      <span class="sub-label">Monochrome + gold icon</span>
+    </button>
+    <button class="tg-btn" onclick="setVariation('v-dark')" data-var="v-dark">
+      <div class="swatch">
+        <span style="background:#080E1C"></span>
+        <span style="background:#D4A04A;flex:0.1"></span>
+        <span style="background:#0E1322"></span>
+      </div>
+      6. Dark Mode
+      <span class="sub-label">Full dark reference</span>
+    </button>
+  </div>
+  <div class="variant-description" id="variant-desc"></div>
+</div>
+<div class="spacer"></div>
+
+<!-- ========== DASHBOARD MOCKUP ========== -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/dashboard</div>
+  </div>
+  <div class="layout">
+
+    <!-- ====== SIDEBAR ====== -->
+    <div class="sidebar">
+      <div class="sb-glow-overlay"></div>
+      <div class="sb-top-line"></div>
+      <div class="sb-header">
+        <div class="logo"><span class="j-letter">J</span>osi<span class="sparkle">&#10022;</span></div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item active" data-icon="dashboard"><span class="ic">&#9673;</span> <span class="label">Dashboard</span></div>
+        <div class="sb-item" data-icon="charts"><span class="ic">&#9734;</span> <span class="label">Charts</span> <span class="ct">12</span></div>
+        <div class="sb-item" data-icon="ai"><span class="ic">&#10024;</span> <span class="label">AI Readings</span> <span class="ct">7</span></div>
+        <div class="sb-divider"></div>
+        <div class="sb-group" style="margin-top:4px">Explore</div>
+        <div class="sb-item" data-icon="compatibility"><span class="ic">&#10023;</span> <span class="label">Compatibility</span></div>
+        <div class="sb-item" data-icon="transits"><span class="ic">&#8634;</span> <span class="label">Transits</span></div>
+        <div class="sb-item" data-icon="panchang"><span class="ic">&#9789;</span> <span class="label">Panchang</span></div>
+        <div class="sb-item" data-icon="dasha"><span class="ic">&#9681;</span> <span class="label">Dasha</span></div>
+        <div class="sb-item" data-icon="muhurta"><span class="ic">&#9883;</span> <span class="label">Muhurta</span></div>
+        <div class="sb-divider"></div>
+        <div class="sb-group" style="margin-top:4px">Connect</div>
+        <div class="sb-item" data-icon="astrologers"><span class="ic">&#9733;</span> <span class="label">Astrologers</span></div>
+        <div class="sb-item" data-icon="consultations"><span class="ic">&#9993;</span> <span class="label">Consultations</span> <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div class="user-name">Govind</div>
+          <div class="user-plan">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="greeting">Good morning, <strong>Govind</strong></div>
+          <div class="date-line">Friday, March 20</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-add-widget"><span class="plus">+</span> Add Widget</button>
+        </div>
+      </div>
+      <div class="content">
+
+        <!-- ROW 1: Hero -->
+        <div class="wc hero-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
+            <div>
+              <div class="hero-label">Today's Sky</div>
+              <div class="hero-title">Shukla Chaturthi in Rohini</div>
+              <div class="hero-text">The Moon transits through Taurus in Rohini nakshatra. A day of nurturing abundance -- creative and material pursuits are strongly favored.</div>
+              <div class="hero-pills">
+                <span class="pill pill-gold">Shubh Muhurta</span>
+                <span class="pill pill-blue">Moon in Taurus</span>
+                <span class="pill pill-gold">Friday &middot; Venus</span>
+              </div>
+            </div>
+            <span class="tradition-badge badge-vedic" style="flex-shrink:0;margin-left:16px;margin-top:2px">Vedic</span>
+          </div>
+        </div>
+
+        <!-- ROW 2: Chart + Dasha + AI -->
+        <div class="widget-grid-3">
+          <!-- Chart Quick View -->
+          <div class="wc" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div class="wc-slabel" style="margin-bottom:0">Chart Quick View</div>
+              <span class="tradition-badge badge-vedic">Vedic</span>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <div class="si-chart">
+                <div class="si-grid">
+                  <div class="si-cell">Pis</div>
+                  <div class="si-cell si-planet">Ari<br>Ma</div>
+                  <div class="si-cell si-planet">Tau<br>Mo</div>
+                  <div class="si-cell">Gem</div>
+                  <div class="si-cell si-planet">Aqu<br>Sa</div>
+                  <div class="si-center">Rasi</div>
+                  <div class="si-cell si-planet">Can<br>As</div>
+                  <div class="si-cell si-planet">Cap<br>Ke</div>
+                  <div class="si-cell">Leo</div>
+                  <div class="si-cell">Sag</div>
+                  <div class="si-cell si-planet">Sco<br>Ju</div>
+                  <div class="si-cell si-planet">Lib<br>Su Ve</div>
+                  <div class="si-cell si-planet">Vir<br>Me Ra</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-family:'DM Serif Display',serif;font-size:14px;color:var(--text-primary);margin-bottom:4px">Sun Pisces, Moon Scorpio</div>
+                <div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:3px">Ascendant Cancer &middot; Anuradha Pada 3</div>
+                <div style="font-size:11px;color:var(--text-faint);line-height:1.5">Ayanamsa: Lahiri</div>
+                <div class="wc-cta">Explore full chart &#8594;</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Dasha -->
+          <div class="wc" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div class="wc-slabel" style="margin-bottom:0">Current Dasha</div>
+              <span class="tradition-badge badge-vedic">Vedic</span>
+            </div>
+            <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--text-primary);margin-bottom:4px">Venus Maha Dasha</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px">Saturn Antar Dasha</div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:35%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:11px;color:var(--text-faint)">35% elapsed</div>
+              <div style="font-size:11px;color:var(--text-muted)">Until March 2027</div>
+            </div>
+            <div class="wc-cta">Chat about this &#8594;</div>
+          </div>
+
+          <!-- AI Chat -->
+          <div class="wc" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div class="wc-slabel" style="margin-bottom:0">AI Chat</div>
+              <span class="tradition-badge badge-ai">AI</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+              <div class="ai-avatar">&#10022;</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Ask Josi AI</div>
+                <div style="font-size:11px;color:var(--text-muted)">About your chart, transits, or anything</div>
+              </div>
+            </div>
+            <div class="input-preview">What would you like to explore?</div>
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+              <span class="chip">Career outlook</span>
+              <span class="chip">Current transits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3: Muhurta + Western Transit -->
+        <div class="widget-grid-2">
+          <!-- Muhurta Timeline -->
+          <div class="wc" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+              <div class="wc-slabel" style="margin-bottom:0">Muhurta Timeline</div>
+              <span class="tradition-badge badge-vedic">Vedic</span>
+            </div>
+            <div class="muhurta-bar" style="position:relative">
+              <div class="muhurta-segment" style="flex:2;background:var(--bar-good)"></div>
+              <div class="muhurta-segment" style="flex:2;background:var(--bar-avoid)"></div>
+              <div class="muhurta-segment" style="flex:1.5;background:var(--bar-good)"></div>
+              <div class="muhurta-segment" style="flex:1.5;background:var(--bar-special);position:relative">
+                <div class="muhurta-now-marker" style="left:40%"></div>
+              </div>
+              <div class="muhurta-segment" style="flex:1;background:var(--bar-special)"></div>
+              <div class="muhurta-segment" style="flex:2;background:var(--bar-good)"></div>
+              <div class="muhurta-segment" style="flex:1.5;background:var(--bar-avoid)"></div>
+              <div class="muhurta-segment" style="flex:1.5;background:var(--bar-neutral)"></div>
+              <div class="muhurta-segment" style="flex:2;background:var(--bar-good)"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-faint);margin-bottom:14px">
+              <span>6 AM</span><span>8 AM</span><span>10 AM</span><span>12 PM</span><span>2 PM</span><span>4 PM</span><span>6 PM</span>
+            </div>
+            <div style="display:flex;gap:14px;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--bar-good)"></div>
+                <span style="font-size:10px;color:var(--text-muted)">Good</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--bar-avoid)"></div>
+                <span style="font-size:10px;color:var(--text-muted)">Rahu</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--bar-special)"></div>
+                <span style="font-size:10px;color:var(--text-muted)">Shubh</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--bar-neutral)"></div>
+                <span style="font-size:10px;color:var(--text-muted)">Neutral</span>
+              </div>
+            </div>
+            <div style="padding:8px 12px;background:var(--accent-red-bg);border-radius:8px;border:1px solid rgba(184,85,69,0.15)">
+              <div style="font-size:11px;color:var(--accent-red);font-weight:600">&#9888; Rahu Kalam: 12:00 - 1:30 PM</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Avoid starting new ventures during this period</div>
+            </div>
+          </div>
+
+          <!-- Western Transit Alert -->
+          <div class="wc" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+              <div class="wc-slabel" style="margin-bottom:0">Western Transit Alert</div>
+              <span class="tradition-badge badge-western">Western</span>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px">Mercury enters Aries in 3 days</div>
+                    <div style="font-size:12px;color:var(--text-body);line-height:1.5">Communication becomes more direct and assertive. Good for bold conversations.</div>
+                  </div>
+                  <div style="border-top:1px solid var(--border-divider);padding-top:12px">
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px">Venus conjunct your natal Mars</div>
+                    <div style="font-size:12px;color:var(--text-body);line-height:1.5">Passionate energy this week. Creative and romantic impulses are heightened.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="circle-chart" style="margin-top:4px">
+                <div class="cc-dot cc-d1"></div>
+                <div class="cc-dot cc-d2"></div>
+                <div class="cc-dot cc-d3"></div>
+                <div class="cc-dot cc-d4"></div>
+                <span style="font-size:7px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-weight:600;z-index:1">Transit</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== COMPARISON TABLE ========== -->
+<div class="comparison-section">
+  <h2>Variant Comparison</h2>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>1. Observatory</th>
+        <th>2. Ice Slate</th>
+        <th>3. Stripe + Gold</th>
+        <th>4. Frosted Indigo</th>
+        <th>5. Vercel</th>
+        <th>6. Dark Mode</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="dim-label">Sidebar Tone</span></td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Deep gradient (#141C30)
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Cool gray (#E4E8F2)
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:15%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Light cool (#EDF0F8)
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:65%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Medium navy (#2E3650)
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Near-white (#F8F9FB)
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Light</span>
+            <div class="bar-track"><div class="bar-fill" style="width:98%"></div></div>
+            <span class="bar-label">Dark</span>
+          </div>
+          Full dark (#080E1C)
+        </td>
+      </tr>
+      <tr>
+        <td><span class="dim-label">Active State</span></td>
+        <td>Gold left border + gold-tinted bg + white text + glow</td>
+        <td><strong>White pop-out card</strong> with shadow + gold left border</td>
+        <td><strong>Gold-tinted bg</strong> + gold border + dark gold text</td>
+        <td>Gold left border + gold-tinted bg + white text</td>
+        <td>Black left border + gray bg + <strong>gold icon only</strong></td>
+        <td>Gold left border + gold-tinted bg + gold text</td>
+      </tr>
+      <tr>
+        <td><span class="dim-label">Key Differentiator</span></td>
+        <td>Gold top accent line, gradient bg, celestial glow</td>
+        <td>Active item floats as a white card above the sidebar</td>
+        <td>Warm gold permeates the active state and top accent</td>
+        <td>Medium-tone sidebar like Slack -- unique depth tier</td>
+        <td>Monochrome discipline; colorful icons are the only accent</td>
+        <td>Full dark theme for comparison</td>
+      </tr>
+      <tr>
+        <td><span class="dim-label">Brand Feel</span></td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:95%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Maximum brand expression
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Clean, spatial, content-first
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Professional, gold-accented
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Slack-esque, approachable
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:50%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Sharp, developer-grade
+        </td>
+        <td>
+          <div class="spectrum-bar">
+            <span class="bar-label">Subtle</span>
+            <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+            <span class="bar-label">Bold</span>
+          </div>
+          Immersive, dramatic
+        </td>
+      </tr>
+      <tr>
+        <td><span class="dim-label">Best For</span></td>
+        <td>Maximum polish. The "Josi signature" observatory look.</td>
+        <td>Content-first. Active item physically elevates. Clean &amp; spatial.</td>
+        <td>B2B/professional astrologers. Gold warmth in a professional frame.</td>
+        <td>Users who love Slack/Discord. Medium sidebar creates 3-tier depth.</td>
+        <td>Developer-minded users. Monochrome + surgical gold warmth.</td>
+        <td>Night owls, AMOLED screens, immersive sessions.</td>
+      </tr>
+      <tr>
+        <td><span class="dim-label">Inspired By</span></td>
+        <td>Telescope UIs, planetariums</td>
+        <td>Notion, Things 3, Craft</td>
+        <td>Stripe Dashboard, Linear</td>
+        <td>Slack, Discord, Obsidian</td>
+        <td>Vercel, Raycast, Arc</td>
+        <td>Spotify, VS Code Dark</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+var variations = ['v-observatory', 'v-iceslate', 'v-stripegold', 'v-indigo', 'v-vercel', 'v-dark'];
+
+var descData = {
+  'v-observatory': ['Observatory', 'Refined dark gradient sidebar with gold top accent, colored icons, and subtle celestial glow. The signature Josi look.'],
+  'v-iceslate': ['Ice Slate', 'Cool gray sidebar where the active item becomes a floating white card with shadow. Clean, spatial, content-forward.'],
+  'v-stripegold': ['Stripe + Gold', 'Light cool sidebar with gold-forward active state. Gold-tinted active row, gold top accent, and the "J" in gold. Warm and professional.'],
+  'v-indigo': ['Frosted Indigo', 'Medium navy sidebar -- darker than light variants, lighter than Observatory. Like Slack. Creates a 3-tier depth with white content.'],
+  'v-vercel': ['Vercel', 'Near-white monochrome sidebar with black active border. Colorful icons provide the only vibrancy. Active icon turns gold. Developer-grade sharpness.'],
+  'v-dark': ['Dark Mode', 'Full dark sidebar and dark content area. Reference variant for night mode comparison.']
+};
+
+function setVariation(v) {
+  for (var i = 0; i < variations.length; i++) {
+    document.body.classList.remove(variations[i]);
+  }
+  document.body.classList.add(v);
+
+  var buttons = document.querySelectorAll('.tg-btn');
+  for (var j = 0; j < buttons.length; j++) {
+    buttons[j].classList.remove('active');
+    if (buttons[j].getAttribute('data-var') === v) {
+      buttons[j].classList.add('active');
+    }
+  }
+
+  var desc = document.getElementById('variant-desc');
+  var d = descData[v];
+  if (d) {
+    var em = document.createElement('em');
+    em.textContent = d[0];
+    var span = document.createTextNode(' -- ' + d[1]);
+    desc.textContent = '';
+    desc.appendChild(em);
+    desc.appendChild(span);
+  }
+}
+
+// Initialize with Observatory (the top pick)
+setVariation('v-observatory');
+</script>
+
+</body>
+</html>

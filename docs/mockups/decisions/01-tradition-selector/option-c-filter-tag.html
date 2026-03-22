@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 1C: Tradition as Filter/Tag</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+      --accent-purple: #9B7AD8;
+      --accent-purple-bg: rgba(155,122,216,0.1);
+      --accent-teal: #5AAFAA;
+      --accent-teal-bg: rgba(90,175,170,0.1);
+      --accent-emerald: #4A9F6A;
+      --accent-emerald-bg: rgba(74,159,106,0.1);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --avatar-placeholder: linear-gradient(135deg, #1A2340, #253050);
+      --bar-good: #6AAF7A;
+      --bar-neutral: #3A4A6A;
+      --bar-avoid: #C45D4A;
+      --bar-special: #D4A04A;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.07);
+      --accent-purple: #7A5FB5;
+      --accent-purple-bg: rgba(122,95,181,0.08);
+      --accent-teal: #3A8F8A;
+      --accent-teal-bg: rgba(58,143,138,0.08);
+      --accent-emerald: #3A7F5A;
+      --accent-emerald-bg: rgba(58,127,90,0.08);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --avatar-placeholder: linear-gradient(135deg, #DDE1EB, #CED4E0);
+      --bar-good: #5A8F6A;
+      --bar-neutral: #CED4E0;
+      --bar-avoid: #C45D4A;
+      --bar-special: #C8913A;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== ANNOTATION CARD ========== */
+    .annotation {
+      max-width: 1280px; margin: 24px auto 20px; padding: 24px 28px;
+      background: var(--bg-card); border: 1px solid var(--accent-gold);
+      border-radius: 12px; position: relative;
+    }
+    .annotation::before {
+      content: 'DESIGN DECISION'; position: absolute; top: -10px; left: 20px;
+      background: var(--accent-gold); color: #fff; font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; padding: 2px 10px; border-radius: 4px;
+    }
+    .annotation h3 {
+      font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .annotation p {
+      font-size: 13px; color: var(--text-body); line-height: 1.7; margin-bottom: 8px;
+    }
+    .annotation .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    .annotation .pros-cons div { font-size: 12px; line-height: 1.6; }
+    .annotation .pros-cons .label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      font-weight: 700; margin-bottom: 4px;
+    }
+    .annotation .pros-cons .pros .label { color: var(--accent-green); }
+    .annotation .pros-cons .cons .label { color: var(--accent-red); }
+    .annotation .pros-cons li { color: var(--text-muted); margin-bottom: 2px; list-style: none; }
+    .annotation .pros-cons li::before { margin-right: 6px; }
+    .annotation .pros-cons .pros li::before { content: '+'; color: var(--accent-green); font-weight: 700; }
+    .annotation .pros-cons .cons li::before { content: '-'; color: var(--accent-red); font-weight: 700; }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-toggle {
+      position: fixed; top: 16px; right: 16px; z-index: 1000;
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 15px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 0 auto 40px; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR + MAIN LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 920px; }
+
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.1s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main { display: flex; flex-direction: column; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .greeting { font-size: 14px; color: var(--text-muted); }
+    .topbar .greeting strong { color: var(--text-primary); }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ========== FILTER BAR — the key differentiating element ========== */
+    .filter-bar {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+      padding: 12px 16px; background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border-default);
+    }
+    .filter-label {
+      font-size: 11px; color: var(--text-faint); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;
+    }
+    .filter-pill {
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; border: 1px solid transparent;
+      color: var(--text-muted); background: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    .filter-pill:hover { background: var(--bg-card-hover); color: var(--text-secondary); }
+    .filter-pill.active {
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright);
+      border-color: rgba(200,145,58,0.2);
+    }
+    .filter-pill.active-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); border-color: rgba(200,145,58,0.2); }
+    .filter-pill.active-western { background: var(--accent-blue-bg); color: var(--accent-blue); border-color: rgba(106,159,216,0.2); }
+    .filter-pill.active-chinese { background: var(--accent-red-bg); color: var(--accent-red); border-color: rgba(196,93,74,0.2); }
+    .filter-count {
+      font-size: 10px; background: var(--counter-bg); padding: 1px 6px;
+      border-radius: 8px; margin-left: 4px; color: var(--text-faint);
+    }
+
+    /* ========== FEED CARDS — content-first approach ========== */
+    .feed { display: flex; flex-direction: column; gap: 16px; }
+
+    .feed-card {
+      background: var(--bg-card); border-radius: 14px; padding: 0;
+      border: 1px solid var(--border-default); overflow: hidden;
+      transition: border-color 0.15s; cursor: pointer;
+    }
+    .feed-card:hover { border-color: var(--border-strong); }
+
+    /* Tradition-specific left border accents */
+    .feed-card.vedic-card { border-left: 3px solid var(--accent-gold); }
+    .feed-card.western-card { border-left: 3px solid var(--accent-blue); }
+    .feed-card.chinese-card { border-left: 3px solid var(--accent-red); }
+    .feed-card.hellenistic-card { border-left: 3px solid var(--accent-purple); }
+    .feed-card.mayan-card { border-left: 3px solid var(--accent-teal); }
+    .feed-card.celtic-card { border-left: 3px solid var(--accent-emerald); }
+
+    .feed-card-inner { padding: 22px 24px; }
+
+    .feed-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .feed-card-type {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+    .feed-card-time { font-size: 11px; color: var(--text-faint); }
+
+    .feed-card-title {
+      font-family: 'DM Serif Display', serif; font-size: 20px;
+      color: var(--text-primary); line-height: 1.3; margin-bottom: 8px;
+    }
+    .feed-card-body {
+      font-family: 'DM Serif Text', serif; font-size: 14px; line-height: 1.7;
+      color: var(--text-body-reading); margin-bottom: 14px;
+    }
+    .feed-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .feed-card-cta {
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+
+    /* Tradition badges */
+    .tradition-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; letter-spacing: 0.5px;
+    }
+    .badge-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-western { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-chinese { background: var(--accent-red-bg); color: var(--accent-red); }
+    .badge-hellenistic { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-mayan { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-celtic { background: var(--accent-emerald-bg); color: var(--accent-emerald); }
+
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+
+    /* Hero card (first/featured item) */
+    .feed-card-hero {
+      background: var(--bg-hero); position: relative; overflow: hidden;
+    }
+    .feed-card-hero::before {
+      content: ''; position: absolute; top: -60px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .feed-card-hero .feed-card-inner { position: relative; }
+
+    /* Inline data grid for panchang etc */
+    .inline-data {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      margin-top: 12px;
+    }
+    .inline-data-item {
+      padding: 8px; background: var(--bg-surface); border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+    body.light .inline-data-item { background: rgba(240,242,247,0.7); }
+    .inline-data-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 3px;
+    }
+    .inline-data-value {
+      font-size: 12px; color: var(--text-primary); font-weight: 500;
+    }
+
+    /* Western chart inline */
+    .western-inline {
+      display: flex; gap: 16px; align-items: center; margin-top: 8px;
+    }
+    .western-wheel {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 1.5px solid var(--accent-blue); position: relative;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .western-wheel::before {
+      content: ''; position: absolute; width: 70%; height: 70%;
+      border-radius: 50%; border: 1px solid rgba(106,159,216,0.3);
+    }
+    .western-wheel .w-dot {
+      position: absolute; width: 5px; height: 5px; border-radius: 50%;
+    }
+    .w-d1 { top: 14%; left: 55%; background: var(--accent-gold-bright); }
+    .w-d2 { top: 35%; right: 8%; background: var(--accent-blue); }
+    .w-d3 { bottom: 22%; right: 16%; background: var(--accent-red); }
+    .w-d4 { bottom: 10%; left: 30%; background: var(--accent-green); }
+    .western-wheel-label {
+      font-size: 7px; color: rgba(106,159,216,0.6); text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600; z-index: 1;
+    }
+
+    /* BaZi pillars inline */
+    .bazi-inline {
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 10px;
+    }
+    .bazi-pillar {
+      text-align: center; padding: 8px 4px; background: var(--bg-surface);
+      border-radius: 6px; border: 1px solid var(--border-subtle);
+    }
+    body.light .bazi-pillar { background: rgba(240,242,247,0.7); }
+    .bazi-pillar .bp-label {
+      font-size: 8px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-faint); margin-bottom: 3px;
+    }
+    .bazi-pillar .bp-char { font-size: 16px; margin-bottom: 1px; }
+    .bazi-pillar .bp-elem { font-size: 10px; font-weight: 500; }
+    .bazi-pillar .bp-animal { font-size: 9px; color: var(--text-muted); }
+
+    /* Transit inline */
+    .transit-row {
+      display: flex; align-items: center; gap: 12px; padding: 8px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .transit-row:last-child { border-bottom: none; }
+    .transit-icon {
+      width: 30px; height: 30px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+    }
+    .transit-info { flex: 1; }
+    .transit-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .transit-detail { font-size: 11px; color: var(--text-muted); }
+    .transit-date { font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-toggle">
+  <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+  <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+</div>
+
+<!-- Annotation Card -->
+<div class="annotation">
+  <h3>Decision 1C: Tradition as Filter/Tag</h3>
+  <p>Content-first approach. The dashboard shows a mixed feed of cards from all traditions, each tagged with a tradition badge. A filter bar at the top lets users show all traditions or narrow to one. Cards appear in chronological/relevance order, creating a discovery-oriented experience.</p>
+  <p>This treats traditions like tags or categories rather than modes. Users see everything at once and filter down when they want focus. Each card has its own visual identity through a colored left border and badge. This works well for users exploring multiple traditions but can feel chaotic when traditions have very different data shapes (Vedic panchang vs. Chinese BaZi vs. Western aspects).</p>
+  <div class="pros-cons">
+    <div class="pros">
+      <div class="label">Pros</div>
+      <ul>
+        <li>Modern, discovery-oriented -- shows the breadth of the platform</li>
+        <li>No switching required -- everything visible at once</li>
+        <li>Great for new users exploring what each tradition offers</li>
+        <li>Filter is fast and non-destructive (just hiding, not changing context)</li>
+        <li>Content naturally sorted by relevance/recency</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <div class="label">Cons</div>
+      <ul>
+        <li>Can feel chaotic with mixed data shapes (panchang + BaZi + aspects)</li>
+        <li>Power users may find it noisy for daily use</li>
+        <li>Harder to build deep workflows within one tradition</li>
+        <li>Feed ordering becomes a complex product decision</li>
+        <li>Less structured than dedicated tradition views</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Main Mockup -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/dashboard</div>
+  </div>
+  <div class="layout">
+    <!-- Sidebar — standard, NO tradition selector -->
+    <div class="sidebar">
+      <div class="sb-header">
+        <div class="logo">Josi</div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item active"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="topbar">
+        <div class="greeting">Good morning, <strong>Govind</strong> &middot; Friday, March 20</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost">Export</button>
+          <button class="btn-gold">+ New Chart</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- FILTER BAR — the key differentiating element -->
+        <div class="filter-bar">
+          <span class="filter-label">Traditions</span>
+          <button class="filter-pill active">All <span class="filter-count">12</span></button>
+          <button class="filter-pill">&#9737; Vedic <span class="filter-count">8</span></button>
+          <button class="filter-pill">&#9789; Western <span class="filter-count">3</span></button>
+          <button class="filter-pill">&#9775; Chinese <span class="filter-count">1</span></button>
+          <button class="filter-pill">&#9978; Hellenistic</button>
+          <button class="filter-pill">&#9788; Mayan</button>
+          <button class="filter-pill">&#9752; Celtic</button>
+        </div>
+
+        <!-- CONTENT FEED -->
+        <div class="feed">
+
+          <!-- Card 1: Today's Vedic Sky (featured/hero) -->
+          <div class="feed-card vedic-card feed-card-hero">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-vedic">&#9737; Vedic</span>
+                  <span class="feed-card-type" style="color:var(--accent-gold)">Today's Sky</span>
+                </div>
+                <span class="feed-card-time">Updated 2 hours ago</span>
+              </div>
+              <div class="feed-card-title">Shukla Dashami in Pushya Nakshatra</div>
+              <div class="feed-card-body">The Moon transits through Cancer in Pushya nakshatra. Pushya is among the most auspicious nakshatras, ruled by Brihaspati. A deeply nurturing day for spiritual practice and beginning new ventures.</div>
+              <div class="inline-data">
+                <div class="inline-data-item">
+                  <div class="inline-data-label">Tithi</div>
+                  <div class="inline-data-value">Dashami</div>
+                </div>
+                <div class="inline-data-item">
+                  <div class="inline-data-label">Nakshatra</div>
+                  <div class="inline-data-value">Pushya</div>
+                </div>
+                <div class="inline-data-item">
+                  <div class="inline-data-label">Yoga</div>
+                  <div class="inline-data-value">Siddha</div>
+                </div>
+                <div class="inline-data-item">
+                  <div class="inline-data-label">Rahu Kalam</div>
+                  <div class="inline-data-value" style="color:var(--accent-red)">10:30-12:00</div>
+                </div>
+              </div>
+              <div class="feed-card-footer" style="margin-top:16px">
+                <div style="display:flex;gap:6px">
+                  <span class="pill pill-gold">Shubh Muhurta</span>
+                  <span class="pill pill-green">Favorable</span>
+                </div>
+                <span class="feed-card-cta" style="color:var(--accent-gold)">Full Panchang &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Western Birth Chart -->
+          <div class="feed-card western-card">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-western">&#9789; Western</span>
+                  <span class="feed-card-type" style="color:var(--accent-blue)">Your Birth Chart</span>
+                </div>
+                <span class="feed-card-time">Last viewed 1 day ago</span>
+              </div>
+              <div class="western-inline">
+                <div class="western-wheel">
+                  <div class="w-dot w-d1"></div>
+                  <div class="w-dot w-d2"></div>
+                  <div class="w-dot w-d3"></div>
+                  <div class="w-dot w-d4"></div>
+                  <span class="western-wheel-label">Natal</span>
+                </div>
+                <div>
+                  <div class="feed-card-title" style="margin-bottom:4px">Sun Aries, Moon Cancer</div>
+                  <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:6px">
+                    Ascendant Leo &middot; MC Taurus<br>
+                    Sun conjunct Mercury (1&deg;) &middot; Moon trine Neptune (2&deg;)<br>
+                    Grand Water Trine: Moon-Jupiter-Neptune
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <span class="pill pill-blue">Tropical / Placidus</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-card-footer" style="margin-top:14px">
+                <span style="font-size:11px;color:var(--text-faint)">3 aspects exact today</span>
+                <span class="feed-card-cta" style="color:var(--accent-blue)">View chart &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: AI Reading (Vedic) -->
+          <div class="feed-card vedic-card">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-vedic">&#9737; Vedic</span>
+                  <span class="feed-card-type" style="color:var(--accent-gold)">AI Reading</span>
+                </div>
+                <span class="feed-card-time">Generated 3 days ago</span>
+              </div>
+              <div class="feed-card-title">The Water Within: Your Emotional Architecture</div>
+              <div class="feed-card-body">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio in the fifth house creates a deep well of creative intensity -- you don't just feel things, you transform through feeling.</div>
+              <div class="feed-card-footer">
+                <div style="display:flex;gap:6px">
+                  <span class="pill pill-gold">Deep Reading</span>
+                  <span class="pill" style="background:var(--accent-gold-bg-subtle);color:var(--text-muted)">8 min read</span>
+                </div>
+                <span class="feed-card-cta" style="color:var(--accent-gold)">Continue reading &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Chinese BaZi -->
+          <div class="feed-card chinese-card">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-chinese">&#9775; Chinese</span>
+                  <span class="feed-card-type" style="color:var(--accent-red)">BaZi Four Pillars</span>
+                </div>
+                <span class="feed-card-time">Created 1 week ago</span>
+              </div>
+              <div class="feed-card-title">Your Four Pillars of Destiny</div>
+              <div class="bazi-inline">
+                <div class="bazi-pillar">
+                  <div class="bp-label">Year</div>
+                  <div class="bp-char">&#27700;</div>
+                  <div class="bp-elem" style="color:var(--accent-blue)">Water</div>
+                  <div class="bp-animal">Monkey</div>
+                </div>
+                <div class="bazi-pillar">
+                  <div class="bp-label">Month</div>
+                  <div class="bp-char">&#27700;</div>
+                  <div class="bp-elem" style="color:var(--accent-blue)">Water</div>
+                  <div class="bp-animal">Rabbit</div>
+                </div>
+                <div class="bazi-pillar">
+                  <div class="bp-label">Day</div>
+                  <div class="bp-char">&#28779;</div>
+                  <div class="bp-elem" style="color:var(--accent-red)">Fire</div>
+                  <div class="bp-animal">Horse</div>
+                </div>
+                <div class="bazi-pillar">
+                  <div class="bp-label">Hour</div>
+                  <div class="bp-char">&#22303;</div>
+                  <div class="bp-elem" style="color:var(--accent-gold-bright)">Earth</div>
+                  <div class="bp-animal">Snake</div>
+                </div>
+              </div>
+              <div class="feed-card-footer" style="margin-top:14px">
+                <span style="font-size:11px;color:var(--text-muted)">Day Master: <span style="color:var(--accent-red);font-weight:500">Bing Fire</span> &middot; Strong Yang</span>
+                <span class="feed-card-cta" style="color:var(--accent-red)">Full analysis &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Western Transit Update -->
+          <div class="feed-card western-card">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-western">&#9789; Western</span>
+                  <span class="feed-card-type" style="color:var(--accent-blue)">Transit Alert</span>
+                </div>
+                <span class="feed-card-time">Today</span>
+              </div>
+              <div class="feed-card-title">Mercury Conjunct Sun in Aries</div>
+              <div class="feed-card-body">Mercury meets the Sun at 29&deg; Pisces (tropical) today, forming a cazimi -- the most powerful Mercury placement. Your thoughts gain solar clarity. Ideas conceived now carry special potency.</div>
+              <div style="margin-top:8px">
+                <div class="transit-row">
+                  <div class="transit-icon" style="background:var(--accent-blue-bg);color:var(--accent-blue)">&#9791;</div>
+                  <div class="transit-info">
+                    <div class="transit-name">Mercury cazimi Sun</div>
+                    <div class="transit-detail">Exact at 2:14 PM &middot; Orb 0&deg;00'</div>
+                  </div>
+                  <div class="transit-date" style="color:var(--accent-blue)">Exact today</div>
+                </div>
+                <div class="transit-row">
+                  <div class="transit-icon" style="background:var(--accent-green-bg);color:var(--accent-green)">&#9792;</div>
+                  <div class="transit-info">
+                    <div class="transit-name">Venus enters Aries</div>
+                    <div class="transit-detail">Passion and initiative in relationships</div>
+                  </div>
+                  <div class="transit-date" style="color:var(--accent-green)">In 2 days</div>
+                </div>
+              </div>
+              <div class="feed-card-footer" style="margin-top:12px">
+                <span style="font-size:11px;color:var(--text-faint)">2 transits active in your chart</span>
+                <span class="feed-card-cta" style="color:var(--accent-blue)">All transits &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6: Vedic Dasha Update -->
+          <div class="feed-card vedic-card">
+            <div class="feed-card-inner">
+              <div class="feed-card-header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="tradition-badge badge-vedic">&#9737; Vedic</span>
+                  <span class="feed-card-type" style="color:var(--accent-gold)">Dasha Period</span>
+                </div>
+                <span class="feed-card-time">Ongoing</span>
+              </div>
+              <div class="feed-card-title">Mercury Mahadasha: The Age of Communication</div>
+              <div class="feed-card-body">You entered Mercury Mahadasha in 2024. Currently running Mercury-Mercury-Venus antardasha. Mercury rules your 3rd and 12th houses -- expect growth in writing, short travels, and spiritual practices.</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;background:var(--bg-surface);border-radius:8px;border:1px solid var(--border-subtle)">
+                <div style="font-size:11px;color:var(--text-muted);width:60px">Progress</div>
+                <div style="flex:1;height:6px;background:var(--border-subtle);border-radius:3px;overflow:hidden"><div style="width:12%;height:100%;border-radius:3px;background:var(--accent-gold-bright)"></div></div>
+                <div style="font-size:11px;color:var(--accent-gold-bright);font-weight:500">12% (2 of 17 yrs)</div>
+              </div>
+              <div class="feed-card-footer" style="margin-top:14px">
+                <span style="font-size:11px;color:var(--text-faint)">Antardasha ends: Aug 2027</span>
+                <span class="feed-card-cta" style="color:var(--accent-gold)">Full Dasha &#8594;</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /feed -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

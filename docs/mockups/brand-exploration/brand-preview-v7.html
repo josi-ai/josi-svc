@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi — v7: Light + Dark Mode Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      /* Dark theme (default) */
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --avatar-placeholder: linear-gradient(135deg, #1A2340, #253050);
+
+      --bar-good: #6AAF7A;
+      --bar-neutral: #3A4A6A;
+      --bar-avoid: #C45D4A;
+      --bar-special: #D4A04A;
+
+      --muhurta-now-bg: rgba(200,145,58,0.06);
+      --muhurta-now-border: rgba(200,145,58,0.15);
+
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --shadow-mobile: 0 20px 80px rgba(0,0,0,0.5);
+
+      --toggle-bar-bg: rgba(6,10,20,0.95);
+      --toggle-btn-border: #1A2340;
+      --toggle-btn-text: #5B6A8A;
+
+      --browser-bar-bg: #080E1C;
+      --notch-bg: #060A14;
+      --tab-bar-bg: rgba(10,15,30,0.92);
+
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --avatar-placeholder: linear-gradient(135deg, #DDE1EB, #CED4E0);
+
+      --bar-good: #5A8F6A;
+      --bar-neutral: #CED4E0;
+      --bar-avoid: #C45D4A;
+      --bar-special: #C8913A;
+
+      --muhurta-now-bg: rgba(184,131,46,0.06);
+      --muhurta-now-border: rgba(184,131,46,0.18);
+
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --shadow-mobile: 0 12px 48px rgba(26,31,46,0.1);
+
+      --toggle-bar-bg: rgba(255,255,255,0.95);
+      --toggle-btn-border: #DDE1EB;
+      --toggle-btn-text: #7E8DA5;
+
+      --browser-bar-bg: #F6F7FB;
+      --notch-bg: #1A1F2E;
+      --tab-bar-bg: rgba(255,255,255,0.95);
+
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== TOGGLE BAR ========== */
+    .toggle-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--toggle-bar-bg); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 6px; flex-wrap: wrap;
+    }
+    .tg-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
+    .tg-btn {
+      padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      border: 1px solid var(--toggle-btn-border); background: transparent;
+      color: var(--toggle-btn-text); transition: all 0.15s;
+    }
+    .tg-btn.active { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); }
+    .tg-sep { width: 1px; height: 24px; background: var(--border-default); margin: 0 10px; }
+    .spacer { height: 56px; }
+
+    /* Theme toggle */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+
+    /* ========== SHARED ========== */
+    .view-container { display: none; }
+    .view-container.visible { display: block; }
+    .page-section { display: none; }
+    .page-section.visible { display: block; }
+
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); margin-bottom: 4px; }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* Shared pill/badge */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .bar-g { background: var(--bar-good); } .bar-n { background: var(--bar-neutral); }
+    .bar-a { background: var(--bar-avoid); } .bar-e { background: var(--bar-special); }
+
+    /* ================================================================
+       MOBILE STYLES
+       ================================================================ */
+    .mobile-frame {
+      max-width: 390px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 40px; border: 3px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-mobile);
+    }
+    .notch { width: 120px; height: 28px; background: var(--notch-bg); border-radius: 0 0 16px 16px; margin: 0 auto; }
+    .m-topbar { display: flex; justify-content: space-between; align-items: center; padding: 4px 20px 12px; }
+    .m-topbar .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text-primary); }
+    .m-icon-btn {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--icon-btn-bg);
+      border: 1px solid var(--border-default); display: flex; align-items: center;
+      justify-content: center; font-size: 13px; color: var(--text-muted);
+    }
+    .m-avatar {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+    .m-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+    .m-tab-bar {
+      background: var(--tab-bar-bg); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-subtle); display: flex; padding: 8px 0 28px;
+    }
+    .m-tab { flex: 1; text-align: center; padding: 6px 0; }
+    .m-tab .icon { font-size: 17px; color: var(--text-faint); margin-bottom: 2px; }
+    .m-tab .lbl { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .m-tab.active .icon, .m-tab.active .lbl { color: var(--accent-gold-bright); }
+
+    .m-hero-card {
+      margin: 0 20px 24px; padding: 24px 20px;
+      background: var(--bg-hero); border-radius: 18px;
+      border: 1px solid var(--border-default); position: relative; overflow: hidden;
+    }
+    .m-hero-card::before {
+      content: ''; position: absolute; top: -50px; right: -30px;
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .m-hero-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 12px; position: relative;
+    }
+    .m-hero-title {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+      line-height: 1.3; margin-bottom: 10px; position: relative;
+    }
+    .m-hero-text {
+      font-family: 'DM Serif Text', serif; font-size: 14px; line-height: 1.7;
+      color: var(--text-body); margin-bottom: 16px; position: relative;
+    }
+
+    .m-muhurta-scroll { display: flex; gap: 0; overflow-x: auto; padding-right: 20px; }
+    .m-muhurta-scroll::-webkit-scrollbar { display: none; }
+    .m-mslot {
+      flex-shrink: 0; width: 56px; text-align: center; padding: 10px 0;
+      border-right: 1px solid var(--border-divider);
+    }
+    .m-mslot:first-child { border-left: 1px solid var(--border-divider); border-radius: 8px 0 0 8px; }
+    .m-mslot .time { font-size: 9px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+    .m-mslot .bar { width: 24px; height: 5px; border-radius: 3px; margin: 0 auto 4px; }
+    .m-mslot .mlbl { font-size: 8px; color: var(--text-faint); font-weight: 500; }
+    .m-mslot.now {
+      background: var(--muhurta-now-bg); border: 1px solid var(--muhurta-now-border);
+      border-radius: 8px; margin: 0 -1px;
+    }
+    .m-mslot.now .time, .m-mslot.now .mlbl { color: var(--accent-gold-bright); }
+
+    .m-cg-card {
+      background: var(--bg-card); border-radius: 14px; padding: 18px;
+      border: 1px solid var(--border-default); display: flex; gap: 16px; align-items: center;
+    }
+    .m-cg-wheel {
+      width: 80px; height: 80px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .m-cg-wheel::before {
+      content: ''; position: absolute; width: 65%; height: 65%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .m-cg-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
+    .md1 { top: 18%; left: 56%; background: var(--accent-gold-bright); }
+    .md2 { top: 36%; right: 10%; background: var(--text-secondary); }
+    .md3 { bottom: 28%; right: 16%; background: var(--accent-red); }
+
+    .m-daily-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-dcard {
+      background: var(--bg-card); border-radius: 12px; padding: 14px;
+      border: 1px solid var(--border-default);
+    }
+    .m-dcard .dc-icon { font-size: 18px; margin-bottom: 8px; }
+    .m-dcard .dc-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .m-dcard .dc-val { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+    .m-rp-card {
+      background: var(--bg-card); border-radius: 14px; padding: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .m-astro-card {
+      background: var(--bg-card); border-radius: 14px; padding: 16px;
+      border: 1px solid var(--border-default); display: flex; gap: 14px; align-items: center;
+    }
+    .m-astro-av {
+      width: 48px; height: 48px; border-radius: 50%; background: var(--avatar-placeholder);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text-primary); flex-shrink: 0;
+    }
+    .m-book-btn {
+      padding: 9px 16px; background: var(--accent-gold); color: #fff; border: none;
+      border-radius: 10px; font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ================================================================
+       WEB SHARED
+       ================================================================ */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ================================================================
+       WEB OPTION 1: SIDEBAR DASHBOARD
+       ================================================================ */
+    .w1-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 800px; }
+    .w1-sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .w1-sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .w1-sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .w1-sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w1-sb-nav { padding: 12px 10px; flex: 1; }
+    .w1-sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .w1-sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer;
+    }
+    .w1-sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .w1-sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .w1-sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .w1-sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .w1-sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .w1-sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    .w1-main { display: flex; flex-direction: column; }
+    .w1-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .w1-topbar .greeting { font-size: 14px; color: var(--text-muted); }
+    .w1-topbar .greeting strong { color: var(--text-primary); }
+    .w-btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .w-btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    .w1-content { padding: 24px 28px; flex: 1; }
+    .w1-hero-row { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-bottom: 24px; }
+
+    /* Shared card styles */
+    .wc { background: var(--bg-card); border-radius: 14px; border: 1px solid var(--border-default); }
+    .wc-hero {
+      padding: 28px; background: var(--bg-hero);
+      position: relative; overflow: hidden; border-radius: 16px;
+    }
+    .wc-hero::before {
+      content: ''; position: absolute; top: -60px; right: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .wc-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 10px; position: relative;
+    }
+    .wc-title {
+      font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text-primary);
+      line-height: 1.25; margin-bottom: 10px; position: relative;
+    }
+    .wc-text {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.7;
+      color: var(--text-body); margin-bottom: 16px; position: relative;
+    }
+    .wc-slabel {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 10px;
+    }
+    .wc-value { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--text-primary); margin-bottom: 2px; }
+    .wc-value.gold { color: var(--accent-gold-bright); }
+    .wc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    .wc-cta { font-size: 12px; color: var(--accent-gold); font-weight: 600; cursor: pointer; margin-top: 12px; }
+
+    /* Muhurta strip */
+    .wm-strip { display: flex; gap: 0; }
+    .wm-slot {
+      flex: 1; text-align: center; padding: 8px 0;
+      border-right: 1px solid var(--border-divider);
+    }
+    .wm-slot:first-child { border-left: 1px solid var(--border-divider); border-radius: 6px 0 0 6px; }
+    .wm-slot:last-child { border-radius: 0 6px 6px 0; }
+    .wm-slot .time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .wm-slot .bar { width: 28px; height: 5px; border-radius: 3px; margin: 0 auto 4px; }
+    .wm-slot .wmlbl { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .wm-slot.now {
+      background: var(--muhurta-now-bg); border: 1px solid var(--muhurta-now-border);
+      border-radius: 6px;
+    }
+    .wm-slot.now .time, .wm-slot.now .wmlbl { color: var(--accent-gold-bright); }
+
+    /* Astrologer list */
+    .wa-item {
+      display: flex; gap: 14px; align-items: center; padding: 12px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .wa-item:last-child { border-bottom: none; }
+    .wa-av {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--avatar-placeholder);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text-primary); flex-shrink: 0;
+    }
+    .wa-info { flex: 1; }
+    .wa-info .name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .wa-info .spec { font-size: 11px; color: var(--text-muted); }
+    .wa-avail { font-size: 10px; color: var(--accent-green); font-weight: 500; }
+    .wa-btn {
+      padding: 7px 14px; background: var(--accent-gold); color: #fff; border: none;
+      border-radius: 8px; font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* Mini chart */
+    .wcm {
+      width: 64px; height: 64px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .wcm::before {
+      content: ''; position: absolute; width: 65%; height: 65%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .wcm-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; }
+    .wcm-d1 { top: 16%; left: 55%; background: var(--accent-gold-bright); }
+    .wcm-d2 { top: 34%; right: 10%; background: var(--text-secondary); }
+    .wcm-d3 { bottom: 24%; right: 14%; background: var(--accent-red); }
+    .wcm-lbl {
+      font-size: 7px; color: var(--text-faint); text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600; z-index: 1;
+    }
+
+    /* ================================================================
+       WEB OPTION 2: TOP NAV + CARDS
+       ================================================================ */
+    .w2-topnav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 40px; border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+    .w2-topnav .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text-primary); }
+    .w2-topnav .nav-links { display: flex; gap: 32px; }
+    .w2-topnav .nav-links span {
+      font-size: 13px; color: var(--text-muted); font-weight: 500;
+      cursor: pointer; transition: color 0.15s;
+    }
+    .w2-topnav .nav-links span:hover { color: var(--text-secondary); }
+    .w2-topnav .nav-links span.active { color: var(--text-primary); }
+    .w2-topnav .right { display: flex; gap: 12px; align-items: center; }
+    .w2-topnav .plan-badge {
+      font-size: 10px; padding: 4px 10px; border-radius: 12px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w2-av {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    .w2-content { max-width: 1120px; margin: 0 auto; padding: 32px 40px; }
+
+    .w2-greeting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .w2-greeting { font-size: 14px; color: var(--text-muted); }
+    .w2-greeting strong { color: var(--text-primary); font-weight: 600; }
+    .w2-date { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text-primary); margin-top: 4px; }
+
+    .w2-hero {
+      background: var(--bg-hero); border-radius: 20px; padding: 44px 40px;
+      border: 1px solid var(--border-default); margin-bottom: 28px;
+      position: relative; overflow: hidden;
+    }
+    .w2-hero::before {
+      content: ''; position: absolute; top: -80px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .w2-hero::after {
+      content: ''; position: absolute; bottom: -50px; left: 20%;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, var(--bg-hero-glow2) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .w2-hero-inner {
+      display: grid; grid-template-columns: 1fr 320px; gap: 48px;
+      align-items: center; position: relative; z-index: 1;
+    }
+    .w2-hero-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 14px;
+    }
+    .w2-hero-title {
+      font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--text-primary);
+      line-height: 1.25; margin-bottom: 12px;
+    }
+    .w2-hero-text {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.75;
+      color: var(--text-body); margin-bottom: 20px;
+    }
+    .w2-hero-pills { display: flex; gap: 8px; }
+
+    .w2-muhurta-card {
+      background: var(--bg-surface); border-radius: 14px; padding: 20px;
+      border: 1px solid var(--border-default);
+    }
+    body.light .w2-muhurta-card { background: rgba(240,242,247,0.7); }
+    .w2-muhurta-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+    .w2-muhurta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+    .w2-ms { text-align: center; padding: 10px 4px; border-radius: 8px; }
+    .w2-ms .time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .w2-ms .bar { width: 100%; height: 5px; border-radius: 3px; margin-bottom: 4px; }
+    .w2-ms .wmlbl { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .w2-ms.now {
+      background: var(--muhurta-now-bg); border: 1px solid var(--muhurta-now-border);
+    }
+    .w2-ms.now .time, .w2-ms.now .wmlbl { color: var(--accent-gold-bright); }
+
+    .w2-cards-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+    .w2-card {
+      background: var(--bg-card); border-radius: 16px; padding: 28px;
+      border: 1px solid var(--border-default); transition: border-color 0.15s; cursor: pointer;
+    }
+    .w2-card:hover { border-color: var(--border-strong); }
+    .w2-c-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 14px;
+    }
+
+    .w2-chart-row { display: flex; gap: 16px; align-items: center; margin-top: 12px; }
+    .w2-chart-info .big { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text-primary); margin-bottom: 2px; }
+    .w2-chart-info .detail { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+    .w2-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .w2-reading-card {
+      background: var(--bg-card); border-radius: 16px; padding: 28px;
+      border: 1px solid var(--border-default);
+    }
+    .w2-astro-card {
+      background: var(--bg-card); border-radius: 16px; padding: 28px;
+      border: 1px solid var(--border-default);
+    }
+
+    /* ================================================================
+       WEB OPTION 2: READING
+       ================================================================ */
+    .w2-reading-page { background: var(--bg-frame); }
+    .w2-rm-hero { max-width: 800px; margin: 0 auto; padding: 56px 40px 40px; text-align: center; }
+    .w2-rm-hero .cat {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 16px;
+    }
+    .w2-rm-hero h1 {
+      font-family: 'DM Serif Display', serif; font-size: 48px; line-height: 1.15;
+      color: var(--text-primary); margin-bottom: 16px;
+    }
+    .w2-rm-hero .byline { font-size: 13px; color: var(--text-muted); }
+    .w2-rm-hero .byline strong { color: var(--text-secondary); }
+    .w2-rm-hero .time-badge {
+      display: inline-block; margin-top: 12px; font-size: 11px; color: var(--text-faint);
+      border: 1px solid var(--border-default); padding: 4px 12px; border-radius: 12px;
+    }
+    .w2-rm-divider { max-width: 800px; margin: 0 auto; height: 1px; background: var(--border-subtle); }
+    .w2-rm-lead { max-width: 680px; margin: 0 auto; padding: 40px 0; }
+    .w2-rm-lead p {
+      font-family: 'DM Serif Text', serif; font-size: 20px; line-height: 1.85;
+      color: var(--text-secondary); border-left: 3px solid var(--accent-gold); padding-left: 24px;
+    }
+    .w2-rm-body { max-width: 680px; margin: 0 auto; padding: 0 0 40px; }
+    .w2-rm-body p {
+      font-family: 'DM Serif Text', serif; font-size: 17px; line-height: 1.9;
+      color: var(--text-body-reading); margin-bottom: 24px;
+    }
+    .w2-rm-pullquote {
+      max-width: 800px; margin: 0 auto; padding: 48px 40px; text-align: center;
+      border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default);
+      font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text-primary); line-height: 1.35;
+    }
+    .w2-rm-insight {
+      max-width: 680px; margin: 32px auto; background: var(--bg-card);
+      border-radius: 14px; padding: 24px; border: 1px solid var(--border-default);
+    }
+    .w2-rm-insight .il {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 8px;
+    }
+    .w2-rm-insight .it {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.75;
+      color: var(--text-secondary);
+    }
+    .w2-rm-actions { max-width: 680px; margin: 0 auto; padding: 32px 0; display: flex; gap: 12px; }
+    .w2-rm-btn {
+      padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; border: none;
+    }
+    .w2-rm-btn-primary { background: var(--accent-gold); color: #fff; }
+    .w2-rm-btn-secondary {
+      background: var(--bg-card); color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+
+    /* ================================================================
+       MOBILE CHART & READING (inline styles replaced by vars)
+       ================================================================ */
+    .m-chart-back {
+      font-size: 13px; color: var(--text-muted); background: none; border: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .m-chart-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .m-chart-export {
+      width: 30px; height: 30px; border-radius: 6px; font-size: 11px;
+      background: var(--icon-btn-bg); border: 1px solid var(--border-default);
+      display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    }
+    .m-chart-canvas {
+      background: var(--bg-frame); padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .m-chart-wheel {
+      width: 200px; height: 200px; border-radius: 50%; border: 2px solid var(--border-default);
+      margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .m-chart-wheel-inner { position: absolute; width: 75%; height: 75%; border-radius: 50%; border: 1px solid var(--border-default); }
+    .m-chart-wheel-h { position: absolute; width: 100%; height: 1px; top: 50%; background: var(--border-divider); }
+    .m-chart-wheel-v { position: absolute; height: 100%; width: 1px; left: 50%; background: var(--border-divider); }
+    .m-planet-marker {
+      position: absolute; width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; z-index: 3;
+    }
+    .m-planet-su { top: 10%; left: 55%; background: rgba(212,160,74,0.2); border: 1.5px solid var(--accent-gold-bright); color: var(--accent-gold-bright); }
+    .m-planet-mo { top: 28%; right: 8%; background: rgba(139,153,181,0.12); border: 1.5px solid var(--text-secondary); color: var(--text-secondary); }
+    .m-planet-ju { bottom: 8%; left: 42%; background: rgba(106,159,216,0.15); border: 1.5px solid var(--accent-blue); color: var(--accent-blue); }
+    .m-chart-center-name { font-size: 12px; font-weight: 600; color: var(--text-primary); z-index: 2; }
+    .m-chart-center-date { font-size: 9px; color: var(--text-faint); }
+    .m-chart-tabs { display: flex; gap: 4px; justify-content: center; margin-top: 12px; }
+    .m-chart-tab {
+      padding: 5px 12px; border-radius: 16px; font-size: 10px; font-weight: 500;
+      border: 1px solid var(--border-default); color: var(--text-muted);
+    }
+    .m-chart-tab.active { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); }
+    .m-planet-section {
+      padding: 24px 20px; border-bottom: 1px solid var(--border-divider);
+    }
+    .m-planet-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .m-planet-detail-card {
+      background: var(--bg-card); border-radius: 12px; padding: 14px;
+      border: 1px solid var(--border-default);
+    }
+    .m-planet-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .m-planet-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .m-planet-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
+    .m-planet-sign { font-size: 12px; color: var(--text-secondary); }
+    .m-planet-deg { font-size: 11px; color: var(--text-faint); font-family: monospace; }
+    .m-planet-desc {
+      border-top: 1px solid var(--border-divider); padding-top: 10px;
+      font-family: 'DM Serif Text', serif; font-size: 13px; line-height: 1.7;
+      color: var(--text-body-reading);
+    }
+
+    /* Mobile reading */
+    .m-reading-header {
+      padding: 28px 20px 24px; border-bottom: 1px solid var(--border-divider);
+    }
+    .m-reading-cat {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 12px;
+    }
+    .m-reading-title {
+      font-family: 'DM Serif Display', serif; font-size: 28px; line-height: 1.2;
+      color: var(--text-primary); margin-bottom: 12px;
+    }
+    .m-reading-byline { font-size: 12px; color: var(--text-muted); }
+    .m-reading-byline strong { color: var(--text-secondary); }
+    .m-reading-lead {
+      padding: 24px 20px; border-bottom: 1px solid var(--border-divider);
+    }
+    .m-reading-lead p {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.8;
+      color: var(--text-secondary); border-left: 3px solid var(--accent-gold); padding-left: 16px;
+    }
+    .m-reading-body { padding: 24px 20px; }
+    .m-reading-body p {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.85;
+      color: var(--text-body-reading); margin-bottom: 20px;
+    }
+    .m-reading-pullquote {
+      font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text-primary);
+      text-align: center; padding: 32px 24px;
+      border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default);
+      line-height: 1.35;
+    }
+    .m-reading-insight {
+      margin: 20px; background: var(--bg-card); border-radius: 12px; padding: 16px;
+      border: 1px solid var(--border-default);
+    }
+    .m-reading-insight-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 6px;
+    }
+    .m-reading-insight-text {
+      font-family: 'DM Serif Text', serif; font-size: 14px; line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .m-reading-cta {
+      padding: 13px 0; width: 100%; background: var(--accent-gold); color: #fff;
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== TOGGLE BAR ========== -->
+<div class="toggle-bar">
+  <span class="tg-label">View:</span>
+  <button class="tg-btn active" onclick="switchView('mobile')">Mobile</button>
+  <button class="tg-btn" onclick="switchView('web1')">Web: Sidebar</button>
+  <button class="tg-btn" onclick="switchView('web2')">Web: Top Nav</button>
+  <div class="tg-sep"></div>
+  <span class="tg-label">Page:</span>
+  <button class="tg-btn page-btn active" onclick="switchPage('home')">Home</button>
+  <button class="tg-btn page-btn" onclick="switchPage('chart')">Chart</button>
+  <button class="tg-btn page-btn" onclick="switchPage('reading')">Reading</button>
+  <div class="tg-sep"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ================================================================ -->
+<!-- MOBILE                                                            -->
+<!-- ================================================================ -->
+<div class="view-container visible" id="view-mobile">
+  <!-- MOBILE HOME -->
+  <div class="page-section visible" data-page="home">
+    <div class="page-marker">
+      <div class="route">/home</div>
+      <h2>Mobile — Home</h2>
+      <p>Today-led. Glanceable, scannable, tappable.</p>
+    </div>
+    <div class="mobile-frame">
+      <div class="notch"></div>
+      <div class="m-topbar">
+        <div class="logo">Josi</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="m-icon-btn">&#9790;</div>
+          <div class="m-avatar">G</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);padding:0 20px;margin-bottom:2px">Good morning, Govind</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--text-primary);padding:0 20px;margin-bottom:20px">Wednesday, March 12</div>
+      <div class="m-hero-card">
+        <div class="m-hero-label">Today's Sky</div>
+        <div class="m-hero-title">Shukla Chaturthi in Rohini</div>
+        <div class="m-hero-text">The Moon transits through Taurus. A day for grounding creative energy and beginning things that need patience.</div>
+        <div style="display:flex;gap:6px;position:relative">
+          <span class="pill pill-gold">Shubh Muhurta</span>
+          <span class="pill pill-blue">Moon in Taurus</span>
+        </div>
+      </div>
+      <div style="padding:0 0 0 20px;margin-bottom:24px">
+        <div class="m-section-label">Muhurta Timeline</div>
+        <div class="m-muhurta-scroll">
+          <div class="m-mslot"><div class="time">6 AM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+          <div class="m-mslot"><div class="time">7 AM</div><div class="bar bar-a"></div><div class="mlbl">Rahu</div></div>
+          <div class="m-mslot"><div class="time">8 AM</div><div class="bar bar-a"></div><div class="mlbl">Rahu</div></div>
+          <div class="m-mslot"><div class="time">9 AM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+          <div class="m-mslot now"><div class="time">10 AM</div><div class="bar bar-e"></div><div class="mlbl">Now</div></div>
+          <div class="m-mslot"><div class="time">11 AM</div><div class="bar bar-e"></div><div class="mlbl">Shubh</div></div>
+          <div class="m-mslot"><div class="time">12 PM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+          <div class="m-mslot"><div class="time">1 PM</div><div class="bar bar-n"></div><div class="mlbl">Neutral</div></div>
+          <div class="m-mslot"><div class="time">2 PM</div><div class="bar bar-g"></div><div class="mlbl">Good</div></div>
+        </div>
+      </div>
+      <div style="padding:0 20px;margin-bottom:24px">
+        <div class="m-section-label">Your Chart</div>
+        <div class="m-cg-card">
+          <div class="m-cg-wheel">
+            <div class="m-cg-dot md1"></div><div class="m-cg-dot md2"></div><div class="m-cg-dot md3"></div>
+            <span style="font-size:8px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-weight:600;z-index:1">Rasi</span>
+          </div>
+          <div style="flex:1">
+            <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--text-primary);margin-bottom:3px">Sun Pisces, Moon Scorpio</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">Ascendant Cancer · Anuradha Pada 3</div>
+            <div style="font-size:12px;color:var(--accent-gold);font-weight:600">Explore full chart &#8594;</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 20px;margin-bottom:24px">
+        <div class="m-section-label">Today for You</div>
+        <div class="m-daily-grid">
+          <div class="m-dcard"><div class="dc-icon">&#9790;</div><div class="dc-title">Moon Phase</div><div class="dc-val">Waxing Crescent<br><span style="color:var(--accent-gold-bright)">12%</span></div></div>
+          <div class="m-dcard"><div class="dc-icon">&#8634;</div><div class="dc-title">Transit</div><div class="dc-val">Jupiter &#8594; Gemini<br><span style="color:var(--accent-blue)">in 4 days</span></div></div>
+          <div class="m-dcard"><div class="dc-icon">&#9673;</div><div class="dc-title">Charts</div><div class="dc-val"><span style="color:var(--accent-gold-bright)">12</span> created<br>3 traditions</div></div>
+          <div class="m-dcard"><div class="dc-icon">&#10024;</div><div class="dc-title">AI Readings</div><div class="dc-val"><span style="color:var(--accent-gold-bright)">7</span> generated<br>3 remaining</div></div>
+        </div>
+      </div>
+      <div style="padding:0 20px;margin-bottom:24px">
+        <div class="m-section-label">Latest Reading</div>
+        <div class="m-rp-card">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent-gold);font-weight:600;margin-bottom:10px">AI Deep Reading</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text-primary);margin-bottom:10px;line-height:1.3">The Water Within: Your Emotional Architecture</div>
+          <div style="font-family:'DM Serif Text',serif;font-size:13px;line-height:1.7;color:var(--text-body-reading);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing...</div>
+          <div style="font-size:12px;color:var(--accent-gold);font-weight:600">Continue reading &#8594;</div>
+        </div>
+      </div>
+      <div style="padding:0 20px;margin-bottom:24px">
+        <div class="m-section-label">Available Now</div>
+        <div class="m-astro-card">
+          <div class="m-astro-av">P</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Priya Shankar</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Vedic · 15 years</div>
+            <div style="font-size:10px;color:var(--accent-green);font-weight:500">&#9679; Available now</div>
+          </div>
+          <button class="m-book-btn">Book</button>
+        </div>
+      </div>
+      <div class="m-tab-bar">
+        <div class="m-tab active"><div class="icon">&#9673;</div><div class="lbl">Today</div></div>
+        <div class="m-tab"><div class="icon">&#9734;</div><div class="lbl">Charts</div></div>
+        <div class="m-tab"><div class="icon">&#10024;</div><div class="lbl">Insights</div></div>
+        <div class="m-tab"><div class="icon">&#9733;</div><div class="lbl">Consult</div></div>
+        <div class="m-tab"><div class="icon">&#9881;</div><div class="lbl">Profile</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE CHART -->
+  <div class="page-section" data-page="chart">
+    <div class="page-marker">
+      <div class="route">/charts/birth-vedic</div>
+      <h2>Mobile — Chart</h2>
+      <p>Scrollytelling. Sticky chart + planet cards.</p>
+    </div>
+    <div class="mobile-frame" style="min-height:700px">
+      <div class="notch"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 20px 10px">
+        <button class="m-chart-back">&#8592; Back</button>
+        <span class="m-chart-title">Birth Chart</span>
+        <div class="m-chart-export">&#8615;</div>
+      </div>
+      <div class="m-chart-canvas">
+        <div class="m-chart-wheel">
+          <div class="m-chart-wheel-inner"></div>
+          <div class="m-chart-wheel-h"></div>
+          <div class="m-chart-wheel-v"></div>
+          <div class="m-planet-marker m-planet-su">Su</div>
+          <div class="m-planet-marker m-planet-mo">Mo</div>
+          <div class="m-planet-marker m-planet-ju">Ju</div>
+          <div style="z-index:2;text-align:center">
+            <div class="m-chart-center-name">Govind</div>
+            <div class="m-chart-center-date">Mar 15, 1992</div>
+          </div>
+        </div>
+        <div class="m-chart-tabs">
+          <span class="m-chart-tab active">Rasi</span>
+          <span class="m-chart-tab">Navamsa</span>
+          <span class="m-chart-tab">Bhava</span>
+        </div>
+      </div>
+      <div class="m-planet-section">
+        <div class="m-planet-label">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--accent-gold-bright)"></span> Sun in Pisces
+        </div>
+        <div class="m-planet-detail-card">
+          <div class="m-planet-row">
+            <span class="m-planet-dot" style="background:var(--accent-gold-bright)"></span>
+            <span class="m-planet-name">Sun</span>
+            <span class="m-planet-sign">Pisces</span>
+            <span class="m-planet-deg">29°14'</span>
+          </div>
+          <div class="m-planet-desc">The Sun at the final degree of Pisces — a gandanta point. Your sense of self dissolves into something larger.</div>
+        </div>
+      </div>
+      <div class="m-planet-section">
+        <div class="m-planet-label">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--text-secondary)"></span> Moon in Scorpio
+        </div>
+        <div class="m-planet-detail-card">
+          <div class="m-planet-row">
+            <span class="m-planet-dot" style="background:var(--text-secondary)"></span>
+            <span class="m-planet-name">Moon</span>
+            <span class="m-planet-sign">Scorpio</span>
+            <span class="m-planet-deg">14°32'</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE READING -->
+  <div class="page-section" data-page="reading">
+    <div class="page-marker">
+      <div class="route">/readings/water-within</div>
+      <h2>Mobile — Reading</h2>
+      <p>Immersive. Reading time. Pull quotes. Insight cards.</p>
+    </div>
+    <div class="mobile-frame" style="min-height:700px">
+      <div class="notch"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 20px 10px">
+        <button class="m-chart-back">&#8592; Back</button>
+        <span style="font-size:11px;color:var(--text-faint)">8 min read</span>
+        <button class="m-chart-back">Share</button>
+      </div>
+      <div class="m-reading-header">
+        <div class="m-reading-cat">AI Deep Reading · Vedic</div>
+        <h1 class="m-reading-title">The Water Within</h1>
+        <div class="m-reading-byline">For <strong>Govind</strong> · March 12, 2026</div>
+      </div>
+      <div class="m-reading-lead">
+        <p>Your water-dominant chart speaks to a life guided by emotional intelligence.</p>
+      </div>
+      <div class="m-reading-body">
+        <p>The Moon in Scorpio creates a deep well of creative intensity — you don't just feel things, you transform through feeling.</p>
+      </div>
+      <div class="m-reading-pullquote">"The surface is calm, the depths are infinite."</div>
+      <div class="m-reading-insight">
+        <div class="m-reading-insight-label">Key Insight</div>
+        <div class="m-reading-insight-text">Saturn channels your emotional intensity into purpose. Your intuition has structure.</div>
+      </div>
+      <div style="padding:20px">
+        <button class="m-reading-cta">Discuss with Astrologer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- WEB OPTION 1: SIDEBAR                                             -->
+<!-- ================================================================ -->
+<div class="view-container" id="view-web1">
+  <div class="page-section visible" data-page="home">
+    <div class="page-marker">
+      <div class="route">app.josiam.com/dashboard</div>
+      <h2>Web Option 1 — Sidebar Dashboard</h2>
+      <p>Persistent sidebar nav. Denser layout. Power-user friendly.</p>
+    </div>
+    <div class="web-frame">
+      <div class="browser-bar">
+        <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div class="browser-url">app.josiam.com/dashboard</div>
+      </div>
+      <div class="w1-layout">
+        <div class="w1-sidebar">
+          <div class="w1-sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+          <div class="w1-sb-nav">
+            <div class="w1-sb-group">Overview</div>
+            <div class="w1-sb-item active"><span class="ic">&#9673;</span> Dashboard</div>
+            <div class="w1-sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+            <div class="w1-sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+            <div class="w1-sb-group" style="margin-top:8px">Explore</div>
+            <div class="w1-sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+            <div class="w1-sb-item"><span class="ic">&#8634;</span> Transits</div>
+            <div class="w1-sb-item"><span class="ic">&#9789;</span> Panchang</div>
+            <div class="w1-sb-item"><span class="ic">&#9681;</span> Dasha</div>
+            <div class="w1-sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+            <div class="w1-sb-group" style="margin-top:8px">Connect</div>
+            <div class="w1-sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+            <div class="w1-sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+          </div>
+          <div class="w1-sb-footer">
+            <div class="w1-sb-av">G</div>
+            <div>
+              <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+              <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+            </div>
+          </div>
+        </div>
+        <div class="w1-main">
+          <div class="w1-topbar">
+            <div class="greeting">Good morning, <strong>Govind</strong> · Wednesday, March 12</div>
+            <div style="display:flex;gap:8px">
+              <button class="w-btn-ghost">Export</button>
+              <button class="w-btn-gold">+ New Chart</button>
+            </div>
+          </div>
+          <div class="w1-content">
+            <div class="w1-hero-row">
+              <div class="wc wc-hero">
+                <div class="wc-label">Today's Sky</div>
+                <div class="wc-title">Shukla Chaturthi in Rohini</div>
+                <div class="wc-text">The Moon transits through Taurus today. A day for grounding creative energy.</div>
+                <div style="display:flex;gap:8px">
+                  <span class="pill pill-gold">Shubh Muhurta</span>
+                  <span class="pill pill-blue">Moon in Taurus</span>
+                </div>
+              </div>
+              <div class="wc" style="padding:20px">
+                <div class="wc-slabel">Muhurta Timeline</div>
+                <div class="wm-strip">
+                  <div class="wm-slot"><div class="time">6AM</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                  <div class="wm-slot"><div class="time">7AM</div><div class="bar bar-a"></div><div class="wmlbl">Rahu</div></div>
+                  <div class="wm-slot"><div class="time">8AM</div><div class="bar bar-a"></div><div class="wmlbl">Rahu</div></div>
+                  <div class="wm-slot"><div class="time">9AM</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                  <div class="wm-slot now"><div class="time">10</div><div class="bar bar-e"></div><div class="wmlbl">Now</div></div>
+                  <div class="wm-slot"><div class="time">11</div><div class="bar bar-e"></div><div class="wmlbl">Shubh</div></div>
+                  <div class="wm-slot"><div class="time">12</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                  <div class="wm-slot"><div class="time">1PM</div><div class="bar bar-n"></div><div class="wmlbl">Neut</div></div>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px">
+              <div class="wc" style="padding:22px">
+                <div class="wc-slabel">Your Chart</div>
+                <div style="display:flex;gap:14px;align-items:center;margin-top:10px">
+                  <div class="wcm"><div class="wcm-dot wcm-d1"></div><div class="wcm-dot wcm-d2"></div><div class="wcm-dot wcm-d3"></div><span class="wcm-lbl">Rasi</span></div>
+                  <div>
+                    <div style="font-family:'DM Serif Display',serif;font-size:14px;color:var(--text-primary)">Sun Pisces, Moon Scorpio</div>
+                    <div style="font-size:11px;color:var(--text-muted)">Asc Cancer · Anuradha 3</div>
+                  </div>
+                </div>
+                <div class="wc-cta">Explore chart &#8594;</div>
+              </div>
+              <div class="wc" style="padding:22px"><div class="wc-slabel">Charts Created</div><div class="wc-value">12</div><div class="wc-desc">Across 3 traditions</div></div>
+              <div class="wc" style="padding:22px"><div class="wc-slabel">AI Readings</div><div class="wc-value gold">7</div><div class="wc-desc">3 remaining this month</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <div class="wc" style="padding:24px">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent-gold);font-weight:600;margin-bottom:10px">Latest AI Reading</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text-primary);margin-bottom:10px;line-height:1.3">The Water Within</div>
+                <div style="font-family:'DM Serif Text',serif;font-size:14px;line-height:1.75;color:var(--text-body-reading);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing...</div>
+                <div style="font-size:12px;color:var(--accent-gold);font-weight:600;cursor:pointer">Continue reading &#8594;</div>
+              </div>
+              <div class="wc" style="padding:24px">
+                <div class="wc-slabel">Available Astrologers</div>
+                <div class="wa-item"><div class="wa-av">P</div><div class="wa-info"><div class="name">Priya Shankar</div><div class="spec">Vedic · 15 years</div></div><div class="wa-avail">&#9679; Now</div><button class="wa-btn">Book</button></div>
+                <div class="wa-item"><div class="wa-av">R</div><div class="wa-info"><div class="name">Raj Krishnamurthy</div><div class="spec">Vedic · Nadi</div></div><div class="wa-avail" style="color:var(--accent-gold-bright)">Tomorrow</div><button class="wa-btn">Book</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-section" data-page="chart">
+    <div class="page-marker"><div class="route">app.josiam.com/charts/birth-vedic</div><h2>Web — Chart (same for both)</h2><p>Sidebar + canvas + panel. Tool mode uses sidebar regardless of preference.</p></div>
+    <div style="text-align:center;padding:80px;color:var(--text-muted);font-size:14px">Chart view is the same in both web options — sidebar + canvas + properties panel.<br>See v5 for the full chart layout.</div>
+  </div>
+  <div class="page-section" data-page="reading">
+    <div class="page-marker"><div class="route">app.josiam.com/readings/water-within</div><h2>Web Option 1 — Reading (sidebar)</h2><p>Sidebar persists. Article + aside in main area.</p></div>
+    <div style="text-align:center;padding:80px;color:var(--text-muted);font-size:14px">Reading with sidebar — see v5 for the full editorial layout.</div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- WEB OPTION 2: TOP NAV + CARDS                                     -->
+<!-- ================================================================ -->
+<div class="view-container" id="view-web2">
+  <!-- HOME -->
+  <div class="page-section visible" data-page="home">
+    <div class="page-marker">
+      <div class="route">app.josiam.com</div>
+      <h2>Web Option 2 — Top Nav + Cards</h2>
+      <p>No sidebar. Full-width. More breathing room. Wellness/consumer feel.</p>
+    </div>
+    <div class="web-frame">
+      <div class="browser-bar">
+        <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div class="browser-url">app.josiam.com</div>
+      </div>
+      <div class="w2-topnav">
+        <div class="logo">Josi</div>
+        <div class="nav-links">
+          <span class="active">Home</span><span>Charts</span><span>AI Insights</span>
+          <span>Compatibility</span><span>Transits</span><span>Panchang</span><span>Astrologers</span>
+        </div>
+        <div class="right">
+          <span class="plan-badge">MYSTIC</span>
+          <div class="w2-av">G</div>
+        </div>
+      </div>
+      <div class="w2-content">
+        <div class="w2-greeting-row">
+          <div>
+            <div class="w2-greeting">Good morning, <strong>Govind</strong></div>
+            <div class="w2-date">Wednesday, March 12</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="w-btn-ghost">Export</button>
+            <button class="w-btn-gold">+ New Chart</button>
+          </div>
+        </div>
+        <div class="w2-hero">
+          <div class="w2-hero-inner">
+            <div class="w2-hero-left">
+              <div class="w2-hero-label">Today's Sky</div>
+              <div class="w2-hero-title">Shukla Chaturthi in Rohini</div>
+              <div class="w2-hero-text">The Moon transits through Taurus today. A day for grounding creative energy and beginning things that need patience to grow.</div>
+              <div class="w2-hero-pills">
+                <span class="pill pill-gold">Shubh Muhurta</span>
+                <span class="pill pill-blue">Moon in Taurus</span>
+                <span class="pill pill-green">Favorable</span>
+              </div>
+            </div>
+            <div class="w2-muhurta-card">
+              <div class="w2-muhurta-label">Muhurta Timeline</div>
+              <div class="w2-muhurta-grid">
+                <div class="w2-ms"><div class="time">6 AM</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                <div class="w2-ms"><div class="time">7 AM</div><div class="bar bar-a"></div><div class="wmlbl">Rahu</div></div>
+                <div class="w2-ms"><div class="time">8 AM</div><div class="bar bar-a"></div><div class="wmlbl">Rahu</div></div>
+                <div class="w2-ms"><div class="time">9 AM</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                <div class="w2-ms now"><div class="time">10 AM</div><div class="bar bar-e"></div><div class="wmlbl">Now</div></div>
+                <div class="w2-ms"><div class="time">11 AM</div><div class="bar bar-e"></div><div class="wmlbl">Shubh</div></div>
+                <div class="w2-ms"><div class="time">12 PM</div><div class="bar bar-g"></div><div class="wmlbl">Good</div></div>
+                <div class="w2-ms"><div class="time">1 PM</div><div class="bar bar-n"></div><div class="wmlbl">Neutral</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w2-cards-row">
+          <div class="w2-card">
+            <div class="w2-c-label">Your Chart</div>
+            <div class="w2-chart-row">
+              <div class="wcm"><div class="wcm-dot wcm-d1"></div><div class="wcm-dot wcm-d2"></div><div class="wcm-dot wcm-d3"></div><span class="wcm-lbl">Rasi</span></div>
+              <div class="w2-chart-info"><div class="big">Sun Pisces, Moon Scorpio</div><div class="detail">Ascendant Cancer · Anuradha Pada 3</div></div>
+            </div>
+            <div style="font-size:12px;color:var(--accent-gold);font-weight:600;cursor:pointer;margin-top:14px">Explore full chart &#8594;</div>
+          </div>
+          <div class="w2-card">
+            <div class="w2-c-label">Charts Created</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:40px;color:var(--text-primary);margin:8px 0 4px">12</div>
+            <div style="font-size:12px;color:var(--text-muted)">Across 3 traditions · +3 this month</div>
+          </div>
+          <div class="w2-card">
+            <div class="w2-c-label">AI Readings</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:40px;color:var(--accent-gold-bright);margin:8px 0 4px">7</div>
+            <div style="font-size:12px;color:var(--text-muted)">3 remaining this month</div>
+          </div>
+        </div>
+        <div class="w2-bottom-row">
+          <div class="w2-reading-card">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent-gold);font-weight:600;margin-bottom:12px">Latest AI Reading</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--text-primary);margin-bottom:12px;line-height:1.3">The Water Within: Your Emotional Architecture</div>
+            <div style="font-family:'DM Serif Text',serif;font-size:15px;line-height:1.75;color:var(--text-body-reading);margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio creates a deep well of creative intensity...</div>
+            <div style="font-size:13px;color:var(--accent-gold);font-weight:600;cursor:pointer">Continue reading &#8594;</div>
+          </div>
+          <div class="w2-astro-card">
+            <div class="wc-slabel">Available Astrologers</div>
+            <div class="wa-item"><div class="wa-av">P</div><div class="wa-info"><div class="name">Priya Shankar</div><div class="spec">Vedic · 15 years · Tamil/English</div></div><div class="wa-avail">&#9679; Now</div><button class="wa-btn">Book</button></div>
+            <div class="wa-item"><div class="wa-av">R</div><div class="wa-info"><div class="name">Raj Krishnamurthy</div><div class="spec">Vedic · Nadi · 22 years</div></div><div class="wa-avail" style="color:var(--accent-gold-bright)">Tomorrow</div><button class="wa-btn">Book</button></div>
+            <div class="wa-item"><div class="wa-av">S</div><div class="wa-info"><div class="name">Sarah Chen</div><div class="spec">Western · Evolutionary · 8 years</div></div><div class="wa-avail">&#9679; Now</div><button class="wa-btn">Book</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="page-section" data-page="chart">
+    <div class="page-marker"><div class="route">app.josiam.com/charts/birth-vedic</div><h2>Web Option 2 — Chart</h2><p>Chart view uses sidebar layout in both options (tool mode).</p></div>
+    <div style="text-align:center;padding:80px;color:var(--text-muted);font-size:14px">Chart view uses the same sidebar + canvas + panel layout in both options.<br>The top-nav approach only applies to browsing/overview pages.</div>
+  </div>
+
+  <!-- READING -->
+  <div class="page-section" data-page="reading">
+    <div class="page-marker">
+      <div class="route">app.josiam.com/readings/water-within</div>
+      <h2>Web Option 2 — Reading (no sidebar, centered)</h2>
+      <p>Full focus. Centered column. No distractions. Like Medium.</p>
+    </div>
+    <div class="web-frame">
+      <div class="browser-bar">
+        <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div class="browser-url">app.josiam.com/readings/water-within-emotional-architecture</div>
+      </div>
+      <div class="w2-reading-page">
+        <div class="w2-topnav">
+          <div class="logo">Josi</div>
+          <div class="nav-links"><span>Home</span><span>Charts</span><span class="active">AI Insights</span><span>Consult</span></div>
+          <div class="right">
+            <button class="w-btn-ghost">Share</button>
+            <button class="w-btn-gold">Book Astrologer</button>
+            <div class="w2-av">G</div>
+          </div>
+        </div>
+        <div class="w2-rm-hero">
+          <div class="cat">AI Deep Reading · Vedic Sidereal</div>
+          <h1>The Water Within:<br>Your Emotional Architecture</h1>
+          <div class="byline">For <strong>Govind</strong> · March 12, 2026</div>
+          <div class="time-badge">8 min read</div>
+        </div>
+        <div class="w2-rm-divider"></div>
+        <div class="w2-rm-lead"><p>Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. Three planets in water signs create what Vedic astrology calls a rare depth of feeling — a life lived from the inside out.</p></div>
+        <div class="w2-rm-body">
+          <p>The Moon in Scorpio in the fifth house creates a deep well of creative intensity — you don't just feel things, you transform through feeling. Every experience passes through an alchemical process before it settles into understanding.</p>
+          <p>The Cancer ascendant wraps this intensity in warmth. Others experience you as nurturing and approachable, even as your inner world runs far deeper than most will ever know.</p>
+        </div>
+        <div class="w2-rm-pullquote">"The surface is calm,<br>the depths are infinite."</div>
+        <div class="w2-rm-insight"><div class="il">Key Insight</div><div class="it">Saturn's aspect on the Moon from the eleventh house creates a stabilizing force. Where water might scatter, Saturn channels it. Your emotions have purpose. Your intuition has structure.</div></div>
+        <div class="w2-rm-body">
+          <p>In the Anuradha nakshatra, the Moon finds its devotional quality. Anuradha's deity, Mitra, governs friendship and alliance. Your deepest emotional fulfillment comes from bonds — the kind that withstand years, distance, and silence.</p>
+        </div>
+        <div class="w2-rm-insight"><div class="il">Neural Pathway Question</div><div class="it">When was the last time you allowed yourself to simply feel without trying to understand? What emerged from that stillness?</div></div>
+        <div class="w2-rm-actions">
+          <button class="w2-rm-btn w2-rm-btn-primary">Discuss with Astrologer</button>
+          <button class="w2-rm-btn w2-rm-btn-secondary">View Chart Placements</button>
+          <button class="w2-rm-btn w2-rm-btn-secondary">Generate Compatibility</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchView(view) {
+  document.querySelectorAll('.tg-btn:not(.page-btn):not(.theme-btn)').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.view-container').forEach(v => v.classList.remove('visible'));
+  document.getElementById('view-' + view).classList.add('visible');
+}
+function switchPage(page) {
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.page-section').forEach(s => {
+    s.classList.toggle('visible', s.dataset.page === page);
+  });
+}
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

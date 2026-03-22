@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 4B: Card-Form Reading Feed — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.06);
+
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label {
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-left: 4px solid var(--accent-gold); border-radius: 12px;
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.75; color: var(--text-body);
+    }
+    .annotation p strong { color: var(--text-secondary); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .w1-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 1100px; }
+
+    .w1-sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .w1-sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .w1-sb-header .logo {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .w1-sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w1-sb-nav { padding: 12px 10px; flex: 1; }
+    .w1-sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .w1-sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .w1-sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .w1-sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .w1-sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .w1-sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .w1-sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .w1-sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .w1-main { display: flex; flex-direction: column; background: var(--bg-frame); }
+
+    .feed-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 28px 16px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .feed-title {
+      font-family: 'DM Serif Display', serif; font-size: 26px;
+      color: var(--text-primary);
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== FILTER BAR ========== */
+    .filter-bar {
+      display: flex; gap: 6px; padding: 14px 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover {
+      border-color: var(--border-strong); color: var(--text-secondary);
+    }
+    .filter-pill.active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+
+    /* ========== CARD FEED ========== */
+    .card-feed {
+      max-width: 800px; margin: 0 auto; padding: 24px 28px;
+    }
+
+    /* Shared card styles */
+    .feed-card {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 14px; padding: 28px; margin-bottom: 16px;
+      transition: border-color 0.15s; cursor: pointer;
+    }
+    .feed-card:hover {
+      border-color: var(--border-strong);
+    }
+    .feed-card.featured {
+      border-color: rgba(200,145,58,0.2);
+    }
+    .feed-card.featured:hover {
+      border-color: rgba(200,145,58,0.35);
+    }
+
+    /* Card header */
+    .card-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .tradition-badge {
+      font-size: 10px; padding: 3px 10px; border-radius: 12px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-western { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .type-badge {
+      font-size: 10px; padding: 3px 10px; border-radius: 12px;
+      background: var(--counter-bg); color: var(--text-muted); font-weight: 500;
+    }
+    .card-date {
+      font-size: 11px; color: var(--text-faint); margin-left: auto;
+    }
+
+    /* Card title */
+    .card-title {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); line-height: 1.3; margin-bottom: 10px;
+    }
+    .feed-card:not(.featured) .card-title {
+      font-size: 18px;
+    }
+
+    /* Card excerpt */
+    .card-excerpt {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.75;
+      color: var(--text-body-reading); margin-bottom: 16px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .feed-card:not(.featured) .card-excerpt {
+      font-size: 14px; -webkit-line-clamp: 2;
+    }
+
+    /* Card insight preview */
+    .card-insight-preview {
+      background: var(--accent-gold-bg-subtle); border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 16px;
+      border: 1px solid rgba(200,145,58,0.08);
+    }
+    .card-insight-preview .insight-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 6px;
+    }
+    .card-insight-preview .insight-text {
+      font-family: 'DM Serif Text', serif; font-size: 13px; line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    /* Card link */
+    .card-link {
+      font-size: 13px; color: var(--accent-gold); font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* Transit mini chart */
+    .transit-mini {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+      padding: 10px 14px; background: var(--bg-card-hover); border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    .transit-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid var(--accent-blue); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 14px; color: var(--accent-blue);
+    }
+    .transit-info {
+      flex: 1;
+    }
+    .transit-info .planet {
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .transit-info .detail {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    /* Dasha progress */
+    .dasha-progress {
+      margin-bottom: 14px;
+    }
+    .dasha-bar-bg {
+      height: 6px; background: var(--border-default); border-radius: 3px;
+      overflow: hidden; margin-bottom: 6px;
+    }
+    .dasha-bar-fill {
+      height: 100%; background: var(--accent-gold); border-radius: 3px;
+    }
+    .dasha-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-faint);
+    }
+
+    /* Energy pills */
+    .energy-pills {
+      display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .energy-pill {
+      font-size: 11px; padding: 5px 12px; border-radius: 14px; font-weight: 500;
+    }
+    .energy-strong { background: var(--accent-green-bg); color: var(--accent-green); }
+    .energy-neutral { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .energy-watch { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* Compatibility score */
+    .compat-score {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .compat-value {
+      font-family: 'DM Serif Display', serif; font-size: 28px;
+      color: var(--accent-gold-bright); line-height: 1;
+    }
+    .compat-max {
+      font-size: 14px; color: var(--text-faint); font-weight: 400;
+    }
+    .compat-label {
+      font-size: 12px; color: var(--text-muted);
+    }
+    .compat-bar {
+      flex: 1; height: 6px; background: var(--border-default); border-radius: 3px;
+      overflow: hidden;
+    }
+    .compat-bar-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-bright));
+      border-radius: 3px;
+    }
+
+    /* Pill / badge */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; display: inline-block; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 4B: Card-Form Reading Feed</span>
+  <div style="width:1px;height:20px;background:var(--border-default);margin:0 8px"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/ai-insights</div>
+  <h2>Decision 4B: Card-Form Reading Feed</h2>
+  <p>Feed-based approach for frequent, scannable AI-generated insights.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/ai-insights</div>
+  </div>
+
+  <div class="w1-layout">
+    <!-- Sidebar -->
+    <div class="w1-sidebar">
+      <div class="w1-sb-header">
+        <div class="logo">Josi</div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="w1-sb-nav">
+        <div class="w1-sb-group">Overview</div>
+        <div class="w1-sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="w1-sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="w1-sb-item active"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">Explore</div>
+        <div class="w1-sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="w1-sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="w1-sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="w1-sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="w1-sb-group" style="margin-top:8px">Connect</div>
+        <div class="w1-sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="w1-sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">AI Tools</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> NPQ Sessions <span class="ct">3</span></div>
+        <div class="w1-sb-item"><span class="ic">&#9998;</span> Predictions</div>
+        <div class="w1-sb-item"><span class="ic">&#9752;</span> Remedies</div>
+      </div>
+      <div class="w1-sb-footer">
+        <div class="w1-sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w1-main">
+      <!-- Page Header -->
+      <div class="feed-topbar">
+        <div class="feed-title">AI Insights</div>
+        <button class="btn-gold">+ Generate New Reading</button>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <button class="filter-pill active">All Types</button>
+        <button class="filter-pill">Birth Chart</button>
+        <button class="filter-pill">Transit</button>
+        <button class="filter-pill">Dasha</button>
+        <button class="filter-pill">Compatibility</button>
+        <button class="filter-pill">Weekly</button>
+        <button class="filter-pill">NPQ</button>
+      </div>
+
+      <!-- Card Feed -->
+      <div class="card-feed">
+
+        <!-- Card 1: Featured / Expanded -->
+        <div class="feed-card featured">
+          <div class="card-header">
+            <span class="tradition-badge badge-vedic">Vedic</span>
+            <span class="type-badge">Birth Chart</span>
+            <span class="pill-gold pill" style="font-size:9px;padding:3px 8px">Featured</span>
+            <span class="card-date">Mar 12, 2026</span>
+          </div>
+          <div class="card-title">The Water Within: Your Emotional Architecture</div>
+          <div class="card-excerpt">
+            Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. Three planets in water signs create what Vedic astrology calls a rare depth of feeling &mdash; a life lived from the inside out, where the invisible currents beneath the surface carry more weight than anything visible.
+          </div>
+          <div class="card-insight-preview">
+            <div class="insight-label">Key Insight</div>
+            <div class="insight-text">Saturn's aspect on the Moon creates a stabilizing force. Where water might scatter, Saturn channels it into purpose. Your emotions have direction.</div>
+          </div>
+          <div class="card-link">Continue reading &#8594;</div>
+        </div>
+
+        <!-- Card 2: Transit Reading -->
+        <div class="feed-card">
+          <div class="card-header">
+            <span class="tradition-badge badge-western">Western</span>
+            <span class="type-badge">Transit</span>
+            <span class="card-date">Mar 10, 2026</span>
+          </div>
+          <div class="card-title">Venus Transit Through Your 7th House</div>
+          <div class="card-excerpt">
+            Venus enters your seventh house of partnerships on March 14th, bringing a period of warmth and receptivity to your closest relationships. This transit softens edges and invites reconciliation where tension has built.
+          </div>
+          <div class="transit-mini">
+            <div class="transit-icon">&#9792;</div>
+            <div class="transit-info">
+              <div class="planet">Venus &#8594; 7th House (Capricorn)</div>
+              <div class="detail">Mar 14 &ndash; Apr 8, 2026 &middot; 25 days</div>
+            </div>
+          </div>
+          <div class="card-link">Read more &#8594;</div>
+        </div>
+
+        <!-- Card 3: Dasha Reading -->
+        <div class="feed-card">
+          <div class="card-header">
+            <span class="tradition-badge badge-vedic">Vedic</span>
+            <span class="type-badge">Dasha</span>
+            <span class="card-date">Mar 8, 2026</span>
+          </div>
+          <div class="card-title">Saturn Maha Dasha: Building Foundations</div>
+          <div class="card-excerpt">
+            You are currently in the Saturn Maha Dasha, a nineteen-year period focused on discipline, structure, and long-term achievement. Saturn rewards patience and penalizes shortcuts. The work you do now builds the foundation for the next three decades.
+          </div>
+          <div class="dasha-progress">
+            <div class="dasha-bar-bg">
+              <div class="dasha-bar-fill" style="width:35%"></div>
+            </div>
+            <div class="dasha-labels">
+              <span>Started: Jun 2019</span>
+              <span>35% complete</span>
+              <span>Ends: Jun 2038</span>
+            </div>
+          </div>
+          <div class="card-link">Read more &#8594;</div>
+        </div>
+
+        <!-- Card 4: Weekly Forecast -->
+        <div class="feed-card">
+          <div class="card-header">
+            <span class="tradition-badge badge-vedic">Vedic</span>
+            <span class="type-badge">Transit</span>
+            <span class="type-badge">Weekly</span>
+            <span class="card-date">Mar 7, 2026</span>
+          </div>
+          <div class="card-title">Weekly Energy Forecast: March 7&ndash;13</div>
+          <div class="card-excerpt">
+            A week of contrasts. The first half favors introspection and planning as the Moon wanes through your twelfth house. The second half brings a burst of initiative as it enters your ascendant sign.
+          </div>
+          <div class="energy-pills">
+            <span class="energy-pill energy-strong">Career: Strong</span>
+            <span class="energy-pill energy-neutral">Love: Neutral</span>
+            <span class="energy-pill energy-watch">Health: Watch</span>
+          </div>
+          <div class="card-link">Read full forecast &#8594;</div>
+        </div>
+
+        <!-- Card 5: Compatibility Reading -->
+        <div class="feed-card">
+          <div class="card-header">
+            <span class="tradition-badge badge-vedic">Vedic</span>
+            <span class="type-badge">Compatibility</span>
+            <span class="card-date">Mar 5, 2026</span>
+          </div>
+          <div class="card-title">Govind & Priya: Cosmic Connection</div>
+          <div class="card-excerpt">
+            The Ashtakoot analysis reveals a strong karmic bond with complementary emotional patterns. Your Moon-Mars exchange creates a dynamic tension that keeps the relationship evolving rather than stagnating.
+          </div>
+          <div class="compat-score">
+            <div>
+              <div class="compat-value">28.5<span class="compat-max">/36</span></div>
+              <div class="compat-label">Ashtakoot Score</div>
+            </div>
+            <div class="compat-bar">
+              <div class="compat-bar-fill" style="width:79.2%"></div>
+            </div>
+          </div>
+          <div class="card-link">Read full analysis &#8594;</div>
+        </div>
+
+        <!-- End of feed marker -->
+        <div style="text-align:center;padding:32px 0 16px;color:var(--text-faint);font-size:12px">
+          Showing 5 of 7 readings &middot;
+          <span style="color:var(--accent-gold);font-weight:600;cursor:pointer">Load more</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <div class="ann-title">Design Annotation &mdash; Option B: Card-Form Feed</div>
+  <p>
+    <strong>Format:</strong> Feed-based card stream, similar to a social media timeline or RSS reader. Each reading is a scannable card with tradition badge, type badge, excerpt, and a visual element unique to its type (transit position, dasha progress bar, energy pills, compatibility score).
+  </p>
+  <p style="margin-top:10px">
+    <strong>Best for:</strong> Frequent, shorter readings &mdash; Transit updates, Dasha period insights, weekly energy forecasts. Content that users consume quickly and repeatedly. The format encourages daily engagement: users check their feed for new insights the way they check news or social media.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Engagement pattern:</strong> Users spend 1-2 minutes scanning the feed, then 2-3 minutes on individual cards they click into. Session frequency is higher than long-form (daily vs. weekly). The filter bar enables targeted browsing. "Generate New Reading" CTA drives quota usage and subscription upgrades.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Card types with unique visual elements:</strong> Birth Chart cards show key insight previews. Transit cards show planet position and duration. Dasha cards show progress bars with timeline. Weekly forecasts show energy pills (Career/Love/Health). Compatibility cards show the Ashtakoot score with a visual bar. Each type is instantly recognizable at a glance.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Bridge to long-form:</strong> Cards are not an alternative to Option A &mdash; they are the entry point. "Continue reading" on deep readings (Birth Chart, Compatibility) links to the full editorial page from Option A. The feed is the discovery layer; the editorial is the depth layer. Both formats should coexist.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Trade-offs:</strong> Individual cards feel less premium than full editorial readings. Risk of "notification fatigue" if too many readings are generated. Requires careful curation &mdash; featured/pinned cards, chronological ordering, and type-based filtering to prevent overwhelm. Cards must be visually distinct enough to not blur together.
+  </p>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

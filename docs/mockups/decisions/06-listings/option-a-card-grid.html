@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 6A: Card Grid Layout — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --counter-bg: #151C30;
+      --icon-btn-bg: #111828;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --counter-bg: #E8ECF2;
+      --icon-btn-bg: #F0F2F7;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 52px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 24px auto; padding: 20px 28px;
+      background: var(--accent-gold-bg-subtle); border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--text-secondary);
+    }
+    .annotation strong { color: var(--accent-gold-bright); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); margin-bottom: 4px; }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .app-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 800px; }
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main { display: flex; flex-direction: column; min-width: 0; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar-title {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .topbar-right { display: flex; gap: 10px; align-items: center; }
+    .search-input {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; padding: 8px 14px 8px 34px; font-size: 13px;
+      color: var(--text-primary); font-family: 'Inter', sans-serif;
+      width: 240px; outline: none; transition: border-color 0.15s;
+      position: relative;
+    }
+    .search-input:focus { border-color: var(--accent-gold); }
+    .search-wrap { position: relative; }
+    .search-wrap::before {
+      content: '\2315'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 14px; color: var(--text-faint);
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-gold:hover { background: var(--accent-gold-bright); }
+
+    /* ========== FILTER ROW ========== */
+    .filter-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .filter-pills { display: flex; gap: 6px; }
+    .filter-pill {
+      padding: 6px 14px; border-radius: 18px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .filter-pill.active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+    .sort-dropdown {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; padding: 7px 14px; font-size: 12px;
+      color: var(--text-secondary); font-family: 'Inter', sans-serif;
+      cursor: pointer; outline: none; appearance: none;
+      background-image: none;
+    }
+
+    /* ========== CONTENT AREA ========== */
+    .content { padding: 24px 28px; flex: 1; }
+    .count-label { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+
+    /* ========== CARD GRID ========== */
+    .card-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+
+    .chart-card {
+      background: var(--bg-card); border-radius: 14px; padding: 20px;
+      border: 1px solid var(--border-default); cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .chart-card:hover {
+      border-color: var(--border-strong); background: var(--bg-card-hover);
+    }
+    .chart-card-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .chart-card-name {
+      font-family: 'DM Serif Display', serif; font-size: 16px;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .chart-card-star {
+      color: var(--accent-gold-bright); font-size: 14px; flex-shrink: 0; margin-left: 8px;
+    }
+    .chart-card-menu {
+      color: var(--text-faint); font-size: 16px; cursor: pointer;
+      padding: 0 4px; line-height: 1; flex-shrink: 0; margin-left: 8px;
+      transition: color 0.15s;
+    }
+    .chart-card-menu:hover { color: var(--text-secondary); }
+
+    .chart-card-body {
+      display: flex; gap: 14px; align-items: center; margin-bottom: 14px;
+    }
+
+    /* Mini chart previews */
+    .mini-vedic {
+      width: 56px; height: 56px; flex-shrink: 0;
+      display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+      border: 1.5px solid var(--border-strong); border-radius: 4px;
+      background: var(--bg-surface);
+    }
+    .mini-vedic .cell {
+      border: 0.5px solid var(--border-default);
+    }
+    .mini-vedic .cell.highlight { background: var(--accent-gold-bg-subtle); }
+    .mini-vedic .cell.center {
+      grid-column: 2 / 4; grid-row: 2 / 4;
+      border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; color: var(--text-faint); font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .mini-western {
+      width: 56px; height: 56px; flex-shrink: 0;
+      border-radius: 50%; border: 1.5px solid var(--border-strong);
+      position: relative; background: var(--bg-surface);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mini-western::before {
+      content: ''; position: absolute; width: 70%; height: 70%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .mini-western .dot {
+      position: absolute; width: 4px; height: 4px; border-radius: 50%;
+    }
+
+    .mini-chinese {
+      width: 56px; height: 56px; flex-shrink: 0;
+      display: flex; gap: 2px; align-items: flex-end;
+      padding: 6px 4px; background: var(--bg-surface);
+      border: 1.5px solid var(--border-strong); border-radius: 4px;
+    }
+    .mini-chinese .pillar {
+      flex: 1; display: flex; flex-direction: column; gap: 1px;
+    }
+    .mini-chinese .pillar .top, .mini-chinese .pillar .bot {
+      border-radius: 2px; font-size: 5px; text-align: center;
+      padding: 2px 0; font-weight: 600;
+    }
+    .mini-chinese .pillar .top { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .mini-chinese .pillar .bot { background: var(--accent-green-bg); color: var(--accent-green); }
+
+    .mini-hellenistic {
+      width: 56px; height: 56px; flex-shrink: 0;
+      border-radius: 50%; border: 1.5px solid var(--border-strong);
+      position: relative; background: var(--bg-surface);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mini-hellenistic::before {
+      content: ''; position: absolute; width: 50%; height: 50%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .mini-hellenistic::after {
+      content: ''; position: absolute; width: 80%; height: 80%;
+      border-radius: 50%; border: 1px solid var(--border-default);
+    }
+    .mini-hellenistic .dot {
+      position: absolute; width: 4px; height: 4px; border-radius: 50%;
+    }
+
+    .mini-mayan {
+      width: 56px; height: 56px; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; background: var(--bg-surface);
+      border: 1.5px solid var(--border-strong); border-radius: 4px;
+    }
+    .mini-mayan .glyph-row { display: flex; gap: 3px; }
+    .mini-mayan .glyph-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent-gold-bright);
+    }
+    .mini-mayan .glyph-bar {
+      width: 20px; height: 4px; border-radius: 2px;
+      background: var(--accent-gold);
+    }
+
+    .chart-card-placements {
+      font-family: 'DM Serif Text', serif; font-size: 13px;
+      color: var(--text-secondary); margin-bottom: 4px;
+    }
+    .chart-card-meta {
+      font-size: 11px; color: var(--text-muted); line-height: 1.5;
+    }
+
+    .chart-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 12px; border-top: 1px solid var(--border-divider);
+    }
+    .tradition-badge {
+      font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+    }
+    .badge-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-western { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-chinese { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-hellenistic { background: rgba(160,120,200,0.1); color: #A078C8; }
+    .badge-mayan { background: rgba(200,100,80,0.1); color: #C86450; }
+
+    .chart-card-time { font-size: 11px; color: var(--text-faint); }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 6A: Card Grid Layout</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/charts</div>
+  <h2>Decision 6A -- Card Grid Layout</h2>
+  <p>Visual, spacious cards with mini chart previews. Great for browsing.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts</div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">People</div>
+        <div class="sb-item"><span class="ic">&#9823;</span> Persons <span class="ct">5</span></div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        <div class="sb-group" style="margin-top:8px">Settings</div>
+        <div class="sb-item"><span class="ic">&#9881;</span> Settings</div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <div class="topbar-title">My Charts</div>
+        <div class="topbar-right">
+          <div class="search-wrap">
+            <input type="text" class="search-input" placeholder="Search charts...">
+          </div>
+          <button class="btn-gold">+ New Chart</button>
+        </div>
+      </div>
+
+      <!-- Filter Row -->
+      <div class="filter-row">
+        <div class="filter-pills">
+          <button class="filter-pill active">All</button>
+          <button class="filter-pill">Vedic</button>
+          <button class="filter-pill">Western</button>
+          <button class="filter-pill">Chinese</button>
+          <button class="filter-pill">Hellenistic</button>
+          <button class="filter-pill">Mayan</button>
+        </div>
+        <select class="sort-dropdown">
+          <option>Sort by: Recently Created</option>
+          <option>Sort by: Name A-Z</option>
+          <option>Sort by: Tradition</option>
+          <option>Sort by: Birth Date</option>
+        </select>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <div class="count-label">12 charts</div>
+
+        <div class="card-grid">
+          <!-- Card 1: Govind's Birth Chart (Primary) -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Govind's Birth Chart</div>
+              <span class="chart-card-star">&#9733;</span>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell"></div><div class="cell highlight"></div><div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell center">RASI</div><div class="cell highlight"></div>
+                <div class="cell highlight"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Pisces, Moon Scorpio</div>
+                <div class="chart-card-meta">Mar 15, 1992 &middot; Chennai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">2 days ago</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Govind - Western -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Govind -- Western</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-western">
+                <div class="dot" style="top:15%;left:52%;background:var(--accent-gold-bright)"></div>
+                <div class="dot" style="top:35%;right:12%;background:var(--text-secondary)"></div>
+                <div class="dot" style="bottom:20%;right:25%;background:var(--accent-red)"></div>
+                <div class="dot" style="bottom:30%;left:15%;background:var(--accent-blue)"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Aries, Moon Scorpio</div>
+                <div class="chart-card-meta">Mar 15, 1992 &middot; Chennai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-western">Western</span>
+              <span class="chart-card-time">2 days ago</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Priya Shankar -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Priya Shankar</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell center">RASI</div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell highlight"></div><div class="cell"></div><div class="cell highlight"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Aquarius, Moon Leo</div>
+                <div class="chart-card-meta">Jun 8, 1994 &middot; Mumbai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">5 days ago</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Mom -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Mom</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell"></div><div class="cell"></div><div class="cell highlight"></div><div class="cell"></div>
+                <div class="cell highlight"></div><div class="cell center">RASI</div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell highlight"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Cancer, Moon Pisces</div>
+                <div class="chart-card-meta">Jul 22, 1965 &middot; Madurai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">1 week ago</span>
+            </div>
+          </div>
+
+          <!-- Card 5: Dad -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Dad</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell"></div><div class="cell highlight"></div><div class="cell"></div><div class="cell highlight"></div>
+                <div class="cell"></div><div class="cell center">RASI</div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div>
+                <div class="cell highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Virgo, Moon Taurus</div>
+                <div class="chart-card-meta">Sep 3, 1962 &middot; Madurai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">1 week ago</span>
+            </div>
+          </div>
+
+          <!-- Card 6: Sarah Chen - BaZi -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Sarah Chen -- BaZi</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-chinese">
+                <div class="pillar"><div class="top">&#30002;</div><div class="bot">&#23376;</div></div>
+                <div class="pillar"><div class="top">&#19993;</div><div class="bot">&#19985;</div></div>
+                <div class="pillar"><div class="top">&#19993;</div><div class="bot">&#21320;</div></div>
+                <div class="pillar"><div class="top">&#30002;</div><div class="bot">&#36784;</div></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Day Master: Yang Fire</div>
+                <div class="chart-card-meta">Apr 12, 1990 &middot; Singapore</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-chinese">Chinese</span>
+              <span class="chart-card-time">2 weeks ago</span>
+            </div>
+          </div>
+
+          <!-- Card 7: Arjun Patel -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Arjun Patel</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell highlight"></div><div class="cell"></div><div class="cell highlight"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell center">RASI</div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell highlight"></div><div class="cell"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Sagittarius, Moon Gemini</div>
+                <div class="chart-card-meta">Dec 1, 1988 &middot; Delhi, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">2 weeks ago</span>
+            </div>
+          </div>
+
+          <!-- Card 8: Lisa Nguyen - Western -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Lisa Nguyen</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-western">
+                <div class="dot" style="top:10%;left:45%;background:var(--accent-gold-bright)"></div>
+                <div class="dot" style="top:50%;right:8%;background:var(--text-secondary)"></div>
+                <div class="dot" style="bottom:15%;left:30%;background:var(--accent-blue)"></div>
+                <div class="dot" style="top:25%;left:15%;background:var(--accent-green)"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Leo, Moon Aquarius</div>
+                <div class="chart-card-meta">Aug 19, 1995 &middot; Ho Chi Minh City</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-western">Western</span>
+              <span class="chart-card-time">3 weeks ago</span>
+            </div>
+          </div>
+
+          <!-- Card 9: Brother -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Brother</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-vedic">
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell highlight"></div>
+                <div class="cell highlight"></div><div class="cell center">RASI</div><div class="cell"></div>
+                <div class="cell"></div><div class="cell highlight"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Capricorn, Moon Aries</div>
+                <div class="chart-card-meta">Jan 14, 1996 &middot; Chennai, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-vedic">Vedic</span>
+              <span class="chart-card-time">1 month ago</span>
+            </div>
+          </div>
+
+          <!-- Card 10: Marcus - Hellenistic -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Marcus Rivera</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-hellenistic">
+                <div class="dot" style="top:12%;left:48%;background:var(--accent-gold-bright)"></div>
+                <div class="dot" style="top:40%;right:15%;background:#A078C8"></div>
+                <div class="dot" style="bottom:18%;left:20%;background:var(--accent-red)"></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Sun Libra, Moon Cancer</div>
+                <div class="chart-card-meta">Oct 7, 1991 &middot; Mexico City</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-hellenistic">Hellenistic</span>
+              <span class="chart-card-time">1 month ago</span>
+            </div>
+          </div>
+
+          <!-- Card 11: Wei Zhang - BaZi -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Wei Zhang -- BaZi</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-chinese">
+                <div class="pillar"><div class="top">&#22764;</div><div class="bot">&#23493;</div></div>
+                <div class="pillar"><div class="top">&#19969;</div><div class="bot">&#37193;</div></div>
+                <div class="pillar"><div class="top">&#30328;</div><div class="bot">&#21359;</div></div>
+                <div class="pillar"><div class="top">&#24218;</div><div class="bot">&#30003;</div></div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Day Master: Yin Earth</div>
+                <div class="chart-card-meta">Feb 20, 1987 &middot; Beijing, China</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-chinese">Chinese</span>
+              <span class="chart-card-time">1 month ago</span>
+            </div>
+          </div>
+
+          <!-- Card 12: Kavitha - Mayan -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-name">Kavitha -- Mayan</div>
+              <span class="chart-card-menu">&#8942;</span>
+            </div>
+            <div class="chart-card-body">
+              <div class="mini-mayan">
+                <div class="glyph-row">
+                  <div class="glyph-dot"></div>
+                  <div class="glyph-dot"></div>
+                  <div class="glyph-dot"></div>
+                </div>
+                <div class="glyph-bar"></div>
+                <div class="glyph-row">
+                  <div class="glyph-dot"></div>
+                  <div class="glyph-dot"></div>
+                </div>
+              </div>
+              <div>
+                <div class="chart-card-placements">Kin 176: Yellow Cosmic Warrior</div>
+                <div class="chart-card-meta">Nov 30, 1993 &middot; Coimbatore, India</div>
+              </div>
+            </div>
+            <div class="chart-card-footer">
+              <span class="tradition-badge badge-mayan">Mayan</span>
+              <span class="chart-card-time">2 months ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <strong>Option A: Card Grid Layout</strong> -- Visual and spacious. Mini chart previews make cards distinctive and scannable. Great for browsing, especially when charts have visual previews. Less efficient for large collections (12+ charts) -- lots of scrolling. Card layout is familiar and modern. Each card communicates chart identity at a glance through its mini preview, tradition badge, and key placements. The grid naturally adapts to different screen widths. Cards provide generous tap/click targets and clear visual hierarchy. The primary chart is marked with a gold star. The three-column layout balances density with breathing room.
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+}
+
+// Filter pill interaction
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
