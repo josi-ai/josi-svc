@@ -21,7 +21,10 @@ export default function BirthDataForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/chart-calculator');
+    if (!dob) return;
+    // Store birth data for the preview page and post-sign-up chart creation
+    sessionStorage.setItem('josi-birth-data', JSON.stringify({ name, dob, tob, place }));
+    window.location.href = '/chart-preview';
   };
 
   return (
