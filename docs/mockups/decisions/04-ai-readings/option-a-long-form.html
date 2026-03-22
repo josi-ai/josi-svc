@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 4A: Long-Form Editorial Reading — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label {
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-left: 4px solid var(--accent-gold); border-radius: 12px;
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.75; color: var(--text-body);
+    }
+    .annotation p strong { color: var(--text-secondary); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .w1-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    .w1-sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .w1-sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .w1-sb-header .logo {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .w1-sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w1-sb-nav { padding: 12px 10px; flex: 1; }
+    .w1-sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .w1-sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .w1-sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .w1-sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .w1-sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .w1-sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .w1-sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .w1-sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .w1-main { display: flex; flex-direction: column; background: var(--bg-frame); }
+
+    /* Breadcrumb / topbar */
+    .reading-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .breadcrumb {
+      font-size: 13px; color: var(--text-muted); cursor: pointer;
+      transition: color 0.15s; display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb:hover { color: var(--text-secondary); }
+    .breadcrumb .arrow { color: var(--accent-gold); }
+    .topbar-actions { display: flex; gap: 8px; }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== READING CONTENT ========== */
+    .reading-scroll { flex: 1; overflow-y: auto; padding-bottom: 40px; }
+
+    /* Header */
+    .reading-header {
+      max-width: 680px; margin: 0 auto; padding: 56px 24px 40px; text-align: center;
+    }
+    .reading-category {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 20px;
+    }
+    .reading-title {
+      font-family: 'DM Serif Display', serif; font-size: 42px; line-height: 1.15;
+      color: var(--text-primary); margin-bottom: 18px;
+    }
+    .reading-byline {
+      font-size: 14px; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .reading-byline strong { color: var(--text-secondary); }
+    .reading-time-badge {
+      display: inline-block; font-size: 11px; color: var(--text-faint);
+      border: 1px solid var(--border-default); padding: 5px 14px; border-radius: 14px;
+      margin-top: 8px;
+    }
+
+    /* Divider */
+    .reading-divider {
+      max-width: 680px; margin: 0 auto; height: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* Lead paragraph */
+    .reading-lead {
+      max-width: 680px; margin: 0 auto; padding: 40px 24px;
+    }
+    .reading-lead p {
+      font-family: 'DM Serif Text', serif; font-size: 20px; line-height: 1.85;
+      color: var(--text-secondary); border-left: 3px solid var(--accent-gold);
+      padding-left: 24px;
+    }
+
+    /* Body paragraphs */
+    .reading-body {
+      max-width: 680px; margin: 0 auto; padding: 0 24px 16px;
+    }
+    .reading-body p {
+      font-family: 'DM Serif Text', serif; font-size: 17px; line-height: 1.9;
+      color: var(--text-body-reading); margin-bottom: 24px;
+    }
+    .reading-body h3 {
+      font-family: 'DM Serif Display', serif; font-size: 24px;
+      color: var(--text-primary); margin-bottom: 16px; margin-top: 8px;
+    }
+
+    /* Pull quote */
+    .reading-pullquote {
+      max-width: 800px; margin: 16px auto 16px; padding: 48px 40px; text-align: center;
+      border-top: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-default);
+      font-family: 'DM Serif Display', serif; font-size: 32px;
+      color: var(--text-primary); line-height: 1.35;
+    }
+    .reading-pullquote .attribution {
+      display: block; font-family: 'Inter', sans-serif; font-size: 11px;
+      color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px;
+      margin-top: 16px; font-weight: 500;
+    }
+
+    /* Insight card */
+    .reading-insight {
+      max-width: 680px; margin: 32px auto; padding: 24px 28px;
+      background: var(--bg-card); border-radius: 14px;
+      border: 1px solid var(--border-default);
+    }
+    .reading-insight .insight-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .reading-insight .insight-label .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-gold-bright);
+    }
+    .reading-insight .insight-text {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    /* NPQ card */
+    .reading-npq {
+      max-width: 680px; margin: 32px auto; padding: 28px;
+      background: var(--accent-gold-bg-subtle); border-radius: 14px;
+      border: 1px solid rgba(200,145,58,0.15);
+    }
+    .reading-npq .npq-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .reading-npq .npq-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent-gold-bg); display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .reading-npq .npq-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .reading-npq .npq-sublabel {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    }
+    .reading-npq .npq-question {
+      font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    /* Action buttons */
+    .reading-actions {
+      max-width: 680px; margin: 40px auto; padding: 0 24px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .reading-actions .action-btn {
+      padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; border: none;
+      transition: all 0.15s;
+    }
+    .action-btn.primary {
+      background: var(--accent-gold); color: #fff;
+    }
+    .action-btn.primary:hover {
+      background: var(--accent-gold-bright);
+    }
+    .action-btn.outline {
+      background: transparent; color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+    .action-btn.outline:hover {
+      border-color: var(--border-strong); background: var(--bg-card);
+    }
+
+    /* Reading meta footer */
+    .reading-meta {
+      max-width: 680px; margin: 48px auto 0; padding: 24px 24px 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .reading-meta .meta-row {
+      display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .reading-meta .meta-item {
+      font-size: 11px; color: var(--text-faint);
+    }
+    .reading-meta .meta-item strong {
+      color: var(--text-muted); font-weight: 600;
+    }
+
+    /* Pill / badge */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; display: inline-block; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 4A: Long-Form Editorial Reading</span>
+  <div style="width:1px;height:20px;background:var(--border-default);margin:0 8px"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/readings/water-within-emotional-architecture</div>
+  <h2>Decision 4A: Long-Form Editorial Reading</h2>
+  <p>Magazine-quality immersive reading experience. Medium-style editorial format.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/readings/water-within-emotional-architecture</div>
+  </div>
+
+  <div class="w1-layout">
+    <!-- Sidebar -->
+    <div class="w1-sidebar">
+      <div class="w1-sb-header">
+        <div class="logo">Josi</div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="w1-sb-nav">
+        <div class="w1-sb-group">Overview</div>
+        <div class="w1-sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="w1-sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="w1-sb-item active"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">Explore</div>
+        <div class="w1-sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="w1-sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="w1-sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="w1-sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="w1-sb-group" style="margin-top:8px">Connect</div>
+        <div class="w1-sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="w1-sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">AI Tools</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> NPQ Sessions <span class="ct">3</span></div>
+        <div class="w1-sb-item"><span class="ic">&#9998;</span> Predictions</div>
+        <div class="w1-sb-item"><span class="ic">&#9752;</span> Remedies</div>
+      </div>
+      <div class="w1-sb-footer">
+        <div class="w1-sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w1-main">
+      <!-- Top bar with breadcrumb -->
+      <div class="reading-topbar">
+        <div class="breadcrumb">
+          <span class="arrow">&#8592;</span> Back to Readings
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-ghost">Share</button>
+          <button class="btn-ghost">Save PDF</button>
+          <button class="btn-gold">Book Astrologer</button>
+        </div>
+      </div>
+
+      <!-- Scrollable reading content -->
+      <div class="reading-scroll">
+
+        <!-- Reading Header -->
+        <div class="reading-header">
+          <div class="reading-category">AI Deep Reading &middot; Vedic Sidereal</div>
+          <h1 class="reading-title">The Water Within:<br>Your Emotional Architecture</h1>
+          <div class="reading-byline">For <strong>Govind</strong> &middot; March 12, 2026</div>
+          <div class="reading-time-badge">8 min read</div>
+        </div>
+
+        <div class="reading-divider"></div>
+
+        <!-- Lead paragraph -->
+        <div class="reading-lead">
+          <p>Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. Three planets in water signs create what Vedic astrology calls a rare depth of feeling &mdash; a life lived from the inside out, where the invisible currents beneath the surface carry more weight than anything visible.</p>
+        </div>
+
+        <!-- Body section 1 -->
+        <div class="reading-body">
+          <h3>Moon in Scorpio: The Alchemist</h3>
+          <p>The Moon in Scorpio in the fifth house creates a deep well of creative intensity. You don't just feel things &mdash; you transform through feeling. Every experience passes through an alchemical process before it settles into understanding. Where others might encounter an emotion and move on, you descend into it, searching for what it means, what it reveals, what it asks you to become.</p>
+
+          <p>This is not a passive placement. The fifth house is the house of creative self-expression, of children, of the intelligence that flows from the heart rather than the head. When the Moon sits here in Scorpio, your creative process becomes deeply emotional &mdash; almost ritualistic. You create not to entertain, but to transmute. Every meaningful act of creation is, for you, an act of psychological transformation.</p>
+
+          <p>In the Anuradha nakshatra, the Moon finds its devotional quality. Anuradha's presiding deity is Mitra &mdash; the god of friendship, alliance, and cosmic order. Your deepest emotional fulfillment comes not from solitary intensity but from bonds. The kind of bonds that withstand years, distance, silence, and change. You seek the people who can hold the weight of your emotional depth without flinching.</p>
+        </div>
+
+        <!-- Pull quote -->
+        <div class="reading-pullquote">
+          "The surface is calm,<br>the depths are infinite."
+          <span class="attribution">Your chart's central paradox</span>
+        </div>
+
+        <!-- Body section 2 -->
+        <div class="reading-body">
+          <h3>Cancer Ascendant: The Container</h3>
+          <p>The Cancer ascendant wraps this Scorpionic intensity in warmth. Others experience you as nurturing, approachable, and safe &mdash; even as your inner world runs far deeper than most will ever know. This is the genius of the Cancer-Scorpio axis: you can hold space for others precisely because you have already navigated your own depths.</p>
+
+          <p>The ascendant lord, the Moon, is itself in Scorpio &mdash; creating a powerful loop between your outer persona and your inner emotional engine. What you show the world and what you feel internally are more connected than most people realize. Your sensitivity is not a performance; it is the architecture of your being. When you care for someone, you are drawing from the same well that fuels your creative fire.</p>
+        </div>
+
+        <!-- Key Insight card -->
+        <div class="reading-insight">
+          <div class="insight-label">
+            <span class="dot"></span> Key Insight
+          </div>
+          <div class="insight-text">
+            Saturn's aspect on the Moon from the eleventh house creates a stabilizing force that is rare in water-dominant charts. Where water might scatter, evaporate, or flood, Saturn channels it into purpose. Your emotions have direction. Your intuition has structure. This aspect is the reason your depth does not overwhelm you &mdash; Saturn gives your inner ocean a coastline.
+          </div>
+        </div>
+
+        <!-- Body section 3 -->
+        <div class="reading-body">
+          <h3>Sun at Gandanta: The Threshold Walker</h3>
+          <p>The Sun at twenty-nine degrees of Pisces sits at one of the most significant points in the Vedic zodiac &mdash; the gandanta, a karmic knot between water and fire. This is the junction where Pisces dissolves into Aries, where the ocean meets the spark. Your sense of self lives on this threshold. You are never entirely one thing. You are simultaneously dissolving the old and igniting the new.</p>
+
+          <p>This placement suggests a life of periodic reinvention. Not the superficial kind &mdash; not changing jobs or cities &mdash; but the deeper kind, where your understanding of who you are undergoes a fundamental shift. These shifts come in cycles, often triggered by the dasha periods of the Sun and Jupiter. Each time, you emerge more aligned with something essential that was always there but hadn't yet found its shape.</p>
+        </div>
+
+        <!-- Neural Pathway Question card -->
+        <div class="reading-npq">
+          <div class="npq-header">
+            <div class="npq-icon">&#128173;</div>
+            <div>
+              <div class="npq-label">Neural Pathway Question</div>
+              <div class="npq-sublabel">A reflection prompt based on your chart placements</div>
+            </div>
+          </div>
+          <div class="npq-question">
+            When was the last time you allowed yourself to simply feel without trying to understand? What emerged from that stillness &mdash; and what did it ask of you?
+          </div>
+        </div>
+
+        <!-- Reading meta -->
+        <div class="reading-meta">
+          <div class="meta-row">
+            <div class="meta-item"><strong>Tradition:</strong> Vedic Sidereal (Lahiri Ayanamsa)</div>
+            <div class="meta-item"><strong>Type:</strong> Birth Chart Deep Reading</div>
+            <div class="meta-item"><strong>Generated:</strong> March 12, 2026</div>
+          </div>
+          <div class="meta-row">
+            <div class="meta-item"><strong>Model:</strong> GPT-4 Turbo</div>
+            <div class="meta-item"><strong>Style:</strong> Narrative/Editorial</div>
+            <div class="meta-item"><strong>Token usage:</strong> 2,840 tokens</div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="reading-actions">
+          <button class="action-btn primary">Discuss with Astrologer</button>
+          <button class="action-btn outline">View Chart Placements</button>
+          <button class="action-btn outline">Generate Compatibility</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <div class="ann-title">Design Annotation &mdash; Option A: Long-Form Editorial</div>
+  <p>
+    <strong>Format:</strong> Magazine-quality editorial reading modeled after Medium, Substack, and long-form journalism. Centered content column (680px max-width), generous whitespace, reading-optimized typography (DM Serif Text at 17px, line-height 1.9).
+  </p>
+  <p style="margin-top:10px">
+    <strong>Best for:</strong> Deep, transformative readings &mdash; Birth Chart interpretations, Compatibility analyses, Yearly forecasts. Content that rewards slow, immersive reading. This is the format that creates the most emotional impact and makes users feel like they received something genuinely valuable.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Engagement pattern:</strong> Users spend 5-10 minutes per reading. Average scroll depth is 80%+. Pull quotes and insight cards create natural pause points. The NPQ card at the end encourages deeper reflection and can funnel into the interactive NPQ session format (Option C).
+  </p>
+  <p style="margin-top:10px">
+    <strong>Monetization:</strong> Strong premium content signal. The editorial quality justifies subscription pricing. "Discuss with Astrologer" CTA bridges AI readings to marketplace revenue. PDF export adds perceived value.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Trade-offs:</strong> Takes more AI tokens to generate (~2,500-4,000 tokens per reading). Not suitable for frequent, short updates (transits, daily forecasts). Requires careful prompt engineering to maintain quality and avoid generic astrology content.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Sidebar behavior:</strong> Sidebar persists but recedes visually. The reading content dominates. "AI Readings" is highlighted as the active nav item. This maintains navigability without breaking the reading flow.
+  </p>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

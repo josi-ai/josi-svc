@@ -1,67 +1,52 @@
 'use client';
 
-import { Layout, Menu, Typography } from 'antd';
-import { CodeOutlined, KeyOutlined, FileTextOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-const { Sider, Content } = Layout;
-const { Text } = Typography;
+import { cn } from '@/lib/utils';
+import { Code, Key, FileText } from 'lucide-react';
 
 const menuItems = [
-  { key: '/developer', icon: <CodeOutlined />, label: <Link href="/developer">Overview</Link> },
-  { key: '/developer/keys', icon: <KeyOutlined />, label: <Link href="/developer/keys">API Keys</Link> },
-  { key: '/developer/docs', icon: <FileTextOutlined />, label: <Link href="/developer/docs">Documentation</Link> },
+  { key: '/developer', icon: Code, label: 'Overview' },
+  { key: '/developer/keys', icon: Key, label: 'API Keys' },
+  { key: '/developer/docs', icon: FileText, label: 'Documentation' },
 ];
 
 export default function DeveloperLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#0f0a1e' }}>
-      <Sider
-        width={240}
-        style={{
-          background: '#1a1230',
-          borderRight: '1px solid rgba(107, 92, 231, 0.1)',
-          paddingTop: 24,
-        }}
-      >
-        <div style={{ padding: '0 24px', marginBottom: 32 }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Text
-              strong
-              style={{
-                fontSize: 20,
-                background: 'linear-gradient(135deg, #6B5CE7, #E78A5C)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Josi
-            </Text>
+    <div className="flex min-h-screen bg-background">
+      <aside className="w-60 border-r border-subtle bg-surface pt-6">
+        <div className="mb-8 px-6">
+          <Link href="/" className="font-display text-xl text-text-primary no-underline">
+            Josi
           </Link>
-          <Text
-            style={{
-              display: 'block',
-              fontSize: 11,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.3)',
-              marginTop: 4,
-            }}
-          >
+          <span className="mt-1 block text-[11px] uppercase tracking-widest text-text-faint">
             Developer Portal
-          </Text>
+          </span>
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[pathname]}
-          style={{ background: 'transparent', borderInlineEnd: 'none' }}
-          items={menuItems}
-        />
-      </Sider>
-      <Content style={{ padding: 32 }}>{children}</Content>
-    </Layout>
+        <nav className="px-2.5">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.key;
+            return (
+              <Link
+                key={item.key}
+                href={item.key}
+                className={cn(
+                  'flex items-center gap-2.5 rounded-lg px-3 py-2 mb-px text-[13px] no-underline transition-colors',
+                  isActive
+                    ? 'bg-card text-text-primary'
+                    : 'text-text-muted hover:bg-card hover:text-text-secondary',
+                )}
+              >
+                <item.icon className="h-4 w-4 opacity-70" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+      <main className="flex-1 p-8">{children}</main>
+    </div>
   );
 }

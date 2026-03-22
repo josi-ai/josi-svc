@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 3A: Single Scrollable Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS (from v7) ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.07);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 900px;
+      margin: 0 auto 24px;
+      padding: 24px 32px;
+      background: var(--accent-gold-bg-subtle);
+      border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-gold);
+    }
+    .annotation h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .annotation p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-body);
+      margin-bottom: 8px;
+    }
+    .annotation .pros, .annotation .cons, .annotation .best-for {
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+    .annotation .label {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .annotation .pros .label { color: var(--accent-green); }
+    .annotation .cons .label { color: var(--accent-red); }
+    .annotation .best-for .label { color: var(--accent-blue); }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 8px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .tg-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 0 auto 40px; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .main { display: flex; flex-direction: column; overflow-y: auto; max-height: 2600px; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+      position: sticky; top: 0; background: var(--bg-frame); z-index: 10;
+    }
+    .topbar .breadcrumb { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .topbar .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .topbar .breadcrumb a:hover { color: var(--accent-gold); }
+    .topbar .breadcrumb .sep { color: var(--text-faint); }
+    .topbar .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+    .topbar-actions { display: flex; gap: 8px; }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    .content { padding: 28px 32px; }
+
+    /* ========== CHART HEADER ========== */
+    .chart-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+    }
+    .chart-header h1 {
+      font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text-primary);
+    }
+    .tradition-badge {
+      font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 16px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright);
+    }
+    .chart-date { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+    /* ========== SECTION STYLES ========== */
+    .section {
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text-primary);
+      margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-divider);
+    }
+
+    /* ========== SOUTH INDIAN CHART ========== */
+    .chart-container {
+      display: flex; justify-content: center; margin-bottom: 8px;
+    }
+    .si-chart {
+      width: 300px; height: 300px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      border: 2px solid var(--border-strong);
+      background: var(--bg-card);
+      border-radius: 4px;
+      position: relative;
+    }
+    .si-cell {
+      border: 1px solid var(--border-default);
+      padding: 4px;
+      font-size: 9px;
+      color: var(--text-muted);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .si-cell .sign-label {
+      font-size: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-faint);
+      font-weight: 600;
+    }
+    .si-cell .planet-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent-gold-bright);
+    }
+    .si-cell .planet-label.blue { color: var(--accent-blue); }
+    .si-cell .planet-label.red { color: var(--accent-red); }
+    .si-cell .planet-label.green { color: var(--accent-green); }
+    .si-cell .planet-label.secondary { color: var(--text-secondary); }
+    /* Center 4 cells (row 2 col 2, row 2 col 3, row 3 col 2, row 3 col 3) form the center */
+    .si-center {
+      grid-column: 2 / 4;
+      grid-row: 2 / 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-default);
+      background: var(--bg-surface);
+    }
+    .si-center .name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    .si-center .date {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .si-center .asc-label {
+      font-size: 9px;
+      color: var(--accent-gold);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* ========== TABLE ========== */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-faint);
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-default);
+      background: var(--bg-surface);
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-divider);
+      color: var(--text-secondary);
+    }
+    .data-table tr:hover td {
+      background: var(--bg-card-hover);
+    }
+    .data-table .planet-cell {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 600; color: var(--text-primary);
+    }
+    .data-table .planet-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .data-table .sign-cell { color: var(--text-primary); }
+    .data-table .degree-cell { font-family: monospace; color: var(--accent-gold-bright); font-size: 12px; }
+    .data-table .nakshatra-cell { color: var(--accent-blue); }
+    .data-table .dignity-good { color: var(--accent-green); font-weight: 500; }
+    .data-table .dignity-bad { color: var(--accent-red); font-weight: 500; }
+    .data-table .dignity-neutral { color: var(--text-muted); }
+    .data-table .retro { color: var(--accent-red); font-weight: 600; font-size: 11px; }
+    .data-table .direct { color: var(--text-faint); font-size: 11px; }
+
+    /* ========== HOUSE GRID ========== */
+    .house-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .house-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 14px;
+      transition: border-color 0.15s;
+    }
+    .house-card:hover { border-color: var(--border-strong); }
+    .house-card .house-num {
+      font-size: 10px; font-weight: 700; color: var(--accent-gold-bright);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .house-card .house-sign {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px; color: var(--text-primary); margin-bottom: 4px;
+    }
+    .house-card .house-ruler {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .house-card .house-planets {
+      font-size: 11px; color: var(--accent-blue); font-weight: 500;
+    }
+    .house-card .house-planets.empty { color: var(--text-faint); font-style: italic; font-weight: 400; }
+
+    /* ========== ASPECT MATRIX ========== */
+    .aspect-table {
+      width: 100%; border-collapse: collapse; font-size: 11px;
+    }
+    .aspect-table th, .aspect-table td {
+      padding: 6px 8px; text-align: center;
+      border: 1px solid var(--border-divider);
+    }
+    .aspect-table th {
+      background: var(--bg-surface);
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+    }
+    .aspect-table .header-planet {
+      color: var(--text-primary); font-weight: 600;
+    }
+    .aspect-table td.aspect-full { background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 600; }
+    .aspect-table td.aspect-partial { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .aspect-table td.aspect-special { background: var(--accent-green-bg); color: var(--accent-green); font-weight: 600; }
+    .aspect-table td.self { background: var(--bg-surface); color: var(--text-faint); }
+
+    /* ========== DIVISIONAL GRID ========== */
+    .div-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .div-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .div-card .div-title {
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .div-card .div-subtitle {
+      font-size: 10px; color: var(--text-muted); margin-bottom: 12px;
+    }
+    .div-mini-chart {
+      width: 140px; height: 140px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1fr;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 3px;
+    }
+    .dmc-cell {
+      border: 0.5px solid var(--border-divider);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6px; font-weight: 600; color: var(--text-muted);
+    }
+    .dmc-center {
+      grid-column: 2 / 4; grid-row: 2 / 4;
+      border: 0.5px solid var(--border-divider);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: var(--text-faint); font-weight: 600;
+      background: var(--bg-surface);
+    }
+
+    /* ========== YOGAS LIST ========== */
+    .yoga-list { display: flex; flex-direction: column; gap: 10px; }
+    .yoga-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .yoga-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .yoga-icon.benefic { background: var(--accent-green-bg); }
+    .yoga-icon.malefic { background: var(--accent-red-bg); }
+    .yoga-icon.raja { background: var(--accent-gold-bg); }
+    .yoga-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px; color: var(--text-primary); margin-bottom: 4px;
+    }
+    .yoga-type {
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .yoga-type.benefic { color: var(--accent-green); }
+    .yoga-type.malefic { color: var(--accent-red); }
+    .yoga-type.raja { color: var(--accent-gold-bright); }
+    .yoga-desc {
+      font-size: 12px; color: var(--text-body); line-height: 1.6;
+    }
+    .yoga-planets {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* ========== DASHA ACCORDION ========== */
+    .dasha-list { display: flex; flex-direction: column; gap: 6px; }
+    .dasha-period {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .dasha-header {
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .dasha-header:hover { background: var(--bg-card-hover); }
+    .dasha-planet-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .dasha-planet-name {
+      font-weight: 600; color: var(--text-primary); font-size: 14px; flex: 1;
+    }
+    .dasha-dates {
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+    }
+    .dasha-duration {
+      font-size: 10px; color: var(--text-faint); padding: 3px 10px;
+      background: var(--counter-bg); border-radius: 8px;
+    }
+    .dasha-toggle {
+      font-size: 12px; color: var(--text-faint); transition: transform 0.2s;
+    }
+    .dasha-period.open .dasha-toggle { transform: rotate(180deg); }
+    .dasha-period.active { border-color: var(--accent-gold); }
+    .dasha-period.active .dasha-planet-name { color: var(--accent-gold-bright); }
+    .dasha-body {
+      display: none; padding: 0 18px 14px;
+      border-top: 1px solid var(--border-divider);
+    }
+    .dasha-period.open .dasha-body { display: block; padding-top: 12px; }
+    .sub-dasha {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-divider);
+      font-size: 12px;
+    }
+    .sub-dasha:last-child { border-bottom: none; }
+    .sub-dasha .sd-name { color: var(--text-secondary); font-weight: 500; width: 80px; }
+    .sub-dasha .sd-dates { color: var(--text-muted); font-family: monospace; font-size: 11px; flex: 1; }
+    .sub-dasha .sd-status { font-size: 10px; padding: 2px 8px; border-radius: 8px; }
+    .sub-dasha .sd-status.current { background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 600; }
+    .sub-dasha .sd-status.past { color: var(--text-faint); }
+    .sub-dasha .sd-status.future { color: var(--text-muted); }
+
+    /* ========== SCROLL INDICATOR ========== */
+    .scroll-indicator {
+      text-align: center; padding: 16px; color: var(--text-faint);
+      font-size: 11px; border-top: 1px solid var(--border-divider);
+    }
+
+    /* ========== PILL ========== */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .pill-red { background: var(--accent-red-bg); color: var(--accent-red); }
+  </style>
+</head>
+<body>
+
+<!-- ========== THEME TOGGLE ========== -->
+<div class="theme-bar">
+  <span class="tg-label">Theme:</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ========== ANNOTATION ========== -->
+<div style="max-width:1280px;margin:20px auto 20px;padding:0 20px;">
+  <div class="annotation">
+    <h1>Decision 3A: Single Scrollable Page</h1>
+    <p>All chart data presented on one long scrolling page. Sections flow vertically: chart visualization, planetary positions, house details, aspects, divisional charts, yogas, and dasha periods. Users scroll through everything in sequence.</p>
+    <div class="pros"><span class="label">Pros:</span> Simple mental model -- everything is on one page, no hidden data. Easy to implement. Works well for printing/export. Natural for users who want a complete overview. Good for sharing chart details as a single document.</div>
+    <div class="cons"><span class="label">Cons:</span> Very long page (2000+ px). Can feel overwhelming with so much dense astrological data at once. Hard to find specific information quickly. Users lose context of the chart visualization while scrolling through data tables below. No way to compare sections side-by-side.</div>
+    <div class="best-for"><span class="label">Best for:</span> Users who prefer completeness over focus. Print/export scenarios. Simpler implementation. First-time visitors who want to see everything their chart contains.</div>
+  </div>
+</div>
+
+<!-- ========== WEB FRAME ========== -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts/birth-vedic/govind-1992</div>
+  </div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <div class="topbar">
+        <div class="breadcrumb">
+          <a href="#">Charts</a>
+          <span class="sep">&#8250;</span>
+          <span class="current">Govind's Birth Chart</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-ghost">&#8615; Export</button>
+          <button class="btn-ghost">&#9734; Share</button>
+          <button class="btn-gold">&#10024; AI Reading</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- CHART HEADER -->
+        <div class="chart-header">
+          <h1>Govind's Birth Chart</h1>
+          <span class="tradition-badge">Vedic</span>
+          <span class="chart-date">Mar 15, 1992 &middot; 14:32 IST &middot; Chennai, India</span>
+        </div>
+
+        <!-- SECTION 1: CHART VISUALIZATION -->
+        <div class="section">
+          <div class="section-title">Rasi Chart (D-1)</div>
+          <div class="chart-container">
+            <div class="si-chart">
+              <!-- Row 1: Pisces, Aries, Taurus, Gemini -->
+              <div class="si-cell">
+                <span class="sign-label">Pisces</span>
+                <span class="planet-label">Su</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Aries</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Taurus</span>
+                <span class="planet-label blue">Ra</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Gemini</span>
+              </div>
+              <!-- Row 2: Aquarius, CENTER, Cancer -->
+              <div class="si-cell">
+                <span class="sign-label">Aquarius</span>
+                <span class="planet-label green">Ve</span>
+                <span class="planet-label secondary">Me</span>
+              </div>
+              <div class="si-center">
+                <div class="name">Govind</div>
+                <div class="date">Mar 15, 1992</div>
+                <div class="asc-label">Asc: Cancer</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Cancer</span>
+                <span class="planet-label" style="font-size:8px;color:var(--text-faint)">Asc</span>
+              </div>
+              <!-- Row 3: Capricorn, CENTER, Leo -->
+              <div class="si-cell">
+                <span class="sign-label">Capricorn</span>
+                <span class="planet-label red">Ma</span>
+              </div>
+              <!-- center continues -->
+              <div class="si-cell">
+                <span class="sign-label">Leo</span>
+              </div>
+              <!-- Row 4: Sagittarius, Scorpio, Libra, Virgo -->
+              <div class="si-cell">
+                <span class="sign-label">Sagittarius</span>
+                <span class="planet-label blue">Ju</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Scorpio</span>
+                <span class="planet-label secondary">Mo</span>
+                <span class="planet-label red">Ke</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Libra</span>
+                <span class="planet-label">Sa</span>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Virgo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PLANETARY POSITIONS -->
+        <div class="section">
+          <div class="section-title">Planetary Positions</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Planet</th>
+                <th>Sign</th>
+                <th>Degree</th>
+                <th>Nakshatra</th>
+                <th>Pada</th>
+                <th>Dignity</th>
+                <th>Retrograde</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-gold-bright)"></span>Sun</div></td>
+                <td class="sign-cell">Pisces</td>
+                <td class="degree-cell">29&#176;14'22"</td>
+                <td class="nakshatra-cell">Revati</td>
+                <td>4</td>
+                <td class="dignity-neutral">Neutral</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--text-secondary)"></span>Moon</div></td>
+                <td class="sign-cell">Scorpio</td>
+                <td class="degree-cell">14&#176;32'08"</td>
+                <td class="nakshatra-cell">Anuradha</td>
+                <td>3</td>
+                <td class="dignity-bad">Debilitated</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-red)"></span>Mars</div></td>
+                <td class="sign-cell">Capricorn</td>
+                <td class="degree-cell">08&#176;45'16"</td>
+                <td class="nakshatra-cell">Uttara Ashadha</td>
+                <td>4</td>
+                <td class="dignity-good">Exalted</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-green)"></span>Mercury</div></td>
+                <td class="sign-cell">Aquarius</td>
+                <td class="degree-cell">21&#176;07'33"</td>
+                <td class="nakshatra-cell">Purva Bhadra</td>
+                <td>3</td>
+                <td class="dignity-neutral">Neutral</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-blue)"></span>Jupiter</div></td>
+                <td class="sign-cell">Sagittarius</td>
+                <td class="degree-cell">15&#176;52'41"</td>
+                <td class="nakshatra-cell">Purva Ashadha</td>
+                <td>2</td>
+                <td class="dignity-good">Own Sign</td>
+                <td class="retro">&#8634; R</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-green)"></span>Venus</div></td>
+                <td class="sign-cell">Aquarius</td>
+                <td class="degree-cell">05&#176;28'19"</td>
+                <td class="nakshatra-cell">Dhanishta</td>
+                <td>3</td>
+                <td class="dignity-neutral">Neutral</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--text-muted)"></span>Saturn</div></td>
+                <td class="sign-cell">Libra</td>
+                <td class="degree-cell">22&#176;18'55"</td>
+                <td class="nakshatra-cell">Vishakha</td>
+                <td>1</td>
+                <td class="dignity-good">Exalted</td>
+                <td class="direct">Direct</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-blue)"></span>Rahu</div></td>
+                <td class="sign-cell">Taurus</td>
+                <td class="degree-cell">12&#176;41'07"</td>
+                <td class="nakshatra-cell">Rohini</td>
+                <td>2</td>
+                <td class="dignity-neutral">--</td>
+                <td class="retro">&#8634; R</td>
+              </tr>
+              <tr>
+                <td><div class="planet-cell"><span class="planet-dot" style="background:var(--accent-red)"></span>Ketu</div></td>
+                <td class="sign-cell">Scorpio</td>
+                <td class="degree-cell">12&#176;41'07"</td>
+                <td class="nakshatra-cell">Anuradha</td>
+                <td>2</td>
+                <td class="dignity-neutral">--</td>
+                <td class="retro">&#8634; R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SECTION 3: HOUSE DETAILS -->
+        <div class="section">
+          <div class="section-title">House Details (Bhava)</div>
+          <div class="house-grid">
+            <div class="house-card">
+              <div class="house-num">1st House</div>
+              <div class="house-sign">Cancer</div>
+              <div class="house-ruler">Ruler: Moon</div>
+              <div class="house-planets empty">No planets</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">2nd House</div>
+              <div class="house-sign">Leo</div>
+              <div class="house-ruler">Ruler: Sun</div>
+              <div class="house-planets empty">No planets</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">3rd House</div>
+              <div class="house-sign">Virgo</div>
+              <div class="house-ruler">Ruler: Mercury</div>
+              <div class="house-planets empty">No planets</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">4th House</div>
+              <div class="house-sign">Libra</div>
+              <div class="house-ruler">Ruler: Venus</div>
+              <div class="house-planets">Saturn</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">5th House</div>
+              <div class="house-sign">Scorpio</div>
+              <div class="house-ruler">Ruler: Mars</div>
+              <div class="house-planets">Moon, Ketu</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">6th House</div>
+              <div class="house-sign">Sagittarius</div>
+              <div class="house-ruler">Ruler: Jupiter</div>
+              <div class="house-planets">Jupiter</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">7th House</div>
+              <div class="house-sign">Capricorn</div>
+              <div class="house-ruler">Ruler: Saturn</div>
+              <div class="house-planets">Mars</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">8th House</div>
+              <div class="house-sign">Aquarius</div>
+              <div class="house-ruler">Ruler: Saturn</div>
+              <div class="house-planets">Venus, Mercury</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">9th House</div>
+              <div class="house-sign">Pisces</div>
+              <div class="house-ruler">Ruler: Jupiter</div>
+              <div class="house-planets">Sun</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">10th House</div>
+              <div class="house-sign">Aries</div>
+              <div class="house-ruler">Ruler: Mars</div>
+              <div class="house-planets empty">No planets</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">11th House</div>
+              <div class="house-sign">Taurus</div>
+              <div class="house-ruler">Ruler: Venus</div>
+              <div class="house-planets">Rahu</div>
+            </div>
+            <div class="house-card">
+              <div class="house-num">12th House</div>
+              <div class="house-sign">Gemini</div>
+              <div class="house-ruler">Ruler: Mercury</div>
+              <div class="house-planets empty">No planets</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: ASPECTS (DRISHTI) -->
+        <div class="section">
+          <div class="section-title">Aspects (Drishti)</div>
+          <div style="overflow-x:auto;">
+            <table class="aspect-table">
+              <thead>
+                <tr>
+                  <th class="header-planet"></th>
+                  <th class="header-planet">Su</th>
+                  <th class="header-planet">Mo</th>
+                  <th class="header-planet">Ma</th>
+                  <th class="header-planet">Me</th>
+                  <th class="header-planet">Ju</th>
+                  <th class="header-planet">Ve</th>
+                  <th class="header-planet">Sa</th>
+                  <th class="header-planet">Ra</th>
+                  <th class="header-planet">Ke</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="header-planet">Sun</td>
+                  <td class="self">--</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Moon</td>
+                  <td></td>
+                  <td class="self">--</td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Mars</td>
+                  <td></td>
+                  <td class="aspect-special">4th</td>
+                  <td class="self">--</td>
+                  <td class="aspect-special">8th</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Mercury</td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td class="self">--</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Jupiter</td>
+                  <td class="aspect-special">5th</td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-special">9th</td>
+                  <td class="self">--</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Venus</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="self">--</td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Saturn</td>
+                  <td></td>
+                  <td class="aspect-special">3rd</td>
+                  <td class="aspect-full">7th</td>
+                  <td class="aspect-special">10th</td>
+                  <td></td>
+                  <td></td>
+                  <td class="self">--</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Rahu</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="aspect-full">7th</td>
+                  <td></td>
+                  <td></td>
+                  <td class="self">--</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="header-planet">Ketu</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="self">--</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:16px;font-size:11px;">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent-gold-bg);border:1px solid var(--accent-gold);vertical-align:middle;margin-right:4px"></span> 7th aspect (full)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent-green-bg);border:1px solid var(--accent-green);vertical-align:middle;margin-right:4px"></span> Special aspect (Mars 4th/8th, Jupiter 5th/9th, Saturn 3rd/10th)</span>
+          </div>
+        </div>
+
+        <!-- SECTION 5: DIVISIONAL CHARTS -->
+        <div class="section">
+          <div class="section-title">Divisional Charts (Vargas)</div>
+          <div class="div-grid">
+            <div class="div-card">
+              <div class="div-title">Rasi (D-1)</div>
+              <div class="div-subtitle">Birth Chart - Overall Life</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell">Su</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Ra</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve Me</div>
+                <div class="dmc-center">D-1</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju</div>
+                <div class="dmc-cell">Mo Ke</div>
+                <div class="dmc-cell">Sa</div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+            <div class="div-card">
+              <div class="div-title">Navamsa (D-9)</div>
+              <div class="div-subtitle">Marriage & Dharma</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Mo</div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell">Su</div>
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju</div>
+                <div class="dmc-center">D-9</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Sa</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Ke</div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve</div>
+                <div class="dmc-cell">Ra Me</div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+            <div class="div-card">
+              <div class="div-title">Dashamsa (D-10)</div>
+              <div class="div-subtitle">Career & Profession</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell">Su Me</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell">Mo</div>
+                <div class="dmc-center">D-10</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Ra</div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve</div>
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju</div>
+                <div class="dmc-cell">Sa Ke</div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+            <div class="div-card">
+              <div class="div-title">Dwadashamsha (D-12)</div>
+              <div class="div-subtitle">Parents & Ancestry</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju</div>
+                <div class="dmc-cell">Mo</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Su</div>
+                <div class="dmc-center">D-12</div>
+                <div class="dmc-cell">Ra</div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve Me</div>
+                <div class="dmc-cell">Ke</div>
+                <div class="dmc-cell">Sa</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+            <div class="div-card">
+              <div class="div-title">Saptamsha (D-7)</div>
+              <div class="div-subtitle">Children & Progeny</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell">Su</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Mo Ra</div>
+                <div class="dmc-center">D-7</div>
+                <div class="dmc-cell">Ke</div>
+                <div class="dmc-cell">Sa</div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju Me</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+            <div class="div-card">
+              <div class="div-title">Trimsamsha (D-30)</div>
+              <div class="div-subtitle">Misfortune & Evils</div>
+              <div class="div-mini-chart">
+                <div class="dmc-cell">Sa</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell" style="color:var(--accent-red)">Ma</div>
+                <div class="dmc-cell">Mo</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-center">D-30</div>
+                <div class="dmc-cell" style="color:var(--accent-blue)">Ju</div>
+                <div class="dmc-cell">Ke</div>
+                <div class="dmc-cell">Su</div>
+                <div class="dmc-cell" style="color:var(--accent-green)">Ve Me</div>
+                <div class="dmc-cell"></div>
+                <div class="dmc-cell">Ra</div>
+                <div class="dmc-cell"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6: YOGAS -->
+        <div class="section">
+          <div class="section-title">Yogas Detected</div>
+          <div class="yoga-list">
+            <div class="yoga-item">
+              <div class="yoga-icon raja">&#9734;</div>
+              <div>
+                <div class="yoga-name">Gaja Kesari Yoga</div>
+                <div class="yoga-type raja">Raja Yoga</div>
+                <div class="yoga-desc">Jupiter in a kendra from the Moon. Confers wisdom, fame, and lasting reputation. The native gains recognition through knowledge and moral conduct.</div>
+                <div class="yoga-planets">Formed by: Jupiter (Sagittarius) + Moon (Scorpio)</div>
+              </div>
+            </div>
+            <div class="yoga-item">
+              <div class="yoga-icon benefic">&#10024;</div>
+              <div>
+                <div class="yoga-name">Ruchaka Yoga (Pancha Mahapurusha)</div>
+                <div class="yoga-type benefic">Benefic Yoga</div>
+                <div class="yoga-desc">Mars is exalted in Capricorn and placed in a kendra (7th house). Grants courage, leadership ability, physical vitality, and success in competitive fields.</div>
+                <div class="yoga-planets">Formed by: Mars exalted in Capricorn, 7th house</div>
+              </div>
+            </div>
+            <div class="yoga-item">
+              <div class="yoga-icon benefic">&#10024;</div>
+              <div>
+                <div class="yoga-name">Shasha Yoga (Pancha Mahapurusha)</div>
+                <div class="yoga-type benefic">Benefic Yoga</div>
+                <div class="yoga-desc">Saturn is exalted in Libra and placed in a kendra (4th house). Bestows authority, discipline, organizational ability, and success in governance or large enterprises.</div>
+                <div class="yoga-planets">Formed by: Saturn exalted in Libra, 4th house</div>
+              </div>
+            </div>
+            <div class="yoga-item">
+              <div class="yoga-icon raja">&#9734;</div>
+              <div>
+                <div class="yoga-name">Budha-Aditya Yoga</div>
+                <div class="yoga-type raja">Raja Yoga</div>
+                <div class="yoga-desc">Though Sun and Mercury are in adjacent signs, the close conjunction effect creates intellectual sharpness, eloquence, and success in communication or analytical fields.</div>
+                <div class="yoga-planets">Formed by: Sun (Pisces) near Mercury (Aquarius)</div>
+              </div>
+            </div>
+            <div class="yoga-item">
+              <div class="yoga-icon malefic">&#9888;</div>
+              <div>
+                <div class="yoga-name">Gandanta Sun</div>
+                <div class="yoga-type malefic">Challenging Placement</div>
+                <div class="yoga-desc">The Sun at 29&#176;14' Pisces is at the gandanta junction between Pisces and Aries (water-fire boundary). Indicates a soul undergoing deep transformation. The ego dissolves and reforms. Past-life karmic knots surface for resolution.</div>
+                <div class="yoga-planets">Sun at 29&#176;14' Pisces (Revati Pada 4)</div>
+              </div>
+            </div>
+            <div class="yoga-item">
+              <div class="yoga-icon benefic">&#10024;</div>
+              <div>
+                <div class="yoga-name">Amala Yoga</div>
+                <div class="yoga-type benefic">Benefic Yoga</div>
+                <div class="yoga-desc">A natural benefic (Jupiter) in the 6th from the Ascendant. Confers a pure character, charitable nature, and success through ethical means. The native earns respect for integrity.</div>
+                <div class="yoga-planets">Formed by: Jupiter in 6th house from Ascendant</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7: VIMSHOTTARI DASHA -->
+        <div class="section">
+          <div class="section-title">Vimshottari Dasha Periods</div>
+          <div class="dasha-list">
+            <div class="dasha-period">
+              <div class="dasha-header" onclick="this.parentElement.classList.toggle('open')">
+                <span class="dasha-planet-dot" style="background:var(--text-muted)"></span>
+                <span class="dasha-planet-name">Saturn Mahadasha</span>
+                <span class="dasha-dates">1992 - 2011</span>
+                <span class="dasha-duration">19 yrs</span>
+                <span class="dasha-toggle">&#9660;</span>
+              </div>
+              <div class="dasha-body">
+                <div class="sub-dasha"><span class="sd-name">Sa-Sa</span><span class="sd-dates">Mar 1992 - Mar 1995</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Me</span><span class="sd-dates">Mar 1995 - Dec 1997</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Ke</span><span class="sd-dates">Dec 1997 - Jan 1999</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Ve</span><span class="sd-dates">Jan 1999 - Mar 2002</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Su</span><span class="sd-dates">Mar 2002 - Mar 2003</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Mo</span><span class="sd-dates">Mar 2003 - Oct 2004</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Ma</span><span class="sd-dates">Oct 2004 - Nov 2005</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Ra</span><span class="sd-dates">Nov 2005 - Sep 2008</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Sa-Ju</span><span class="sd-dates">Sep 2008 - Mar 2011</span><span class="sd-status past">Completed</span></div>
+              </div>
+            </div>
+
+            <div class="dasha-period">
+              <div class="dasha-header" onclick="this.parentElement.classList.toggle('open')">
+                <span class="dasha-planet-dot" style="background:var(--text-secondary)"></span>
+                <span class="dasha-planet-name">Mercury Mahadasha</span>
+                <span class="dasha-dates">2011 - 2028</span>
+                <span class="dasha-duration">17 yrs</span>
+                <span class="dasha-toggle">&#9660;</span>
+              </div>
+              <div class="dasha-body">
+                <div class="sub-dasha"><span class="sd-name">Me-Me</span><span class="sd-dates">Mar 2011 - Aug 2013</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Ke</span><span class="sd-dates">Aug 2013 - Aug 2014</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Ve</span><span class="sd-dates">Aug 2014 - Jun 2017</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Su</span><span class="sd-dates">Jun 2017 - Apr 2018</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Mo</span><span class="sd-dates">Apr 2018 - Sep 2019</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Ma</span><span class="sd-dates">Sep 2019 - Sep 2020</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Ra</span><span class="sd-dates">Sep 2020 - Mar 2023</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Ju</span><span class="sd-dates">Mar 2023 - Jun 2025</span><span class="sd-status past">Completed</span></div>
+                <div class="sub-dasha"><span class="sd-name">Me-Sa</span><span class="sd-dates">Jun 2025 - Mar 2028</span><span class="sd-status current">Current</span></div>
+              </div>
+            </div>
+
+            <div class="dasha-period active open">
+              <div class="dasha-header" onclick="this.parentElement.classList.toggle('open')">
+                <span class="dasha-planet-dot" style="background:var(--accent-red)"></span>
+                <span class="dasha-planet-name">Ketu Mahadasha</span>
+                <span class="dasha-dates">2028 - 2035</span>
+                <span class="dasha-duration">7 yrs</span>
+                <span class="dasha-toggle">&#9660;</span>
+              </div>
+              <div class="dasha-body">
+                <div class="sub-dasha"><span class="sd-name">Ke-Ke</span><span class="sd-dates">Mar 2028 - Aug 2028</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Ve</span><span class="sd-dates">Aug 2028 - Oct 2029</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Su</span><span class="sd-dates">Oct 2029 - Feb 2030</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Mo</span><span class="sd-dates">Feb 2030 - Sep 2030</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Ma</span><span class="sd-dates">Sep 2030 - Feb 2031</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Ra</span><span class="sd-dates">Feb 2031 - Mar 2032</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Ju</span><span class="sd-dates">Mar 2032 - Feb 2033</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Sa</span><span class="sd-dates">Feb 2033 - Mar 2034</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ke-Me</span><span class="sd-dates">Mar 2034 - Mar 2035</span><span class="sd-status future">Upcoming</span></div>
+              </div>
+            </div>
+
+            <div class="dasha-period">
+              <div class="dasha-header" onclick="this.parentElement.classList.toggle('open')">
+                <span class="dasha-planet-dot" style="background:var(--accent-green)"></span>
+                <span class="dasha-planet-name">Venus Mahadasha</span>
+                <span class="dasha-dates">2035 - 2055</span>
+                <span class="dasha-duration">20 yrs</span>
+                <span class="dasha-toggle">&#9660;</span>
+              </div>
+              <div class="dasha-body">
+                <div class="sub-dasha"><span class="sd-name">Ve-Ve</span><span class="sd-dates">Mar 2035 - Jul 2038</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ve-Su</span><span class="sd-dates">Jul 2038 - Jul 2039</span><span class="sd-status future">Upcoming</span></div>
+                <div class="sub-dasha"><span class="sd-name">Ve-Mo</span><span class="sd-dates">Jul 2039 - Mar 2041</span><span class="sd-status future">Upcoming</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scroll-indicator">
+          End of chart data &middot; 7 sections &middot; Scroll up or use sidebar to navigate
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

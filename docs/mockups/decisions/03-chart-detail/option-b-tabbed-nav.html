@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 3B: Tabbed Sub-Navigation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS (from v7) ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.07);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 900px;
+      margin: 0 auto 24px;
+      padding: 24px 32px;
+      background: var(--accent-gold-bg-subtle);
+      border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-gold);
+    }
+    .annotation h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.7; color: var(--text-body); margin-bottom: 8px;
+    }
+    .annotation .label { font-weight: 700; color: var(--text-primary); }
+    .annotation .pros .label { color: var(--accent-green); }
+    .annotation .cons .label { color: var(--accent-red); }
+    .annotation .best-for .label { color: var(--accent-blue); }
+    .annotation .pros, .annotation .cons, .annotation .best-for {
+      font-size: 12px; line-height: 1.6; margin-bottom: 6px;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 8px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .tg-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 0 auto 40px; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .main { display: flex; flex-direction: column; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .breadcrumb { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .topbar .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .topbar .breadcrumb a:hover { color: var(--accent-gold); }
+    .topbar .breadcrumb .sep { color: var(--text-faint); }
+    .topbar .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+    .topbar-actions { display: flex; gap: 8px; }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== CHART HEADER ========== */
+    .chart-header-section {
+      padding: 24px 32px 0;
+    }
+    .chart-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+    }
+    .chart-header h1 {
+      font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text-primary);
+    }
+    .tradition-badge {
+      font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 16px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright);
+    }
+    .chart-date { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+    /* ========== CHART VISUALIZATION (always visible) ========== */
+    .chart-viz-area {
+      padding: 0 32px 20px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .si-chart-wrapper {
+      flex-shrink: 0;
+    }
+    .si-chart {
+      width: 300px; height: 300px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      border: 2px solid var(--border-strong);
+      background: var(--bg-card);
+      border-radius: 4px;
+    }
+    .si-cell {
+      border: 1px solid var(--border-default);
+      padding: 4px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+    }
+    .si-cell .sign-label {
+      font-size: 7px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-faint); font-weight: 600;
+    }
+    .si-cell .planet-label {
+      font-size: 10px; font-weight: 600; color: var(--accent-gold-bright);
+    }
+    .si-cell .planet-label.blue { color: var(--accent-blue); }
+    .si-cell .planet-label.red { color: var(--accent-red); }
+    .si-cell .planet-label.green { color: var(--accent-green); }
+    .si-cell .planet-label.secondary { color: var(--text-secondary); }
+    .si-center {
+      grid-column: 2 / 4; grid-row: 2 / 4;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 1px solid var(--border-default);
+      background: var(--bg-surface);
+    }
+    .si-center .name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 14px; color: var(--text-primary);
+    }
+    .si-center .date { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .si-center .asc-label {
+      font-size: 9px; color: var(--accent-gold); margin-top: 4px; font-weight: 600;
+    }
+
+    /* Quick info next to chart */
+    .chart-quick-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quick-stat-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+    }
+    .quick-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .quick-stat .qs-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 6px;
+    }
+    .quick-stat .qs-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px; color: var(--text-primary);
+    }
+    .quick-stat .qs-sub {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    }
+
+    /* ========== TAB BAR ========== */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border-default);
+      margin: 0 32px;
+    }
+    .tab-item {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab-item:hover {
+      color: var(--text-secondary);
+    }
+    .tab-item.active {
+      color: var(--accent-gold-bright);
+      border-bottom-color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    /* ========== TAB CONTENT ========== */
+    .tab-content {
+      padding: 24px 32px;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ========== OVERVIEW TAB ========== */
+    .overview-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .overview-summary::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -20px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .overview-summary .summary-text {
+      font-family: 'DM Serif Text', serif;
+      font-size: 18px; line-height: 1.6;
+      color: var(--text-primary);
+      position: relative;
+    }
+    .overview-summary .summary-highlight {
+      color: var(--accent-gold-bright);
+    }
+
+    .key-placements {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 20px;
+    }
+    .placement-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 18px;
+      transition: border-color 0.15s;
+    }
+    .placement-card:hover { border-color: var(--border-strong); }
+    .placement-card .pc-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; margin-bottom: 12px;
+    }
+    .placement-card .pc-planet {
+      font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px;
+    }
+    .placement-card .pc-sign {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px; color: var(--accent-gold-bright); margin-bottom: 6px;
+    }
+    .placement-card .pc-detail {
+      font-size: 11px; color: var(--text-muted); line-height: 1.5;
+    }
+    .placement-card .pc-degree {
+      font-family: monospace; font-size: 11px; color: var(--accent-blue);
+    }
+
+    .quick-stats-bar {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .stat-card .sc-label {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .stat-card .sc-value {
+      font-size: 15px; font-weight: 600; color: var(--text-primary);
+    }
+    .stat-card .sc-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    .ai-summary-card {
+      background: var(--bg-hero);
+      border: 1px solid var(--border-default);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-summary-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -20px;
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .ai-summary-card .ai-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 10px;
+      position: relative;
+    }
+    .ai-summary-card .ai-text {
+      font-family: 'DM Serif Text', serif;
+      font-size: 15px; line-height: 1.75;
+      color: var(--text-body-reading);
+      position: relative;
+    }
+    .ai-summary-card .ai-cta {
+      font-size: 12px; color: var(--accent-gold); font-weight: 600;
+      margin-top: 14px; cursor: pointer; position: relative;
+    }
+
+    /* ========== PILLS ========== */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .pill-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* ========== SECTION TITLE ========== */
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* ========== PLACEHOLDER CONTENT FOR INACTIVE TABS ========== */
+    .placeholder-content {
+      text-align: center;
+      padding: 60px 40px;
+      color: var(--text-muted);
+    }
+    .placeholder-content .ph-icon {
+      font-size: 32px; margin-bottom: 12px; opacity: 0.5;
+    }
+    .placeholder-content .ph-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: var(--text-primary); margin-bottom: 8px;
+    }
+    .placeholder-content .ph-desc {
+      font-size: 13px; max-width: 400px; margin: 0 auto; line-height: 1.6;
+    }
+
+    /* ========== TAB INDICATOR AREA ========== */
+    .tab-hint {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--bg-surface);
+      border-radius: 10px;
+      border: 1px dashed var(--border-default);
+      text-align: center;
+    }
+    .tab-hint .hint-text {
+      font-size: 12px; color: var(--text-faint);
+    }
+    .tab-hint .hint-tabs {
+      display: flex; gap: 8px; justify-content: center; margin-top: 10px;
+    }
+    .tab-hint .ht-chip {
+      font-size: 11px; padding: 5px 14px; border-radius: 16px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      color: var(--text-muted);
+    }
+    .tab-hint .ht-chip.ht-active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== THEME TOGGLE ========== -->
+<div class="theme-bar">
+  <span class="tg-label">Theme:</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ========== ANNOTATION ========== -->
+<div style="max-width:1280px;margin:20px auto 20px;padding:0 20px;">
+  <div class="annotation">
+    <h1>Decision 3B: Tabbed Sub-Navigation</h1>
+    <p>Chart data is organized into focused tabs below the chart visualization. The chart itself remains always visible at the top, while the content area below switches between tabs: Overview, Planets, Houses, Aspects, Divisional, Yogas, and Dasha. Each tab presents a focused, digestible view of one data category.</p>
+    <div class="pros"><span class="label">Pros:</span> Organized and scannable. Each tab is focused and digestible -- no overwhelming data walls. The chart remains visible while users explore specific data areas. Easy to add new tabs for future features (transits overlay, AI analysis). Tab names act as a table of contents. Each section loads independently.</div>
+    <div class="cons"><span class="label">Cons:</span> Requires more clicks to see all data. Users cannot easily compare across tabs (e.g., see planets and aspects at the same time). Tab content can feel disconnected from other sections. Not ideal for printing -- each tab would need separate export. Some users may not discover all tabs.</div>
+    <div class="best-for"><span class="label">Best for:</span> Users who want focused exploration of specific data areas. Regular users who know what they are looking for. Progressive disclosure -- shows complexity gradually. Mobile-friendly pattern that scales down well.</div>
+  </div>
+</div>
+
+<!-- ========== WEB FRAME ========== -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts/birth-vedic/govind-1992</div>
+  </div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <div class="topbar">
+        <div class="breadcrumb">
+          <a href="#">Charts</a>
+          <span class="sep">&#8250;</span>
+          <span class="current">Govind's Birth Chart</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-ghost">&#8615; Export</button>
+          <button class="btn-ghost">&#9734; Share</button>
+          <button class="btn-gold">&#10024; AI Reading</button>
+        </div>
+      </div>
+
+      <!-- CHART HEADER (always visible) -->
+      <div class="chart-header-section">
+        <div class="chart-header">
+          <h1>Govind's Birth Chart</h1>
+          <span class="tradition-badge">Vedic</span>
+          <span class="chart-date">Mar 15, 1992 &middot; 14:32 IST &middot; Chennai, India</span>
+        </div>
+      </div>
+
+      <!-- CHART VISUALIZATION (always visible) -->
+      <div class="chart-viz-area">
+        <div class="si-chart-wrapper">
+          <div class="si-chart">
+            <!-- Row 1: Pisces, Aries, Taurus, Gemini -->
+            <div class="si-cell">
+              <span class="sign-label">Pisces</span>
+              <span class="planet-label">Su</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Aries</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Taurus</span>
+              <span class="planet-label blue">Ra</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Gemini</span>
+            </div>
+            <!-- Row 2: Aquarius, CENTER, Cancer -->
+            <div class="si-cell">
+              <span class="sign-label">Aquarius</span>
+              <span class="planet-label green">Ve</span>
+              <span class="planet-label secondary">Me</span>
+            </div>
+            <div class="si-center">
+              <div class="name">Govind</div>
+              <div class="date">Mar 15, 1992</div>
+              <div class="asc-label">Asc: Cancer</div>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Cancer</span>
+              <span style="font-size:8px;color:var(--text-faint);font-weight:600">Asc</span>
+            </div>
+            <!-- Row 3: Capricorn, CENTER, Leo -->
+            <div class="si-cell">
+              <span class="sign-label">Capricorn</span>
+              <span class="planet-label red">Ma</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Leo</span>
+            </div>
+            <!-- Row 4: Sagittarius, Scorpio, Libra, Virgo -->
+            <div class="si-cell">
+              <span class="sign-label">Sagittarius</span>
+              <span class="planet-label blue">Ju</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Scorpio</span>
+              <span class="planet-label secondary">Mo</span>
+              <span class="planet-label red">Ke</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Libra</span>
+              <span class="planet-label">Sa</span>
+            </div>
+            <div class="si-cell">
+              <span class="sign-label">Virgo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-quick-info">
+          <div class="quick-stat-row">
+            <div class="quick-stat">
+              <div class="qs-label">Sun Sign</div>
+              <div class="qs-value">Pisces</div>
+              <div class="qs-sub">29&#176;14' Revati</div>
+            </div>
+            <div class="quick-stat">
+              <div class="qs-label">Moon Sign</div>
+              <div class="qs-value">Scorpio</div>
+              <div class="qs-sub">14&#176;32' Anuradha</div>
+            </div>
+            <div class="quick-stat">
+              <div class="qs-label">Ascendant</div>
+              <div class="qs-value">Cancer</div>
+              <div class="qs-sub">08&#176;22' Pushya</div>
+            </div>
+          </div>
+          <div class="quick-stat-row">
+            <div class="quick-stat">
+              <div class="qs-label">Nakshatra</div>
+              <div class="qs-value">Anuradha</div>
+              <div class="qs-sub">Pada 3</div>
+            </div>
+            <div class="quick-stat">
+              <div class="qs-label">Yoga Karana</div>
+              <div class="qs-value">Siddhi</div>
+              <div class="qs-sub">Vanija</div>
+            </div>
+            <div class="quick-stat">
+              <div class="qs-label">Dasha</div>
+              <div class="qs-value" style="font-size:14px">Me-Sa</div>
+              <div class="qs-sub">Until Mar 2028</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB BAR -->
+      <div class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('overview')">Overview</div>
+        <div class="tab-item" onclick="switchTab('planets')">Planets</div>
+        <div class="tab-item" onclick="switchTab('houses')">Houses</div>
+        <div class="tab-item" onclick="switchTab('aspects')">Aspects</div>
+        <div class="tab-item" onclick="switchTab('divisional')">Divisional</div>
+        <div class="tab-item" onclick="switchTab('yogas')">Yogas</div>
+        <div class="tab-item" onclick="switchTab('dasha')">Dasha</div>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div class="tab-content">
+        <!-- OVERVIEW TAB (active) -->
+        <div class="tab-pane active" id="tab-overview">
+          <!-- Summary Card -->
+          <div class="overview-summary">
+            <div class="summary-text">
+              <span class="summary-highlight">Sun in Pisces 29&#176;14'</span> at the gandanta point &middot;
+              <span class="summary-highlight">Moon in Scorpio 14&#176;32'</span> in Anuradha &middot;
+              <span class="summary-highlight">Ascendant Cancer</span> 08&#176;22'
+            </div>
+          </div>
+
+          <!-- Key Placements -->
+          <div class="section-title">Key Placements</div>
+          <div class="key-placements">
+            <div class="placement-card">
+              <div class="pc-icon" style="background:var(--accent-gold-bg);color:var(--accent-gold-bright)">&#9737;</div>
+              <div class="pc-planet">Sun</div>
+              <div class="pc-sign">Pisces</div>
+              <div class="pc-degree">29&#176;14'22"</div>
+              <div class="pc-detail">9th house &middot; Revati &middot; Pada 4<br>Gandanta point -- identity dissolution</div>
+            </div>
+            <div class="placement-card">
+              <div class="pc-icon" style="background:rgba(139,153,181,0.12);color:var(--text-secondary)">&#9789;</div>
+              <div class="pc-planet">Moon</div>
+              <div class="pc-sign">Scorpio</div>
+              <div class="pc-degree">14&#176;32'08"</div>
+              <div class="pc-detail">5th house &middot; Anuradha &middot; Pada 3<br>Debilitated -- deep emotional intensity</div>
+            </div>
+            <div class="placement-card">
+              <div class="pc-icon" style="background:var(--accent-blue-bg);color:var(--accent-blue)">&#9651;</div>
+              <div class="pc-planet">Ascendant</div>
+              <div class="pc-sign">Cancer</div>
+              <div class="pc-degree">08&#176;22'</div>
+              <div class="pc-detail">Pushya nakshatra<br>Nurturing, protective, intuitive nature</div>
+            </div>
+            <div class="placement-card">
+              <div class="pc-icon" style="background:var(--accent-red-bg);color:var(--accent-red)">&#9829;</div>
+              <div class="pc-planet">Mars (Chart Ruler)</div>
+              <div class="pc-sign">Capricorn</div>
+              <div class="pc-degree">08&#176;45'16"</div>
+              <div class="pc-detail">7th house &middot; Exalted<br>Powerful drive in partnerships</div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="section-title">Quick Stats</div>
+          <div class="quick-stats-bar">
+            <div class="stat-card">
+              <div class="sc-icon" style="background:var(--accent-blue-bg)">&#9776;</div>
+              <div>
+                <div class="sc-label">Dominant Element</div>
+                <div class="sc-value">Water</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon" style="background:var(--accent-gold-bg)">&#9679;</div>
+              <div>
+                <div class="sc-label">Dominant Quality</div>
+                <div class="sc-value">Fixed</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon" style="background:var(--accent-green-bg)">&#10023;</div>
+              <div>
+                <div class="sc-label">Chart Pattern</div>
+                <div class="sc-value">Bowl</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Summary -->
+          <div class="section-title">AI Summary</div>
+          <div class="ai-summary-card">
+            <div class="ai-label">&#10024; AI Interpretation</div>
+            <div class="ai-text">A deeply transformative chart anchored in emotional intelligence. The gandanta Sun suggests a soul at a critical evolutionary juncture -- identity is being dissolved and reformed through Piscean surrender. The debilitated Moon in Scorpio creates profound emotional depth that, channeled through the exalted Saturn in Libra, becomes extraordinary discipline and structure. Two Pancha Mahapurusha yogas (Ruchaka and Shasha) indicate unusual potential for leadership through both courage and wisdom.</div>
+            <div class="ai-cta">Generate Full AI Reading &#8594;</div>
+          </div>
+
+          <!-- Tab hint showing other available tabs -->
+          <div class="tab-hint">
+            <div class="hint-text">Explore detailed data using the tabs above</div>
+            <div class="hint-tabs">
+              <span class="ht-chip ht-active">Overview</span>
+              <span class="ht-chip">Planets</span>
+              <span class="ht-chip">Houses</span>
+              <span class="ht-chip">Aspects</span>
+              <span class="ht-chip">Divisional</span>
+              <span class="ht-chip">Yogas</span>
+              <span class="ht-chip">Dasha</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLANETS TAB (inactive placeholder) -->
+        <div class="tab-pane" id="tab-planets">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#9734;</div>
+            <div class="ph-title">Planetary Positions</div>
+            <div class="ph-desc">Full table of all 9 Vedic planets with Sign, Degree, Nakshatra, Pada, Dignity, and Retrograde status. Same detailed table as shown in Option A, but contained within this focused tab view.</div>
+          </div>
+        </div>
+
+        <!-- HOUSES TAB -->
+        <div class="tab-pane" id="tab-houses">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#9673;</div>
+            <div class="ph-title">House Details (12 Bhavas)</div>
+            <div class="ph-desc">4-column grid of 12 house cards, each showing house number, sign, ruling planet, and planets in that house. Same layout as Option A but contained in this tab.</div>
+          </div>
+        </div>
+
+        <!-- ASPECTS TAB -->
+        <div class="tab-pane" id="tab-aspects">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#10023;</div>
+            <div class="ph-title">Aspects (Drishti)</div>
+            <div class="ph-desc">Full 9x9 aspect matrix showing planetary aspects. Color coded by type: 7th (standard), special aspects (Mars 4th/8th, Jupiter 5th/9th, Saturn 3rd/10th). Same grid as Option A.</div>
+          </div>
+        </div>
+
+        <!-- DIVISIONAL TAB -->
+        <div class="tab-pane" id="tab-divisional">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#9681;</div>
+            <div class="ph-title">Divisional Charts (Vargas)</div>
+            <div class="ph-desc">3-column grid of 6 mini South Indian charts: Rasi D-1, Navamsa D-9, Dashamsa D-10, Dwadashamsha D-12, Saptamsha D-7, Trimsamsha D-30. Each with purpose label.</div>
+          </div>
+        </div>
+
+        <!-- YOGAS TAB -->
+        <div class="tab-pane" id="tab-yogas">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#10024;</div>
+            <div class="ph-title">Yogas Detected</div>
+            <div class="ph-desc">List of detected yogas with name, type (Raja/Benefic/Challenging), description, and forming planets. Same card-based list as Option A but focused in this tab.</div>
+          </div>
+        </div>
+
+        <!-- DASHA TAB -->
+        <div class="tab-pane" id="tab-dasha">
+          <div class="placeholder-content">
+            <div class="ph-icon">&#8634;</div>
+            <div class="ph-title">Vimshottari Dasha Periods</div>
+            <div class="ph-desc">Accordion-style dasha timeline. Mahadasha periods with expandable Antardasha sub-periods. Current period highlighted. Same layout as Option A.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+</script>
+
+</body>
+</html>

@@ -1,66 +1,39 @@
 'use client';
 
-import { Typography, Card, Row, Col, Statistic } from 'antd';
-import { ApiOutlined, KeyOutlined, CheckCircleOutlined } from '@ant-design/icons';
-
-const { Title, Text } = Typography;
+import { Card, CardContent } from '@/components/ui/card';
+import { Plug, Key, CheckCircle } from 'lucide-react';
 
 const stats = [
-  { title: 'API Calls (30d)', value: 0, icon: <ApiOutlined style={{ color: '#6B5CE7' }} /> },
-  { title: 'Active Keys', value: 0, icon: <KeyOutlined style={{ color: '#E78A5C' }} /> },
-  { title: 'Status', value: 'Active', icon: <CheckCircleOutlined style={{ color: '#52c41a' }} /> },
+  { title: 'API Calls (30d)', value: '0', icon: Plug, color: 'text-gold' },
+  { title: 'Active Keys', value: '0', icon: Key, color: 'text-gold-bright' },
+  { title: 'Status', value: 'Active', icon: CheckCircle, color: 'text-green' },
 ];
 
 export default function DeveloperPortalPage() {
   return (
     <div>
-      <div style={{ marginBottom: 32 }}>
-        <Title level={3} style={{ color: '#fff', marginBottom: 4 }}>
-          <ApiOutlined style={{ marginRight: 10, color: '#6B5CE7' }} />
-          API Developer Portal
-        </Title>
-        <Text style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Manage your API keys, monitor usage, and explore documentation
-        </Text>
+      <div className="mb-8">
+        <h3 className="font-display text-display-md text-text-primary mb-1">API Developer Portal</h3>
+        <p className="text-sm text-text-muted">Manage your API keys, monitor usage, and explore documentation</p>
       </div>
 
-      <Row gutter={[20, 20]}>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {stats.map((s) => (
-          <Col xs={24} sm={8} key={s.title}>
-            <Card
-              bordered={false}
-              style={{
-                background: '#231845',
-                borderRadius: 12,
-                border: '1px solid rgba(107, 92, 231, 0.1)',
-              }}
-              styles={{ body: { padding: 20 } }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Statistic
-                  title={<Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>{s.title}</Text>}
-                  value={s.value}
-                  valueStyle={{ color: '#fff', fontSize: 28 }}
-                />
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 10,
-                    background: 'rgba(107, 92, 231, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 20,
-                  }}
-                >
-                  {s.icon}
+          <Card key={s.title}>
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[13px] text-text-muted mb-1">{s.title}</p>
+                  <p className="font-display text-display-md text-text-primary">{s.value}</p>
+                </div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--gold-bg)]">
+                  <s.icon className={`h-5 w-5 ${s.color}`} />
                 </div>
               </div>
-            </Card>
-          </Col>
+            </CardContent>
+          </Card>
         ))}
-      </Row>
+      </div>
     </div>
   );
 }

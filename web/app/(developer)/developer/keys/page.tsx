@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { Button, Card, Input, Table, Modal, Typography, Space, Tag, message, Popconfirm } from 'antd';
-import { PlusOutlined, CopyOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-
-const { Title, Text, Paragraph } = Typography;
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Plus, Copy, Trash2, RefreshCw, Key } from 'lucide-react';
 
 interface ApiKeyResponse {
   api_key_id: string;
@@ -25,11 +33,23 @@ interface ApiKeyCreatedResponse {
   name: string;
 }
 
+type Toast = { message: string; type: 'success' | 'error' } | null;
+
 export default function ApiKeysPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    label: string;
+    onConfirm: () => void;
+  } | null>(null);
+  const [toast, setToast] = useState<Toast>(null);
   const queryClient = useQueryClient();
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const { data: keys, isLoading } = useQuery({
     queryKey: ['api-keys'],
@@ -37,12 +57,13 @@ export default function ApiKeysPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (name: string) => apiClient.post<ApiKeyCreatedResponse>('/api/v1/api-keys', { name }),
+    mutationFn: (name: string) =>
+      apiClient.post<ApiKeyCreatedResponse>('/api/v1/api-keys', { name }),
     onSuccess: (data) => {
       setCreatedKey(data.data.key);
       setNewKeyName('');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-      message.success('API key created');
+      showToast('API key created');
     },
   });
 
@@ -50,134 +71,232 @@ export default function ApiKeysPage() {
     mutationFn: (keyId: string) => apiClient.delete(`/api/v1/api-keys/${keyId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-      message.success('API key revoked');
+      showToast('API key revoked');
     },
   });
 
   const rotateMutation = useMutation({
-    mutationFn: (keyId: string) => apiClient.post<ApiKeyCreatedResponse>(`/api/v1/api-keys/${keyId}/rotate`),
+    mutationFn: (keyId: string) =>
+      apiClient.post<ApiKeyCreatedResponse>(`/api/v1/api-keys/${keyId}/rotate`),
     onSuccess: (data) => {
       setCreatedKey(data.data.key);
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-      message.success('API key rotated');
+      showToast('API key rotated');
     },
   });
 
-  const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    {
-      title: 'Key',
-      dataIndex: 'key_prefix',
-      key: 'key_prefix',
-      render: (prefix: string) => <Text code>{prefix}...************************</Text>,
-    },
-    {
-      title: 'Created',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: 'Last Used',
-      dataIndex: 'last_used_at',
-      key: 'last_used_at',
-      render: (date: string | null) => date ? new Date(date).toLocaleDateString() : 'Never',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'is_active',
-      key: 'is_active',
-      render: (active: boolean) => (
-        <Tag color={active ? 'green' : 'red'}>{active ? 'Active' : 'Revoked'}</Tag>
-      ),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: ApiKeyResponse) => (
-        <Space>
-          <Popconfirm title="Rotate this key?" onConfirm={() => rotateMutation.mutate(record.api_key_id)}>
-            <Button icon={<SyncOutlined />} size="small">Rotate</Button>
-          </Popconfirm>
-          <Popconfirm title="Revoke this key?" onConfirm={() => revokeMutation.mutate(record.api_key_id)}>
-            <Button icon={<DeleteOutlined />} size="small" danger>Revoke</Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
+  const closeCreateModal = () => {
+    setIsCreateOpen(false);
+    setCreatedKey(null);
+    setNewKeyName('');
+  };
+
+  const keysList = keys?.data || [];
 
   return (
-    <div style={{ padding: 24 }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={3} style={{ margin: 0 }}>API Keys</Title>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsCreateOpen(true)}>
-            Create API Key
-          </Button>
+    <div>
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-[60] animate-in fade-in slide-in-from-top-2">
+          <div
+            className={`rounded-xl border px-4 py-2.5 text-sm shadow-lg ${
+              toast.type === 'success'
+                ? 'border-green/20 bg-green/10 text-green'
+                : 'border-red/20 bg-red/10 text-red'
+            }`}
+          >
+            {toast.message}
+          </div>
         </div>
+      )}
 
-        <Table
-          columns={columns}
-          dataSource={keys?.data || []}
-          loading={isLoading}
-          rowKey="api_key_id"
-          pagination={false}
-        />
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <h3 className="font-display text-display-md text-text-primary">API Keys</h3>
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Plus className="h-4 w-4" /> Create API Key
+        </Button>
+      </div>
 
-        {/* Create Key Modal */}
-        <Modal
-          title="Create API Key"
-          open={isCreateOpen}
-          onCancel={() => { setIsCreateOpen(false); setCreatedKey(null); }}
-          footer={createdKey ? [
-            <Button key="close" onClick={() => { setIsCreateOpen(false); setCreatedKey(null); }}>
-              Done
-            </Button>,
-          ] : [
-            <Button key="cancel" onClick={() => setIsCreateOpen(false)}>Cancel</Button>,
-            <Button
-              key="create"
-              type="primary"
-              loading={createMutation.isPending}
-              onClick={() => createMutation.mutate(newKeyName)}
-              disabled={!newKeyName.trim()}
-            >
-              Create
-            </Button>,
-          ]}
-        >
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16 text-sm text-text-muted">
+              Loading…
+            </div>
+          ) : keysList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Key className="mb-4 h-10 w-10 text-text-faint" />
+              <p className="text-sm text-text-muted">
+                No API keys yet. Create one to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-divider text-left">
+                    <th className="px-5 py-3 font-medium text-text-muted">Name</th>
+                    <th className="px-5 py-3 font-medium text-text-muted">Key</th>
+                    <th className="px-5 py-3 font-medium text-text-muted">Created</th>
+                    <th className="px-5 py-3 font-medium text-text-muted">Last Used</th>
+                    <th className="px-5 py-3 font-medium text-text-muted">Status</th>
+                    <th className="px-5 py-3 font-medium text-text-muted text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keysList.map((row) => (
+                    <tr
+                      key={row.api_key_id}
+                      className="border-b border-divider last:border-0 hover:bg-surface-hover transition-colors"
+                    >
+                      <td className="px-5 py-3 text-text-primary">{row.name}</td>
+                      <td className="px-5 py-3">
+                        <code className="rounded bg-surface-raised px-2 py-0.5 text-xs text-text-secondary">
+                          {row.key_prefix}…************************
+                        </code>
+                      </td>
+                      <td className="px-5 py-3 text-text-secondary">
+                        {new Date(row.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-5 py-3 text-text-secondary">
+                        {row.last_used_at
+                          ? new Date(row.last_used_at).toLocaleDateString()
+                          : 'Never'}
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge variant={row.is_active ? 'green' : 'destructive'}>
+                          {row.is_active ? 'Active' : 'Revoked'}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setConfirmAction({
+                                label: `Rotate "${row.name}"?`,
+                                onConfirm: () => rotateMutation.mutate(row.api_key_id),
+                              })
+                            }
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" /> Rotate
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red hover:text-red"
+                            onClick={() =>
+                              setConfirmAction({
+                                label: `Revoke "${row.name}"? This cannot be undone.`,
+                                onConfirm: () => revokeMutation.mutate(row.api_key_id),
+                              })
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Revoke
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create Key Dialog */}
+      <Dialog open={isCreateOpen} onClose={closeCreateModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{createdKey ? 'Key Created' : 'Create API Key'}</DialogTitle>
+          </DialogHeader>
+
           {createdKey ? (
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              <Paragraph type="warning">
+            <div className="space-y-4">
+              <p className="text-sm text-amber-400">
                 Copy this key now. You will not be able to see it again.
-              </Paragraph>
-              <Input.TextArea
+              </p>
+              <Textarea
                 value={createdKey}
                 readOnly
-                autoSize
-                style={{ fontFamily: 'monospace' }}
+                className="font-mono text-xs"
               />
               <Button
-                icon={<CopyOutlined />}
+                variant="outline"
+                className="w-full"
                 onClick={() => {
                   navigator.clipboard.writeText(createdKey);
-                  message.success('Copied to clipboard');
+                  showToast('Copied to clipboard');
                 }}
               >
-                Copy to Clipboard
+                <Copy className="h-4 w-4" /> Copy to Clipboard
               </Button>
-            </Space>
+            </div>
           ) : (
             <Input
               placeholder="Key name (e.g., Production, Staging)"
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
-              onPressEnter={() => newKeyName.trim() && createMutation.mutate(newKeyName)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newKeyName.trim()) {
+                  createMutation.mutate(newKeyName);
+                }
+              }}
+              autoFocus
             />
           )}
-        </Modal>
-      </Space>
+
+          <DialogFooter>
+            {createdKey ? (
+              <Button onClick={closeCreateModal}>Done</Button>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => setIsCreateOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => createMutation.mutate(newKeyName)}
+                  disabled={!newKeyName.trim() || createMutation.isPending}
+                >
+                  {createMutation.isPending ? 'Creating…' : 'Create'}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Dialog */}
+      <Dialog
+        open={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-text-secondary">{confirmAction?.label}</p>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmAction(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                confirmAction?.onConfirm();
+                setConfirmAction(null);
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

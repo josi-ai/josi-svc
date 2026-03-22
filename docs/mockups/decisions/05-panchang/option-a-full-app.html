@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 5A: Full Panchang App-Within-an-App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-amber: #D4A04A;
+      --accent-amber-bg: rgba(212,160,74,0.12);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --bar-good: #6AAF7A;
+      --bar-neutral: #3A4A6A;
+      --bar-avoid: #C45D4A;
+      --bar-special: #D4A04A;
+      --muhurta-now-bg: rgba(200,145,58,0.06);
+      --muhurta-now-border: rgba(200,145,58,0.15);
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-amber: #C8913A;
+      --accent-amber-bg: rgba(200,145,58,0.08);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --bar-good: #5A8F6A;
+      --bar-neutral: #CED4E0;
+      --bar-avoid: #C45D4A;
+      --bar-special: #C8913A;
+      --muhurta-now-bg: rgba(184,131,46,0.06);
+      --muhurta-now-border: rgba(184,131,46,0.18);
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 52px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--accent-gold-bg-subtle); border: 1px solid var(--accent-gold-bg);
+      border-radius: 12px; border-left: 4px solid var(--accent-gold);
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 8px;
+    }
+    .annotation p { font-size: 13px; color: var(--text-body); line-height: 1.7; }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .main { display: flex; flex-direction: column; overflow-y: auto; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .page-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text-primary); }
+    .topbar-controls { display: flex; gap: 12px; align-items: center; }
+    .location-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .location-btn .loc-icon { font-size: 14px; }
+    .location-btn .change { color: var(--accent-gold); font-weight: 600; margin-left: 4px; }
+    .date-nav {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .date-nav .arrow {
+      width: 28px; height: 28px; border-radius: 6px; background: var(--bg-card);
+      border: 1px solid var(--border-default); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 14px;
+    }
+    .date-nav .date-text { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 120px; text-align: center; }
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ========== CALENDAR GRID ========== */
+    .calendar-section { margin-bottom: 28px; }
+    .cal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .cal-header .month-nav { display: flex; align-items: center; gap: 12px; }
+    .cal-header .month-nav .arrow {
+      width: 28px; height: 28px; border-radius: 6px; background: var(--bg-card);
+      border: 1px solid var(--border-default); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 14px;
+    }
+    .cal-header .month-nav .month-text {
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text-primary);
+      min-width: 160px; text-align: center;
+    }
+    .cal-weekdays {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px;
+    }
+    .cal-weekdays .wd {
+      text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-faint); font-weight: 600; padding: 8px 0;
+    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-cell {
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px;
+      padding: 8px; min-height: 72px; cursor: pointer; transition: all 0.15s;
+    }
+    .cal-cell:hover { border-color: var(--border-strong); }
+    .cal-cell.empty { background: transparent; border-color: transparent; }
+    .cal-cell.today { border-color: var(--accent-gold); box-shadow: 0 0 0 1px var(--accent-gold); }
+    .cal-cell.purnima { background: rgba(200,145,58,0.08); }
+    .cal-cell.amavasya { background: rgba(106,159,216,0.06); }
+    .cal-cell.ekadashi { background: rgba(106,175,122,0.06); }
+    .cal-cell .day-num { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .cal-cell .tithi-name { font-size: 9px; color: var(--text-muted); line-height: 1.3; }
+    .cal-cell .nak-name { font-size: 9px; color: var(--text-faint); }
+    .cal-cell .festival-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--accent-gold-bright);
+      display: inline-block; margin-top: 3px;
+    }
+
+    /* ========== DAILY DETAIL ========== */
+    .daily-header {
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .sunrise-card {
+      background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px;
+      padding: 16px 20px; display: flex; gap: 32px; align-items: center; margin-bottom: 20px;
+    }
+    .sunrise-item { display: flex; flex-direction: column; }
+    .sunrise-item .sr-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 3px; }
+    .sunrise-item .sr-value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .sunrise-item .sr-value.gold { color: var(--accent-gold-bright); }
+
+    /* Five elements */
+    .five-elements {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .element-card {
+      background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px;
+      padding: 16px; position: relative; overflow: hidden;
+    }
+    .element-card .el-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 8px;
+    }
+    .element-card .el-name {
+      font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text-primary);
+      margin-bottom: 4px; line-height: 1.3;
+    }
+    .element-card .el-time { font-size: 11px; color: var(--accent-gold); margin-bottom: 6px; }
+    .element-card .el-then { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .element-card .el-detail { font-size: 10px; color: var(--text-faint); line-height: 1.4; }
+    .element-card .el-indicator {
+      position: absolute; top: 0; right: 0; width: 6px; height: 100%;
+    }
+    .el-indicator.auspicious { background: var(--accent-green); }
+    .el-indicator.neutral { background: var(--accent-amber); }
+
+    /* ========== INAUSPICIOUS TIMELINE ========== */
+    .timeline-section { margin-bottom: 24px; }
+    .section-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+    .timeline-bar-container {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 12px; padding: 20px;
+    }
+    .timeline-hours {
+      display: flex; justify-content: space-between; margin-bottom: 4px;
+    }
+    .timeline-hours span { font-size: 9px; color: var(--text-faint); font-weight: 500; }
+    .timeline-bar {
+      height: 32px; border-radius: 6px; display: flex; position: relative;
+      overflow: hidden; background: var(--bar-good); margin-bottom: 12px;
+    }
+    .timeline-segment {
+      height: 100%; position: absolute; display: flex; align-items: center;
+      justify-content: center; font-size: 8px; font-weight: 600; color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .timeline-now {
+      position: absolute; top: -4px; bottom: -4px; width: 2px;
+      background: var(--accent-gold-bright); z-index: 10;
+    }
+    .timeline-now::after {
+      content: 'NOW'; position: absolute; top: -16px; left: -10px;
+      font-size: 8px; font-weight: 700; color: var(--accent-gold-bright);
+      letter-spacing: 1px;
+    }
+    .timeline-legend { display: flex; gap: 20px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+    .legend-text { font-size: 11px; color: var(--text-muted); }
+    .legend-time { font-size: 10px; color: var(--text-faint); }
+
+    /* ========== CHOGHADIYA ========== */
+    .choghadiya-section { margin-bottom: 24px; }
+    .choghadiya-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chog-table {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 12px; overflow: hidden;
+    }
+    .chog-table .chog-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border-divider);
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .chog-row {
+      display: grid; grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr;
+      padding: 10px 16px; border-bottom: 1px solid var(--border-divider);
+      font-size: 12px; align-items: center;
+    }
+    .chog-row:last-child { border-bottom: none; }
+    .chog-row.shubh { background: rgba(106,175,122,0.06); }
+    .chog-row.amrit { background: rgba(106,175,122,0.1); }
+    .chog-row.labh { background: rgba(106,175,122,0.04); }
+    .chog-row.char { background: rgba(212,160,74,0.06); }
+    .chog-row.rog { background: rgba(196,93,74,0.06); }
+    .chog-row.kaal { background: rgba(196,93,74,0.08); }
+    .chog-row.udveg { background: rgba(196,93,74,0.04); }
+    .chog-time { color: var(--text-secondary); font-family: monospace; font-size: 11px; }
+    .chog-name { color: var(--text-primary); font-weight: 500; }
+    .chog-type { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; text-align: center; }
+    .type-good { background: var(--accent-green-bg); color: var(--accent-green); }
+    .type-neutral { background: var(--accent-amber-bg); color: var(--accent-amber); }
+    .type-bad { background: rgba(196,93,74,0.12); color: var(--accent-red); }
+    .chog-planet { color: var(--text-faint); font-size: 11px; text-align: right; }
+
+    /* ========== FESTIVALS ========== */
+    .festivals-section { margin-bottom: 24px; }
+    .festival-card {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 12px; padding: 20px; margin-bottom: 12px;
+    }
+    .festival-card .fest-name {
+      font-family: 'DM Serif Display', serif; font-size: 16px;
+      color: var(--text-primary); margin-bottom: 6px;
+    }
+    .festival-card .fest-desc { font-size: 12px; color: var(--text-body); line-height: 1.6; margin-bottom: 8px; }
+    .festival-card .fest-tag {
+      display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 12px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- THEME BAR -->
+<div class="theme-bar">
+  <span class="label">Decision 5A: Full Panchang App-Within-an-App</span>
+  <div style="width:1px;height:20px;background:var(--border-default);margin:0 8px"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- WEB FRAME -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/panchang</div>
+  </div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item active"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="page-title">Panchang</div>
+        <div class="topbar-controls">
+          <div class="location-btn">
+            <span class="loc-icon">&#128205;</span>
+            Chennai, Tamil Nadu
+            <span class="change">Change</span>
+          </div>
+          <div class="date-nav">
+            <div class="arrow">&#8592;</div>
+            <div class="date-text">Mar 12, 2026</div>
+            <div class="arrow">&#8594;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- SECTION 1: MONTHLY CALENDAR -->
+        <div class="calendar-section">
+          <div class="cal-header">
+            <div class="month-nav">
+              <div class="arrow">&#8592;</div>
+              <div class="month-text">March 2026</div>
+              <div class="arrow">&#8594;</div>
+            </div>
+          </div>
+          <div class="cal-weekdays">
+            <div class="wd">Sun</div><div class="wd">Mon</div><div class="wd">Tue</div>
+            <div class="wd">Wed</div><div class="wd">Thu</div><div class="wd">Fri</div><div class="wd">Sat</div>
+          </div>
+          <div class="cal-grid">
+            <!-- Row 1: Mar 1-7 -->
+            <div class="cal-cell"><div class="day-num">1</div><div class="tithi-name">Shukla 1</div><div class="nak-name">U.Bhadra</div></div>
+            <div class="cal-cell"><div class="day-num">2</div><div class="tithi-name">Shukla 2</div><div class="nak-name">Revati</div></div>
+            <div class="cal-cell"><div class="day-num">3</div><div class="tithi-name">Shukla 3</div><div class="nak-name">Ashwini</div></div>
+            <div class="cal-cell"><div class="day-num">4</div><div class="tithi-name">Shukla 4</div><div class="nak-name">Bharani</div><div class="festival-dot"></div></div>
+            <div class="cal-cell"><div class="day-num">5</div><div class="tithi-name">Shukla 5</div><div class="nak-name">Krittika</div></div>
+            <div class="cal-cell"><div class="day-num">6</div><div class="tithi-name">Shukla 6</div><div class="nak-name">Rohini</div></div>
+            <div class="cal-cell"><div class="day-num">7</div><div class="tithi-name">Shukla 7</div><div class="nak-name">Mrigash.</div></div>
+            <!-- Row 2: Mar 8-14 -->
+            <div class="cal-cell"><div class="day-num">8</div><div class="tithi-name">Shukla 8</div><div class="nak-name">Ardra</div></div>
+            <div class="cal-cell"><div class="day-num">9</div><div class="tithi-name">Shukla 9</div><div class="nak-name">Punarvasu</div></div>
+            <div class="cal-cell ekadashi"><div class="day-num">10</div><div class="tithi-name">Shukla 11</div><div class="nak-name">Pushya</div></div>
+            <div class="cal-cell"><div class="day-num">11</div><div class="tithi-name">Shukla 12</div><div class="nak-name">Ashlesha</div></div>
+            <div class="cal-cell today"><div class="day-num">12</div><div class="tithi-name">Shukla 4</div><div class="nak-name">Rohini</div><div class="festival-dot"></div></div>
+            <div class="cal-cell"><div class="day-num">13</div><div class="tithi-name">Shukla 5</div><div class="nak-name">Mrigash.</div></div>
+            <div class="cal-cell purnima"><div class="day-num">14</div><div class="tithi-name">Purnima</div><div class="nak-name">P.Phalg.</div><div class="festival-dot"></div></div>
+            <!-- Row 3: Mar 15-21 -->
+            <div class="cal-cell"><div class="day-num">15</div><div class="tithi-name">Krishna 1</div><div class="nak-name">U.Phalg.</div></div>
+            <div class="cal-cell"><div class="day-num">16</div><div class="tithi-name">Krishna 2</div><div class="nak-name">Hasta</div></div>
+            <div class="cal-cell"><div class="day-num">17</div><div class="tithi-name">Krishna 3</div><div class="nak-name">Chitra</div></div>
+            <div class="cal-cell"><div class="day-num">18</div><div class="tithi-name">Krishna 4</div><div class="nak-name">Swati</div></div>
+            <div class="cal-cell"><div class="day-num">19</div><div class="tithi-name">Krishna 5</div><div class="nak-name">Vishakha</div></div>
+            <div class="cal-cell"><div class="day-num">20</div><div class="tithi-name">Krishna 6</div><div class="nak-name">Anuradha</div></div>
+            <div class="cal-cell"><div class="day-num">21</div><div class="tithi-name">Krishna 7</div><div class="nak-name">Jyeshtha</div></div>
+            <!-- Row 4: Mar 22-28 -->
+            <div class="cal-cell"><div class="day-num">22</div><div class="tithi-name">Krishna 8</div><div class="nak-name">Moola</div></div>
+            <div class="cal-cell"><div class="day-num">23</div><div class="tithi-name">Krishna 9</div><div class="nak-name">P.Ashadha</div></div>
+            <div class="cal-cell"><div class="day-num">24</div><div class="tithi-name">Krishna 10</div><div class="nak-name">U.Ashadha</div></div>
+            <div class="cal-cell ekadashi"><div class="day-num">25</div><div class="tithi-name">Krishna 11</div><div class="nak-name">Shravana</div></div>
+            <div class="cal-cell"><div class="day-num">26</div><div class="tithi-name">Krishna 12</div><div class="nak-name">Dhanistha</div></div>
+            <div class="cal-cell"><div class="day-num">27</div><div class="tithi-name">Krishna 13</div><div class="nak-name">Shatab.</div></div>
+            <div class="cal-cell amavasya"><div class="day-num">28</div><div class="tithi-name">Amavasya</div><div class="nak-name">P.Bhadra</div></div>
+            <!-- Row 5: Mar 29-31 -->
+            <div class="cal-cell"><div class="day-num">29</div><div class="tithi-name">Shukla 1</div><div class="nak-name">U.Bhadra</div></div>
+            <div class="cal-cell"><div class="day-num">30</div><div class="tithi-name">Shukla 2</div><div class="nak-name">Revati</div></div>
+            <div class="cal-cell"><div class="day-num">31</div><div class="tithi-name">Shukla 3</div><div class="nak-name">Ashwini</div></div>
+            <div class="cal-cell empty"></div><div class="cal-cell empty"></div><div class="cal-cell empty"></div><div class="cal-cell empty"></div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: DAILY DETAIL -->
+        <div class="daily-header">Panchang for Wednesday, March 12, 2026</div>
+
+        <div class="sunrise-card">
+          <div class="sunrise-item">
+            <span class="sr-label">Sunrise</span>
+            <span class="sr-value">6:14 AM</span>
+          </div>
+          <div class="sunrise-item">
+            <span class="sr-label">Sunset</span>
+            <span class="sr-value">6:22 PM</span>
+          </div>
+          <div class="sunrise-item">
+            <span class="sr-label">Day Duration</span>
+            <span class="sr-value gold">12h 08m</span>
+          </div>
+          <div class="sunrise-item">
+            <span class="sr-label">Moonrise</span>
+            <span class="sr-value">9:48 AM</span>
+          </div>
+          <div class="sunrise-item">
+            <span class="sr-label">Moonset</span>
+            <span class="sr-value">10:56 PM</span>
+          </div>
+        </div>
+
+        <!-- Five Panchang Elements -->
+        <div class="section-title">Five Panchang Elements</div>
+        <div class="five-elements">
+          <div class="element-card">
+            <div class="el-indicator auspicious"></div>
+            <div class="el-label">Tithi</div>
+            <div class="el-name">Shukla Chaturthi</div>
+            <div class="el-time">Until 3:42 PM</div>
+            <div class="el-then">Then: Shukla Panchami</div>
+            <div class="el-detail">Deity: Ganapati<br>Auspicious for new beginnings</div>
+          </div>
+          <div class="element-card">
+            <div class="el-indicator auspicious"></div>
+            <div class="el-label">Nakshatra</div>
+            <div class="el-name">Rohini</div>
+            <div class="el-time">Until 1:15 PM</div>
+            <div class="el-then">Then: Mrigashira</div>
+            <div class="el-detail">Deity: Brahma<br>Ruling Planet: Moon</div>
+          </div>
+          <div class="element-card">
+            <div class="el-indicator auspicious"></div>
+            <div class="el-label">Yoga</div>
+            <div class="el-name">Shubha</div>
+            <div class="el-time">Until 11:30 AM</div>
+            <div class="el-then">Then: Shukla</div>
+            <div class="el-detail">Nature: Auspicious<br>Good for all activities</div>
+          </div>
+          <div class="element-card">
+            <div class="el-indicator neutral"></div>
+            <div class="el-label">Karana</div>
+            <div class="el-name">Baalava</div>
+            <div class="el-time">Until 3:42 PM</div>
+            <div class="el-then">Then: Kaulava</div>
+            <div class="el-detail">Type: Movable<br>Favorable for trade</div>
+          </div>
+          <div class="element-card">
+            <div class="el-indicator neutral"></div>
+            <div class="el-label">Vara</div>
+            <div class="el-name">Wednesday</div>
+            <div class="el-time">Budha Vara</div>
+            <div class="el-then">Ruling: Mercury</div>
+            <div class="el-detail">Good for learning, trade, communication</div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: INAUSPICIOUS TIMINGS -->
+        <div class="timeline-section">
+          <div class="section-title">Inauspicious &amp; Auspicious Timings</div>
+          <div class="timeline-bar-container">
+            <div class="timeline-hours">
+              <span>6 AM</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span>
+              <span>12 PM</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6 PM</span>
+            </div>
+            <div class="timeline-bar">
+              <!-- Background is green (safe). Overlay colored segments. -->
+              <!-- Yamagandam: 7:30-9:00 AM = ~12.5% to 25% -->
+              <div class="timeline-segment" style="left:12.5%;width:12.5%;background:rgba(212,160,74,0.85);">Yama</div>
+              <!-- Gulika Kalam: 9:00-10:30 AM = 25% to 37.5% -->
+              <div class="timeline-segment" style="left:25%;width:12.5%;background:rgba(200,145,58,0.65);">Gulika</div>
+              <!-- Abhijit Muhurta: 11:54-12:42 = ~49.2% to 55.8% -->
+              <div class="timeline-segment" style="left:49%;width:6.7%;background:var(--bar-special);border-radius:4px;">Abhijit</div>
+              <!-- Rahu Kalam: 12:00-1:30 PM = 50% to 62.5% -->
+              <div class="timeline-segment" style="left:50%;width:12.5%;background:var(--bar-avoid);">Rahu</div>
+              <!-- Now marker at ~10:15 AM = ~35.4% -->
+              <div class="timeline-now" style="left:35.4%"></div>
+            </div>
+            <div class="timeline-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--bar-good)"></div>
+                <span class="legend-text">Safe / Auspicious</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--bar-avoid)"></div>
+                <span class="legend-text">Rahu Kalam</span>
+                <span class="legend-time">12:00 - 1:30 PM</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:rgba(212,160,74,0.85)"></div>
+                <span class="legend-text">Yamagandam</span>
+                <span class="legend-time">7:30 - 9:00 AM</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:rgba(200,145,58,0.65)"></div>
+                <span class="legend-text">Gulika Kalam</span>
+                <span class="legend-time">9:00 - 10:30 AM</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--bar-special)"></div>
+                <span class="legend-text">Abhijit Muhurta</span>
+                <span class="legend-time">11:54 AM - 12:42 PM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: CHOGHADIYA -->
+        <div class="choghadiya-section">
+          <div class="section-title">Choghadiya</div>
+          <div class="choghadiya-grid">
+            <!-- Day Choghadiya -->
+            <div class="chog-table">
+              <div class="chog-header">Day Choghadiya (Sunrise to Sunset)</div>
+              <div class="chog-row amrit">
+                <span class="chog-time">6:14 - 7:45</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+              <div class="chog-row kaal">
+                <span class="chog-time">7:45 - 9:16</span>
+                <span class="chog-name">Kaal</span>
+                <span class="chog-type type-bad">Kaal</span>
+                <span class="chog-planet">Saturn</span>
+              </div>
+              <div class="chog-row shubh">
+                <span class="chog-time">9:16 - 10:47</span>
+                <span class="chog-name">Shubh</span>
+                <span class="chog-type type-good">Shubh</span>
+                <span class="chog-planet">Jupiter</span>
+              </div>
+              <div class="chog-row rog">
+                <span class="chog-time">10:47 - 12:18</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+              <div class="chog-row udveg">
+                <span class="chog-time">12:18 - 1:49</span>
+                <span class="chog-name">Udveg</span>
+                <span class="chog-type type-bad">Udveg</span>
+                <span class="chog-planet">Sun</span>
+              </div>
+              <div class="chog-row char">
+                <span class="chog-time">1:49 - 3:20</span>
+                <span class="chog-name">Char</span>
+                <span class="chog-type type-neutral">Char</span>
+                <span class="chog-planet">Venus</span>
+              </div>
+              <div class="chog-row labh">
+                <span class="chog-time">3:20 - 4:51</span>
+                <span class="chog-name">Labh</span>
+                <span class="chog-type type-good">Labh</span>
+                <span class="chog-planet">Mercury</span>
+              </div>
+              <div class="chog-row amrit">
+                <span class="chog-time">4:51 - 6:22</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+            </div>
+            <!-- Night Choghadiya -->
+            <div class="chog-table">
+              <div class="chog-header">Night Choghadiya (Sunset to Sunrise)</div>
+              <div class="chog-row rog">
+                <span class="chog-time">6:22 - 7:53</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+              <div class="chog-row kaal">
+                <span class="chog-time">7:53 - 9:24</span>
+                <span class="chog-name">Kaal</span>
+                <span class="chog-type type-bad">Kaal</span>
+                <span class="chog-planet">Saturn</span>
+              </div>
+              <div class="chog-row labh">
+                <span class="chog-time">9:24 - 10:55</span>
+                <span class="chog-name">Labh</span>
+                <span class="chog-type type-good">Labh</span>
+                <span class="chog-planet">Mercury</span>
+              </div>
+              <div class="chog-row udveg">
+                <span class="chog-time">10:55 - 12:26</span>
+                <span class="chog-name">Udveg</span>
+                <span class="chog-type type-bad">Udveg</span>
+                <span class="chog-planet">Sun</span>
+              </div>
+              <div class="chog-row shubh">
+                <span class="chog-time">12:26 - 1:57</span>
+                <span class="chog-name">Shubh</span>
+                <span class="chog-type type-good">Shubh</span>
+                <span class="chog-planet">Jupiter</span>
+              </div>
+              <div class="chog-row amrit">
+                <span class="chog-time">1:57 - 3:28</span>
+                <span class="chog-name">Amrit</span>
+                <span class="chog-type type-good">Amrit</span>
+                <span class="chog-planet">Moon</span>
+              </div>
+              <div class="chog-row char">
+                <span class="chog-time">3:28 - 4:59</span>
+                <span class="chog-name">Char</span>
+                <span class="chog-type type-neutral">Char</span>
+                <span class="chog-planet">Venus</span>
+              </div>
+              <div class="chog-row rog">
+                <span class="chog-time">4:59 - 6:14</span>
+                <span class="chog-name">Rog</span>
+                <span class="chog-type type-bad">Rog</span>
+                <span class="chog-planet">Mars</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: FESTIVALS -->
+        <div class="festivals-section">
+          <div class="section-title">Festivals &amp; Observances</div>
+          <div class="festival-card">
+            <div class="fest-name">Vinayaka Chaturthi</div>
+            <div class="fest-desc">Monthly observance of Lord Ganesha on Shukla Chaturthi. Auspicious for worship, new beginnings, and removing obstacles. Fasting from sunrise to moonrise is recommended.</div>
+            <span class="fest-tag">Shukla Chaturthi</span>
+          </div>
+          <div class="festival-card">
+            <div class="fest-name">Skanda Sashti</div>
+            <div class="fest-desc">Sacred day dedicated to Lord Murugan (Kartikeya). Special prayers and pujas are performed at Murugan temples. Devotees observe a fast and break it after evening prayers.</div>
+            <span class="fest-tag">Upcoming: Mar 14</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNOTATION -->
+<div class="annotation">
+  <div class="ann-title">Design Decision Analysis</div>
+  <p>Full panchang experience. Competes with Drik Panchang and AstroSage. Huge draw for daily active users -- Indians check panchang every morning. But requires: maintaining festival database, regional variant support, accurate astronomical calculations for each location. Significant ongoing data maintenance.</p>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

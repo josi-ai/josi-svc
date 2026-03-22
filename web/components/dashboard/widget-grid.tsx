@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   type WidgetType,
   type WidgetInstance,
@@ -83,6 +83,13 @@ export function WidgetGrid() {
   const [widgets, setWidgets] = useState<WidgetInstance[]>(defaultWidgets);
   const [modalOpen, setModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { user } = useAuth();
+
+  const displayName = user?.full_name || user?.email || 'User';
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   // Load from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
@@ -120,21 +127,21 @@ export function WidgetGrid() {
       {/* Header row */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h3 className="font-display text-display-md text-text-primary mb-1">
-            Dashboard
-          </h3>
-          <p className="text-sm text-text-muted">
-            Your personalized cosmic command center
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {greeting}, <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{displayName}</strong>
           </p>
+          <h2 className="font-display mt-1" style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}>
+            {dateStr}
+          </h2>
         </div>
-        <Button
-          variant="outline"
+        <button
           onClick={() => setModalOpen(true)}
-          className="border-gold text-gold-bright hover:bg-[rgba(200,145,58,0.08)]"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+          style={{ background: 'var(--gold)', color: 'var(--btn-add-text)' }}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           Add Widget
-        </Button>
+        </button>
       </div>
 
       {/* Widget grid */}

@@ -172,7 +172,9 @@ else:
         enable_cdn=True,
         cdn_policy=gcp.compute.BackendServiceCdnPolicyArgs(
             cache_mode="CACHE_ALL_STATIC",
-            default_ttl=3600,
+            default_ttl=86400,  # 1 day default TTL
+            max_ttl=31536000,   # respect up to 1 year from Cache-Control headers
+            client_ttl=86400,   # 1 day client-side cache
             signed_url_cache_max_age_sec=0,
         ),
         log_config=gcp.compute.BackendServiceLogConfigArgs(

@@ -1,17 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { AvatarUser } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { PanelLeftClose, PanelLeftOpen, ChevronRight } from 'lucide-react';
+import UserDropdown from '@/components/layout/user-dropdown';
 import {
   sidebarMenuItems,
   sidebarGroups,
   type SidebarMenuItem,
 } from '@/config/sidebar-config';
 
-/** Hardcoded counter placeholders until real data flows in */
 const counterValues: Record<string, string> = {
   charts: '12',
   ai: '7',
@@ -20,6 +21,7 @@ const counterValues: Record<string, string> = {
 
 interface AppSidebarProps {
   collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 function NavItem({
@@ -53,7 +55,7 @@ function NavItem({
         borderRadius: 7,
         borderLeft: isActive ? '3px solid var(--gold)' : '3px solid transparent',
         background: isActive ? 'var(--sb-active-bg)' : 'transparent',
-        fontWeight: isActive ? 'var(--sb-active-weight)' as React.CSSProperties['fontWeight'] : 'normal',
+        fontWeight: isActive ? ('var(--sb-active-weight)' as React.CSSProperties['fontWeight']) : 'normal',
         color: isActive ? 'var(--sb-text-active)' : 'var(--sb-text)',
         transition: 'all 0.2s',
         textAlign: 'left',
@@ -61,23 +63,13 @@ function NavItem({
         justifyContent: collapsed ? 'center' : 'flex-start',
       }}
       onMouseEnter={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'var(--sb-hover-bg)';
-        }
+        if (!isActive) e.currentTarget.style.background = 'var(--sb-hover-bg)';
       }}
       onMouseLeave={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'transparent';
-        }
+        if (!isActive) e.currentTarget.style.background = 'transparent';
       }}
     >
-      <Icon
-        size={16}
-        style={{
-          color: `var(${item.iconColorVar})`,
-          flexShrink: 0,
-        }}
-      />
+      <Icon size={16} style={{ color: `var(${item.iconColorVar})`, flexShrink: 0 }} />
       {!collapsed && (
         <>
           <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>
@@ -102,7 +94,7 @@ function NavItem({
   );
 }
 
-export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
+export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -123,9 +115,7 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
         flexDirection: 'column',
         height: '100%',
         position: 'relative',
-        overflow: 'hidden',
-        width: collapsed ? 60 : 240,
-        transition: 'width 0.2s ease',
+        overflow: 'visible',
       }}
     >
       {/* Gold top accent line */}
@@ -142,7 +132,7 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
         }}
       />
 
-      {/* Header */}
+      {/* Header: Logo + MYSTIC + Collapse toggle */}
       <div
         style={{
           display: 'flex',
@@ -154,26 +144,62 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
           zIndex: 1,
         }}
       >
-        <span
-          className="font-display"
-          style={{
-            fontSize: 22,
-            color: 'var(--sb-text)',
-          }}
-        >
-          {collapsed ? 'J' : 'Josi'}
-        </span>
-        {!collapsed && (
-          <Badge
-            variant="plan"
+        {!collapsed ? (
+          <>
+            <span className="font-display" style={{ fontSize: 22, color: 'var(--sb-text)' }}>
+              Josi
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Badge
+                variant="plan"
+                style={{
+                  background: 'rgba(200,145,58,0.12)',
+                  color: '#C8913A',
+                  border: '1px solid rgba(200,145,58,0.3)',
+                }}
+              >
+                MYSTIC
+              </Badge>
+              <button
+                onClick={onToggleCollapse}
+                title="Collapse sidebar"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 24,
+                  height: 24,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--sb-text-muted, var(--sb-text))',
+                  cursor: 'pointer',
+                  transition: 'color 0.2s',
+                }}
+              >
+                <PanelLeftClose size={14} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={onToggleCollapse}
+            title="Expand sidebar"
             style={{
-              background: 'rgba(200,145,58,0.12)',
-              color: '#C8913A',
-              border: '1px solid rgba(200,145,58,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--sb-text)',
+              cursor: 'pointer',
             }}
           >
-            MYSTIC
-          </Badge>
+            <PanelLeftOpen size={16} />
+          </button>
         )}
       </div>
 
@@ -225,26 +251,19 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Footer */}
+      {/* Footer: User dropdown (replaces header avatar) */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: collapsed ? '14px 10px' : '14px 16px',
           borderTop: '1px solid var(--sb-border)',
           position: 'relative',
-          zIndex: 1,
-          justifyContent: collapsed ? 'center' : 'flex-start',
+          zIndex: 50,
         }}
       >
-        <AvatarUser size="sm" initials={initials} />
-        {!collapsed && (
-          <div>
-            <div style={{ fontSize: 12, color: 'var(--sb-text)' }}>{displayName}</div>
-            <div style={{ fontSize: 10, color: 'var(--sb-text-muted)' }}>Mystic Plan</div>
-          </div>
-        )}
+        <UserDropdown
+          initials={initials}
+          variant="sidebar"
+          collapsed={collapsed}
+        />
       </div>
     </aside>
   );
