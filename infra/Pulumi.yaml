@@ -2,5 +2,6 @@ name: josi-infra
 runtime:
   name: python
   options:
+    toolchain: pip
     virtualenv: venv
 description: Josi platform infrastructure on GCP
