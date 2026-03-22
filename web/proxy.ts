@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/chart-calculator',
   '/pricing',
   '/api/v1/webhooks/(.*)',
+  '/constellations/(.*)',
 ]);
 
 export const proxy = clerkMiddleware(async (auth, request) => {

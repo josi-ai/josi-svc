@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 3C: Chart + Sliding Panel (Tool Mode)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS (from v7) ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.07);
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 900px;
+      margin: 0 auto 24px;
+      padding: 24px 32px;
+      background: var(--accent-gold-bg-subtle);
+      border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-gold);
+    }
+    .annotation h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: var(--text-primary); margin-bottom: 12px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.7; color: var(--text-body); margin-bottom: 8px;
+    }
+    .annotation .label { font-weight: 700; color: var(--text-primary); }
+    .annotation .pros .label { color: var(--accent-green); }
+    .annotation .cons .label { color: var(--accent-red); }
+    .annotation .best-for .label { color: var(--accent-blue); }
+    .annotation .pros, .annotation .cons, .annotation .best-for {
+      font-size: 12px; line-height: 1.6; margin-bottom: 6px;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 8px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .tg-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== PILLS ========== */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; display: inline-block; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .pill-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .pill-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 0 auto 40px; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 900px; }
+
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA (Two-Panel) ========== */
+    .main { display: flex; flex-direction: column; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .breadcrumb { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .topbar .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .topbar .breadcrumb a:hover { color: var(--accent-gold); }
+    .topbar .breadcrumb .sep { color: var(--text-faint); }
+    .topbar .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+    .topbar-actions { display: flex; gap: 8px; }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== TWO-PANEL SPLIT ========== */
+    .panel-split {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      flex: 1;
+    }
+
+    /* ========== LEFT PANEL: CHART CANVAS ========== */
+    .chart-canvas {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 28px;
+      background: var(--bg-frame);
+      position: relative;
+    }
+
+    .chart-canvas-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .chart-canvas-header h1 {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .tradition-badge {
+      font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 16px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright);
+    }
+    .chart-canvas-header .chart-date {
+      font-size: 12px; color: var(--text-muted); margin-left: auto;
+    }
+
+    /* ========== LARGE SOUTH INDIAN CHART ========== */
+    .chart-large-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .si-chart-large {
+      width: 420px; height: 420px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      border: 2px solid var(--border-strong);
+      background: var(--bg-card);
+      border-radius: 6px;
+      position: relative;
+    }
+    .si-cell {
+      border: 1px solid var(--border-default);
+      padding: 6px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .si-cell:hover { background: var(--bg-card-hover); }
+    .si-cell .sign-label {
+      font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-faint); font-weight: 600;
+    }
+    .si-cell .planet-marker {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .si-cell .planet-marker:hover {
+      transform: scale(1.15);
+    }
+    .planet-marker.sun {
+      background: rgba(212,160,74,0.2);
+      border: 2px solid var(--accent-gold-bright);
+      color: var(--accent-gold-bright);
+    }
+    .planet-marker.sun.selected {
+      background: rgba(212,160,74,0.35);
+      box-shadow: 0 0 12px rgba(212,160,74,0.4), 0 0 24px rgba(212,160,74,0.15);
+    }
+    .planet-marker.moon {
+      background: rgba(139,153,181,0.15);
+      border: 2px solid var(--text-secondary);
+      color: var(--text-secondary);
+    }
+    .planet-marker.mars {
+      background: rgba(196,93,74,0.15);
+      border: 2px solid var(--accent-red);
+      color: var(--accent-red);
+    }
+    .planet-marker.mercury {
+      background: rgba(106,175,122,0.12);
+      border: 2px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+    .planet-marker.jupiter {
+      background: rgba(106,159,216,0.15);
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .planet-marker.venus {
+      background: rgba(106,175,122,0.12);
+      border: 2px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+    .planet-marker.saturn {
+      background: rgba(91,106,138,0.15);
+      border: 2px solid var(--text-muted);
+      color: var(--text-muted);
+    }
+    .planet-marker.rahu {
+      background: rgba(106,159,216,0.1);
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .planet-marker.ketu {
+      background: rgba(196,93,74,0.1);
+      border: 2px solid var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .si-center {
+      grid-column: 2 / 4; grid-row: 2 / 4;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 1px solid var(--border-default);
+      background: var(--bg-surface);
+    }
+    .si-center .name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px; color: var(--text-primary);
+    }
+    .si-center .date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .si-center .asc-label {
+      font-size: 10px; color: var(--accent-gold); margin-top: 4px; font-weight: 600;
+    }
+
+    /* Multiple planets in one cell */
+    .planet-row {
+      display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;
+    }
+
+    /* ========== CHART TOOLBAR ========== */
+    .chart-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 0 0;
+    }
+    .toolbar-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-default);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toolbar-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-secondary);
+    }
+    .toolbar-btn.active {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold-bright);
+      background: var(--accent-gold-bg-subtle);
+    }
+    .toolbar-sep {
+      width: 1px; height: 24px; background: var(--border-default);
+      margin: 0 4px;
+    }
+    .toolbar-select {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-default);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+
+    /* ========== RIGHT PANEL: DETAIL PANEL ========== */
+    .detail-panel {
+      border-left: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .panel-header .planet-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .panel-header .planet-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: var(--text-primary);
+      flex: 1;
+    }
+    .panel-header .close-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border-default);
+      background: transparent;
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .panel-header .close-btn:hover {
+      color: var(--text-secondary);
+      border-color: var(--border-strong);
+    }
+
+    .panel-body {
+      padding: 20px;
+      flex: 1;
+    }
+
+    /* ========== PLANET DETAILS ========== */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .detail-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .detail-item .di-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 4px;
+    }
+    .detail-item .di-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px; color: var(--text-primary);
+    }
+    .detail-item .di-sub {
+      font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    }
+    .detail-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* ========== PANEL SECTIONS ========== */
+    .panel-section {
+      margin-bottom: 20px;
+    }
+    .panel-section-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-divider);
+    }
+
+    .interpretation-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .interpretation-card .interp-text {
+      font-family: 'DM Serif Text', serif;
+      font-size: 14px; line-height: 1.75;
+      color: var(--text-body-reading);
+    }
+    .interpretation-card .interp-cta {
+      font-size: 12px; color: var(--accent-gold);
+      font-weight: 600; margin-top: 12px; cursor: pointer;
+    }
+
+    .aspect-list {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .aspect-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+    }
+    .aspect-item .ai-planet {
+      font-weight: 600; color: var(--text-primary); font-size: 13px;
+      width: 50px;
+    }
+    .aspect-item .ai-type {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 10px; border-radius: 8px;
+    }
+    .aspect-item .ai-type.full { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .aspect-item .ai-type.special { background: var(--accent-green-bg); color: var(--accent-green); }
+    .aspect-item .ai-desc {
+      font-size: 11px; color: var(--text-muted); flex: 1;
+    }
+
+    .div-position-list {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .div-position-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+    }
+    .div-position-item .dp-varga {
+      font-weight: 600; color: var(--accent-gold-bright); font-size: 12px;
+      width: 40px;
+    }
+    .div-position-item .dp-sign {
+      font-size: 13px; color: var(--text-primary); font-weight: 500; flex: 1;
+    }
+    .div-position-item .dp-house {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    /* ========== COLLAPSED PANEL STATE ========== */
+    .collapsed-indicator {
+      display: none;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .collapsed-indicator .ci-icon {
+      font-size: 28px; margin-bottom: 12px; opacity: 0.4;
+    }
+    .collapsed-indicator .ci-text {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .collapsed-indicator .ci-hint {
+      font-size: 11px; color: var(--text-faint);
+    }
+
+    /* ========== OVERVIEW STATS in panel ========== */
+    .overview-stat-list {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .overview-stat-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+    }
+    .overview-stat-item .os-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+    }
+    .overview-stat-item .os-label {
+      font-size: 11px; color: var(--text-muted);
+    }
+    .overview-stat-item .os-value {
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+
+    /* ========== ASPECT LINES ON CHART (CSS visual) ========== */
+    .aspect-line-hint {
+      position: absolute;
+      top: 30%;
+      left: 20%;
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-gold-bright), transparent);
+      opacity: 0.3;
+      transform: rotate(-25deg);
+      pointer-events: none;
+    }
+    .aspect-line-hint-2 {
+      position: absolute;
+      top: 45%;
+      left: 15%;
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+      opacity: 0.2;
+      transform: rotate(15deg);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== THEME TOGGLE ========== -->
+<div class="theme-bar">
+  <span class="tg-label">Theme:</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ========== ANNOTATION ========== -->
+<div style="max-width:1280px;margin:20px auto 20px;padding:0 20px;">
+  <div class="annotation">
+    <h1>Decision 3C: Chart + Sliding Panel (Tool Mode)</h1>
+    <p>A two-panel layout where the chart dominates the left side (60%) and a sliding detail panel occupies the right (40%). Users click on planet markers in the chart to populate the right panel with that planet's details -- sign, degree, nakshatra, interpretation, aspects, and divisional positions. The chart becomes an interactive tool. When no planet is selected, the right panel shows an overview with key stats.</p>
+    <div class="pros"><span class="label">Pros:</span> Most interactive and professional feel. Keeps the chart always visible while exploring details -- no loss of context. Direct visual-to-data connection (click planet, see its data). Natural exploration flow. Power users can quickly compare planets by clicking through them. Aspect lines can be toggled on the chart itself.</div>
+    <div class="cons"><span class="label">Cons:</span> Most complex to build -- requires an interactive chart with clickable elements. Harder to see a full table of all planets at once. Right panel has limited width for dense data like aspect matrices. Discovery problem: users must know to click things. Not as good for printing/exporting a full report.</div>
+    <div class="best-for"><span class="label">Best for:</span> Power users and professional astrologers who want an interactive exploration tool. Users who think visually and want to understand chart relationships spatially. Premium product feel. Users who want to understand "what does this placement mean?"</div>
+  </div>
+</div>
+
+<!-- ========== WEB FRAME ========== -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts/birth-vedic/govind-1992</div>
+  </div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <div class="topbar">
+        <div class="breadcrumb">
+          <a href="#">Charts</a>
+          <span class="sep">&#8250;</span>
+          <span class="current">Govind's Birth Chart</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-ghost">&#8615; Export</button>
+          <button class="btn-ghost">&#9734; Share</button>
+          <button class="btn-gold">&#10024; AI Reading</button>
+        </div>
+      </div>
+
+      <!-- TWO-PANEL SPLIT -->
+      <div class="panel-split">
+        <!-- LEFT: CHART CANVAS -->
+        <div class="chart-canvas">
+          <div class="chart-canvas-header">
+            <h1>Govind's Birth Chart</h1>
+            <span class="tradition-badge">Vedic</span>
+            <span class="chart-date">Mar 15, 1992 &middot; 14:32 IST</span>
+          </div>
+
+          <div class="chart-large-container">
+            <!-- Subtle aspect lines behind chart -->
+            <div class="aspect-line-hint"></div>
+            <div class="aspect-line-hint-2"></div>
+
+            <div class="si-chart-large">
+              <!-- Row 1: Pisces, Aries, Taurus, Gemini -->
+              <div class="si-cell" onclick="selectPlanet('sun')">
+                <span class="sign-label">Pisces</span>
+                <div class="planet-marker sun selected">Su</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Aries</span>
+              </div>
+              <div class="si-cell" onclick="selectPlanet('rahu')">
+                <span class="sign-label">Taurus</span>
+                <div class="planet-marker rahu">Ra</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Gemini</span>
+              </div>
+              <!-- Row 2 -->
+              <div class="si-cell" onclick="selectPlanet('venus')">
+                <span class="sign-label">Aquarius</span>
+                <div class="planet-row">
+                  <div class="planet-marker venus">Ve</div>
+                  <div class="planet-marker mercury" onclick="event.stopPropagation();selectPlanet('mercury')">Me</div>
+                </div>
+              </div>
+              <div class="si-center">
+                <div class="name">Govind</div>
+                <div class="date">Mar 15, 1992</div>
+                <div class="asc-label">Asc: Cancer</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Cancer</span>
+                <span style="font-size:9px;color:var(--accent-gold);font-weight:600">ASC</span>
+              </div>
+              <!-- Row 3 -->
+              <div class="si-cell" onclick="selectPlanet('mars')">
+                <span class="sign-label">Capricorn</span>
+                <div class="planet-marker mars">Ma</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Leo</span>
+              </div>
+              <!-- Row 4 -->
+              <div class="si-cell" onclick="selectPlanet('jupiter')">
+                <span class="sign-label">Sagittarius</span>
+                <div class="planet-marker jupiter">Ju</div>
+              </div>
+              <div class="si-cell" onclick="selectPlanet('moon')">
+                <span class="sign-label">Scorpio</span>
+                <div class="planet-row">
+                  <div class="planet-marker moon">Mo</div>
+                  <div class="planet-marker ketu" onclick="event.stopPropagation();selectPlanet('ketu')">Ke</div>
+                </div>
+              </div>
+              <div class="si-cell" onclick="selectPlanet('saturn')">
+                <span class="sign-label">Libra</span>
+                <div class="planet-marker saturn">Sa</div>
+              </div>
+              <div class="si-cell">
+                <span class="sign-label">Virgo</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Toolbar -->
+          <div class="chart-toolbar">
+            <div class="toolbar-btn" title="Zoom in">+</div>
+            <div class="toolbar-btn" title="Zoom out">-</div>
+            <div class="toolbar-sep"></div>
+            <div class="toolbar-btn" title="Rotate">&#8634;</div>
+            <div class="toolbar-btn active" title="Show aspect lines">&#9674;</div>
+            <div class="toolbar-sep"></div>
+            <select class="toolbar-select">
+              <option>South Indian</option>
+              <option>North Indian</option>
+              <option>East Indian</option>
+              <option>Western Wheel</option>
+            </select>
+            <div class="toolbar-sep"></div>
+            <select class="toolbar-select">
+              <option>Rasi (D-1)</option>
+              <option>Navamsa (D-9)</option>
+              <option>Dashamsa (D-10)</option>
+              <option>Dwadashamsha (D-12)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RIGHT: DETAIL PANEL -->
+        <div class="detail-panel">
+          <!-- Panel showing Sun details (selected state) -->
+          <div class="panel-header">
+            <div class="planet-icon" style="background:rgba(212,160,74,0.2);border:2px solid var(--accent-gold-bright);color:var(--accent-gold-bright);border-radius:50%">&#9737;</div>
+            <div class="planet-title">Sun in Pisces</div>
+            <button class="close-btn" title="Close panel">&times;</button>
+          </div>
+
+          <div class="panel-body">
+            <!-- Planet Details Grid -->
+            <div class="panel-section">
+              <div class="panel-section-title">Placement Details</div>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="di-label">Sign</div>
+                  <div class="di-value">Pisces</div>
+                  <div class="di-sub">Jupiter-ruled Water</div>
+                </div>
+                <div class="detail-item">
+                  <div class="di-label">Degree</div>
+                  <div class="di-value">29&#176;14'</div>
+                  <div class="di-sub">Gandanta point</div>
+                </div>
+                <div class="detail-item">
+                  <div class="di-label">Nakshatra</div>
+                  <div class="di-value">Revati</div>
+                  <div class="di-sub">Pada 4 &middot; Mercury-ruled</div>
+                </div>
+                <div class="detail-item">
+                  <div class="di-label">House</div>
+                  <div class="di-value">9th</div>
+                  <div class="di-sub">Dharma &middot; Higher learning</div>
+                </div>
+                <div class="detail-item">
+                  <div class="di-label">Dignity</div>
+                  <div class="di-value">Neutral</div>
+                  <div class="di-sub">In Jupiter's sign</div>
+                </div>
+                <div class="detail-item">
+                  <div class="di-label">Motion</div>
+                  <div class="di-value">Direct</div>
+                  <div class="di-sub">Normal speed</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interpretation -->
+            <div class="panel-section">
+              <div class="panel-section-title">Interpretation</div>
+              <div class="interpretation-card">
+                <div class="interp-text">The Sun at the final degree of Pisces -- a <strong style="color:var(--text-primary)">gandanta point</strong> where water dissolves into fire. This is one of the most spiritually significant placements in Vedic astrology. Your sense of self is perpetually being dissolved and reborn. Identity is not fixed but fluid, leading to profound spiritual insight and a capacity for selfless service. The 9th house placement amplifies the dharmic quality -- your purpose involves teaching, philosophy, or guiding others through their own transformations.</div>
+                <div class="interp-cta">Generate full AI interpretation &#8594;</div>
+              </div>
+            </div>
+
+            <!-- Aspects from this planet -->
+            <div class="panel-section">
+              <div class="panel-section-title">Aspects Made by Sun</div>
+              <div class="aspect-list">
+                <div class="aspect-item">
+                  <span class="ai-planet">Saturn</span>
+                  <span class="ai-type full">7th</span>
+                  <span class="ai-desc">Full aspect to Libra (4th house)</span>
+                </div>
+              </div>
+              <div style="margin-top:10px;">
+                <div class="panel-section-title" style="margin-bottom:8px">Aspects Received by Sun</div>
+                <div class="aspect-list">
+                  <div class="aspect-item">
+                    <span class="ai-planet">Saturn</span>
+                    <span class="ai-type full">7th</span>
+                    <span class="ai-desc">Full aspect from Libra</span>
+                  </div>
+                  <div class="aspect-item">
+                    <span class="ai-planet">Jupiter</span>
+                    <span class="ai-type special">5th</span>
+                    <span class="ai-desc">Special aspect from Sagittarius</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Divisional positions -->
+            <div class="panel-section">
+              <div class="panel-section-title">Divisional Positions</div>
+              <div class="div-position-list">
+                <div class="div-position-item">
+                  <span class="dp-varga">D-1</span>
+                  <span class="dp-sign">Pisces</span>
+                  <span class="dp-house">9th house</span>
+                </div>
+                <div class="div-position-item">
+                  <span class="dp-varga">D-9</span>
+                  <span class="dp-sign">Gemini</span>
+                  <span class="dp-house">12th house</span>
+                </div>
+                <div class="div-position-item">
+                  <span class="dp-varga">D-10</span>
+                  <span class="dp-sign">Aquarius</span>
+                  <span class="dp-house">8th house</span>
+                </div>
+                <div class="div-position-item">
+                  <span class="dp-varga">D-12</span>
+                  <span class="dp-sign">Virgo</span>
+                  <span class="dp-house">3rd house</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Related Yogas -->
+            <div class="panel-section">
+              <div class="panel-section-title">Related Yogas</div>
+              <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:14px 16px;margin-bottom:8px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span class="pill pill-red">Challenging</span>
+                  <span style="font-weight:600;font-size:13px;color:var(--text-primary)">Gandanta Sun</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-body);line-height:1.6">Sun at 29&#176; Pisces is in gandanta zone. Deep karmic transformation of ego and identity.</div>
+              </div>
+              <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:14px 16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span class="pill pill-gold">Raja Yoga</span>
+                  <span style="font-weight:600;font-size:13px;color:var(--text-primary)">Budha-Aditya Yoga</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-body);line-height:1.6">Sun near Mercury -- intellectual sharpness and communication ability.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========== COLLAPSED STATE PREVIEW ========== -->
+<div style="max-width:900px;margin:0 auto 40px;padding:0 20px;">
+  <div class="annotation" style="border-left-color:var(--accent-blue)">
+    <h1 style="font-size:18px">Collapsed State (No Planet Selected)</h1>
+    <p>When no planet is clicked, the right panel shows an overview instead. Below is what that default state looks like. The panel header reads "Overview" and displays key chart statistics, element balance, current dasha, and a prompt to click any planet for details.</p>
+  </div>
+</div>
+
+<div class="web-frame" style="max-width:420px;margin:0 auto 40px">
+  <div style="background:var(--bg-surface);padding:20px;">
+    <!-- Collapsed overview state -->
+    <div style="display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);margin-bottom:16px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent-gold-bg);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--accent-gold-bright)">&#9673;</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text-primary)">Overview</div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-bottom:8px">Key Placements</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-muted)">Sun</span><span style="color:var(--text-primary);font-weight:500">Pisces 29&#176;14'</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-muted)">Moon</span><span style="color:var(--text-primary);font-weight:500">Scorpio 14&#176;32'</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-muted)">Ascendant</span><span style="color:var(--text-primary);font-weight:500">Cancer 08&#176;22'</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-muted)">Mars</span><span style="color:var(--accent-green);font-weight:500">Capricorn (Exalted)</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-muted)">Saturn</span><span style="color:var(--accent-green);font-weight:500">Libra (Exalted)</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:12px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-bottom:4px">Element</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--text-primary)">Water</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:12px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-bottom:4px">Pattern</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--text-primary)">Bowl</div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-bottom:4px">Current Dasha</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--text-primary)">Mercury-Saturn</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Until Mar 2028</div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid var(--border-default);border-radius:10px;padding:12px;">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-bottom:4px">Yogas Detected</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+        <span class="pill pill-gold">Gaja Kesari</span>
+        <span class="pill pill-green">Ruchaka</span>
+        <span class="pill pill-green">Shasha</span>
+        <span class="pill pill-red">Gandanta</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0 8px;">
+      <div style="font-size:12px;color:var(--text-faint)">Click any planet on the chart to see details</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:4px;opacity:0.6">&#8592; Select a planet marker</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+
+function selectPlanet(planet) {
+  // Visual feedback: remove selected from all, add to clicked
+  document.querySelectorAll('.planet-marker').forEach(m => m.classList.remove('selected'));
+  event.target.closest('.planet-marker')?.classList.add('selected');
+  // In a real implementation, this would update the detail panel content
+}
+</script>
+
+</body>
+</html>

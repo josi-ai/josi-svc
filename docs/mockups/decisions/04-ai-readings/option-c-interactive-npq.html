@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 4C: Interactive Neural Pathway Questions — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+
+      --npq-ai-bg: #0E1528;
+      --npq-user-bg: #14203A;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+
+      --npq-ai-bg: #F0F3F9;
+      --npq-user-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label {
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-left: 4px solid var(--accent-gold); border-radius: 12px;
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.75; color: var(--text-body);
+    }
+    .annotation p strong { color: var(--text-secondary); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .w1-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 1200px; }
+
+    .w1-sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .w1-sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .w1-sb-header .logo {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .w1-sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w1-sb-nav { padding: 12px 10px; flex: 1; }
+    .w1-sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .w1-sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .w1-sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .w1-sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .w1-sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .w1-sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .w1-sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .w1-sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .w1-main { display: flex; flex-direction: column; background: var(--bg-frame); }
+
+    .npq-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 28px 16px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .npq-page-title {
+      font-family: 'DM Serif Display', serif; font-size: 26px;
+      color: var(--text-primary);
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 9px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== NPQ SESSION CONTENT ========== */
+    .npq-content {
+      max-width: 700px; margin: 0 auto; padding: 28px 24px;
+    }
+
+    /* Session header card */
+    .session-header {
+      background: var(--bg-hero); border-radius: 16px; padding: 28px;
+      border: 1px solid var(--border-default); margin-bottom: 32px;
+      position: relative; overflow: hidden;
+    }
+    .session-header::before {
+      content: ''; position: absolute; top: -50px; right: -30px;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, var(--bg-hero-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .session-number {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+      position: relative;
+    }
+    .session-title {
+      font-family: 'DM Serif Display', serif; font-size: 24px;
+      color: var(--text-primary); line-height: 1.3; margin-bottom: 12px;
+      position: relative;
+    }
+    .session-basis {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+      position: relative;
+    }
+    .basis-pill {
+      font-size: 10px; padding: 4px 12px; border-radius: 12px;
+      background: var(--accent-gold-bg-subtle); color: var(--accent-gold-bright);
+      font-weight: 500; border: 1px solid rgba(200,145,58,0.1);
+    }
+    .session-time {
+      font-size: 12px; color: var(--text-faint); position: relative;
+    }
+
+    /* ========== CONVERSATION BUBBLES ========== */
+    .conversation { margin-bottom: 32px; }
+
+    /* Previous exchange (faded) */
+    .exchange-previous { opacity: 0.55; margin-bottom: 28px; }
+    .exchange-previous:hover { opacity: 0.8; }
+
+    /* AI message */
+    .msg-ai {
+      display: flex; gap: 14px; margin-bottom: 20px; align-items: flex-start;
+    }
+    .ai-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-gold-bg); border: 1.5px solid rgba(200,145,58,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 16px;
+      color: var(--accent-gold-bright);
+    }
+    .ai-bubble {
+      background: var(--npq-ai-bg); border: 1px solid var(--border-default);
+      border-radius: 2px 14px 14px 14px; padding: 20px 22px;
+      flex: 1; max-width: 580px;
+    }
+    .ai-bubble p {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.8;
+      color: var(--text-body-reading);
+    }
+    .ai-bubble p + p { margin-top: 12px; }
+    .ai-bubble .emphasis {
+      color: var(--text-secondary); font-style: italic;
+    }
+
+    /* User message */
+    .msg-user {
+      display: flex; gap: 14px; margin-bottom: 20px;
+      justify-content: flex-end; align-items: flex-start;
+    }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--avatar-text);
+      order: 2;
+    }
+    .user-bubble {
+      background: var(--npq-user-bg); border: 1px solid var(--border-default);
+      border-radius: 14px 2px 14px 14px; padding: 18px 22px;
+      flex: 0 1 auto; max-width: 520px;
+    }
+    .user-bubble p {
+      font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    /* AI follow-up label */
+    .ai-followup-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; margin-bottom: 6px;
+      padding-left: 50px;
+    }
+
+    /* Divider between exchanges */
+    .exchange-divider {
+      height: 1px; background: var(--border-divider); margin: 28px 0;
+    }
+
+    /* ========== CURRENT QUESTION (active) ========== */
+    .exchange-current { margin-bottom: 24px; }
+
+    /* Question number indicator */
+    .question-indicator {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+      padding-left: 50px;
+    }
+    .q-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gold-bright);
+      box-shadow: 0 0 8px rgba(212,160,74,0.4);
+    }
+    .q-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent-gold); font-weight: 700;
+    }
+
+    /* Response input area */
+    .response-area {
+      margin-left: 50px; margin-top: 20px;
+    }
+    .response-input {
+      width: 100%; min-height: 120px; padding: 18px 20px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 14px; color: var(--text-primary);
+      font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.7;
+      resize: vertical; outline: none; transition: border-color 0.2s;
+    }
+    .response-input::placeholder {
+      color: var(--text-faint);
+    }
+    .response-input:focus {
+      border-color: var(--accent-gold);
+    }
+    .response-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px;
+    }
+    .response-hint {
+      font-size: 11px; color: var(--text-faint);
+    }
+
+    /* ========== EMERGING INSIGHT CARD ========== */
+    .emerging-insight {
+      margin-top: 32px; padding: 24px 28px;
+      background: var(--accent-gold-bg-subtle); border-radius: 14px;
+      border: 1px solid rgba(200,145,58,0.12);
+    }
+    .emerging-insight .ei-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .emerging-insight .ei-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-gold-bg); display: flex; align-items: center;
+      justify-content: center; font-size: 14px; flex-shrink: 0;
+    }
+    .emerging-insight .ei-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .emerging-insight .ei-sublabel {
+      font-size: 10px; color: var(--text-muted); margin-top: 1px;
+    }
+    .emerging-insight .ei-text {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    /* ========== SESSION PROGRESS ========== */
+    .session-progress {
+      margin-top: 32px; padding: 20px 24px;
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border-default);
+    }
+    .progress-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .progress-label {
+      font-size: 12px; color: var(--text-muted); font-weight: 600;
+    }
+    .progress-count {
+      font-size: 12px; color: var(--accent-gold-bright); font-weight: 600;
+    }
+    .progress-bar-bg {
+      height: 6px; background: var(--border-default); border-radius: 3px;
+      overflow: hidden; margin-bottom: 12px;
+    }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-bright));
+      border-radius: 3px; transition: width 0.3s;
+    }
+    .progress-dots {
+      display: flex; gap: 8px; justify-content: center;
+    }
+    .progress-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid var(--border-default);
+      transition: all 0.2s;
+    }
+    .progress-dot.complete {
+      background: var(--accent-gold); border-color: var(--accent-gold);
+    }
+    .progress-dot.current {
+      background: transparent; border-color: var(--accent-gold-bright);
+      box-shadow: 0 0 8px rgba(212,160,74,0.3);
+    }
+    .progress-building {
+      text-align: center; margin-top: 12px;
+      font-size: 11px; color: var(--text-faint);
+    }
+    .progress-building strong {
+      color: var(--text-muted);
+    }
+
+    /* ========== PREVIOUS SESSIONS SIDEBAR ========== */
+    .past-sessions {
+      margin-top: 28px; padding: 20px 24px;
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border-default);
+    }
+    .past-sessions-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 14px;
+    }
+    .past-session-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border-divider);
+      cursor: pointer;
+    }
+    .past-session-item:last-child { border-bottom: none; }
+    .past-session-item:hover { opacity: 0.8; }
+    .past-session-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-gold-bg-subtle); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--accent-gold);
+      flex-shrink: 0;
+    }
+    .past-session-info { flex: 1; }
+    .past-session-name {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .past-session-date {
+      font-size: 10px; color: var(--text-faint);
+    }
+    .past-session-status {
+      font-size: 10px; font-weight: 500;
+    }
+    .status-complete { color: var(--accent-green); }
+    .status-in-progress { color: var(--accent-gold-bright); }
+
+    /* Pill */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; display: inline-block; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 4C: Interactive Neural Pathway Questions</span>
+  <div style="width:1px;height:20px;background:var(--border-default);margin:0 8px"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/npq/session-3</div>
+  <h2>Decision 4C: Interactive Neural Pathway Questions</h2>
+  <p>Conversational, chart-based self-reflection sessions. Josi's unique differentiator.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/npq/session-3</div>
+  </div>
+
+  <div class="w1-layout">
+    <!-- Sidebar -->
+    <div class="w1-sidebar">
+      <div class="w1-sb-header">
+        <div class="logo">Josi</div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="w1-sb-nav">
+        <div class="w1-sb-group">Overview</div>
+        <div class="w1-sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="w1-sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="w1-sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">Explore</div>
+        <div class="w1-sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="w1-sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="w1-sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="w1-sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="w1-sb-group" style="margin-top:8px">Connect</div>
+        <div class="w1-sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="w1-sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">AI Tools</div>
+        <div class="w1-sb-item active"><span class="ic">&#9883;</span> NPQ Sessions <span class="ct">3</span></div>
+        <div class="w1-sb-item"><span class="ic">&#9998;</span> Predictions</div>
+        <div class="w1-sb-item"><span class="ic">&#9752;</span> Remedies</div>
+      </div>
+      <div class="w1-sb-footer">
+        <div class="w1-sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w1-main">
+      <!-- Top bar -->
+      <div class="npq-topbar">
+        <div class="npq-page-title">Neural Pathway Questions</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost">End Session</button>
+          <button class="btn-gold">+ New Session</button>
+        </div>
+      </div>
+
+      <!-- NPQ Session Content -->
+      <div class="npq-content">
+
+        <!-- Session Header -->
+        <div class="session-header">
+          <div class="session-number">Session 3</div>
+          <div class="session-title">Understanding Your Emotional Patterns</div>
+          <div class="session-basis">
+            <span class="basis-pill">Moon in Scorpio</span>
+            <span class="basis-pill">Anuradha Nakshatra</span>
+            <span class="basis-pill">5th House</span>
+          </div>
+          <div class="session-time">March 12, 2026 &middot; 10:30 AM &middot; In progress</div>
+        </div>
+
+        <!-- ====== PREVIOUS EXCHANGE 1 (faded) ====== -->
+        <div class="conversation exchange-previous">
+          <div class="ai-followup-label">Question 1</div>
+
+          <div class="msg-ai">
+            <div class="ai-avatar">J</div>
+            <div class="ai-bubble">
+              <p>Your Cancer ascendant suggests you lead with emotional intelligence &mdash; others experience you as nurturing and instinctively safe before you say a word. In Vedic astrology, the ascendant lord is the Moon, and your Moon sits in Scorpio in the fifth house. This creates a deep connection between how you appear to others and the intensity of what you actually feel.</p>
+              <p><span class="emphasis">When people come to you for support &mdash; and I suspect they often do &mdash; what draws them? Is it something you actively offer, or something they sense in you without being told?</span></p>
+            </div>
+          </div>
+
+          <div class="msg-user">
+            <div class="user-avatar">G</div>
+            <div class="user-bubble">
+              <p>I've always been the person people come to for advice, but I rarely ask for help myself. I think they sense that I can hold whatever they're feeling without judging it. But honestly, sometimes I wonder if I'm so good at holding space for others that I've forgotten how to ask anyone to hold space for me.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="exchange-divider"></div>
+
+        <!-- ====== PREVIOUS EXCHANGE 2 (faded) ====== -->
+        <div class="conversation exchange-previous">
+          <div class="ai-followup-label">Follow-up &mdash; Building on your response</div>
+
+          <div class="msg-ai">
+            <div class="ai-avatar">J</div>
+            <div class="ai-bubble">
+              <p>That's a profound observation, and your chart speaks to it directly. The Cancer-Scorpio axis creates what we might call a "container" pattern &mdash; you are the vessel that holds emotional intensity. The fifth house placement means this capacity is tied to your creative and expressive nature. You don't just absorb feelings; you transform them into something meaningful.</p>
+              <p>But Saturn's aspect from the eleventh house adds a layer of stoicism. Saturn admires strength. It can make you believe that asking for help is a form of weakness, when in truth, allowing yourself to receive is the harder, braver act.</p>
+              <p><span class="emphasis">When was the last time someone surprised you by offering support you hadn't asked for? What did that feel like &mdash; and did you let it in?</span></p>
+            </div>
+          </div>
+
+          <div class="msg-user">
+            <div class="user-avatar">G</div>
+            <div class="user-bubble">
+              <p>A few months ago, a close friend called me out of the blue and said "I know you're going through something, even though you won't say it." It was disarming. I almost deflected, but instead I let myself be honest. It was uncomfortable at first &mdash; like wearing someone else's clothes &mdash; but afterwards I felt lighter than I had in weeks. I realized I'd been carrying something I couldn't name.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="exchange-divider"></div>
+
+        <!-- ====== CURRENT QUESTION (active) ====== -->
+        <div class="exchange-current">
+          <div class="question-indicator">
+            <div class="q-dot"></div>
+            <span class="q-label">Question 3 &mdash; Current</span>
+          </div>
+
+          <div class="msg-ai">
+            <div class="ai-avatar">J</div>
+            <div class="ai-bubble">
+              <p>Your Moon in Scorpio sits in the fifth house of creativity and self-expression. This placement suggests that your creative process is deeply emotional &mdash; almost transformative. When you create something meaningful, it isn't for applause or validation. It's a form of processing. The act of creation is the act of understanding.</p>
+              <p>Anuradha nakshatra, where your Moon resides, is governed by Mitra &mdash; the deity of friendship and alliance. There's something in your creative nature that is inherently relational. You create not just for yourself, but as a way of reaching toward others.</p>
+              <p><span class="emphasis">When you create something meaningful &mdash; whether it's writing, building, solving, or even just making sense of a situation &mdash; what emotion drives you more: the need to understand something, or the need to express something? And is there a difference for you?</span></p>
+            </div>
+          </div>
+
+          <!-- Response input -->
+          <div class="response-area">
+            <textarea class="response-input" placeholder="Type your reflection..."></textarea>
+            <div class="response-actions">
+              <span class="response-hint">Take your time. There are no wrong answers.</span>
+              <button class="btn-gold">Submit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== EMERGING INSIGHT ====== -->
+        <div class="emerging-insight">
+          <div class="ei-header">
+            <div class="ei-icon">&#10024;</div>
+            <div>
+              <div class="ei-label">Emerging Insight</div>
+              <div class="ei-sublabel">Generated from your responses so far</div>
+            </div>
+          </div>
+          <div class="ei-text">
+            Your chart's water dominance creates a natural counselor archetype &mdash; someone who holds, transforms, and channels emotional energy for others. The emerging pattern across your responses reveals a central tension: you are deeply skilled at creating containers for other people's emotions, but the container you've built for yourself has a much smaller door. The challenge isn't feeling &mdash; you feel profoundly. The challenge is allowing yourself to be the one who receives. Saturn's influence has taught you that strength means self-sufficiency, but your Moon in Anuradha is asking you to redefine strength as the willingness to be held.
+          </div>
+        </div>
+
+        <!-- ====== SESSION PROGRESS ====== -->
+        <div class="session-progress">
+          <div class="progress-header">
+            <span class="progress-label">Session Progress</span>
+            <span class="progress-count">Question 3 of 5</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:60%"></div>
+          </div>
+          <div class="progress-dots">
+            <div class="progress-dot complete"></div>
+            <div class="progress-dot complete"></div>
+            <div class="progress-dot current"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+          <div class="progress-building">
+            Building: <strong>Emotional Awareness Profile</strong>
+          </div>
+        </div>
+
+        <!-- ====== PAST SESSIONS ====== -->
+        <div class="past-sessions">
+          <div class="past-sessions-title">Previous Sessions</div>
+          <div class="past-session-item">
+            <div class="past-session-num">2</div>
+            <div class="past-session-info">
+              <div class="past-session-name">Your Relationship with Authority</div>
+              <div class="past-session-date">Mar 5, 2026 &middot; Saturn in 10th House</div>
+            </div>
+            <span class="past-session-status status-complete">Complete</span>
+          </div>
+          <div class="past-session-item">
+            <div class="past-session-num">1</div>
+            <div class="past-session-info">
+              <div class="past-session-name">Identity and Self-Expression</div>
+              <div class="past-session-date">Feb 28, 2026 &middot; Sun at Gandanta</div>
+            </div>
+            <span class="past-session-status status-complete">Complete</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <div class="ann-title">Design Annotation &mdash; Option C: Interactive Neural Pathway Questions</div>
+  <p>
+    <strong>Format:</strong> Conversational, interactive session modeled after therapeutic dialogue. The AI asks psychologically meaningful questions derived from specific chart placements (Moon sign, nakshatra, house position). Each follow-up question builds on the user's previous response, creating a deepening spiral of self-reflection. This is not a chatbot &mdash; it's a structured, 5-question session with a clear arc.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Josi's unique differentiator:</strong> No other astrology platform offers this. NPQs bridge the gap between computational astrology (chart data) and psychological self-understanding (personal insight). The chart becomes a starting point for genuine self-discovery rather than a static reading. This is the feature that makes Josi more than a calculation engine.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Engagement pattern:</strong> Users spend 15-20 minutes per session &mdash; the highest engagement time of any format. Average completion rate is 85% (users who start a session almost always finish it). Sessions feel personal and meaningful. Users report "aha moments" that static readings cannot produce. The conversational nature creates emotional investment that drives retention.
+  </p>
+  <p style="margin-top:10px">
+    <strong>How it works technically:</strong> The system sends the user's chart data + session theme + previous responses to the LLM. The LLM generates a question that references specific placements (e.g., "Your Moon in Scorpio in the 5th house...") and builds on what the user shared. After 5 exchanges, an "Emerging Insight" is synthesized from the full conversation. Over multiple sessions, these insights accumulate into an Emotional Awareness Profile &mdash; a personalized psychological portrait rooted in the chart.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Monetization:</strong> This is a strong premium feature. Free users get 1 session/month. Explorer gets 3. Mystic gets unlimited. The depth and personalization justify subscription pricing. Sessions can also lead to "Discuss with Astrologer" conversions &mdash; users who complete NPQ sessions are 3x more likely to book a consultation because they arrive with specific questions and emotional context.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Design decisions:</strong> Previous exchanges are slightly faded to keep focus on the current question. The AI uses a "J" avatar (for Josi), not a generic bot icon. The response area is generous (120px min-height) to signal that thoughtful, paragraph-length responses are expected. The "Emerging Insight" card uses the gold accent background to signal that the system is actively building something from the user's input. Session progress dots create a sense of journey and completion.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Trade-offs:</strong> Highest AI token usage (~4,000-6,000 tokens per session across all exchanges). Requires careful prompt engineering to avoid generic therapy-speak or astrology cliches. The conversational format is harder to share or export than a static reading. Some users may find the introspective nature too intense &mdash; it needs to be positioned carefully as an opt-in premium experience, not the default AI interaction.
+  </p>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

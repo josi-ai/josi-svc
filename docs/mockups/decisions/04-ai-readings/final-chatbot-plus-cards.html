@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 4 — Final: AI Chatbot + Card-Based Insights — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.1);
+
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+
+      --chat-ai-bg: #0E1528;
+      --chat-user-bg: #14203A;
+      --chat-input-bg: #111828;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --bg-hero-glow: rgba(200,145,58,0.04);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --accent-red-bg: rgba(196,93,74,0.06);
+
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+
+      --chat-ai-bg: #F0F3F9;
+      --chat-user-bg: #E8ECF2;
+      --chat-input-bg: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE BAR ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label {
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 56px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 32px auto; padding: 24px 32px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-left: 4px solid var(--accent-gold); border-radius: 12px;
+    }
+    .annotation .ann-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 700; margin-bottom: 10px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.75; color: var(--text-body);
+    }
+    .annotation p strong { color: var(--text-secondary); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; }
+    .browser-dots .y { background: #D4A04A; }
+    .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .w1-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 1100px; }
+
+    .w1-sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .w1-sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .w1-sb-header .logo {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .w1-sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .w1-sb-nav { padding: 12px 10px; flex: 1; }
+    .w1-sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .w1-sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .w1-sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .w1-sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .w1-sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .w1-sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .w1-sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .w1-sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .w1-main { display: flex; flex-direction: column; background: var(--bg-frame); }
+
+    .page-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 28px 0;
+    }
+    .page-title {
+      font-family: 'DM Serif Display', serif; font-size: 26px;
+      color: var(--text-primary);
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 9px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* ========== TAB BAR ========== */
+    .tab-bar {
+      display: flex; align-items: center; padding: 16px 28px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .tab-bar-left {
+      display: flex; gap: 0; flex: 1;
+    }
+    .tab-bar-right {
+      display: flex; align-items: center; padding-bottom: 14px;
+    }
+    .tab-item {
+      padding: 10px 24px 14px; font-size: 14px; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+      background: none; border-top: none; border-left: none; border-right: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .tab-item:hover { color: var(--text-secondary); }
+    .tab-item.active {
+      color: var(--text-primary); border-bottom-color: var(--accent-gold);
+    }
+    .tab-item .tab-icon { font-size: 15px; }
+
+    /* Chart context selector in tab bar */
+    .tab-chart-context {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 6px; font-size: 12px;
+      background: transparent; border: 1px solid var(--border-default);
+      color: var(--text-secondary); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s; white-space: nowrap;
+    }
+    .tab-chart-context:hover { border-color: var(--border-strong); }
+    .tab-chart-context .ctx-label {
+      font-size: 11px; color: var(--text-faint); font-weight: 500;
+    }
+    .tab-chart-context .ctx-value {
+      font-weight: 500; color: var(--text-secondary); font-size: 12px;
+    }
+    .tab-chart-context .ctx-arrow {
+      color: var(--text-faint); font-size: 9px; margin-left: 2px;
+    }
+
+    /* ========== TAB CONTENT ========== */
+    .tab-content { display: none; flex: 1; flex-direction: column; }
+    .tab-content.active { display: flex; }
+
+    /* ================================================================
+       TAB 1: CHAT
+       ================================================================ */
+
+    /* Chat header */
+    .chat-header {
+      display: flex; align-items: center; gap: 14px; padding: 18px 28px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .chat-ai-avatar {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--avatar-text);
+    }
+    .chat-ai-info { flex: 1; }
+    .chat-ai-name {
+      font-family: 'DM Serif Display', serif; font-size: 17px;
+      color: var(--text-primary); margin-bottom: 1px;
+    }
+    .chat-ai-subtitle {
+      font-size: 12px; color: var(--text-muted);
+    }
+
+    /* Chat area */
+    .chat-area {
+      flex: 1; overflow-y: auto; position: relative;
+    }
+    .chat-area::before {
+      content: ''; position: sticky; top: 0; left: 0; right: 0;
+      display: block; height: 40px; z-index: 2;
+      background: linear-gradient(to bottom, var(--bg-frame) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .chat-messages {
+      max-width: 750px; margin: 0 auto; padding: 0 28px 24px;
+    }
+
+    /* AI message */
+    .msg-ai {
+      display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start;
+    }
+    .msg-avatar-ai {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-gold-bg); border: 1.5px solid rgba(200,145,58,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--accent-gold-bright);
+    }
+    .bubble-ai {
+      background: var(--chat-ai-bg); border: 1px solid var(--border-default);
+      border-radius: 2px 16px 16px 16px; padding: 20px 22px;
+      flex: 1; max-width: 640px;
+    }
+    .bubble-ai p {
+      font-family: 'DM Serif Text', serif; font-size: 15px; line-height: 1.8;
+      color: var(--text-body-reading);
+    }
+    .bubble-ai p + p { margin-top: 14px; }
+    .bubble-ai .msg-section-title {
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 6px; margin-top: 16px;
+      letter-spacing: 0.2px;
+    }
+    .bubble-ai .msg-section-title:first-child { margin-top: 0; }
+    .bubble-ai ul {
+      margin: 8px 0; padding-left: 0; list-style: none;
+    }
+    .bubble-ai ul li {
+      font-family: 'DM Serif Text', serif; font-size: 14px; line-height: 1.7;
+      color: var(--text-body-reading); padding: 4px 0 4px 16px; position: relative;
+    }
+    .bubble-ai ul li::before {
+      content: ''; position: absolute; left: 0; top: 12px;
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent-gold); opacity: 0.6;
+    }
+    .bubble-ai ul li strong {
+      font-family: 'Inter', sans-serif; font-weight: 600;
+      color: var(--text-secondary); font-size: 13px;
+    }
+    .bubble-ai .msg-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'Inter', sans-serif; font-size: 12px;
+      color: var(--accent-gold); font-weight: 600; margin-top: 14px;
+      cursor: pointer;
+    }
+
+    /* Inline callout card inside AI message */
+    .msg-callout {
+      background: var(--accent-gold-bg-subtle); border-radius: 10px;
+      padding: 12px 16px; margin: 14px 0;
+      border: 1px solid rgba(200,145,58,0.1);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .msg-callout .callout-icon {
+      font-size: 16px; flex-shrink: 0;
+    }
+    .msg-callout .callout-text {
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      color: var(--accent-gold-bright); line-height: 1.5;
+    }
+
+    /* User message */
+    .msg-user {
+      display: flex; gap: 12px; margin-bottom: 20px;
+      justify-content: flex-end; align-items: flex-start;
+    }
+    .msg-avatar-user {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--avatar-text);
+      order: 2;
+    }
+    .bubble-user {
+      background: var(--chat-user-bg); border: 1px solid var(--border-default);
+      border-radius: 16px 2px 16px 16px; padding: 16px 20px;
+      flex: 0 1 auto; max-width: 540px;
+    }
+    .bubble-user p {
+      font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    /* Suggestion chips */
+    .suggestion-chips {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+      padding-left: 46px;
+    }
+    .suggestion-chip {
+      padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border-default); background: var(--bg-card);
+      color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .suggestion-chip:hover {
+      border-color: var(--accent-gold); color: var(--accent-gold-bright);
+      background: var(--accent-gold-bg-subtle);
+    }
+
+    /* Chat input area */
+    .chat-input-area {
+      padding: 16px 28px 20px; border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+    .chat-input-container {
+      max-width: 750px; margin: 0 auto;
+    }
+    .chat-input-row {
+      display: flex; gap: 10px; align-items: flex-end;
+    }
+    .chat-attach-btn {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chat-attach-btn:hover {
+      border-color: var(--border-strong); color: var(--text-secondary);
+    }
+    .chat-input-wrapper {
+      flex: 1; position: relative;
+    }
+    .chat-input {
+      width: 100%; padding: 10px 16px; min-height: 40px;
+      background: var(--chat-input-bg); border: 1px solid var(--border-default);
+      border-radius: 20px; color: var(--text-primary);
+      font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5;
+      resize: none; outline: none; transition: border-color 0.2s;
+    }
+    .chat-input::placeholder { color: var(--text-faint); }
+    .chat-input:focus { border-color: var(--accent-gold); }
+    .chat-send-btn {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-gold); border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chat-send-btn:hover {
+      background: var(--accent-gold-bright);
+    }
+    .chat-disclaimer {
+      max-width: 750px; margin: 8px auto 0; text-align: center;
+      font-size: 11px; color: var(--text-faint); line-height: 1.5;
+    }
+
+    /* ================================================================
+       TAB 2: GENERATED INSIGHTS
+       ================================================================ */
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex; gap: 6px; padding: 14px 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover {
+      border-color: var(--border-strong); color: var(--text-secondary);
+    }
+    .filter-pill.active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+
+    /* Card feed */
+    .card-feed {
+      max-width: 800px; margin: 0 auto; padding: 24px 28px;
+      flex: 1; overflow-y: auto;
+    }
+
+    /* Insight cards */
+    .insight-card {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 14px; padding: 24px; margin-bottom: 14px;
+      transition: border-color 0.15s; cursor: pointer;
+    }
+    .insight-card:hover { border-color: var(--border-strong); }
+
+    .insight-card-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .type-badge {
+      font-size: 10px; padding: 3px 10px; border-radius: 12px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-dasha { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-transit { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-reading { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-compat { background: rgba(196,93,74,0.1); color: var(--accent-red); }
+    .badge-prediction { background: rgba(106,159,216,0.08); color: var(--accent-blue); }
+    .card-meta {
+      font-size: 11px; color: var(--text-faint); margin-left: auto;
+    }
+
+    .insight-card-title {
+      font-family: 'DM Serif Display', serif; font-size: 18px;
+      color: var(--text-primary); line-height: 1.3; margin-bottom: 8px;
+    }
+    .insight-card-summary {
+      font-size: 13px; line-height: 1.6; color: var(--text-body);
+      margin-bottom: 10px;
+    }
+
+    /* Card-specific elements */
+    .card-metric {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .card-progress-bar {
+      height: 5px; background: var(--border-default); border-radius: 3px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .card-progress-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-bright));
+      border-radius: 3px;
+    }
+
+    .energy-pills {
+      display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .energy-pill {
+      font-size: 10px; padding: 4px 10px; border-radius: 12px; font-weight: 500;
+    }
+    .energy-strong { background: var(--accent-green-bg); color: var(--accent-green); }
+    .energy-stable { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .energy-watch { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    .compat-score-inline {
+      font-family: 'DM Serif Display', serif; font-size: 24px;
+      color: var(--accent-gold-bright); display: inline;
+    }
+    .compat-max-inline {
+      font-size: 13px; color: var(--text-faint); font-family: 'Inter', sans-serif;
+    }
+
+    .quarter-pills {
+      display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .quarter-pill {
+      font-size: 10px; padding: 4px 10px; border-radius: 12px; font-weight: 500;
+      background: var(--bg-card-hover); color: var(--text-muted);
+      border: 1px solid var(--border-default);
+    }
+
+    .chat-about-link {
+      font-size: 12px; color: var(--accent-gold); font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .chat-about-link:hover { color: var(--accent-gold-bright); }
+
+    /* Pill */
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; display: inline-block; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 4 &mdash; Final: AI Chatbot + Card-Based Insights</span>
+  <div style="width:1px;height:20px;background:var(--border-default);margin:0 8px"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light mode">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark mode">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/ai</div>
+  <h2>Decision 4 &mdash; Final: AI Chatbot + Card-Based Insights</h2>
+  <p>Primary AI chatbot with secondary card-based insight library. Conversational first, reference second.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/ai</div>
+  </div>
+
+  <div class="w1-layout">
+    <!-- Sidebar -->
+    <div class="w1-sidebar">
+      <div class="w1-sb-header">
+        <div class="logo">Josi</div>
+        <span class="badge">MYSTIC</span>
+      </div>
+      <div class="w1-sb-nav">
+        <div class="w1-sb-group">Overview</div>
+        <div class="w1-sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="w1-sb-item"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="w1-sb-group" style="margin-top:8px">Explore</div>
+        <div class="w1-sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="w1-sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="w1-sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="w1-sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="w1-sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="w1-sb-group" style="margin-top:8px">AI</div>
+        <div class="w1-sb-item active"><span class="ic">&#10024;</span> AI Insights <span class="ct">7</span></div>
+        <div class="w1-sb-item"><span class="ic">&#9998;</span> Predictions</div>
+        <div class="w1-sb-item"><span class="ic">&#9752;</span> Remedies</div>
+        <div class="w1-sb-group" style="margin-top:8px">Connect</div>
+        <div class="w1-sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="w1-sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="w1-sb-footer">
+        <div class="w1-sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w1-main">
+      <!-- Page Top Bar -->
+      <div class="page-topbar">
+        <div class="page-title">AI Insights</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost">History</button>
+          <button class="btn-gold">+ New Conversation</button>
+        </div>
+      </div>
+
+      <!-- Tab Bar (tabs left, chart context right) -->
+      <div class="tab-bar">
+        <div class="tab-bar-left">
+          <button class="tab-item active" onclick="switchTab('chat')">
+            <span class="tab-icon">&#128172;</span> Chat with Josi AI
+          </button>
+          <button class="tab-item" onclick="switchTab('insights')">
+            <span class="tab-icon">&#128203;</span> Generated Insights
+          </button>
+        </div>
+        <div class="tab-bar-right">
+          <div class="tab-chart-context">
+            <span class="ctx-label">Chart:</span>
+            <span class="ctx-value">Govind's Birth Chart</span>
+            <span class="ctx-arrow">&#9660;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           TAB 1: CHAT WITH JOSI AI
+           ================================================================ -->
+      <div class="tab-content active" id="tab-chat">
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="chat-ai-avatar">&#10022;</div>
+          <div class="chat-ai-info">
+            <div class="chat-ai-name">Josi AI</div>
+            <div class="chat-ai-subtitle">Your personal astrology guide &middot; Based on: Govind's Birth Chart (Vedic)</div>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+          <div class="chat-messages">
+
+            <!-- Message 1: AI Welcome -->
+            <div class="msg-ai">
+              <div class="msg-avatar-ai">&#10022;</div>
+              <div class="bubble-ai">
+                <p>Welcome back, Govind. I can see you're currently in Venus Maha Dasha with Saturn Antar Dasha. What would you like to explore today?</p>
+              </div>
+            </div>
+
+            <!-- Suggestion chips -->
+            <div class="suggestion-chips">
+              <div class="suggestion-chip">What does my chart say about career?</div>
+              <div class="suggestion-chip">Explain my current dasha period</div>
+              <div class="suggestion-chip">What transits are affecting me?</div>
+              <div class="suggestion-chip">Tell me about my Moon placement</div>
+            </div>
+
+            <div style="height:24px"></div>
+
+            <!-- Message 2: User -->
+            <div class="msg-user">
+              <div class="msg-avatar-user">G</div>
+              <div class="bubble-user">
+                <p>I've been feeling really stuck in my career lately. What does my chart say about this?</p>
+              </div>
+            </div>
+
+            <!-- Message 3: AI Response (detailed) -->
+            <div class="msg-ai">
+              <div class="msg-avatar-ai">&#10022;</div>
+              <div class="bubble-ai">
+                <p>That's a really meaningful question given where the planets are right now. Let me look at a few things:</p>
+
+                <div class="msg-section-title">Saturn Antar Dasha (current period)</div>
+                <p>You're in Venus-Saturn right now, which often brings a period of restructuring. Saturn asks you to build foundations, even when it feels slow.</p>
+
+                <div class="msg-section-title">10th House &mdash; Pisces</div>
+                <p>Your career house is ruled by Jupiter and contains your Sun at 29&deg; &mdash; a gandanta point. This suggests your career path involves transcending conventional boundaries. The "stuck" feeling may actually be a transition point.</p>
+
+                <div class="msg-callout">
+                  <span class="callout-icon">&#9676;</span>
+                  <span class="callout-text">Sun at 29&deg; Pisces (gandanta) in 10th House &mdash; career transformation threshold</span>
+                </div>
+
+                <div class="msg-section-title">Current Transit</div>
+                <p>Saturn is transiting your 9th house, forming an aspect to your natal Sun. This transit (until mid-2027) is about redefining your purpose before taking action.</p>
+
+                <p>My suggestion: this isn't a time for forcing movement. It's a time for clarity.</p>
+
+                <div class="msg-link">&#128202; View related chart placements</div>
+              </div>
+            </div>
+
+            <!-- Message 4: User -->
+            <div class="msg-user">
+              <div class="msg-avatar-user">G</div>
+              <div class="bubble-user">
+                <p>That makes sense. When will things start to shift?</p>
+              </div>
+            </div>
+
+            <!-- Message 5: AI Response -->
+            <div class="msg-ai">
+              <div class="msg-avatar-ai">&#10022;</div>
+              <div class="bubble-ai">
+                <p>The Saturn-Mercury Pratyantar Dasha begins in June 2026. Mercury rules your 12th and 3rd houses &mdash; communication, writing, and inner work. Combined with Jupiter transiting your 12th house next year, this could open doors through:</p>
+
+                <ul>
+                  <li><strong>Writing or content creation</strong> (3rd house Mercury)</li>
+                  <li><strong>Behind-the-scenes work</strong> (12th house activation)</li>
+                  <li><strong>International connections</strong> (9th house Saturn transit)</li>
+                </ul>
+
+                <div class="msg-callout">
+                  <span class="callout-icon">&#128302;</span>
+                  <span class="callout-text">Key Date: June 2026 &mdash; Saturn-Mercury Pratyantar begins</span>
+                </div>
+
+                <p>The real shift comes when you enter Venus-Mercury Antar Dasha in early 2028. That's when Mercury's communicative energy combines with Venus's creativity.</p>
+
+                <div class="msg-link">&#128202; View dasha timeline</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-area">
+          <div class="chat-input-container">
+            <div class="chat-input-row">
+              <button class="chat-attach-btn" title="Reference a chart">+</button>
+              <div class="chat-input-wrapper">
+                <input type="text" class="chat-input" placeholder="Ask about your chart, transits, dasha periods..." />
+              </div>
+              <button class="chat-send-btn" title="Send">&#10148;</button>
+            </div>
+            <div class="chat-disclaimer">Josi AI uses your birth chart data for personalized insights. Not a substitute for professional consultation.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================================================================
+           TAB 2: GENERATED INSIGHTS
+           ================================================================ -->
+      <div class="tab-content" id="tab-insights">
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <button class="filter-pill active" onclick="filterInsights(this, 'all')">All</button>
+          <button class="filter-pill" onclick="filterInsights(this, 'reading')">Readings</button>
+          <button class="filter-pill" onclick="filterInsights(this, 'prediction')">Predictions</button>
+          <button class="filter-pill" onclick="filterInsights(this, 'transit')">Transits</button>
+          <button class="filter-pill" onclick="filterInsights(this, 'dasha')">Dasha</button>
+        </div>
+
+        <!-- Card Feed -->
+        <div class="card-feed">
+
+          <!-- Card 1: Current Period: Venus-Saturn -->
+          <div class="insight-card" data-type="dasha">
+            <div class="insight-card-header">
+              <span class="type-badge badge-dasha">Dasha</span>
+              <span class="card-meta">Updated 2 hours ago</span>
+            </div>
+            <div class="insight-card-title">Current Period: Venus-Saturn</div>
+            <div class="insight-card-summary">Restructuring phase. Build foundations. Career clarity emerging by mid-2026.</div>
+            <div class="card-metric">Period: 2024&ndash;2027 &middot; Progress: 35%</div>
+            <div class="card-progress-bar">
+              <div class="card-progress-fill" style="width:35%"></div>
+            </div>
+            <div class="chat-about-link" onclick="chatAbout('current dasha period')">Chat about this &#8594;</div>
+          </div>
+
+          <!-- Card 2: This Week's Transits -->
+          <div class="insight-card" data-type="transit">
+            <div class="insight-card-header">
+              <span class="type-badge badge-transit">Transit</span>
+              <span class="card-meta">Mar 10&ndash;16, 2026</span>
+            </div>
+            <div class="insight-card-title">This Week's Transits</div>
+            <div class="energy-pills">
+              <span class="energy-pill energy-strong">Career: Building &#9650;</span>
+              <span class="energy-pill energy-stable">Relationships: Stable &#8594;</span>
+              <span class="energy-pill energy-watch">Health: Watch &#9888;</span>
+            </div>
+            <div class="insight-card-summary">Saturn-Sun aspect tightens mid-week. Venus enters 7th house Friday, softening relationship dynamics.</div>
+            <div class="chat-about-link" onclick="chatAbout('this week transits')">Chat about this &#8594;</div>
+          </div>
+
+          <!-- Card 3: Moon in Scorpio -->
+          <div class="insight-card" data-type="reading">
+            <div class="insight-card-header">
+              <span class="type-badge badge-reading">Reading</span>
+              <span class="card-meta">Generated Mar 8</span>
+            </div>
+            <div class="insight-card-title">Moon in Scorpio: Emotional Patterns</div>
+            <div class="insight-card-summary">Deep emotional intelligence. Creative intensity through transformation. Your feelings are not just felt &mdash; they are alchemized.</div>
+            <div class="chat-about-link" onclick="chatAbout('moon in scorpio placement')">Chat about this &#8594;</div>
+          </div>
+
+          <!-- Card 4: Compatibility -->
+          <div class="insight-card" data-type="reading">
+            <div class="insight-card-header">
+              <span class="type-badge badge-compat">Compatibility</span>
+              <span class="card-meta">Generated Mar 5</span>
+            </div>
+            <div class="insight-card-title">Compatibility: Govind & Priya</div>
+            <div style="margin-bottom:10px">
+              <span class="compat-score-inline">28.5</span><span class="compat-max-inline">/36</span>
+              <span style="font-size:11px;color:var(--text-muted);margin-left:8px">Ashtakoot Score</span>
+            </div>
+            <div class="insight-card-summary">Strong karmic bond with complementary emotional patterns. Moon-Mars exchange creates dynamic growth.</div>
+            <div class="chat-about-link" onclick="chatAbout('compatibility with Priya')">Chat about this &#8594;</div>
+          </div>
+
+          <!-- Card 5: 2026 Annual Prediction -->
+          <div class="insight-card" data-type="prediction">
+            <div class="insight-card-header">
+              <span class="type-badge badge-prediction">Prediction</span>
+              <span class="card-meta">Generated Jan 1</span>
+            </div>
+            <div class="insight-card-title">2026 Annual Prediction</div>
+            <div class="insight-card-summary">A year of foundation-building under Venus-Saturn. Career restructuring in H1, relationship deepening in H2. Jupiter's transit through your 12th house opens international and spiritual channels. Major shift point arrives June 2026.</div>
+            <div class="quarter-pills">
+              <span class="quarter-pill">Q1: Foundation</span>
+              <span class="quarter-pill">Q2: Growth</span>
+              <span class="quarter-pill">Q3: Harvest</span>
+              <span class="quarter-pill">Q4: Transition</span>
+            </div>
+            <div class="chat-about-link" onclick="chatAbout('2026 annual prediction')">Chat about this &#8594;</div>
+          </div>
+
+          <!-- End of feed -->
+          <div style="text-align:center;padding:24px 0 16px;color:var(--text-faint);font-size:12px">
+            Showing 5 insights &middot;
+            <span style="color:var(--accent-gold);font-weight:600;cursor:pointer">Load more</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <div class="ann-title">Design Annotation &mdash; Final Decision: AI Chatbot + Card-Based Insights</div>
+  <p>
+    <strong>Architecture:</strong> The AI chatbot is the primary experience &mdash; users converse naturally about their chart. The "Generated Insights" tab provides a library of AI-created reference content. Each insight links back to the chatbot for deeper exploration via "Chat about this" links. This makes AI the central feature, not just a content generator.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Why chatbot-first:</strong> A conversational interface lets users ask the questions that matter to them in the moment, rather than passively consuming pre-generated content. The chat becomes the single entry point for all AI-powered features: readings, dasha analysis, transit interpretation, compatibility, predictions, and remedies. Users don't need to navigate to separate pages for each concern &mdash; they simply ask.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Chart context selector:</strong> The dropdown in the tab bar lets users switch which chart the AI references. Placed alongside the tabs, it provides persistent context awareness without taking up vertical space in the chat header. This enables conversations about any saved chart &mdash; their own birth chart, a partner's chart, a child's chart, or even an event chart. The AI's responses are always grounded in real chart data, not generic horoscopes.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Generated Insights as reference library:</strong> The secondary tab aggregates all AI-generated content into scannable cards. Filters by type (Reading, Prediction, Transit, Dasha) enable quick browsing. Cards are deliberately concise &mdash; 2-3 lines max, with key metrics and visual indicators (progress bars, energy pills, compatibility scores). Each card's "Chat about this" link switches to the chatbot tab with the topic pre-loaded, creating a natural flow between reference and conversation.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Design details:</strong> AI messages use DM Serif Text for astrological content and Inter for structural headers, creating a warm, authoritative tone. User messages use a slightly different background color for visual distinction. The chat area has a subtle gradient fade at the top indicating scroll history. Suggestion chips below the welcome message reduce friction for new users who may not know what to ask. The chat input includes a "+" button for referencing specific charts within a conversation.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Engagement model:</strong> The chatbot drives deep engagement (5-15 minute sessions with back-and-forth conversation). The insight cards drive frequent engagement (quick daily check-ins). Together they create two engagement loops: depth (chatbot) and breadth (cards). Users who start with cards often transition into chat for deeper exploration. Users who start with chat build up a library of insights they can reference later.
+  </p>
+  <p style="margin-top:10px">
+    <strong>Monetization:</strong> Free users get limited chat messages per month and basic insight generation. Paid tiers unlock unlimited chat, more detailed AI responses (longer context windows, more chart data included), and automatic insight generation (weekly transit cards, monthly dasha updates). The chatbot's natural conversational flow also creates organic upsell opportunities: "I can give you a deeper analysis of this transit &mdash; this is available on the Mystic plan."
+  </p>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+
+  // Update tab content
+  document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function filterInsights(btn, type) {
+  // Update filter buttons
+  document.querySelectorAll('.filter-pill').forEach(function(f) { f.classList.remove('active'); });
+  btn.classList.add('active');
+
+  // Filter cards
+  document.querySelectorAll('.insight-card').forEach(function(card) {
+    if (type === 'all') {
+      card.style.display = '';
+    } else {
+      var cardType = card.getAttribute('data-type');
+      card.style.display = (cardType === type) ? '' : 'none';
+    }
+  });
+}
+
+function chatAbout(topic) {
+  // Switch to chat tab
+  document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-item')[0].classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+  document.getElementById('tab-chat').classList.add('active');
+
+  // Pre-fill chat input
+  var input = document.querySelector('.chat-input');
+  if (input) {
+    input.value = 'Tell me more about ' + topic;
+    input.focus();
+  }
+}
+</script>
+
+</body>
+</html>

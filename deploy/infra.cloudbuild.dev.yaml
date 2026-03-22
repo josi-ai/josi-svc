@@ -22,8 +22,10 @@ steps:
         apt-get update -qq && apt-get install -y -qq curl > /dev/null
         curl -fsSL https://get.pulumi.com | sh
         export PATH="$$HOME/.pulumi/bin:$$PATH"
-        pip install --quiet 'pulumi>=3.0.0,<4.0.0' 'pulumi-gcp>=8.0.0,<9.0.0'
         cd infra
+        python -m venv venv
+        . venv/bin/activate
+        pip install --quiet -r requirements.txt
         pulumi login
         pulumi stack select ${_STACK}
         pulumi up --yes --skip-preview

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 6B: Dense Table/List Layout — Josi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --counter-bg: #151C30;
+      --icon-btn-bg: #111828;
+      --row-alt: rgba(17,24,40,0.4);
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --counter-bg: #E8ECF2;
+      --icon-btn-bg: #F0F2F7;
+      --row-alt: rgba(246,247,251,0.6);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-bar { background: rgba(255,255,255,0.95); }
+    .theme-bar .label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 52px; }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 1280px; margin: 24px auto; padding: 20px 28px;
+      background: var(--accent-gold-bg-subtle); border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--text-secondary);
+    }
+    .annotation strong { color: var(--accent-gold-bright); }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); margin-bottom: 4px; }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .app-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 800px; }
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--bg-card); color: var(--text-primary); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main { display: flex; flex-direction: column; min-width: 0; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar-title {
+      font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary);
+    }
+    .topbar-right { display: flex; gap: 10px; align-items: center; }
+    .search-input {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; padding: 8px 14px 8px 34px; font-size: 13px;
+      color: var(--text-primary); font-family: 'Inter', sans-serif;
+      width: 240px; outline: none; transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--accent-gold); }
+    .search-wrap { position: relative; }
+    .search-wrap::before {
+      content: '\2315'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 14px; color: var(--text-faint);
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap;
+    }
+    .btn-gold:hover { background: var(--accent-gold-bright); }
+
+    /* ========== FILTER ROW ========== */
+    .filter-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .filter-pills { display: flex; gap: 6px; }
+    .filter-pill {
+      padding: 6px 14px; border-radius: 18px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .filter-pill.active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+    .sort-dropdown {
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 8px; padding: 7px 14px; font-size: 12px;
+      color: var(--text-secondary); font-family: 'Inter', sans-serif;
+      cursor: pointer; outline: none;
+    }
+
+    /* ========== BULK ACTIONS BAR ========== */
+    .bulk-bar {
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 28px; background: var(--accent-gold-bg-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .bulk-bar .bulk-count { font-size: 12px; color: var(--accent-gold-bright); font-weight: 600; }
+    .bulk-btn {
+      padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+      background: transparent; border: 1px solid var(--border-default); color: var(--text-muted);
+    }
+    .bulk-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .bulk-btn-danger { border-color: rgba(196,93,74,0.3); color: var(--accent-red); }
+    .bulk-btn-danger:hover { border-color: var(--accent-red); }
+
+    /* ========== TABLE ========== */
+    .content { flex: 1; }
+    .chart-table { width: 100%; border-collapse: collapse; }
+    .chart-table thead th {
+      padding: 10px 16px; text-align: left;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600;
+      border-bottom: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      cursor: pointer; user-select: none; white-space: nowrap;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .chart-table thead th:first-child { padding-left: 28px; }
+    .chart-table thead th:last-child { padding-right: 28px; }
+    .chart-table thead th:hover { color: var(--text-muted); }
+    .chart-table thead th .sort-arrow { font-size: 8px; margin-left: 4px; color: var(--accent-gold-bright); }
+
+    .chart-table tbody tr {
+      border-bottom: 1px solid var(--border-divider);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .chart-table tbody tr:nth-child(even) { background: var(--row-alt); }
+    .chart-table tbody tr:hover { background: var(--bg-card-hover); }
+
+    .chart-table tbody td {
+      padding: 12px 16px; font-size: 13px; color: var(--text-secondary);
+      vertical-align: middle;
+    }
+    .chart-table tbody td:first-child { padding-left: 28px; }
+    .chart-table tbody td:last-child { padding-right: 28px; }
+
+    /* Checkbox */
+    .checkbox-cell { width: 36px; }
+    .custom-checkbox {
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid var(--border-strong); appearance: none; -webkit-appearance: none;
+      cursor: pointer; background: transparent; position: relative;
+      vertical-align: middle; transition: all 0.15s;
+    }
+    .custom-checkbox:checked {
+      background: var(--accent-gold); border-color: var(--accent-gold);
+    }
+    .custom-checkbox:checked::after {
+      content: '\2713'; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); font-size: 10px; color: #fff; font-weight: 700;
+    }
+
+    /* Name cell */
+    .name-cell { display: flex; align-items: center; gap: 8px; }
+    .name-cell .star { color: var(--accent-gold-bright); font-size: 12px; flex-shrink: 0; }
+    .name-cell .name { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+
+    /* Tradition badge */
+    .tradition-badge {
+      display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+    }
+    .badge-vedic { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .badge-western { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-chinese { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-hellenistic { background: rgba(160,120,200,0.1); color: #A078C8; }
+    .badge-mayan { background: rgba(200,100,80,0.1); color: #C86450; }
+
+    /* Actions */
+    .action-cell { display: flex; gap: 6px; align-items: center; }
+    .action-btn {
+      padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--border-default);
+    }
+    .action-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .action-btn-primary {
+      background: var(--accent-gold-bg-subtle); color: var(--accent-gold); border-color: rgba(200,145,58,0.2);
+    }
+    .action-btn-primary:hover { background: var(--accent-gold-bg); border-color: var(--accent-gold); }
+    .action-more {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; font-size: 14px; color: var(--text-faint); cursor: pointer;
+      border: none; background: transparent; transition: all 0.15s;
+    }
+    .action-more:hover { background: var(--icon-btn-bg); color: var(--text-muted); }
+
+    /* ========== PAGINATION ========== */
+    .pagination-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 28px; border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+    .pagination-info { font-size: 12px; color: var(--text-muted); }
+    .pagination-buttons { display: flex; gap: 4px; }
+    .page-btn {
+      width: 30px; height: 30px; border-radius: 6px; display: flex;
+      align-items: center; justify-content: center; font-size: 12px;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+      background: transparent; border: 1px solid var(--border-default); color: var(--text-muted);
+    }
+    .page-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .page-btn.active {
+      background: var(--accent-gold); color: #fff; border-color: var(--accent-gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-bar">
+  <span class="label">Decision 6B: Dense Table/List Layout</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- Page Marker -->
+<div class="page-marker">
+  <div class="route">app.josiam.com/charts</div>
+  <h2>Decision 6B -- Dense Table/List Layout</h2>
+  <p>Compact, sortable table. Efficient for power users managing large collections.</p>
+</div>
+
+<!-- Web Frame -->
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts</div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">People</div>
+        <div class="sb-item"><span class="ic">&#9823;</span> Persons <span class="ct">5</span></div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+        <div class="sb-group" style="margin-top:8px">Settings</div>
+        <div class="sb-item"><span class="ic">&#9881;</span> Settings</div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <div class="topbar-title">My Charts</div>
+        <div class="topbar-right">
+          <div class="search-wrap">
+            <input type="text" class="search-input" placeholder="Search charts...">
+          </div>
+          <button class="btn-gold">+ New Chart</button>
+        </div>
+      </div>
+
+      <!-- Filter Row -->
+      <div class="filter-row">
+        <div class="filter-pills">
+          <button class="filter-pill active">All</button>
+          <button class="filter-pill">Vedic</button>
+          <button class="filter-pill">Western</button>
+          <button class="filter-pill">Chinese</button>
+          <button class="filter-pill">Hellenistic</button>
+          <button class="filter-pill">Mayan</button>
+        </div>
+        <select class="sort-dropdown">
+          <option>Sort by: Recently Created</option>
+          <option>Sort by: Name A-Z</option>
+          <option>Sort by: Tradition</option>
+          <option>Sort by: Birth Date</option>
+        </select>
+      </div>
+
+      <!-- Bulk Actions Bar (appears when items selected) -->
+      <div class="bulk-bar">
+        <span class="bulk-count">1 selected</span>
+        <button class="bulk-btn">Export</button>
+        <button class="bulk-btn">Compare</button>
+        <button class="bulk-btn bulk-btn-danger">Delete</button>
+      </div>
+
+      <!-- Table -->
+      <div class="content">
+        <table class="chart-table">
+          <thead>
+            <tr>
+              <th class="checkbox-cell"><input type="checkbox" class="custom-checkbox" id="select-all"></th>
+              <th>Name</th>
+              <th>Tradition</th>
+              <th>Chart Type</th>
+              <th>Key Placements</th>
+              <th>Birth Date</th>
+              <th>Location</th>
+              <th>Created <span class="sort-arrow">&#9660;</span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1: Govind's Birth Chart (selected) -->
+            <tr style="background:var(--accent-gold-bg-subtle)">
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox" checked></td>
+              <td><div class="name-cell"><span class="star">&#9733;</span><span class="name">Govind's Birth Chart</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Pisces, Moon Scorpio</td>
+              <td>Mar 15, 1992</td>
+              <td>Chennai</td>
+              <td>2 days ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 2: Govind Western -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Govind -- Western</span></div></td>
+              <td><span class="tradition-badge badge-western">Western</span></td>
+              <td>Natal</td>
+              <td>Sun Aries, Moon Scorpio</td>
+              <td>Mar 15, 1992</td>
+              <td>Chennai</td>
+              <td>2 days ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 3: Priya Shankar -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Priya Shankar</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Aquarius, Moon Leo</td>
+              <td>Jun 8, 1994</td>
+              <td>Mumbai</td>
+              <td>5 days ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 4: Mom -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Mom</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Cancer, Moon Pisces</td>
+              <td>Jul 22, 1965</td>
+              <td>Madurai</td>
+              <td>1 week ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 5: Dad -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Dad</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Virgo, Moon Taurus</td>
+              <td>Sep 3, 1962</td>
+              <td>Madurai</td>
+              <td>1 week ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 6: Sarah Chen - BaZi -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Sarah Chen -- BaZi</span></div></td>
+              <td><span class="tradition-badge badge-chinese">Chinese</span></td>
+              <td>BaZi</td>
+              <td>Day Master: Yang Fire</td>
+              <td>Apr 12, 1990</td>
+              <td>Singapore</td>
+              <td>2 weeks ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 7: Arjun Patel -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Arjun Patel</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Sagittarius, Moon Gemini</td>
+              <td>Dec 1, 1988</td>
+              <td>Delhi</td>
+              <td>2 weeks ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 8: Lisa Nguyen -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Lisa Nguyen</span></div></td>
+              <td><span class="tradition-badge badge-western">Western</span></td>
+              <td>Natal</td>
+              <td>Sun Leo, Moon Aquarius</td>
+              <td>Aug 19, 1995</td>
+              <td>Ho Chi Minh City</td>
+              <td>3 weeks ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 9: Brother -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Brother</span></div></td>
+              <td><span class="tradition-badge badge-vedic">Vedic</span></td>
+              <td>Rasi (D-1)</td>
+              <td>Sun Capricorn, Moon Aries</td>
+              <td>Jan 14, 1996</td>
+              <td>Chennai</td>
+              <td>1 month ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 10: Marcus Rivera -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Marcus Rivera</span></div></td>
+              <td><span class="tradition-badge badge-hellenistic">Hellenistic</span></td>
+              <td>Whole Sign</td>
+              <td>Sun Libra, Moon Cancer</td>
+              <td>Oct 7, 1991</td>
+              <td>Mexico City</td>
+              <td>1 month ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 11: Wei Zhang -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Wei Zhang -- BaZi</span></div></td>
+              <td><span class="tradition-badge badge-chinese">Chinese</span></td>
+              <td>BaZi</td>
+              <td>Day Master: Yin Earth</td>
+              <td>Feb 20, 1987</td>
+              <td>Beijing</td>
+              <td>1 month ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 12: Kavitha -->
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox" class="custom-checkbox"></td>
+              <td><div class="name-cell"><span class="name">Kavitha -- Mayan</span></div></td>
+              <td><span class="tradition-badge badge-mayan">Mayan</span></td>
+              <td>Tzolk'in</td>
+              <td>Kin 176: Yellow Cosmic Warrior</td>
+              <td>Nov 30, 1993</td>
+              <td>Coimbatore</td>
+              <td>2 months ago</td>
+              <td>
+                <div class="action-cell">
+                  <button class="action-btn action-btn-primary">View</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-more">&#8942;</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-row">
+        <div class="pagination-info">Showing 1&ndash;12 of 12 charts</div>
+        <div class="pagination-buttons">
+          <button class="page-btn" style="opacity:0.4;cursor:default">&#8592;</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn" style="opacity:0.4;cursor:default">&#8594;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation -->
+<div class="annotation">
+  <strong>Option B: Dense Table/List Layout</strong> -- Dense and efficient. Shows more items per screen with all key data visible in a scannable row. Sortable columns let users find charts quickly by name, tradition, date, or creation time. Good for power users with 20+ charts. Supports bulk operations (select all, export, compare, delete). But lacks the visual richness of card previews -- charts look like spreadsheet rows. The tradition badges add color-coding for quick scanning. Each row has inline actions (View, Edit, more menu) and a checkbox for bulk operations. Pagination is shown for completeness but kicks in at larger collections. This pattern is ideal for information-dense listing pages like Consultations or API keys.
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+}
+
+// Filter pill interaction
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Select-all checkbox
+document.getElementById('select-all').addEventListener('change', function() {
+  document.querySelectorAll('.chart-table tbody .custom-checkbox').forEach(cb => {
+    cb.checked = this.checked;
+  });
+});
+</script>
+
+</body>
+</html>

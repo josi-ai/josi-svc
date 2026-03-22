@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Decision 2B: Default North Indian Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== THEME TOKENS (from v7) ========== */
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --bg-hero-glow: rgba(200,145,58,0.06);
+      --bg-hero-glow2: rgba(106,159,216,0.03);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-body-reading: #7080A0;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --browser-bar-bg: #080E1C;
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-body-reading: #4E5A70;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --browser-bar-bg: #F6F7FB;
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-toggle-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(6,10,20,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 12px;
+    }
+    body.light .theme-toggle-bar { background: rgba(255,255,255,0.95); }
+    .theme-toggle-bar .label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+    .spacer { height: 52px; }
+
+    /* ========== PAGE FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: hidden;
+      box-shadow: var(--shadow-frame);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--browser-bar-bg); border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== SIDEBAR LAYOUT ========== */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 800px; }
+    .sidebar {
+      background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column;
+    }
+    .sb-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); }
+    .sb-header .badge {
+      font-size: 9px; padding: 3px 8px; border-radius: 10px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+    .sb-nav { padding: 12px 10px; flex: 1; }
+    .sb-group {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; padding: 10px 10px 5px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 7px; margin-bottom: 1px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .sb-item:hover { background: var(--bg-card); color: var(--text-secondary); }
+    .sb-item.active { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+    .sb-item.active .ic { opacity: 1; }
+    .sb-item .ct {
+      margin-left: auto; font-size: 10px; background: var(--counter-bg);
+      color: var(--text-muted); padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    }
+    .sb-footer {
+      padding: 14px 16px; border-top: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--avatar-text);
+    }
+
+    /* ========== MAIN AREA ========== */
+    .main { display: flex; flex-direction: column; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 28px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .topbar .breadcrumb {
+      font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s;
+    }
+    .topbar .breadcrumb:hover { color: var(--accent-gold); }
+    .topbar .chart-name {
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text-primary);
+    }
+    .topbar-right { display: flex; gap: 8px; align-items: center; }
+    .btn-ghost {
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-secondary); padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-gold {
+      background: var(--accent-gold); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    .content { padding: 28px; flex: 1; }
+
+    /* ========== NORTH INDIAN CHART ========== */
+    .chart-container {
+      display: flex; gap: 32px; align-items: flex-start; margin-bottom: 32px;
+    }
+    .chart-wrapper {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+    }
+    .chart-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 16px;
+    }
+
+    /* North Indian diamond chart using CSS */
+    .ni-chart-outer {
+      width: 440px; height: 440px;
+      position: relative;
+      background: var(--bg-card);
+      border: 2px solid var(--border-strong);
+      border-radius: 4px;
+    }
+
+    /* The diamond (rotated inner square) */
+    .ni-diamond {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 311px; height: 311px;
+      transform: translate(-50%, -50%) rotate(45deg);
+      border: 2px solid var(--border-strong);
+      background: transparent;
+    }
+
+    /* Diagonal lines from corners */
+    .ni-diag {
+      position: absolute;
+      background: var(--border-default);
+    }
+    .ni-diag-1 { /* top-left to center */
+      width: 1px; height: 311px;
+      top: 0; left: 0;
+      transform-origin: top left;
+      transform: rotate(45deg);
+    }
+    .ni-diag-2 { /* top-right to center */
+      width: 1px; height: 311px;
+      top: 0; right: 0;
+      transform-origin: top right;
+      transform: rotate(-45deg);
+    }
+    .ni-diag-3 { /* bottom-left to center */
+      width: 1px; height: 311px;
+      bottom: 0; left: 0;
+      transform-origin: bottom left;
+      transform: rotate(-45deg);
+    }
+    .ni-diag-4 { /* bottom-right to center */
+      width: 1px; height: 311px;
+      bottom: 0; right: 0;
+      transform-origin: bottom right;
+      transform: rotate(45deg);
+    }
+
+    /* House cells positioned absolutely within the chart */
+    .ni-house {
+      position: absolute;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; z-index: 2;
+    }
+    .ni-house-num {
+      font-size: 9px; font-weight: 700; color: var(--text-faint);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .ni-house-sign {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+    }
+    .ni-house.lagna .ni-house-sign { color: var(--accent-gold-bright); }
+    .ni-house.lagna .ni-house-num { color: var(--accent-gold); }
+    .ni-planets {
+      display: flex; flex-wrap: wrap; gap: 3px;
+      justify-content: center; align-items: center; margin-top: 2px;
+    }
+    .ni-planet {
+      font-size: 10px; font-weight: 700; padding: 2px 5px;
+      border-radius: 3px; border: 1px solid var(--border-default);
+      background: var(--bg-card); color: var(--text-primary);
+    }
+    .ni-planet.su { color: var(--accent-gold-bright); border-color: var(--accent-gold); background: rgba(200,145,58,0.08); }
+    .ni-planet.mo { color: var(--text-secondary); border-color: var(--text-faint); background: rgba(139,153,181,0.08); }
+    .ni-planet.ma { color: var(--accent-red); border-color: var(--accent-red); background: rgba(196,93,74,0.08); }
+    .ni-planet.me { color: var(--accent-green); border-color: var(--accent-green); background: rgba(106,175,122,0.08); }
+    .ni-planet.ju { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(106,159,216,0.08); }
+    .ni-planet.ve { color: #B8A0D4; border-color: #8B6DAF; background: rgba(139,109,175,0.08); }
+    .ni-planet.sa { color: var(--text-muted); border-color: var(--text-faint); background: rgba(91,106,138,0.08); }
+    .ni-planet.ra { color: #7A8CA8; border-color: var(--text-faint); background: rgba(122,140,168,0.06); }
+    .ni-planet.ke { color: #7A8CA8; border-color: var(--text-faint); background: rgba(122,140,168,0.06); }
+
+    /* Lagna highlight */
+    .ni-house.lagna::before {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 6px;
+      background: var(--accent-gold-bg);
+      z-index: -1;
+    }
+
+    /* House 1 - Top center (Lagna) triangle */
+    .ni-h1 { top: 8px; left: 50%; transform: translateX(-50%); width: 120px; text-align: center; }
+    /* House 2 - Upper left triangle */
+    .ni-h2 { top: 56px; left: 40px; width: 100px; text-align: center; }
+    /* House 3 - Left top triangle */
+    .ni-h3 { top: 130px; left: 8px; width: 90px; text-align: center; }
+    /* House 4 - Left center */
+    .ni-h4 { top: 50%; left: 8px; transform: translateY(-50%); width: 100px; text-align: center; }
+    /* House 5 - Left bottom triangle */
+    .ni-h5 { bottom: 130px; left: 8px; width: 90px; text-align: center; }
+    /* House 6 - Lower left */
+    .ni-h6 { bottom: 56px; left: 40px; width: 100px; text-align: center; }
+    /* House 7 - Bottom center */
+    .ni-h7 { bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; text-align: center; }
+    /* House 8 - Lower right */
+    .ni-h8 { bottom: 56px; right: 40px; width: 100px; text-align: center; }
+    /* House 9 - Right bottom */
+    .ni-h9 { bottom: 130px; right: 8px; width: 90px; text-align: center; }
+    /* House 10 - Right center */
+    .ni-h10 { top: 50%; right: 8px; transform: translateY(-50%); width: 100px; text-align: center; }
+    /* House 11 - Right top */
+    .ni-h11 { top: 130px; right: 8px; width: 90px; text-align: center; }
+    /* House 12 - Upper right */
+    .ni-h12 { top: 56px; right: 40px; width: 100px; text-align: center; }
+
+    /* Center area */
+    .ni-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center; z-index: 3;
+      padding: 10px;
+    }
+    .center-name {
+      font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--text-primary);
+    }
+    .center-date { font-size: 10px; color: var(--text-muted); }
+    .center-format {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent-gold); font-weight: 600; margin-top: 4px;
+    }
+
+    /* Chart info panel */
+    .chart-info { width: 280px; flex-shrink: 0; }
+    .info-card {
+      background: var(--bg-card); border-radius: 12px; padding: 20px;
+      border: 1px solid var(--border-default); margin-bottom: 16px;
+    }
+    .info-card-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px;
+    }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid var(--border-divider);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 12px; color: var(--text-muted); }
+    .info-value { font-size: 12px; color: var(--text-primary); font-weight: 500; }
+    .info-value.gold { color: var(--accent-gold-bright); }
+
+    /* ========== PLANETARY TABLE ========== */
+    .table-section {
+      background: var(--bg-card); border-radius: 12px; padding: 24px;
+      border: 1px solid var(--border-default); margin-bottom: 24px;
+    }
+    .table-title {
+      font-family: 'DM Serif Display', serif; font-size: 18px;
+      color: var(--text-primary); margin-bottom: 16px;
+    }
+    .planet-table { width: 100%; border-collapse: collapse; }
+    .planet-table th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600; text-align: left;
+      padding: 8px 12px; border-bottom: 2px solid var(--border-default);
+    }
+    .planet-table td {
+      font-size: 13px; color: var(--text-secondary); padding: 10px 12px;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .planet-table tr:last-child td { border-bottom: none; }
+    .planet-table .planet-name { color: var(--text-primary); font-weight: 600; }
+    .planet-table .degree { font-family: monospace; color: var(--text-muted); font-size: 12px; }
+    .planet-table .dignity-own { color: var(--accent-gold-bright); font-weight: 600; }
+    .planet-table .dignity-exalted { color: var(--accent-green); font-weight: 600; }
+    .planet-table .dignity-debilitated { color: var(--accent-red); font-weight: 600; }
+    .planet-table .dignity-neutral { color: var(--text-muted); }
+    .planet-table .dignity-enemy { color: var(--accent-red); }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      background: var(--accent-gold-bg-subtle); border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;
+      border-left: 3px solid var(--accent-gold);
+    }
+    .annotation-title {
+      font-family: 'DM Serif Display', serif; font-size: 16px;
+      color: var(--text-primary); margin-bottom: 8px;
+    }
+    .annotation-text {
+      font-family: 'DM Serif Text', serif; font-size: 14px;
+      line-height: 1.75; color: var(--text-body);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-toggle-bar">
+  <span class="label">Decision 2B: North Indian Chart</span>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')" title="Dark">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<div class="web-frame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com/charts/govind-birth-chart</div>
+  </div>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-header"><div class="logo">Josi</div><span class="badge">MYSTIC</span></div>
+      <div class="sb-nav">
+        <div class="sb-group">Overview</div>
+        <div class="sb-item"><span class="ic">&#9673;</span> Dashboard</div>
+        <div class="sb-item active"><span class="ic">&#9734;</span> Charts <span class="ct">12</span></div>
+        <div class="sb-item"><span class="ic">&#10024;</span> AI Readings <span class="ct">7</span></div>
+        <div class="sb-group" style="margin-top:8px">Explore</div>
+        <div class="sb-item"><span class="ic">&#10023;</span> Compatibility</div>
+        <div class="sb-item"><span class="ic">&#8634;</span> Transits</div>
+        <div class="sb-item"><span class="ic">&#9789;</span> Panchang</div>
+        <div class="sb-item"><span class="ic">&#9681;</span> Dasha</div>
+        <div class="sb-item"><span class="ic">&#9883;</span> Muhurta</div>
+        <div class="sb-group" style="margin-top:8px">Connect</div>
+        <div class="sb-item"><span class="ic">&#9733;</span> Astrologers</div>
+        <div class="sb-item"><span class="ic">&#9993;</span> Consultations <span class="ct">1</span></div>
+      </div>
+      <div class="sb-footer">
+        <div class="sb-av">G</div>
+        <div>
+          <div style="font-size:12px;color:var(--text-primary)">Govind</div>
+          <div style="font-size:10px;color:var(--text-muted)">Mystic Plan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:16px">
+          <span class="breadcrumb">&#8592; Back to Charts</span>
+          <span class="chart-name">Govind's Birth Chart</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-ghost">&#8615; Export</button>
+          <button class="btn-gold">&#10024; AI Reading</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="chart-container">
+          <div class="chart-wrapper">
+            <div class="chart-label">Rasi Chart &mdash; North Indian Format</div>
+
+            <!-- North Indian Diamond Chart -->
+            <div class="ni-chart-outer">
+              <!-- Diagonal lines from outer square corners to create diamond sections -->
+              <div class="ni-diag ni-diag-1"></div>
+              <div class="ni-diag ni-diag-2"></div>
+              <div class="ni-diag ni-diag-3"></div>
+              <div class="ni-diag ni-diag-4"></div>
+              <!-- Inner diamond -->
+              <div class="ni-diamond"></div>
+
+              <!-- House 1 (Lagna) - Top center - Cancer -->
+              <div class="ni-house ni-h1 lagna">
+                <div class="ni-house-sign">Cancer</div>
+                <div class="ni-house-num">ASC</div>
+              </div>
+
+              <!-- House 2 - Upper left - Leo -->
+              <div class="ni-house ni-h2">
+                <div class="ni-house-sign">Leo</div>
+                <div class="ni-planets">
+                  <span class="ni-planet ju">Ju</span>
+                </div>
+              </div>
+
+              <!-- House 3 - Left top - Virgo -->
+              <div class="ni-house ni-h3">
+                <div class="ni-house-sign">Virgo</div>
+              </div>
+
+              <!-- House 4 - Left center - Libra -->
+              <div class="ni-house ni-h4">
+                <div class="ni-house-sign">Libra</div>
+              </div>
+
+              <!-- House 5 - Left bottom - Scorpio -->
+              <div class="ni-house ni-h5">
+                <div class="ni-house-sign">Scorpio</div>
+                <div class="ni-planets">
+                  <span class="ni-planet mo">Mo</span>
+                </div>
+              </div>
+
+              <!-- House 6 - Lower left - Sagittarius -->
+              <div class="ni-house ni-h6">
+                <div class="ni-house-sign">Sagitt.</div>
+                <div class="ni-planets">
+                  <span class="ni-planet ke">Ke</span>
+                </div>
+              </div>
+
+              <!-- House 7 - Bottom center - Capricorn -->
+              <div class="ni-house ni-h7">
+                <div class="ni-house-sign">Capricorn</div>
+                <div class="ni-planets">
+                  <span class="ni-planet sa">Sa</span>
+                </div>
+              </div>
+
+              <!-- House 8 - Lower right - Aquarius -->
+              <div class="ni-house ni-h8">
+                <div class="ni-house-sign">Aquarius</div>
+                <div class="ni-planets">
+                  <span class="ni-planet ve">Ve</span>
+                </div>
+              </div>
+
+              <!-- House 9 - Right bottom - Pisces -->
+              <div class="ni-house ni-h9">
+                <div class="ni-house-sign">Pisces</div>
+                <div class="ni-planets">
+                  <span class="ni-planet su">Su</span>
+                  <span class="ni-planet me">Me</span>
+                </div>
+              </div>
+
+              <!-- House 10 - Right center - Aries -->
+              <div class="ni-house ni-h10">
+                <div class="ni-house-sign">Aries</div>
+                <div class="ni-planets">
+                  <span class="ni-planet ma">Ma</span>
+                </div>
+              </div>
+
+              <!-- House 11 - Right top - Taurus -->
+              <div class="ni-house ni-h11">
+                <div class="ni-house-sign">Taurus</div>
+              </div>
+
+              <!-- House 12 - Upper right - Gemini -->
+              <div class="ni-house ni-h12">
+                <div class="ni-house-sign">Gemini</div>
+                <div class="ni-planets">
+                  <span class="ni-planet ra">Ra</span>
+                </div>
+              </div>
+
+              <!-- Center -->
+              <div class="ni-center">
+                <div class="center-name">Govind</div>
+                <div class="center-date">Mar 15, 1992</div>
+                <div class="center-format">North Indian</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Info Side Panel -->
+          <div class="chart-info">
+            <div class="info-card">
+              <div class="info-card-title">Chart Details</div>
+              <div class="info-row"><span class="info-label">Format</span><span class="info-value gold">North Indian</span></div>
+              <div class="info-row"><span class="info-label">Ayanamsa</span><span class="info-value">Lahiri</span></div>
+              <div class="info-row"><span class="info-label">Ascendant</span><span class="info-value">Cancer 12&deg;48'</span></div>
+              <div class="info-row"><span class="info-label">Sun Sign</span><span class="info-value">Pisces</span></div>
+              <div class="info-row"><span class="info-label">Moon Sign</span><span class="info-value">Scorpio</span></div>
+              <div class="info-row"><span class="info-label">Nakshatra</span><span class="info-value">Anuradha</span></div>
+              <div class="info-row"><span class="info-label">Pada</span><span class="info-value">3</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">Birth Data</div>
+              <div class="info-row"><span class="info-label">Date</span><span class="info-value">March 15, 1992</span></div>
+              <div class="info-row"><span class="info-label">Time</span><span class="info-value">10:35 AM IST</span></div>
+              <div class="info-row"><span class="info-label">Place</span><span class="info-value">Chennai, India</span></div>
+              <div class="info-row"><span class="info-label">Lat / Lon</span><span class="info-value">13.08&deg;N 80.27&deg;E</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">House System</div>
+              <div style="font-family:'DM Serif Text',serif;font-size:13px;line-height:1.7;color:var(--text-body);margin-top:4px">
+                Houses are <strong style="color:var(--text-primary)">fixed</strong> &mdash; House 1 (Lagna) is always the top-center diamond. Signs rotate counterclockwise from the Ascendant.
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">Chart Type</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+                <span style="font-size:11px;padding:5px 12px;border-radius:16px;font-weight:500;background:var(--accent-gold-bg);color:var(--accent-gold-bright)">Rasi</span>
+                <span style="font-size:11px;padding:5px 12px;border-radius:16px;font-weight:500;border:1px solid var(--border-default);color:var(--text-muted)">Navamsa</span>
+                <span style="font-size:11px;padding:5px 12px;border-radius:16px;font-weight:500;border:1px solid var(--border-default);color:var(--text-muted)">Bhava</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Planetary Positions Table -->
+        <div class="table-section">
+          <div class="table-title">Planetary Positions</div>
+          <table class="planet-table">
+            <thead>
+              <tr>
+                <th>Planet</th>
+                <th>Sign</th>
+                <th>Degree</th>
+                <th>Nakshatra</th>
+                <th>Pada</th>
+                <th>Dignity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="planet-name">&#9737; Sun</td>
+                <td>Pisces</td>
+                <td class="degree">29&deg;14'22"</td>
+                <td>Revati</td>
+                <td>4</td>
+                <td class="dignity-neutral">Neutral</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9789; Moon</td>
+                <td>Scorpio</td>
+                <td class="degree">14&deg;32'08"</td>
+                <td>Anuradha</td>
+                <td>3</td>
+                <td class="dignity-enemy">Enemy</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9794; Mars</td>
+                <td>Aries</td>
+                <td class="degree">08&deg;45'11"</td>
+                <td>Ashwini</td>
+                <td>3</td>
+                <td class="dignity-own">Own Sign</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9791; Mercury</td>
+                <td>Pisces</td>
+                <td class="degree">18&deg;22'45"</td>
+                <td>Revati</td>
+                <td>1</td>
+                <td class="dignity-debilitated">Debilitated</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9795; Jupiter</td>
+                <td>Leo</td>
+                <td class="degree">11&deg;56'33"</td>
+                <td>Magha</td>
+                <td>4</td>
+                <td class="dignity-neutral">Neutral</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9792; Venus</td>
+                <td>Aquarius</td>
+                <td class="degree">22&deg;03'17"</td>
+                <td>Purva Bhadra</td>
+                <td>3</td>
+                <td class="dignity-neutral">Neutral</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9796; Saturn</td>
+                <td>Capricorn</td>
+                <td class="degree">17&deg;28'52"</td>
+                <td>Shravana</td>
+                <td>3</td>
+                <td class="dignity-own">Own Sign</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9738; Rahu</td>
+                <td>Gemini</td>
+                <td class="degree">05&deg;41'09"</td>
+                <td>Mrigashira</td>
+                <td>3</td>
+                <td class="dignity-neutral">&mdash;</td>
+              </tr>
+              <tr>
+                <td class="planet-name">&#9739; Ketu</td>
+                <td>Sagittarius</td>
+                <td class="degree">05&deg;41'09"</td>
+                <td>Mula</td>
+                <td>2</td>
+                <td class="dignity-neutral">&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Annotation -->
+        <div class="annotation">
+          <div class="annotation-title">Option B: North Indian (Diamond) Format</div>
+          <div class="annotation-text">
+            North Indian (Diamond) format. Houses are FIXED (1st house always top-center). Signs move based on Ascendant. Standard in North India and most Kundli software. Reading direction is counterclockwise from the top. More familiar to traditional astrologers who learned the Parashari system. The diamond geometry is slightly harder to implement in CSS but creates a distinctive, recognizable visual.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+</script>
+
+</body>
+</html>

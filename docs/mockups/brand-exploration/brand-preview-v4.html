@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi — v4: Wellness Experience</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #0A0F1E;
+      color: #D4DAE6;
+    }
+
+    /* ========== PAGE MARKERS ========== */
+    .page-marker {
+      padding: 48px 48px 24px; text-align: center;
+      background: #060A14; border-top: 3px solid #C8913A;
+    }
+    .page-marker .route {
+      font-size: 12px; font-family: monospace; color: #C8913A;
+      background: rgba(200,145,58,0.08); display: inline-block;
+      padding: 4px 16px; border-radius: 20px; margin-bottom: 12px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px; color: #D4DAE6; margin-bottom: 6px;
+    }
+    .page-marker p { font-size: 13px; color: #5B6A8A; }
+
+    /* ================================================================
+       SCREEN 1: HOME — "Today" Experience
+       The first thing you see. Led by today's cosmic moment.
+       ================================================================ */
+    .home {
+      background: #0A0F1E;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0;
+      border-left: 1px solid #151C30;
+      border-right: 1px solid #151C30;
+      min-height: 900px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Status bar mockup */
+    .status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 20px;
+      font-size: 12px; font-weight: 600; color: #8B99B5;
+    }
+
+    /* Top bar */
+    .home-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 20px 16px;
+    }
+    .home-topbar .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px; color: #D4DAE6;
+    }
+    .home-topbar .right { display: flex; gap: 16px; align-items: center; }
+    .home-topbar .icon-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #111828; border: 1px solid #1A2340;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #5B6A8A; cursor: pointer;
+    }
+    .home-topbar .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #C8913A 0%, #D4A04A 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #0A0F1E;
+    }
+
+    /* ===== HERO: Today's Cosmic Moment ===== */
+    .today-hero {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+    .today-greeting {
+      font-size: 14px; color: #5B6A8A; margin-bottom: 4px;
+    }
+    .today-date {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px; color: #D4DAE6; margin-bottom: 20px;
+    }
+    .today-card {
+      background: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      border-radius: 20px;
+      padding: 28px 24px;
+      border: 1px solid #1A2340;
+      position: relative;
+      overflow: hidden;
+    }
+    .today-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(200,145,58,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .today-card::after {
+      content: '';
+      position: absolute; bottom: -40px; left: -20px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(106,159,216,0.04) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .today-card-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #C8913A; font-weight: 600; margin-bottom: 14px;
+      position: relative; z-index: 1;
+    }
+    .today-card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px; color: #D4DAE6; line-height: 1.3;
+      margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .today-card-insight {
+      font-family: 'DM Serif Text', serif;
+      font-size: 15px; line-height: 1.7; color: #7B8CA8;
+      position: relative; z-index: 1;
+      margin-bottom: 20px;
+    }
+    .today-card-pills {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    .pill {
+      font-size: 11px; padding: 5px 12px; border-radius: 20px;
+      font-weight: 500;
+    }
+    .pill-gold { background: rgba(200,145,58,0.12); color: #D4A04A; }
+    .pill-blue { background: rgba(106,159,216,0.1); color: #6A9FD8; }
+    .pill-green { background: rgba(106,175,122,0.1); color: #6AAF7A; }
+
+    /* ===== MUHURTA TIMELINE (horizontal scroll) ===== */
+    .muhurta-section {
+      padding: 0 0 0 20px;
+      margin-bottom: 28px;
+    }
+    .section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #5B6A8A; font-weight: 600; margin-bottom: 12px;
+    }
+    .muhurta-scroll {
+      display: flex; gap: 0; overflow-x: auto;
+      padding-right: 20px;
+      -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .muhurta-scroll::-webkit-scrollbar { display: none; }
+    .muhurta-slot {
+      flex-shrink: 0;
+      width: 64px; text-align: center;
+      padding: 12px 0;
+      border-right: 1px solid #14203A;
+    }
+    .muhurta-slot:first-child { border-left: 1px solid #14203A; border-radius: 10px 0 0 10px; }
+    .muhurta-slot:last-child { border-radius: 0 10px 10px 0; }
+    .muhurta-slot .time { font-size: 10px; color: #5B6A8A; margin-bottom: 6px; font-weight: 500; }
+    .muhurta-slot .bar {
+      width: 28px; height: 6px; border-radius: 3px; margin: 0 auto 6px;
+    }
+    .muhurta-slot .label { font-size: 9px; color: #3A4A6A; font-weight: 500; letter-spacing: 0.5px; }
+    .bar-good { background: #6AAF7A; }
+    .bar-neutral { background: #3A4A6A; }
+    .bar-avoid { background: #C45D4A; }
+    .bar-excellent { background: #D4A04A; }
+    .muhurta-slot.now {
+      background: rgba(200,145,58,0.06);
+      border: 1px solid rgba(200,145,58,0.15);
+      border-radius: 10px;
+      margin: 0 -1px;
+    }
+    .muhurta-slot.now .time { color: #D4A04A; }
+    .muhurta-slot.now .label { color: #D4A04A; }
+
+    /* ===== CHART GLANCE (simplified) ===== */
+    .chart-glance {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+    .chart-glance-card {
+      background: #111828;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #1A2340;
+      display: flex; gap: 20px; align-items: center;
+    }
+    .chart-mini {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 1.5px solid #253050;
+      position: relative;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chart-mini::before {
+      content: ''; position: absolute;
+      width: 70%; height: 70%; border-radius: 50%;
+      border: 1px solid #1E2A42;
+    }
+    .chart-mini .mini-line { position: absolute; background: #1A2340; }
+    .chart-mini .ml-h { width: 100%; height: 1px; top: 50%; }
+    .chart-mini .ml-v { height: 100%; width: 1px; left: 50%; }
+    .chart-mini .ml-d1 { width: 100%; height: 1px; top: 50%; transform: rotate(30deg); }
+    .chart-mini .ml-d2 { width: 100%; height: 1px; top: 50%; transform: rotate(60deg); }
+    .chart-mini .mini-dot {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    }
+    .md-su { top: 15%; left: 58%; background: #D4A04A; }
+    .md-mo { top: 35%; right: 8%; background: #8B99B5; }
+    .md-ma { bottom: 25%; right: 15%; background: #C45D4A; }
+    .md-ju { bottom: 10%; left: 45%; background: #6A9FD8; }
+    .chart-mini-label {
+      font-size: 9px; color: #3A4A6A; z-index: 1;
+      text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+    }
+    .chart-glance-info { flex: 1; }
+    .chart-glance-info .name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: #D4DAE6; margin-bottom: 4px;
+    }
+    .chart-glance-info .placements {
+      font-size: 12px; color: #5B6A8A; line-height: 1.6; margin-bottom: 12px;
+    }
+    .chart-glance-info .cta {
+      font-size: 12px; color: #C8913A; font-weight: 600; cursor: pointer;
+    }
+
+    /* ===== DAILY CARDS (2-column modular) ===== */
+    .daily-cards {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+    .cards-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .mini-card {
+      background: #111828; border-radius: 14px; padding: 18px;
+      border: 1px solid #1A2340;
+    }
+    .mini-card .mc-icon {
+      font-size: 20px; margin-bottom: 10px;
+    }
+    .mini-card .mc-title {
+      font-size: 13px; font-weight: 600; color: #D4DAE6; margin-bottom: 4px;
+    }
+    .mini-card .mc-value {
+      font-size: 12px; color: #5B6A8A; line-height: 1.5;
+    }
+    .mini-card .mc-value.highlight { color: #D4A04A; }
+
+    /* ===== AI READING PREVIEW ===== */
+    .reading-preview {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+    .reading-preview-card {
+      background: #111828; border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #1A2340;
+    }
+    .rp-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #C8913A; font-weight: 600; margin-bottom: 12px;
+    }
+    .rp-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: #D4DAE6; margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .rp-excerpt {
+      font-family: 'DM Serif Text', serif;
+      font-size: 14px; line-height: 1.8; color: #7080A0;
+      margin-bottom: 16px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .rp-cta {
+      font-size: 13px; color: #C8913A; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ===== ASTROLOGER SPOTLIGHT ===== */
+    .astrologer-spot {
+      padding: 0 20px;
+      margin-bottom: 28px;
+    }
+    .astrologer-card {
+      background: #111828; border-radius: 16px; padding: 20px;
+      border: 1px solid #1A2340;
+      display: flex; gap: 16px; align-items: center;
+    }
+    .astrologer-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #1A2340 0%, #253050 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: #D4DAE6;
+      flex-shrink: 0;
+    }
+    .astrologer-info { flex: 1; }
+    .astrologer-info .name { font-size: 14px; font-weight: 600; color: #D4DAE6; margin-bottom: 2px; }
+    .astrologer-info .spec { font-size: 12px; color: #5B6A8A; margin-bottom: 6px; }
+    .astrologer-info .avail { font-size: 11px; color: #6AAF7A; font-weight: 500; }
+    .book-btn {
+      padding: 10px 18px; background: #C8913A; color: #fff;
+      border: none; border-radius: 10px; font-size: 12px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ===== BOTTOM TAB BAR ===== */
+    .tab-bar {
+      position: sticky; bottom: 0;
+      background: rgba(10,15,30,0.92);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid #151C30;
+      display: flex;
+      padding: 8px 0 24px;
+    }
+    .tab-item {
+      flex: 1; text-align: center; padding: 8px 0;
+      cursor: pointer;
+    }
+    .tab-item .tab-icon { font-size: 18px; margin-bottom: 2px; color: #3A4A6A; }
+    .tab-item .tab-label { font-size: 10px; color: #3A4A6A; font-weight: 500; }
+    .tab-item.active .tab-icon { color: #D4A04A; }
+    .tab-item.active .tab-label { color: #D4A04A; }
+
+    /* ================================================================
+       SCREEN 2: CHART EXPLORATION — Scrollytelling
+       Tap "Explore full chart" → this view
+       ================================================================ */
+    .chart-explore {
+      background: #0A0F1E;
+      max-width: 480px;
+      margin: 0 auto;
+      border-left: 1px solid #151C30;
+      border-right: 1px solid #151C30;
+      min-height: 900px;
+    }
+    .ce-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid #151C30;
+    }
+    .ce-back {
+      font-size: 13px; color: #5B6A8A; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none; font-family: 'Inter', sans-serif;
+    }
+    .ce-title { font-size: 14px; font-weight: 600; color: #D4DAE6; }
+    .ce-actions { display: flex; gap: 8px; }
+    .ce-icon-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #111828; border: 1px solid #1A2340;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #5B6A8A; cursor: pointer;
+    }
+
+    /* Sticky chart area */
+    .ce-chart-area {
+      position: sticky; top: 0; z-index: 10;
+      background: #0A0F1E;
+      padding: 24px 20px;
+      border-bottom: 1px solid #151C30;
+    }
+    .ce-chart-wheel {
+      width: 280px; height: 280px; border-radius: 50%;
+      border: 2px solid #1E2A42;
+      margin: 0 auto;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ce-chart-wheel::before {
+      content: ''; position: absolute;
+      width: 75%; height: 75%; border-radius: 50%;
+      border: 1px solid #182240;
+    }
+    .ce-chart-wheel::after {
+      content: ''; position: absolute;
+      width: 50%; height: 50%; border-radius: 50%;
+      border: 1px solid #14203A;
+    }
+    .ce-line { position: absolute; background: #14203A; }
+    .ce-lh { width: 100%; height: 1px; top: 50%; }
+    .ce-lv { height: 100%; width: 1px; left: 50%; }
+    .ce-ld1 { width: 140%; height: 1px; top: 50%; left: -20%; transform: rotate(30deg); }
+    .ce-ld2 { width: 140%; height: 1px; top: 50%; left: -20%; transform: rotate(60deg); }
+    .ce-ld3 { width: 140%; height: 1px; top: 50%; left: -20%; transform: rotate(-30deg); }
+    .ce-ld4 { width: 140%; height: 1px; top: 50%; left: -20%; transform: rotate(-60deg); }
+    .ce-planet {
+      position: absolute; z-index: 3;
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; border: 1.5px solid;
+    }
+    .ce-su { top: 10%; left: 55%; background: rgba(212,160,74,0.2); border-color: #D4A04A; color: #D4A04A; }
+    .ce-mo { top: 28%; right: 6%; background: rgba(139,153,181,0.15); border-color: #8B99B5; color: #8B99B5; }
+    .ce-ma { bottom: 22%; right: 10%; background: rgba(196,93,74,0.15); border-color: #C45D4A; color: #C45D4A; }
+    .ce-ju { bottom: 8%; left: 40%; background: rgba(106,159,216,0.15); border-color: #6A9FD8; color: #6A9FD8; }
+    .ce-ve { top: 38%; left: 5%; background: rgba(106,175,122,0.15); border-color: #6AAF7A; color: #6AAF7A; }
+    .ce-sa { top: 5%; left: 30%; background: rgba(91,106,138,0.15); border-color: #5B6A8A; color: #5B6A8A; }
+    /* Highlighted planet */
+    .ce-planet.highlighted {
+      box-shadow: 0 0 12px rgba(212,160,74,0.3);
+      transform: scale(1.2);
+    }
+    .ce-center {
+      z-index: 2; text-align: center;
+    }
+    .ce-center .name { font-size: 13px; font-weight: 600; color: #D4DAE6; }
+    .ce-center .meta { font-size: 10px; color: #3A4A6A; }
+
+    /* Chart type tabs */
+    .ce-chart-tabs {
+      display: flex; gap: 6px; justify-content: center;
+      margin-top: 16px;
+    }
+    .ce-tab {
+      padding: 6px 14px; border-radius: 20px; font-size: 11px;
+      background: transparent; border: 1px solid #1A2340;
+      color: #5B6A8A; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+    }
+    .ce-tab.active { background: #C8913A; color: #fff; border-color: #C8913A; }
+
+    /* Scrolling interpretation sections */
+    .ce-sections {
+      padding: 0;
+    }
+    .ce-section {
+      padding: 32px 24px;
+      border-bottom: 1px solid #14203A;
+    }
+    .ce-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #C8913A; font-weight: 600; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ce-section-label .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .ce-section h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: #D4DAE6; margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .ce-section p {
+      font-family: 'DM Serif Text', serif;
+      font-size: 15px; line-height: 1.85; color: #7080A0;
+      margin-bottom: 16px;
+    }
+    .ce-section .detail-row {
+      display: flex; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid #14203A;
+      font-size: 13px;
+    }
+    .ce-section .detail-row:last-child { border-bottom: none; }
+    .ce-section .detail-row .dl { color: #5B6A8A; }
+    .ce-section .detail-row .dv { color: #8B99B5; }
+    .ce-section .detail-row .dv.gold { color: #D4A04A; }
+
+    /* Planet cards (tap to expand) */
+    .planet-card {
+      background: #111828; border-radius: 12px;
+      padding: 16px; margin-bottom: 10px;
+      border: 1px solid #1A2340;
+      cursor: pointer;
+    }
+    .planet-card-header {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .pc-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .pc-name { font-size: 14px; font-weight: 600; color: #D4DAE6; flex: 1; }
+    .pc-sign { font-size: 13px; color: #8B99B5; }
+    .pc-deg { font-size: 12px; color: #3A4A6A; font-family: monospace; }
+    .planet-card-body {
+      padding-top: 12px; margin-top: 12px;
+      border-top: 1px solid #14203A;
+    }
+    .planet-card-body p {
+      font-family: 'DM Serif Text', serif;
+      font-size: 14px; line-height: 1.8; color: #7080A0;
+      margin: 0;
+    }
+
+    /* ================================================================
+       SCREEN 3: AI READING — Immersive
+       Full reading as a focused, distraction-free experience
+       ================================================================ */
+    .reading-full {
+      background: #0A0F1E;
+      max-width: 480px;
+      margin: 0 auto;
+      border-left: 1px solid #151C30;
+      border-right: 1px solid #151C30;
+      min-height: 900px;
+    }
+    .rf-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid #151C30;
+    }
+    .rf-topbar .back { font-size: 13px; color: #5B6A8A; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .rf-topbar .reading-time { font-size: 11px; color: #3A4A6A; }
+    .rf-topbar .share { font-size: 13px; color: #5B6A8A; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+    .rf-hero {
+      padding: 40px 24px 32px;
+      border-bottom: 1px solid #14203A;
+    }
+    .rf-hero .category {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: #C8913A; font-weight: 600; margin-bottom: 14px;
+    }
+    .rf-hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px; line-height: 1.2; color: #D4DAE6;
+      margin-bottom: 16px;
+    }
+    .rf-hero .meta { font-size: 12px; color: #5B6A8A; }
+    .rf-hero .meta strong { color: #8B99B5; }
+
+    .rf-lead {
+      padding: 32px 24px;
+      border-bottom: 1px solid #14203A;
+    }
+    .rf-lead p {
+      font-family: 'DM Serif Text', serif;
+      font-size: 18px; line-height: 1.85; color: #8B99B5;
+      border-left: 3px solid #C8913A;
+      padding-left: 20px;
+    }
+
+    .rf-body {
+      padding: 32px 24px;
+    }
+    .rf-body p {
+      font-family: 'DM Serif Text', serif;
+      font-size: 16px; line-height: 1.9; color: #7080A0;
+      margin-bottom: 24px;
+    }
+    .rf-pullquote {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px; line-height: 1.35; color: #D4DAE6;
+      text-align: center;
+      padding: 40px 12px;
+      margin: 16px 0;
+      border-top: 1px solid #1A2340;
+      border-bottom: 1px solid #1A2340;
+    }
+
+    .rf-section-break {
+      padding: 0 24px;
+      margin-bottom: 24px;
+    }
+    .rf-section-break .label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #C8913A; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rf-section-break .label::after {
+      content: ''; flex: 1; height: 1px; background: #1A2340;
+    }
+
+    /* Themes / Key Insight cards within reading */
+    .rf-insight-card {
+      margin: 0 24px 24px;
+      background: #111828; border-radius: 14px;
+      padding: 20px; border: 1px solid #1A2340;
+    }
+    .rf-insight-card .ic-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #5B6A8A; font-weight: 600; margin-bottom: 8px;
+    }
+    .rf-insight-card .ic-text {
+      font-family: 'DM Serif Text', serif;
+      font-size: 15px; line-height: 1.7; color: #8B99B5;
+    }
+
+    /* Actions at bottom of reading */
+    .rf-actions {
+      padding: 24px;
+      border-top: 1px solid #14203A;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .rf-btn {
+      padding: 14px; border-radius: 12px; font-size: 14px;
+      font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+      text-align: center; border: none; width: 100%;
+    }
+    .rf-btn-primary { background: #C8913A; color: #fff; }
+    .rf-btn-secondary { background: #111828; color: #D4DAE6; border: 1px solid #1A2340; }
+
+    /* Continue exploring cards */
+    .rf-continue {
+      padding: 24px;
+      border-top: 1px solid #14203A;
+    }
+    .rf-continue .section-label { margin-bottom: 16px; }
+    .rf-continue-card {
+      background: #111828; border-radius: 12px;
+      padding: 16px; margin-bottom: 10px;
+      border: 1px solid #1A2340;
+      display: flex; gap: 14px; align-items: center;
+      cursor: pointer;
+    }
+    .rf-continue-card:hover { border-color: #253050; }
+    .rcc-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .rcc-icon.gold { background: rgba(200,145,58,0.1); color: #D4A04A; }
+    .rcc-icon.blue { background: rgba(106,159,216,0.1); color: #6A9FD8; }
+    .rcc-icon.green { background: rgba(106,175,122,0.1); color: #6AAF7A; }
+    .rcc-info { flex: 1; }
+    .rcc-info .title { font-size: 14px; font-weight: 600; color: #D4DAE6; margin-bottom: 2px; }
+    .rcc-info .desc { font-size: 12px; color: #5B6A8A; }
+    .rcc-arrow { color: #3A4A6A; font-size: 14px; }
+
+    /* ================================================================
+       SCREEN 4: ASTROLOGER BOOKING
+       Expert-first, not calendar-first
+       ================================================================ */
+    .booking {
+      background: #0A0F1E;
+      max-width: 480px;
+      margin: 0 auto;
+      border-left: 1px solid #151C30;
+      border-right: 1px solid #151C30;
+      min-height: 900px;
+      padding-bottom: 40px;
+    }
+    .bk-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid #151C30;
+    }
+    .bk-topbar .back { font-size: 13px; color: #5B6A8A; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .bk-topbar .title { font-size: 14px; font-weight: 600; color: #D4DAE6; }
+
+    .bk-filters {
+      padding: 12px 20px;
+      display: flex; gap: 8px;
+      overflow-x: auto;
+      border-bottom: 1px solid #151C30;
+    }
+    .bk-filter {
+      padding: 6px 14px; border-radius: 20px; font-size: 11px;
+      background: transparent; border: 1px solid #1A2340;
+      color: #5B6A8A; cursor: pointer; font-family: 'Inter', sans-serif;
+      font-weight: 500; white-space: nowrap; flex-shrink: 0;
+    }
+    .bk-filter.active { background: #1A2340; color: #D4DAE6; }
+
+    .bk-list { padding: 16px 20px; }
+    .bk-card {
+      background: #111828; border-radius: 16px;
+      padding: 20px; margin-bottom: 14px;
+      border: 1px solid #1A2340;
+    }
+    .bk-card-top {
+      display: flex; gap: 14px; margin-bottom: 14px;
+    }
+    .bk-avatar {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, #1A2340 0%, #253050 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: #D4DAE6;
+      flex-shrink: 0;
+    }
+    .bk-info { flex: 1; }
+    .bk-info .name { font-size: 15px; font-weight: 600; color: #D4DAE6; margin-bottom: 2px; }
+    .bk-info .spec { font-size: 12px; color: #5B6A8A; margin-bottom: 6px; }
+    .bk-info .rating { font-size: 12px; color: #D4A04A; }
+    .bk-info .rating .count { color: #3A4A6A; }
+    .bk-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .bk-tag {
+      font-size: 10px; padding: 4px 10px; border-radius: 8px;
+      background: #14203A; color: #5B6A8A; font-weight: 500;
+    }
+    .bk-card-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 14px; border-top: 1px solid #14203A;
+    }
+    .bk-price { font-size: 14px; font-weight: 600; color: #D4DAE6; }
+    .bk-price .per { font-size: 11px; color: #5B6A8A; font-weight: 400; }
+    .bk-avail { font-size: 11px; color: #6AAF7A; font-weight: 500; }
+    .bk-book-btn {
+      padding: 8px 20px; background: #C8913A; color: #fff;
+      border: none; border-radius: 10px; font-size: 12px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- SCREEN 1: HOME                                                    -->
+<!-- ================================================================ -->
+<div class="page-marker">
+  <div class="route">/home</div>
+  <h2>Home — "Today" Experience</h2>
+  <p>Mobile-first. Led by today's cosmic moment. Glanceable → scannable → tappable.</p>
+</div>
+
+<div class="home">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>&#9679;&#9679;&#9679;&#9679; &nbsp; &#9632;</span>
+  </div>
+
+  <div class="home-topbar">
+    <div class="logo">Josi</div>
+    <div class="right">
+      <div class="icon-btn">&#9790;</div>
+      <div class="avatar">G</div>
+    </div>
+  </div>
+
+  <!-- LAYER 1: Glance — Today's cosmic moment -->
+  <div class="today-hero">
+    <div class="today-greeting">Good morning, Govind</div>
+    <div class="today-date">Monday, March 10</div>
+    <div class="today-card">
+      <div class="today-card-label">Today's Sky</div>
+      <div class="today-card-title">Shukla Chaturthi in Rohini</div>
+      <div class="today-card-insight">The Moon transits through Taurus today. A day for grounding creative energy and beginning things that need patience to grow.</div>
+      <div class="today-card-pills">
+        <span class="pill pill-gold">Shubh Muhurta</span>
+        <span class="pill pill-blue">Moon in Taurus</span>
+        <span class="pill pill-green">Favorable</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYER 1-2: Muhurta timeline (horizontal scroll) -->
+  <div class="muhurta-section">
+    <div class="section-label">Muhurta Timeline</div>
+    <div class="muhurta-scroll">
+      <div class="muhurta-slot"><div class="time">6 AM</div><div class="bar bar-good"></div><div class="label">Good</div></div>
+      <div class="muhurta-slot"><div class="time">7 AM</div><div class="bar bar-avoid"></div><div class="label">Rahu</div></div>
+      <div class="muhurta-slot"><div class="time">8 AM</div><div class="bar bar-avoid"></div><div class="label">Rahu</div></div>
+      <div class="muhurta-slot"><div class="time">9 AM</div><div class="bar bar-good"></div><div class="label">Good</div></div>
+      <div class="muhurta-slot now"><div class="time">10 AM</div><div class="bar bar-excellent"></div><div class="label">Now</div></div>
+      <div class="muhurta-slot"><div class="time">11 AM</div><div class="bar bar-excellent"></div><div class="label">Shubh</div></div>
+      <div class="muhurta-slot"><div class="time">12 PM</div><div class="bar bar-good"></div><div class="label">Good</div></div>
+      <div class="muhurta-slot"><div class="time">1 PM</div><div class="bar bar-neutral"></div><div class="label">Neutral</div></div>
+      <div class="muhurta-slot"><div class="time">2 PM</div><div class="bar bar-good"></div><div class="label">Good</div></div>
+      <div class="muhurta-slot"><div class="time">3 PM</div><div class="bar bar-neutral"></div><div class="label">Neutral</div></div>
+      <div class="muhurta-slot"><div class="time">4 PM</div><div class="bar bar-good"></div><div class="label">Good</div></div>
+      <div class="muhurta-slot"><div class="time">5 PM</div><div class="bar bar-avoid"></div><div class="label">Yama</div></div>
+    </div>
+  </div>
+
+  <!-- LAYER 2: Your chart at a glance -->
+  <div class="chart-glance">
+    <div class="section-label">Your Chart</div>
+    <div class="chart-glance-card">
+      <div class="chart-mini">
+        <div class="mini-line ml-h"></div>
+        <div class="mini-line ml-v"></div>
+        <div class="mini-line ml-d1"></div>
+        <div class="mini-line ml-d2"></div>
+        <div class="mini-dot md-su"></div>
+        <div class="mini-dot md-mo"></div>
+        <div class="mini-dot md-ma"></div>
+        <div class="mini-dot md-ju"></div>
+        <span class="chart-mini-label">Rasi</span>
+      </div>
+      <div class="chart-glance-info">
+        <div class="name">Sun Pisces, Moon Scorpio</div>
+        <div class="placements">Ascendant Cancer · Anuradha Pada 3<br>Saturn Mahadasha · 2019–2038</div>
+        <div class="cta">Explore full chart →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYER 2: Daily modular cards -->
+  <div class="daily-cards">
+    <div class="section-label">Today for You</div>
+    <div class="cards-grid">
+      <div class="mini-card">
+        <div class="mc-icon">&#9790;</div>
+        <div class="mc-title">Moon Phase</div>
+        <div class="mc-value">Waxing Crescent<br><span style="color:#D4A04A">12% illuminated</span></div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-icon">&#8634;</div>
+        <div class="mc-title">Transit Alert</div>
+        <div class="mc-value">Jupiter enters Gemini<br><span style="color:#6A9FD8">in 4 days</span></div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-icon">&#9673;</div>
+        <div class="mc-title">Charts</div>
+        <div class="mc-value highlight">12 created<br><span style="color:#5B6A8A">3 traditions</span></div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-icon">&#10024;</div>
+        <div class="mc-title">AI Readings</div>
+        <div class="mc-value highlight">7 generated<br><span style="color:#5B6A8A">3 remaining</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYER 2→3: AI reading preview -->
+  <div class="reading-preview">
+    <div class="section-label">Latest Reading</div>
+    <div class="reading-preview-card">
+      <div class="rp-label">AI Deep Reading</div>
+      <div class="rp-title">The Water Within: Your Emotional Architecture</div>
+      <div class="rp-excerpt">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio in the fifth house creates a deep well of creative intensity...</div>
+      <div class="rp-cta">Continue reading →</div>
+    </div>
+  </div>
+
+  <!-- LAYER 2: Astrologer spotlight -->
+  <div class="astrologer-spot">
+    <div class="section-label">Available Now</div>
+    <div class="astrologer-card">
+      <div class="astrologer-avatar">P</div>
+      <div class="astrologer-info">
+        <div class="name">Priya Shankar</div>
+        <div class="spec">Vedic · 15 years · Tamil/English</div>
+        <div class="avail">&#9679; Available now</div>
+      </div>
+      <button class="book-btn">Book</button>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">&#9673;</div><div class="tab-label">Today</div></div>
+    <div class="tab-item"><div class="tab-icon">&#9734;</div><div class="tab-label">Charts</div></div>
+    <div class="tab-item"><div class="tab-icon">&#10024;</div><div class="tab-label">Insights</div></div>
+    <div class="tab-item"><div class="tab-icon">&#9733;</div><div class="tab-label">Consult</div></div>
+    <div class="tab-item"><div class="tab-icon">&#9881;</div><div class="tab-label">Profile</div></div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN 2: CHART EXPLORATION (Scrollytelling)                      -->
+<!-- ================================================================ -->
+<div class="page-marker">
+  <div class="route">/charts/birth-vedic → tapped "Explore full chart"</div>
+  <h2>Chart Exploration — Scrollytelling</h2>
+  <p>Chart stays sticky at top. Interpretation sections scroll beneath. Tap a planet card to expand.</p>
+</div>
+
+<div class="chart-explore">
+  <div class="ce-topbar">
+    <button class="ce-back">← Back</button>
+    <div class="ce-title">Birth Chart</div>
+    <div class="ce-actions">
+      <div class="ce-icon-btn">&#8615;</div>
+      <div class="ce-icon-btn">&#8943;</div>
+    </div>
+  </div>
+
+  <!-- Sticky chart -->
+  <div class="ce-chart-area">
+    <div class="ce-chart-wheel">
+      <div class="ce-line ce-lh"></div>
+      <div class="ce-line ce-lv"></div>
+      <div class="ce-line ce-ld1"></div>
+      <div class="ce-line ce-ld2"></div>
+      <div class="ce-line ce-ld3"></div>
+      <div class="ce-line ce-ld4"></div>
+      <div class="ce-center">
+        <div class="name">Govind</div>
+        <div class="meta">Mar 15, 1992 · Chennai</div>
+      </div>
+      <div class="ce-planet ce-su highlighted">Su</div>
+      <div class="ce-planet ce-mo">Mo</div>
+      <div class="ce-planet ce-ma">Ma</div>
+      <div class="ce-planet ce-ju">Ju</div>
+      <div class="ce-planet ce-ve">Ve</div>
+      <div class="ce-planet ce-sa">Sa</div>
+    </div>
+    <div class="ce-chart-tabs">
+      <button class="ce-tab active">Rasi</button>
+      <button class="ce-tab">Navamsa</button>
+      <button class="ce-tab">Bhava</button>
+      <button class="ce-tab">Transit</button>
+    </div>
+  </div>
+
+  <!-- Scrolling sections -->
+  <div class="ce-sections">
+    <!-- Overview section -->
+    <div class="ce-section">
+      <div class="ce-section-label">Overview</div>
+      <h3>Water-Dominant Chart</h3>
+      <p>Three planets in water signs create what Vedic astrology calls a rare depth of feeling — a life lived from the inside out. Emotional intelligence is your primary mode of understanding the world.</p>
+      <div class="detail-row"><span class="dl">Dominant Element</span><span class="dv">Water (3 placements)</span></div>
+      <div class="detail-row"><span class="dl">Chart Ruler</span><span class="dv gold">Moon in Scorpio</span></div>
+      <div class="detail-row"><span class="dl">Dasha Period</span><span class="dv">Saturn · 2019–2038</span></div>
+    </div>
+
+    <!-- Planet cards (expandable) -->
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#D4A04A"></div>
+        Sun in Pisces · House 9
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#D4A04A"></div>
+          <div class="pc-name">Sun</div>
+          <div class="pc-sign">Pisces</div>
+          <div class="pc-deg">29°14'</div>
+        </div>
+        <div class="planet-card-body">
+          <p>The Sun at the final degree of Pisces — the last degree of the last sign. In Vedic astrology, this is a gandanta point, a karmic knot where water meets fire. Your sense of self dissolves into something larger than individual identity.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#8B99B5"></div>
+        Moon in Scorpio · House 5
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#8B99B5"></div>
+          <div class="pc-name">Moon</div>
+          <div class="pc-sign">Scorpio</div>
+          <div class="pc-deg">14°32'</div>
+        </div>
+        <div class="planet-card-body">
+          <p>The Moon in Scorpio in the fifth house creates a deep well of creative intensity — you don't just feel things, you transform through feeling. Every experience passes through an alchemical process.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#6A9FD8"></div>
+        Jupiter in Leo · House 2
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#6A9FD8"></div>
+          <div class="pc-name">Jupiter</div>
+          <div class="pc-sign">Leo</div>
+          <div class="pc-deg">05°41'</div>
+        </div>
+        <div class="planet-card-body">
+          <p>Jupiter in Leo in the second house expands your sense of values and self-worth. Your voice — both literal and metaphorical — carries a natural authority. Resources flow toward you when you speak your truth.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#6AAF7A"></div>
+        Venus in Aquarius · House 8
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#6AAF7A"></div>
+          <div class="pc-name">Venus</div>
+          <div class="pc-sign">Aquarius</div>
+          <div class="pc-deg">18°55'</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#5B6A8A"></div>
+        Saturn in Aquarius · House 8
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#5B6A8A"></div>
+          <div class="pc-name">Saturn</div>
+          <div class="pc-sign">Aquarius</div>
+          <div class="pc-deg">24°19'</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ce-section">
+      <div class="ce-section-label">
+        <div class="dot" style="background:#C45D4A"></div>
+        Mars in Sagittarius · House 6
+      </div>
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="pc-dot" style="background:#C45D4A"></div>
+          <div class="pc-name">Mars</div>
+          <div class="pc-sign">Sagittarius</div>
+          <div class="pc-deg">22°08'</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="ce-section" style="text-align:center">
+      <button class="rf-btn rf-btn-primary" style="max-width:320px;margin:0 auto;display:block">Generate Full AI Reading →</button>
+      <button class="rf-btn rf-btn-secondary" style="max-width:320px;margin:10px auto 0;display:block">Book Astrologer for This Chart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN 3: AI READING — Immersive Focus                           -->
+<!-- ================================================================ -->
+<div class="page-marker">
+  <div class="route">/readings/water-within → tapped "Continue reading"</div>
+  <h2>AI Reading — Immersive Focus</h2>
+  <p>Distraction-free. Reading time shown. Sections break up the narrative. Pull quotes as landmarks.</p>
+</div>
+
+<div class="reading-full">
+  <div class="rf-topbar">
+    <button class="back">← Readings</button>
+    <div class="reading-time">8 min read</div>
+    <button class="share">Share</button>
+  </div>
+
+  <div class="rf-hero">
+    <div class="category">AI Deep Reading · Vedic Sidereal</div>
+    <h1>The Water Within: Your Emotional Architecture</h1>
+    <div class="meta">For <strong>Govind</strong> · March 10, 2026</div>
+  </div>
+
+  <div class="rf-lead">
+    <p>Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. Three planets in water signs create what Vedic astrology calls a rare depth of feeling — a life lived from the inside out.</p>
+  </div>
+
+  <div class="rf-section-break">
+    <div class="label">Moon · Scorpio · House 5</div>
+  </div>
+
+  <div class="rf-body">
+    <p>The Moon in Scorpio in the fifth house creates a deep well of creative intensity — you don't just feel things, you transform through feeling. Every experience passes through an alchemical process before it settles into understanding.</p>
+
+    <p>The Cancer ascendant wraps this intensity in warmth. Others experience you as nurturing and approachable, even as your inner world runs far deeper than most will ever know.</p>
+  </div>
+
+  <div class="rf-pullquote">"The surface is calm, the depths are infinite."</div>
+
+  <div class="rf-insight-card">
+    <div class="ic-label">Key Insight</div>
+    <div class="ic-text">Saturn's aspect on the Moon channels your emotional intensity into purpose. Where water might scatter, Saturn gives it direction. Your intuition has structure.</div>
+  </div>
+
+  <div class="rf-section-break">
+    <div class="label">Anuradha Nakshatra · Pada 3</div>
+  </div>
+
+  <div class="rf-body">
+    <p>In the Anuradha nakshatra, the Moon finds its devotional quality. Anuradha's deity, Mitra, governs friendship and alliance. Your deepest emotional fulfillment comes from bonds — the kind that withstand years, distance, and silence.</p>
+
+    <p>Jupiter in the ninth house amplifies this into wisdom. Your emotional experiences don't just heal you — they become teachings. You are the person others come to when they need understanding, not advice.</p>
+  </div>
+
+  <div class="rf-insight-card">
+    <div class="ic-label">Neural Pathway Question</div>
+    <div class="ic-text">When was the last time you allowed yourself to simply feel without trying to understand? What emerged from that stillness?</div>
+  </div>
+
+  <div class="rf-actions">
+    <button class="rf-btn rf-btn-primary">Discuss with Astrologer</button>
+    <button class="rf-btn rf-btn-secondary">View Chart Placements</button>
+  </div>
+
+  <div class="rf-continue">
+    <div class="section-label">Continue Exploring</div>
+    <div class="rf-continue-card">
+      <div class="rcc-icon gold">&#9681;</div>
+      <div class="rcc-info">
+        <div class="title">Saturn Mahadasha Analysis</div>
+        <div class="desc">19-year cycle of karmic lessons</div>
+      </div>
+      <div class="rcc-arrow">→</div>
+    </div>
+    <div class="rf-continue-card">
+      <div class="rcc-icon blue">&#8634;</div>
+      <div class="rcc-info">
+        <div class="title">Jupiter in Gemini Transit</div>
+        <div class="desc">Entering your 12th house March 14</div>
+      </div>
+      <div class="rcc-arrow">→</div>
+    </div>
+    <div class="rf-continue-card">
+      <div class="rcc-icon green">&#10023;</div>
+      <div class="rcc-info">
+        <div class="title">Compatibility Reading</div>
+        <div class="desc">Compare charts with someone</div>
+      </div>
+      <div class="rcc-arrow">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- SCREEN 4: ASTROLOGER BOOKING                                      -->
+<!-- ================================================================ -->
+<div class="page-marker">
+  <div class="route">/consult → tapped "Book" or "Consult" tab</div>
+  <h2>Astrologer Booking — Expert First</h2>
+  <p>Browse astrologers first, not calendar. Filter by tradition, language, type. Availability visible upfront.</p>
+</div>
+
+<div class="booking">
+  <div class="bk-topbar">
+    <button class="back">← Back</button>
+    <div class="title">Find an Astrologer</div>
+    <div></div>
+  </div>
+
+  <div class="bk-filters">
+    <button class="bk-filter active">All</button>
+    <button class="bk-filter">Vedic</button>
+    <button class="bk-filter">Western</button>
+    <button class="bk-filter">Chinese</button>
+    <button class="bk-filter">Video</button>
+    <button class="bk-filter">Chat</button>
+    <button class="bk-filter">Tamil</button>
+    <button class="bk-filter">Hindi</button>
+  </div>
+
+  <div class="bk-list">
+    <div class="bk-card">
+      <div class="bk-card-top">
+        <div class="bk-avatar">P</div>
+        <div class="bk-info">
+          <div class="name">Priya Shankar</div>
+          <div class="spec">Vedic · KP System · 15 years</div>
+          <div class="rating">&#9733;&#9733;&#9733;&#9733;&#9733; 4.9 <span class="count">(142 reviews)</span></div>
+        </div>
+      </div>
+      <div class="bk-tags">
+        <span class="bk-tag">Video</span>
+        <span class="bk-tag">Chat</span>
+        <span class="bk-tag">Tamil</span>
+        <span class="bk-tag">English</span>
+        <span class="bk-tag">Marriage</span>
+        <span class="bk-tag">Career</span>
+      </div>
+      <div class="bk-card-bottom">
+        <div><div class="bk-price">$45 <span class="per">/ 30 min</span></div><div class="bk-avail">&#9679; Available now</div></div>
+        <button class="bk-book-btn">Book</button>
+      </div>
+    </div>
+
+    <div class="bk-card">
+      <div class="bk-card-top">
+        <div class="bk-avatar">R</div>
+        <div class="bk-info">
+          <div class="name">Raj Krishnamurthy</div>
+          <div class="spec">Vedic · Nadi · 22 years</div>
+          <div class="rating">&#9733;&#9733;&#9733;&#9733;&#9733; 4.8 <span class="count">(89 reviews)</span></div>
+        </div>
+      </div>
+      <div class="bk-tags">
+        <span class="bk-tag">Video</span>
+        <span class="bk-tag">Tamil</span>
+        <span class="bk-tag">English</span>
+        <span class="bk-tag">Hindi</span>
+        <span class="bk-tag">Remedies</span>
+      </div>
+      <div class="bk-card-bottom">
+        <div><div class="bk-price">$60 <span class="per">/ 30 min</span></div><div class="bk-avail" style="color:#D4A04A">&#9679; Next: Tomorrow 10 AM</div></div>
+        <button class="bk-book-btn">Book</button>
+      </div>
+    </div>
+
+    <div class="bk-card">
+      <div class="bk-card-top">
+        <div class="bk-avatar">S</div>
+        <div class="bk-info">
+          <div class="name">Sarah Chen</div>
+          <div class="spec">Western · Evolutionary · 8 years</div>
+          <div class="rating">&#9733;&#9733;&#9733;&#9733;&#9734; 4.6 <span class="count">(67 reviews)</span></div>
+        </div>
+      </div>
+      <div class="bk-tags">
+        <span class="bk-tag">Video</span>
+        <span class="bk-tag">Chat</span>
+        <span class="bk-tag">Email</span>
+        <span class="bk-tag">English</span>
+        <span class="bk-tag">Relationships</span>
+      </div>
+      <div class="bk-card-bottom">
+        <div><div class="bk-price">$35 <span class="per">/ 30 min</span></div><div class="bk-avail">&#9679; Available now</div></div>
+        <button class="bk-book-btn">Book</button>
+      </div>
+    </div>
+
+    <div class="bk-card">
+      <div class="bk-card-top">
+        <div class="bk-avatar">M</div>
+        <div class="bk-info">
+          <div class="name">Master Wei Lin</div>
+          <div class="spec">Chinese · BaZi · Four Pillars · 30 years</div>
+          <div class="rating">&#9733;&#9733;&#9733;&#9733;&#9733; 5.0 <span class="count">(31 reviews)</span></div>
+        </div>
+      </div>
+      <div class="bk-tags">
+        <span class="bk-tag">Video</span>
+        <span class="bk-tag">English</span>
+        <span class="bk-tag">Mandarin</span>
+        <span class="bk-tag">Business</span>
+        <span class="bk-tag">Feng Shui</span>
+      </div>
+      <div class="bk-card-bottom">
+        <div><div class="bk-price">$80 <span class="per">/ 45 min</span></div><div class="bk-avail" style="color:#D4A04A">&#9679; Next: Wed 3 PM</div></div>
+        <button class="bk-book-btn">Book</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Final -->
+<div style="padding:80px 48px;text-align:center;background:#060A14;border-top:3px solid #C8913A">
+  <div style="font-family:'DM Serif Display',serif;font-size:32px;color:#D4DAE6;margin-bottom:16px">Four screens. One experience.</div>
+  <div style="font-size:14px;color:#5B6A8A;max-width:520px;margin:0 auto;line-height:1.7">
+    Mobile-first. Today-led home. Scrollytelling chart. Immersive reading. Expert-first booking.<br>
+    Each screen is optimized for its content type. Nothing fights for attention.
+  </div>
+</div>
+
+</body>
+</html>

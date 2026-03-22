@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi — User Preferences Dropdown</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-page: #060A14;
+      --bg-frame: #0A0F1E;
+      --bg-surface: #080E1C;
+      --bg-card: #111828;
+      --bg-card-hover: #151E30;
+      --bg-hero: linear-gradient(135deg, #111828 0%, #0F1A2E 50%, #131425 100%);
+      --border-subtle: #151C30;
+      --border-default: #1A2340;
+      --border-strong: #253050;
+      --border-divider: #14203A;
+      --text-primary: #D4DAE6;
+      --text-secondary: #8B99B5;
+      --text-body: #7B8CA8;
+      --text-muted: #5B6A8A;
+      --text-faint: #3A4A6A;
+      --accent-gold: #C8913A;
+      --accent-gold-bright: #D4A04A;
+      --accent-gold-bg: rgba(200,145,58,0.12);
+      --accent-gold-bg-subtle: rgba(200,145,58,0.06);
+      --accent-blue: #6A9FD8;
+      --accent-blue-bg: rgba(106,159,216,0.1);
+      --accent-green: #6AAF7A;
+      --accent-green-bg: rgba(106,175,122,0.1);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #C8913A, #D4A04A);
+      --avatar-text: #0A0F1E;
+      --shadow-frame: 0 20px 80px rgba(0,0,0,0.4);
+      --shadow-dropdown: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,35,64,0.5);
+      --icon-btn-bg: #111828;
+      --counter-bg: #151C30;
+    }
+
+    body.light {
+      --bg-page: #F0F2F7;
+      --bg-frame: #FFFFFF;
+      --bg-surface: #F6F7FB;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8F9FC;
+      --bg-hero: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 50%, #F0F3F9 100%);
+      --border-subtle: #E8ECF2;
+      --border-default: #DDE1EB;
+      --border-strong: #CED4E0;
+      --border-divider: #E8ECF2;
+      --text-primary: #1A1F2E;
+      --text-secondary: #4A5268;
+      --text-body: #5A6478;
+      --text-muted: #7E8DA5;
+      --text-faint: #A0AABB;
+      --accent-gold: #B8832E;
+      --accent-gold-bright: #C8913A;
+      --accent-gold-bg: rgba(184,131,46,0.08);
+      --accent-gold-bg-subtle: rgba(184,131,46,0.04);
+      --accent-blue: #4A7FB5;
+      --accent-blue-bg: rgba(74,127,181,0.08);
+      --accent-green: #5A8F6A;
+      --accent-green-bg: rgba(90,143,106,0.07);
+      --accent-red: #C45D4A;
+      --avatar-gradient: linear-gradient(135deg, #B8832E, #C8913A);
+      --avatar-text: #FFFFFF;
+      --shadow-frame: 0 8px 40px rgba(26,31,46,0.08);
+      --shadow-dropdown: 0 12px 48px rgba(26,31,46,0.12), 0 0 0 1px rgba(221,225,235,0.5);
+      --icon-btn-bg: #F0F2F7;
+      --counter-bg: #E8ECF2;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ========== TOGGLE BAR ========== */
+    .toggle-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      background: var(--bg-surface); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: center; align-items: center;
+      padding: 10px 24px; gap: 6px; flex-wrap: wrap;
+    }
+    .tg-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
+    .tg-btn {
+      padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      border: 1px solid var(--border-default); background: transparent;
+      color: var(--text-muted); transition: all 0.15s;
+    }
+    .tg-btn.active { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); }
+    .tg-sep { width: 1px; height: 24px; background: var(--border-default); margin: 0 10px; }
+    .spacer { height: 56px; }
+
+    /* Theme toggle in toggle bar */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; background: var(--bg-card); border-radius: 20px;
+      border: 1px solid var(--border-default);
+    }
+    .theme-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      cursor: pointer; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+      background: transparent; color: var(--text-faint);
+    }
+    .theme-btn.active {
+      background: var(--accent-gold); color: #fff;
+      box-shadow: 0 2px 8px rgba(200,145,58,0.3);
+    }
+
+    /* ========== WEB FRAME ========== */
+    .web-frame {
+      max-width: 1280px; margin: 20px auto; background: var(--bg-frame);
+      border-radius: 12px; border: 1px solid var(--border-default); overflow: visible;
+      box-shadow: var(--shadow-frame); position: relative;
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);
+      border-radius: 12px 12px 0 0;
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .browser-dots .r { background: #C45D4A; } .browser-dots .y { background: #D4A04A; } .browser-dots .g { background: #6AAF7A; }
+    .browser-url {
+      flex: 1; background: var(--bg-frame); border-radius: 6px; padding: 6px 14px;
+      font-size: 11px; color: var(--text-muted); font-family: monospace;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ========== TOP NAV ========== */
+    .topnav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 40px; border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-surface); position: relative;
+    }
+    .topnav .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text-primary); }
+    .topnav .nav-links { display: flex; gap: 32px; }
+    .topnav .nav-links span {
+      font-size: 13px; color: var(--text-muted); font-weight: 500;
+      cursor: pointer; transition: color 0.15s;
+    }
+    .topnav .nav-links span:hover { color: var(--text-secondary); }
+    .topnav .nav-links span.active { color: var(--text-primary); }
+    .topnav .right { display: flex; gap: 12px; align-items: center; position: relative; }
+    .topnav .plan-badge {
+      font-size: 10px; padding: 4px 10px; border-radius: 12px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 700;
+    }
+
+    /* ========== AVATAR BUTTON ========== */
+    .avatar-btn {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--avatar-text);
+      cursor: pointer; border: 2px solid transparent;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative; z-index: 1001;
+    }
+    .avatar-btn:hover { border-color: var(--accent-gold); }
+    .avatar-btn.open {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px var(--accent-gold-bg);
+    }
+
+    /* ========== DROPDOWN OVERLAY ========== */
+    .dropdown-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 999;
+    }
+    .dropdown-overlay.visible { display: block; }
+
+    /* ========== PREFERENCES DROPDOWN ========== */
+    .prefs-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      width: 320px; background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 14px; box-shadow: var(--shadow-dropdown);
+      z-index: 1000; overflow: hidden;
+      animation: dropIn 0.15s ease-out;
+    }
+    .prefs-dropdown.visible { display: block; }
+
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* User header */
+    .prefs-user {
+      padding: 20px; border-bottom: 1px solid var(--border-divider);
+      display: flex; gap: 14px; align-items: center;
+    }
+    .prefs-user-av {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--avatar-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--avatar-text); flex-shrink: 0;
+    }
+    .prefs-user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .prefs-user-email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .prefs-user-plan {
+      font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright);
+      display: inline-block; margin-top: 4px;
+    }
+
+    /* Section labels */
+    .prefs-section {
+      padding: 14px 20px 6px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); font-weight: 600;
+    }
+
+    /* Layout preference */
+    .prefs-layout {
+      padding: 8px 20px 16px; display: flex; gap: 10px;
+    }
+    .layout-option {
+      flex: 1; padding: 12px; border-radius: 10px;
+      border: 2px solid var(--border-default); cursor: pointer;
+      text-align: center; transition: all 0.15s; background: transparent;
+    }
+    .layout-option:hover { border-color: var(--border-strong); background: var(--bg-card-hover); }
+    .layout-option.selected {
+      border-color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle);
+    }
+    .layout-icon {
+      width: 100%; height: 40px; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Sidebar icon */
+    .icon-sidebar {
+      width: 52px; height: 32px; border: 1.5px solid var(--border-strong);
+      border-radius: 4px; display: flex; overflow: hidden;
+    }
+    .icon-sidebar .sb { width: 14px; background: var(--border-default); border-right: 1px solid var(--border-strong); }
+    .icon-sidebar .mn { flex: 1; padding: 4px; display: flex; flex-direction: column; gap: 2px; }
+    .icon-sidebar .mn span { display: block; height: 2px; border-radius: 1px; background: var(--border-default); }
+    .icon-sidebar .mn span:first-child { width: 80%; }
+    .icon-sidebar .mn span:nth-child(2) { width: 60%; }
+    .layout-option.selected .icon-sidebar { border-color: var(--accent-gold); }
+    .layout-option.selected .icon-sidebar .sb { background: var(--accent-gold-bg); }
+    .layout-option.selected .icon-sidebar .mn span { background: var(--accent-gold-bg); }
+
+    /* Top nav icon */
+    .icon-topnav {
+      width: 52px; height: 32px; border: 1.5px solid var(--border-strong);
+      border-radius: 4px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .icon-topnav .tp { height: 7px; background: var(--border-default); border-bottom: 1px solid var(--border-strong); }
+    .icon-topnav .ct { flex: 1; padding: 4px; display: flex; flex-direction: column; gap: 2px; align-items: center; }
+    .icon-topnav .ct span { display: block; height: 2px; border-radius: 1px; background: var(--border-default); }
+    .icon-topnav .ct span:first-child { width: 70%; }
+    .icon-topnav .ct span:nth-child(2) { width: 50%; }
+    .layout-option.selected .icon-topnav { border-color: var(--accent-gold); }
+    .layout-option.selected .icon-topnav .tp { background: var(--accent-gold-bg); }
+    .layout-option.selected .icon-topnav .ct span { background: var(--accent-gold-bg); }
+
+    .layout-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+    .layout-option.selected .layout-label { color: var(--accent-gold-bright); }
+
+    /* Theme preference */
+    .prefs-theme {
+      padding: 8px 20px 16px; display: flex; gap: 10px;
+    }
+    .theme-option {
+      flex: 1; padding: 12px; border-radius: 10px;
+      border: 2px solid var(--border-default); cursor: pointer;
+      text-align: center; transition: all 0.15s; background: transparent;
+    }
+    .theme-option:hover { border-color: var(--border-strong); background: var(--bg-card-hover); }
+    .theme-option.selected {
+      border-color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle);
+    }
+    .theme-swatch {
+      width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .theme-swatch-light {
+      background: #F0F2F7; border: 1.5px solid #DDE1EB; color: #B8832E;
+    }
+    .theme-swatch-dark {
+      background: #0A0F1E; border: 1.5px solid #1A2340; color: #D4A04A;
+    }
+    .theme-swatch-auto {
+      background: linear-gradient(135deg, #F0F2F7 50%, #0A0F1E 50%);
+      border: 1.5px solid var(--border-strong); color: var(--accent-gold-bright); font-size: 14px;
+    }
+    .theme-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+    .theme-option.selected .theme-label { color: var(--accent-gold-bright); }
+
+    /* Menu items */
+    .prefs-menu {
+      padding: 6px 8px; border-top: 1px solid var(--border-divider);
+    }
+    .prefs-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      border-radius: 8px; cursor: pointer; transition: background 0.1s;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .prefs-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .prefs-item .pi-icon { width: 16px; text-align: center; font-size: 13px; opacity: 0.7; }
+    .prefs-item .pi-label { flex: 1; }
+    .prefs-item .pi-badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 8px;
+      background: var(--accent-gold-bg); color: var(--accent-gold-bright); font-weight: 600;
+    }
+    .prefs-item .pi-arrow { font-size: 11px; color: var(--text-faint); }
+
+    /* Divider in menu */
+    .prefs-divider { height: 1px; background: var(--border-divider); margin: 4px 12px; }
+
+    /* Sign out */
+    .prefs-item.danger { color: var(--accent-red); }
+    .prefs-item.danger:hover { background: rgba(196,93,74,0.08); }
+
+    /* ========== CONTENT (behind dropdown) ========== */
+    .content { max-width: 1120px; margin: 0 auto; padding: 32px 40px; }
+    .greeting { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+    .greeting strong { color: var(--text-primary); font-weight: 600; }
+    .date { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text-primary); margin-bottom: 28px; }
+    .hero {
+      background: var(--bg-hero); border-radius: 20px; padding: 44px 40px;
+      border: 1px solid var(--border-default); margin-bottom: 28px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -80px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(200,145,58,0.05) 0%, transparent 60%);
+      border-radius: 50%;
+    }
+    .hero-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: var(--accent-gold); font-weight: 600; margin-bottom: 14px; position: relative;
+    }
+    .hero-title {
+      font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--text-primary);
+      line-height: 1.25; margin-bottom: 12px; position: relative;
+    }
+    .hero-text {
+      font-family: 'DM Serif Text', serif; font-size: 16px; line-height: 1.75;
+      color: var(--text-body); position: relative; max-width: 640px;
+    }
+    .pill { font-size: 11px; padding: 5px 12px; border-radius: 16px; font-weight: 500; }
+    .pill-gold { background: var(--accent-gold-bg); color: var(--accent-gold-bright); }
+    .pill-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+
+    .cards-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 28px;
+    }
+    .card {
+      background: var(--bg-card); border-radius: 16px; padding: 28px;
+      border: 1px solid var(--border-default);
+    }
+    .card-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 14px;
+    }
+    .card-value { font-family: 'DM Serif Display', serif; font-size: 40px; color: var(--text-primary); margin: 8px 0 4px; }
+    .card-value.gold { color: var(--accent-gold-bright); }
+    .card-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* Blur overlay when dropdown open */
+    .web-frame.blurred .content { filter: blur(2px); opacity: 0.5; pointer-events: none; transition: all 0.15s; }
+
+    /* ========== PAGE MARKER ========== */
+    .page-marker {
+      padding: 28px 48px 16px; text-align: center;
+      background: var(--bg-page); border-top: 2px solid var(--accent-gold);
+    }
+    .page-marker .route {
+      font-size: 11px; font-family: monospace; color: var(--accent-gold);
+      background: var(--accent-gold-bg-subtle); display: inline-block;
+      padding: 3px 12px; border-radius: 14px; margin-bottom: 6px;
+    }
+    .page-marker h2 {
+      font-family: 'DM Serif Display', serif; font-size: 22px;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-marker p { font-size: 12px; color: var(--text-muted); }
+
+    /* ========== ANNOTATION ========== */
+    .annotation {
+      max-width: 800px; margin: 40px auto 20px; padding: 24px;
+      background: var(--bg-card); border: 1px solid var(--border-default);
+      border-radius: 14px; border-left: 3px solid var(--accent-gold);
+    }
+    .annotation h3 {
+      font-family: 'DM Serif Display', serif; font-size: 18px;
+      color: var(--text-primary); margin-bottom: 10px;
+    }
+    .annotation p {
+      font-size: 13px; line-height: 1.7; color: var(--text-body); margin-bottom: 8px;
+    }
+    .annotation ul { list-style: none; padding: 0; }
+    .annotation li {
+      font-size: 13px; color: var(--text-body); line-height: 1.7;
+      padding: 3px 0; padding-left: 16px; position: relative;
+    }
+    .annotation li::before {
+      content: ''; position: absolute; left: 0; top: 11px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent-gold-bg);
+      border: 1px solid var(--accent-gold);
+    }
+    .annotation code {
+      font-size: 11px; padding: 2px 6px; border-radius: 4px;
+      background: var(--accent-gold-bg-subtle); color: var(--accent-gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== PREVIEW TOGGLE BAR ========== -->
+<div class="toggle-bar">
+  <span class="tg-label">Preview:</span>
+  <button class="tg-btn active" onclick="showState('closed')">Dropdown Closed</button>
+  <button class="tg-btn" onclick="showState('open')">Dropdown Open</button>
+  <div class="tg-sep"></div>
+  <div class="theme-toggle">
+    <button class="theme-btn" onclick="setTheme('light')">&#9788;</button>
+    <button class="theme-btn active" onclick="setTheme('dark')">&#9790;</button>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<!-- ANNOTATION -->
+<div class="annotation">
+  <h3>User Preferences — Avatar Dropdown</h3>
+  <p>Click the avatar <strong>G</strong> in the top-right corner of the nav bar to open the preferences dropdown. This menu provides:</p>
+  <ul>
+    <li><strong>Navigation layout</strong> — toggle between Side Nav and Top Nav</li>
+    <li><strong>Theme</strong> — Light, Dark, or Auto (follows system)</li>
+    <li><strong>Quick links</strong> — Profile, Subscription, API Keys, Settings</li>
+    <li><strong>Sign out</strong></li>
+  </ul>
+  <p>Use the toggle above to see the dropdown open/closed states, and the theme toggle to preview in both themes.</p>
+</div>
+
+<!-- ========== WEB FRAME ========== -->
+<div class="page-marker">
+  <div class="route">app.josiam.com (Top Nav view)</div>
+  <h2>Preferences Dropdown — User Avatar</h2>
+  <p>Appears on click. Contains layout preference, theme, and account actions.</p>
+</div>
+
+<div class="web-frame" id="webFrame">
+  <div class="browser-bar">
+    <div class="browser-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="browser-url">app.josiam.com</div>
+  </div>
+
+  <div class="topnav">
+    <div class="logo">Josi</div>
+    <div class="nav-links">
+      <span class="active">Home</span><span>Charts</span><span>AI Insights</span>
+      <span>Compatibility</span><span>Transits</span><span>Panchang</span><span>Astrologers</span>
+    </div>
+    <div class="right">
+      <span class="plan-badge">MYSTIC</span>
+      <div class="avatar-btn" id="avatarBtn" onclick="toggleDropdown()">G</div>
+
+      <!-- Dropdown -->
+      <div class="prefs-dropdown" id="prefsDropdown">
+        <!-- User info -->
+        <div class="prefs-user">
+          <div class="prefs-user-av">G</div>
+          <div>
+            <div class="prefs-user-name">Govind</div>
+            <div class="prefs-user-email">govind@josiam.com</div>
+            <span class="prefs-user-plan">MYSTIC PLAN</span>
+          </div>
+        </div>
+
+        <!-- Layout preference -->
+        <div class="prefs-section">Navigation Layout</div>
+        <div class="prefs-layout">
+          <div class="layout-option selected" onclick="selectLayout(this, 'sidebar')">
+            <div class="layout-icon">
+              <div class="icon-sidebar">
+                <div class="sb"></div>
+                <div class="mn"><span></span><span></span></div>
+              </div>
+            </div>
+            <div class="layout-label">Side Nav</div>
+          </div>
+          <div class="layout-option" onclick="selectLayout(this, 'topnav')">
+            <div class="layout-icon">
+              <div class="icon-topnav">
+                <div class="tp"></div>
+                <div class="ct"><span></span><span></span></div>
+              </div>
+            </div>
+            <div class="layout-label">Top Nav</div>
+          </div>
+        </div>
+
+        <!-- Theme preference -->
+        <div class="prefs-section">Theme</div>
+        <div class="prefs-theme">
+          <div class="theme-option" onclick="selectThemeOption(this, 'light')">
+            <div class="theme-swatch theme-swatch-light">&#9788;</div>
+            <div class="theme-label">Light</div>
+          </div>
+          <div class="theme-option selected" onclick="selectThemeOption(this, 'dark')">
+            <div class="theme-swatch theme-swatch-dark">&#9790;</div>
+            <div class="theme-label">Dark</div>
+          </div>
+          <div class="theme-option" onclick="selectThemeOption(this, 'auto')">
+            <div class="theme-swatch theme-swatch-auto">A</div>
+            <div class="theme-label">Auto</div>
+          </div>
+        </div>
+
+        <!-- Menu items -->
+        <div class="prefs-menu">
+          <div class="prefs-item">
+            <span class="pi-icon">&#9998;</span>
+            <span class="pi-label">Edit Profile</span>
+            <span class="pi-arrow">&#8250;</span>
+          </div>
+          <div class="prefs-item">
+            <span class="pi-icon">&#9733;</span>
+            <span class="pi-label">Subscription</span>
+            <span class="pi-badge">Mystic</span>
+            <span class="pi-arrow">&#8250;</span>
+          </div>
+          <div class="prefs-item">
+            <span class="pi-icon">&#9919;</span>
+            <span class="pi-label">API Keys</span>
+            <span class="pi-arrow">&#8250;</span>
+          </div>
+          <div class="prefs-item">
+            <span class="pi-icon">&#9881;</span>
+            <span class="pi-label">Settings</span>
+            <span class="pi-arrow">&#8250;</span>
+          </div>
+          <div class="prefs-divider"></div>
+          <div class="prefs-item danger">
+            <span class="pi-icon">&#10140;</span>
+            <span class="pi-label">Sign Out</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content area (blurs when dropdown open) -->
+  <div class="content">
+    <div class="greeting">Good morning, <strong>Govind</strong></div>
+    <div class="date">Wednesday, March 12</div>
+    <div class="hero">
+      <div class="hero-label">Today's Sky</div>
+      <div class="hero-title">Shukla Chaturthi in Rohini</div>
+      <div class="hero-text">The Moon transits through Taurus today. A day for grounding creative energy and beginning things that need patience to grow.</div>
+      <div style="display:flex;gap:8px;margin-top:20px;position:relative">
+        <span class="pill pill-gold">Shubh Muhurta</span>
+        <span class="pill pill-blue">Moon in Taurus</span>
+      </div>
+    </div>
+    <div class="cards-row">
+      <div class="card">
+        <div class="card-label">Your Chart</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--text-primary);margin-top:10px">Sun Pisces, Moon Scorpio</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Ascendant Cancer · Anuradha Pada 3</div>
+        <div style="font-size:12px;color:var(--accent-gold);font-weight:600;margin-top:14px;cursor:pointer">Explore full chart &#8594;</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Charts Created</div>
+        <div class="card-value">12</div>
+        <div class="card-desc">Across 3 traditions · +3 this month</div>
+      </div>
+      <div class="card">
+        <div class="card-label">AI Readings</div>
+        <div class="card-value gold">7</div>
+        <div class="card-desc">3 remaining this month</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay to close dropdown -->
+<div class="dropdown-overlay" id="dropdownOverlay" onclick="closeDropdown()"></div>
+
+<script>
+function toggleDropdown() {
+  const dropdown = document.getElementById('prefsDropdown');
+  const avatar = document.getElementById('avatarBtn');
+  const overlay = document.getElementById('dropdownOverlay');
+  const frame = document.getElementById('webFrame');
+  const isOpen = dropdown.classList.contains('visible');
+
+  if (isOpen) {
+    closeDropdown();
+  } else {
+    dropdown.classList.add('visible');
+    avatar.classList.add('open');
+    overlay.classList.add('visible');
+    frame.classList.add('blurred');
+    // Update toggle bar state
+    document.querySelectorAll('.tg-btn:not(.theme-btn)').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tg-btn:not(.theme-btn)')[1].classList.add('active');
+  }
+}
+
+function closeDropdown() {
+  document.getElementById('prefsDropdown').classList.remove('visible');
+  document.getElementById('avatarBtn').classList.remove('open');
+  document.getElementById('dropdownOverlay').classList.remove('visible');
+  document.getElementById('webFrame').classList.remove('blurred');
+  // Update toggle bar state
+  document.querySelectorAll('.tg-btn:not(.theme-btn)').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tg-btn:not(.theme-btn)')[0].classList.add('active');
+}
+
+function showState(state) {
+  document.querySelectorAll('.tg-btn:not(.theme-btn)').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (state === 'open') {
+    document.getElementById('prefsDropdown').classList.add('visible');
+    document.getElementById('avatarBtn').classList.add('open');
+    document.getElementById('dropdownOverlay').classList.add('visible');
+    document.getElementById('webFrame').classList.add('blurred');
+  } else {
+    closeDropdown();
+  }
+}
+
+function selectLayout(el, layout) {
+  document.querySelectorAll('.layout-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectThemeOption(el, theme) {
+  document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  // Also apply theme to the page
+  if (theme === 'light') {
+    document.body.classList.add('light');
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.theme-btn')[0].classList.add('active');
+  } else if (theme === 'dark') {
+    document.body.classList.remove('light');
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.theme-btn')[1].classList.add('active');
+  }
+}
+
+function setTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (theme === 'light') {
+    document.body.classList.add('light');
+    // Sync dropdown theme option
+    document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.theme-option')[0].classList.add('selected');
+  } else {
+    document.body.classList.remove('light');
+    document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.theme-option')[1].classList.add('selected');
+  }
+}
+</script>
+
+</body>
+</html>

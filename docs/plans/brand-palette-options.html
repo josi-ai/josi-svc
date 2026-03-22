@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi — Color Palette Options (Dark + Light)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; padding: 40px 48px; background: #f8f8fa; color: #1a1a2e; }
+
+    .page-title { font-family: 'DM Serif Display', serif; font-size: 36px; margin-bottom: 8px; }
+    .page-subtitle { font-size: 14px; color: #666; margin-bottom: 40px; }
+
+    .option { margin-bottom: 48px; border-radius: 20px; overflow: hidden; border: 1px solid #e0e0e0; }
+    .option-header { padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .option-header h2 { font-family: 'DM Serif Display', serif; font-size: 24px; }
+    .option-header .badge { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+
+    .themes { display: flex; }
+    .theme-half { flex: 1; padding: 28px; }
+
+    .theme-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 20px; }
+    .swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .sw { width: 64px; height: 48px; border-radius: 8px; display: flex; align-items: flex-end; justify-content: center; font-size: 8px; padding-bottom: 4px; font-family: monospace; }
+
+    .mock-nav { display: flex; align-items: center; gap: 20px; padding: 12px 20px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; }
+    .mock-nav .logo { font-family: 'DM Serif Display', serif; font-size: 22px; }
+    .mock-nav .links { display: flex; gap: 16px; font-size: 12px; margin-left: auto; }
+    .mock-nav .cta { padding: 6px 16px; border-radius: 6px; font-size: 11px; font-weight: 600; border: none; cursor: pointer; }
+
+    .mock-cards { display: flex; gap: 12px; margin-bottom: 16px; }
+    .mock-card { flex: 1; padding: 20px; border-radius: 12px; }
+    .mock-card h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 6px; }
+    .mock-card p { font-size: 12px; line-height: 1.6; opacity: 0.7; }
+    .mock-card .btn { display: inline-block; margin-top: 12px; padding: 7px 18px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .mock-card .stat { font-family: 'DM Serif Display', serif; font-size: 36px; }
+    .mock-card .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; }
+
+    .tagline-mock { text-align: center; padding: 32px; border-radius: 12px; margin-bottom: 16px; }
+    .tagline-mock .logo { font-family: 'DM Serif Display', serif; font-size: 36px; margin-bottom: 8px; }
+    .tagline-mock .tag { font-size: 14px; opacity: 0.6; font-weight: 300; }
+
+    .psychology { padding: 16px 20px; border-radius: 10px; font-size: 12px; line-height: 1.7; margin-top: 8px; }
+    .psychology strong { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="page-title">Josi — Color Palette Exploration</div>
+<div class="page-subtitle">5 non-purple directions, each shown in dark + light mode. DM Serif Display + Inter typography.</div>
+
+<!-- ============================================ -->
+<!-- OPTION 1: MIDNIGHT INDIGO -->
+<!-- ============================================ -->
+<div class="option">
+  <div class="option-header" style="background:#0D1B2A;color:#E0E8F0">
+    <h2>Option 1 — Midnight Indigo</h2>
+    <span class="badge" style="background:rgba(99,160,255,0.15);color:#63A0FF">Deep • Trustworthy • Celestial</span>
+  </div>
+  <div class="themes">
+    <!-- DARK -->
+    <div class="theme-half" style="background:#0D1B2A;color:#E0E8F0">
+      <div class="theme-label" style="color:#63A0FF">Dark Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#070F1A;color:#555">070F1A</div>
+        <div class="sw" style="background:#0D1B2A;color:#555">0D1B2A</div>
+        <div class="sw" style="background:#1B2D45;color:#888">1B2D45</div>
+        <div class="sw" style="background:#243B55;color:#aaa">243B55</div>
+        <div class="sw" style="background:#63A0FF;color:#000">63A0FF</div>
+        <div class="sw" style="background:#F0C761;color:#000">F0C761</div>
+        <div class="sw" style="background:#4ECDC4;color:#000">4ECDC4</div>
+        <div class="sw" style="background:#FF6B6B;color:#000">FF6B6B</div>
+      </div>
+      <div class="mock-nav" style="background:#1B2D45">
+        <div class="logo" style="color:#63A0FF">Josi</div>
+        <div class="links" style="color:#8899AA">
+          <span style="color:#63A0FF">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#63A0FF;color:#070F1A">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#070F1A;border:1px solid #1B2D45">
+        <div class="logo" style="color:#63A0FF">Josi</div>
+        <div class="tag" style="color:#8899AA">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#1B2D45;color:#E0E8F0;border:1px solid #243B55">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#63A0FF;color:#070F1A">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#243B55;color:#E0E8F0;border:1px solid #2E4A6A">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(240,199,97,0.15);color:#F0C761;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#F0C761;color:#070F1A;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#1B2D45;color:#E0E8F0;border:1px solid #243B55;text-align:center">
+          <div class="stat" style="color:#63A0FF">12</div>
+          <div class="stat-label" style="color:#8899AA">Charts</div>
+        </div>
+      </div>
+    </div>
+    <!-- LIGHT -->
+    <div class="theme-half" style="background:#F5F7FA;color:#0D1B2A">
+      <div class="theme-label" style="color:#2E6BC6">Light Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFFFF;color:#ccc;border:1px solid #e0e0e0">FFFFFF</div>
+        <div class="sw" style="background:#F5F7FA;color:#aaa">F5F7FA</div>
+        <div class="sw" style="background:#E8ECF1;color:#888">E8ECF1</div>
+        <div class="sw" style="background:#D1D8E0;color:#666">D1D8E0</div>
+        <div class="sw" style="background:#2E6BC6;color:#fff">2E6BC6</div>
+        <div class="sw" style="background:#D4960A;color:#fff">D4960A</div>
+        <div class="sw" style="background:#0D9488;color:#fff">0D9488</div>
+        <div class="sw" style="background:#DC2626;color:#fff">DC2626</div>
+      </div>
+      <div class="mock-nav" style="background:#FFFFFF;border:1px solid #E8ECF1">
+        <div class="logo" style="color:#2E6BC6">Josi</div>
+        <div class="links" style="color:#6B7B8D">
+          <span style="color:#2E6BC6">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#2E6BC6;color:white">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#FFFFFF;border:1px solid #E8ECF1">
+        <div class="logo" style="color:#2E6BC6">Josi</div>
+        <div class="tag" style="color:#6B7B8D">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#FFFFFF;color:#0D1B2A;border:1px solid #E8ECF1">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#2E6BC6;color:white">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0D1B2A;border:1px solid #E8ECF1">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(212,150,10,0.1);color:#D4960A;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#D4960A;color:white;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0D1B2A;border:1px solid #E8ECF1;text-align:center">
+          <div class="stat" style="color:#2E6BC6">12</div>
+          <div class="stat-label" style="color:#6B7B8D">Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psychology" style="background:#F0F4F8;color:#333">
+    <strong>Psychology:</strong> Blue = #1 most trusted color globally. 33% of top brands use blue. Night sky association perfect for astrology. Gold accent adds premium warmth. <strong>Risk:</strong> Could feel too corporate/fintech without the warm accents. Needs the gold to stay spiritual.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- OPTION 2: CELESTIAL TEAL -->
+<!-- ============================================ -->
+<div class="option">
+  <div class="option-header" style="background:#0A1A1F;color:#D0E8E4">
+    <h2>Option 2 — Celestial Teal</h2>
+    <span class="badge" style="background:rgba(45,212,191,0.15);color:#2DD4BF">Calm • Balanced • Refreshing</span>
+  </div>
+  <div class="themes">
+    <div class="theme-half" style="background:#0A1A1F;color:#D0E8E4">
+      <div class="theme-label" style="color:#2DD4BF">Dark Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#050F12;color:#444">050F12</div>
+        <div class="sw" style="background:#0A1A1F;color:#555">0A1A1F</div>
+        <div class="sw" style="background:#13292F;color:#777">13292F</div>
+        <div class="sw" style="background:#1C3A42;color:#999">1C3A42</div>
+        <div class="sw" style="background:#2DD4BF;color:#000">2DD4BF</div>
+        <div class="sw" style="background:#F59E0B;color:#000">F59E0B</div>
+        <div class="sw" style="background:#818CF8;color:#000">818CF8</div>
+        <div class="sw" style="background:#F87171;color:#000">F87171</div>
+      </div>
+      <div class="mock-nav" style="background:#13292F">
+        <div class="logo" style="color:#2DD4BF">Josi</div>
+        <div class="links" style="color:#7A9A94">
+          <span style="color:#2DD4BF">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#2DD4BF;color:#050F12">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#050F12;border:1px solid #13292F">
+        <div class="logo" style="color:#2DD4BF">Josi</div>
+        <div class="tag" style="color:#7A9A94">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#13292F;color:#D0E8E4;border:1px solid #1C3A42">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#2DD4BF;color:#050F12">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#1C3A42;color:#D0E8E4;border:1px solid #265A55">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(245,158,11,0.15);color:#F59E0B;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#F59E0B;color:#050F12;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#13292F;color:#D0E8E4;border:1px solid #1C3A42;text-align:center">
+          <div class="stat" style="color:#2DD4BF">12</div>
+          <div class="stat-label" style="color:#7A9A94">Charts</div>
+        </div>
+      </div>
+    </div>
+    <div class="theme-half" style="background:#F4FAF9;color:#0A1A1F">
+      <div class="theme-label" style="color:#0D9488">Light Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFFFF;color:#ccc;border:1px solid #e0e0e0">FFFFFF</div>
+        <div class="sw" style="background:#F4FAF9;color:#aaa">F4FAF9</div>
+        <div class="sw" style="background:#E0F0ED;color:#888">E0F0ED</div>
+        <div class="sw" style="background:#C2DDD8;color:#666">C2DDD8</div>
+        <div class="sw" style="background:#0D9488;color:#fff">0D9488</div>
+        <div class="sw" style="background:#D97706;color:#fff">D97706</div>
+        <div class="sw" style="background:#6366F1;color:#fff">6366F1</div>
+        <div class="sw" style="background:#DC2626;color:#fff">DC2626</div>
+      </div>
+      <div class="mock-nav" style="background:#FFFFFF;border:1px solid #E0F0ED">
+        <div class="logo" style="color:#0D9488">Josi</div>
+        <div class="links" style="color:#5A7A74">
+          <span style="color:#0D9488">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#0D9488;color:white">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#FFFFFF;border:1px solid #E0F0ED">
+        <div class="logo" style="color:#0D9488">Josi</div>
+        <div class="tag" style="color:#5A7A74">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1A1F;border:1px solid #E0F0ED">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#0D9488;color:white">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1A1F;border:1px solid #E0F0ED">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(217,119,6,0.1);color:#D97706;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#D97706;color:white;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1A1F;border:1px solid #E0F0ED;text-align:center">
+          <div class="stat" style="color:#0D9488">12</div>
+          <div class="stat-label" style="color:#5A7A74">Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psychology" style="background:#E8F5F3;color:#333">
+    <strong>Psychology:</strong> Teal = balance + trust + freshness. Perfect blend of blue's reliability and green's growth. Wellness-aligned. Amber accent adds warmth. <strong>Risk:</strong> Could lean too "wellness app" and lose the celestial/mystical edge. Needs careful use.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- OPTION 3: OBSIDIAN + SAFFRON -->
+<!-- ============================================ -->
+<div class="option">
+  <div class="option-header" style="background:#121212;color:#F0E6D3">
+    <h2>Option 3 — Obsidian & Saffron</h2>
+    <span class="badge" style="background:rgba(232,168,56,0.15);color:#E8A838">Warm • Cultural • Bold</span>
+  </div>
+  <div class="themes">
+    <div class="theme-half" style="background:#121212;color:#F0E6D3">
+      <div class="theme-label" style="color:#E8A838">Dark Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#0A0A0A;color:#444">0A0A0A</div>
+        <div class="sw" style="background:#121212;color:#555">121212</div>
+        <div class="sw" style="background:#1E1E1E;color:#777">1E1E1E</div>
+        <div class="sw" style="background:#2A2A2A;color:#999">2A2A2A</div>
+        <div class="sw" style="background:#E8A838;color:#000">E8A838</div>
+        <div class="sw" style="background:#D4634B;color:#fff">D4634B</div>
+        <div class="sw" style="background:#7CB69A;color:#000">7CB69A</div>
+        <div class="sw" style="background:#E85D5D;color:#fff">E85D5D</div>
+      </div>
+      <div class="mock-nav" style="background:#1E1E1E">
+        <div class="logo" style="color:#E8A838">Josi</div>
+        <div class="links" style="color:#8A8078">
+          <span style="color:#E8A838">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#E8A838;color:#0A0A0A">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#0A0A0A;border:1px solid #1E1E1E">
+        <div class="logo" style="color:#E8A838">Josi</div>
+        <div class="tag" style="color:#8A8078">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#1E1E1E;color:#F0E6D3;border:1px solid #2A2A2A">
+          <h3 style="color:#F0E6D3">Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#E8A838;color:#0A0A0A">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#2A2A2A;color:#F0E6D3;border:1px solid #3A3A3A">
+          <h3 style="color:#F0E6D3">Subscription</h3>
+          <p><span style="background:rgba(212,99,75,0.15);color:#D4634B;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#D4634B;color:#fff;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#1E1E1E;color:#F0E6D3;border:1px solid #2A2A2A;text-align:center">
+          <div class="stat" style="color:#E8A838">12</div>
+          <div class="stat-label" style="color:#8A8078">Charts</div>
+        </div>
+      </div>
+    </div>
+    <div class="theme-half" style="background:#FAF6F0;color:#1A1612">
+      <div class="theme-label" style="color:#B8841E">Light Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFFFF;color:#ccc;border:1px solid #e0e0e0">FFFFFF</div>
+        <div class="sw" style="background:#FAF6F0;color:#aaa">FAF6F0</div>
+        <div class="sw" style="background:#F0E8DA;color:#888">F0E8DA</div>
+        <div class="sw" style="background:#D9CCBA;color:#666">D9CCBA</div>
+        <div class="sw" style="background:#B8841E;color:#fff">B8841E</div>
+        <div class="sw" style="background:#B5472F;color:#fff">B5472F</div>
+        <div class="sw" style="background:#2E8B57;color:#fff">2E8B57</div>
+        <div class="sw" style="background:#C0392B;color:#fff">C0392B</div>
+      </div>
+      <div class="mock-nav" style="background:#FFFFFF;border:1px solid #F0E8DA">
+        <div class="logo" style="color:#B8841E">Josi</div>
+        <div class="links" style="color:#8A7A68">
+          <span style="color:#B8841E">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#B8841E;color:white">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#FFFFFF;border:1px solid #F0E8DA">
+        <div class="logo" style="color:#B8841E">Josi</div>
+        <div class="tag" style="color:#8A7A68">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#FFFFFF;color:#1A1612;border:1px solid #F0E8DA">
+          <h3 style="color:#1A1612">Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#B8841E;color:white">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#1A1612;border:1px solid #F0E8DA">
+          <h3 style="color:#1A1612">Subscription</h3>
+          <p><span style="background:rgba(181,71,47,0.1);color:#B5472F;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#B5472F;color:white;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#1A1612;border:1px solid #F0E8DA;text-align:center">
+          <div class="stat" style="color:#B8841E">12</div>
+          <div class="stat-label" style="color:#8A7A68">Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psychology" style="background:#F5EFE5;color:#333">
+    <strong>Psychology:</strong> Saffron = sacred in Hindu/Buddhist traditions. True neutral black backgrounds (no color tint). Warm cream text feels like parchment. Terracotta accent = earth. <strong>Risk:</strong> Could skew too "Indian" for US audience, but the neutral blacks keep it modern. Most culturally resonant option.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- OPTION 4: AURORA -->
+<!-- ============================================ -->
+<div class="option">
+  <div class="option-header" style="background:#0F172A;color:#E2E8F0">
+    <h2>Option 4 — Aurora</h2>
+    <span class="badge" style="background:rgba(56,189,248,0.15);color:#38BDF8">Electric • Cosmic • Modern</span>
+  </div>
+  <div class="themes">
+    <div class="theme-half" style="background:#0F172A;color:#E2E8F0">
+      <div class="theme-label" style="color:#38BDF8">Dark Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#020617;color:#444">020617</div>
+        <div class="sw" style="background:#0F172A;color:#555">0F172A</div>
+        <div class="sw" style="background:#1E293B;color:#888">1E293B</div>
+        <div class="sw" style="background:#334155;color:#aaa">334155</div>
+        <div class="sw" style="background:#38BDF8;color:#000">38BDF8</div>
+        <div class="sw" style="background:#A78BFA;color:#000">A78BFA</div>
+        <div class="sw" style="background:#34D399;color:#000">34D399</div>
+        <div class="sw" style="background:#FB7185;color:#000">FB7185</div>
+      </div>
+      <div class="mock-nav" style="background:#1E293B">
+        <div class="logo" style="color:#38BDF8">Josi</div>
+        <div class="links" style="color:#64748B">
+          <span style="color:#38BDF8">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#38BDF8;color:#020617">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#020617;border:1px solid #1E293B">
+        <div class="logo" style="color:#38BDF8">Josi</div>
+        <div class="tag" style="color:#64748B">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#1E293B;color:#E2E8F0;border:1px solid #334155">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#38BDF8;color:#020617">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#334155;color:#E2E8F0;border:1px solid #475569">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(167,139,250,0.15);color:#A78BFA;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#A78BFA;color:#020617;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#1E293B;color:#E2E8F0;border:1px solid #334155;text-align:center">
+          <div class="stat" style="color:#38BDF8">12</div>
+          <div class="stat-label" style="color:#64748B">Charts</div>
+        </div>
+      </div>
+    </div>
+    <div class="theme-half" style="background:#F8FAFC;color:#0F172A">
+      <div class="theme-label" style="color:#0284C7">Light Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFFFF;color:#ccc;border:1px solid #e0e0e0">FFFFFF</div>
+        <div class="sw" style="background:#F8FAFC;color:#aaa">F8FAFC</div>
+        <div class="sw" style="background:#E2E8F0;color:#888">E2E8F0</div>
+        <div class="sw" style="background:#CBD5E1;color:#666">CBD5E1</div>
+        <div class="sw" style="background:#0284C7;color:#fff">0284C7</div>
+        <div class="sw" style="background:#7C3AED;color:#fff">7C3AED</div>
+        <div class="sw" style="background:#059669;color:#fff">059669</div>
+        <div class="sw" style="background:#E11D48;color:#fff">E11D48</div>
+      </div>
+      <div class="mock-nav" style="background:#FFFFFF;border:1px solid #E2E8F0">
+        <div class="logo" style="color:#0284C7">Josi</div>
+        <div class="links" style="color:#64748B">
+          <span style="color:#0284C7">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#0284C7;color:white">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#FFFFFF;border:1px solid #E2E8F0">
+        <div class="logo" style="color:#0284C7">Josi</div>
+        <div class="tag" style="color:#64748B">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#FFFFFF;color:#0F172A;border:1px solid #E2E8F0">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#0284C7;color:white">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0F172A;border:1px solid #E2E8F0">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(124,58,237,0.1);color:#7C3AED;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#7C3AED;color:white;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0F172A;border:1px solid #E2E8F0;text-align:center">
+          <div class="stat" style="color:#0284C7">12</div>
+          <div class="stat-label" style="color:#64748B">Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psychology" style="background:#EFF6FF;color:#333">
+    <strong>Psychology:</strong> Sky blue + violet = aurora borealis. Feels like Tailwind's Slate palette (battle-tested). Multi-accent system (blue, violet, green) for different features. <strong>Risk:</strong> Could feel too "developer tool" without warm accents. Very modern but less spiritual. Uses Tailwind's default Slate — maximum ecosystem compatibility.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- OPTION 5: EMERALD COSMOS -->
+<!-- ============================================ -->
+<div class="option">
+  <div class="option-header" style="background:#0A1612;color:#D4E8DF">
+    <h2>Option 5 — Emerald Cosmos</h2>
+    <span class="badge" style="background:rgba(52,211,153,0.15);color:#34D399">Natural • Grounded • Premium</span>
+  </div>
+  <div class="themes">
+    <div class="theme-half" style="background:#0A1612;color:#D4E8DF">
+      <div class="theme-label" style="color:#34D399">Dark Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#050D0A;color:#444">050D0A</div>
+        <div class="sw" style="background:#0A1612;color:#555">0A1612</div>
+        <div class="sw" style="background:#14261E;color:#777">14261E</div>
+        <div class="sw" style="background:#1E3A2E;color:#999">1E3A2E</div>
+        <div class="sw" style="background:#34D399;color:#000">34D399</div>
+        <div class="sw" style="background:#FBBF24;color:#000">FBBF24</div>
+        <div class="sw" style="background:#60A5FA;color:#000">60A5FA</div>
+        <div class="sw" style="background:#F87171;color:#000">F87171</div>
+      </div>
+      <div class="mock-nav" style="background:#14261E">
+        <div class="logo" style="color:#34D399">Josi</div>
+        <div class="links" style="color:#6A9A84">
+          <span style="color:#34D399">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#34D399;color:#050D0A">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#050D0A;border:1px solid #14261E">
+        <div class="logo" style="color:#34D399">Josi</div>
+        <div class="tag" style="color:#6A9A84">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#14261E;color:#D4E8DF;border:1px solid #1E3A2E">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#34D399;color:#050D0A">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#1E3A2E;color:#D4E8DF;border:1px solid #2A5040">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(251,191,36,0.15);color:#FBBF24;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#FBBF24;color:#050D0A;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#14261E;color:#D4E8DF;border:1px solid #1E3A2E;text-align:center">
+          <div class="stat" style="color:#34D399">12</div>
+          <div class="stat-label" style="color:#6A9A84">Charts</div>
+        </div>
+      </div>
+    </div>
+    <div class="theme-half" style="background:#F5FAF7;color:#0A1612">
+      <div class="theme-label" style="color:#059669">Light Mode</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFFFF;color:#ccc;border:1px solid #e0e0e0">FFFFFF</div>
+        <div class="sw" style="background:#F5FAF7;color:#aaa">F5FAF7</div>
+        <div class="sw" style="background:#E0F0E8;color:#888">E0F0E8</div>
+        <div class="sw" style="background:#C2DDD0;color:#666">C2DDD0</div>
+        <div class="sw" style="background:#059669;color:#fff">059669</div>
+        <div class="sw" style="background:#D97706;color:#fff">D97706</div>
+        <div class="sw" style="background:#2563EB;color:#fff">2563EB</div>
+        <div class="sw" style="background:#DC2626;color:#fff">DC2626</div>
+      </div>
+      <div class="mock-nav" style="background:#FFFFFF;border:1px solid #E0F0E8">
+        <div class="logo" style="color:#059669">Josi</div>
+        <div class="links" style="color:#5A7A68">
+          <span style="color:#059669">Dashboard</span><span>Charts</span><span>Insights</span>
+        </div>
+        <button class="cta" style="background:#059669;color:white">New Chart</button>
+      </div>
+      <div class="tagline-mock" style="background:#FFFFFF;border:1px solid #E0F0E8">
+        <div class="logo" style="color:#059669">Josi</div>
+        <div class="tag" style="color:#5A7A68">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1612;border:1px solid #E0F0E8">
+          <h3>Your Birth Chart</h3>
+          <p>Sun in Pisces, Moon in Scorpio. Deep emotional intelligence and intuitive knowing.</p>
+          <div class="btn" style="background:#059669;color:white">View Chart</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1612;border:1px solid #E0F0E8">
+          <h3>Subscription</h3>
+          <p><span style="background:rgba(217,119,6,0.1);color:#D97706;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">Mystic</span></p>
+          <div class="btn" style="background:#D97706;color:white;margin-top:12px">Upgrade</div>
+        </div>
+        <div class="mock-card" style="background:#FFFFFF;color:#0A1612;border:1px solid #E0F0E8;text-align:center">
+          <div class="stat" style="color:#059669">12</div>
+          <div class="stat-label" style="color:#5A7A68">Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psychology" style="background:#E8F5EC;color:#333">
+    <strong>Psychology:</strong> Emerald = balance, harmony, well-being, premium luxury. Strongest "nature connected to cosmos" feeling. Gold accent = celestial warmth. <strong>Risk:</strong> Could read as "fintech" or "eco" brand. Needs the warm gold to stay spiritual. Most unique in astrology space — nobody uses green.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SUMMARY -->
+<!-- ============================================ -->
+<div style="margin-top:48px;padding:32px;background:#1a1a2e;color:#e0e0e0;border-radius:20px">
+  <h2 style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:16px;color:#fff">Summary & Recommendation</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="border-bottom:1px solid #333">
+      <th style="text-align:left;padding:12px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px">Option</th>
+      <th style="text-align:left;padding:12px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px">Personality</th>
+      <th style="text-align:left;padding:12px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px">Light/Dark</th>
+      <th style="text-align:left;padding:12px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px">Cultural Fit</th>
+      <th style="text-align:left;padding:12px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px">Uniqueness</th>
+    </tr>
+    <tr style="border-bottom:1px solid #282840">
+      <td style="padding:12px;color:#63A0FF">1. Midnight Indigo</td>
+      <td style="padding:12px">Trust, night sky, premium</td>
+      <td style="padding:12px;color:#34D399">Excellent</td>
+      <td style="padding:12px;color:#34D399">Universal</td>
+      <td style="padding:12px;color:#F59E0B">Medium — blue is common</td>
+    </tr>
+    <tr style="border-bottom:1px solid #282840">
+      <td style="padding:12px;color:#2DD4BF">2. Celestial Teal</td>
+      <td style="padding:12px">Balance, calm, fresh</td>
+      <td style="padding:12px;color:#34D399">Excellent</td>
+      <td style="padding:12px;color:#34D399">Universal</td>
+      <td style="padding:12px;color:#34D399">High — rare in astrology</td>
+    </tr>
+    <tr style="border-bottom:1px solid #282840">
+      <td style="padding:12px;color:#E8A838">3. Obsidian & Saffron</td>
+      <td style="padding:12px">Sacred, warm, bold</td>
+      <td style="padding:12px;color:#34D399">Good</td>
+      <td style="padding:12px;color:#F59E0B">Strong India, moderate US</td>
+      <td style="padding:12px;color:#34D399">Very high — nobody does this</td>
+    </tr>
+    <tr style="border-bottom:1px solid #282840">
+      <td style="padding:12px;color:#38BDF8">4. Aurora</td>
+      <td style="padding:12px">Electric, tech-forward, cosmic</td>
+      <td style="padding:12px;color:#34D399">Excellent (Tailwind native)</td>
+      <td style="padding:12px;color:#34D399">Universal</td>
+      <td style="padding:12px;color:#F59E0B">Medium — Tailwind default</td>
+    </tr>
+    <tr>
+      <td style="padding:12px;color:#34D399">5. Emerald Cosmos</td>
+      <td style="padding:12px">Natural, premium, grounded</td>
+      <td style="padding:12px;color:#34D399">Good</td>
+      <td style="padding:12px;color:#34D399">Universal</td>
+      <td style="padding:12px;color:#34D399">Very high — no astrology app uses green</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

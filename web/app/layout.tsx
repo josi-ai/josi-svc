@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, DM_Serif_Display, DM_Serif_Text } from 'next/font/google';
 import Providers from '@/components/providers';
 import './globals.css';
 
@@ -9,9 +9,17 @@ const inter = Inter({
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const dmSerifDisplay = DM_Serif_Display({
+  weight: '400',
   subsets: ['latin'],
-  variable: '--font-mono',
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const dmSerifText = DM_Serif_Text({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-reading',
   display: 'swap',
 });
 
@@ -26,10 +34,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable}`}
-        style={{ fontFamily: 'var(--font-inter)', backgroundColor: '#0f0a1e', margin: 0 }}
+        className={`${inter.variable} ${dmSerifDisplay.variable} ${dmSerifText.variable}`}
       >
         <Providers>{children}</Providers>
       </body>

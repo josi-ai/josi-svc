@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Josi — Brand Vision v2: The Museum</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== LIGHT MODE (PRIMARY) ========== */
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #FAF8F4;
+      color: #2C2520;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Section dividers */
+    .section-divider {
+      max-width: 1200px; margin: 80px auto 0; padding: 0 48px;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+      color: #9A8E82; font-weight: 600;
+      border-bottom: 1px solid #E8E2D8; padding-bottom: 12px;
+    }
+
+    /* ========== HERO / LANDING ========== */
+    .hero {
+      max-width: 1200px; margin: 0 auto; padding: 120px 48px 80px;
+      text-align: center;
+    }
+    .hero .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 72px; color: #2C2520;
+      letter-spacing: 3px; margin-bottom: 20px;
+    }
+    .hero .tagline {
+      font-family: 'DM Serif Text', serif;
+      font-size: 22px; color: #7A6E60;
+      font-style: italic; font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+    .hero .accent-line {
+      width: 48px; height: 3px;
+      background: #C8913A; margin: 32px auto;
+      border-radius: 2px;
+    }
+    .hero .subtitle {
+      font-size: 15px; color: #9A8E82;
+      max-width: 480px; margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* ========== NAV ========== */
+    .nav {
+      max-width: 1200px; margin: 0 auto; padding: 0 48px;
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid #E8E2D8;
+    }
+    .nav .logo { font-family: 'DM Serif Display', serif; font-size: 28px; color: #2C2520; }
+    .nav .links { display: flex; gap: 32px; font-size: 13px; color: #9A8E82; font-weight: 500; }
+    .nav .links span { cursor: pointer; transition: color 0.2s; }
+    .nav .links .active { color: #2C2520; }
+    .nav .cta {
+      padding: 10px 24px; background: #2C2520; color: #FAF8F4;
+      border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer; letter-spacing: 0.3px;
+    }
+
+    /* ========== MUSEUM GALLERY — CHART READING ========== */
+    .gallery {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+    }
+    .gallery-exhibit {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 64px;
+      border: 1px solid #EDE8E0;
+      box-shadow: 0 2px 24px rgba(44, 37, 32, 0.04);
+    }
+    .exhibit-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
+      color: #C8913A; font-weight: 600; margin-bottom: 24px;
+    }
+    .exhibit-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 40px; line-height: 1.25;
+      color: #2C2520; margin-bottom: 16px;
+    }
+    .exhibit-meta {
+      font-size: 13px; color: #9A8E82; margin-bottom: 32px;
+      display: flex; gap: 24px;
+    }
+    .exhibit-body {
+      font-size: 16px; line-height: 1.9; color: #5A4F44;
+      max-width: 640px;
+      font-family: 'DM Serif Text', serif;
+    }
+    .exhibit-body p { margin-bottom: 20px; }
+    .exhibit-actions {
+      margin-top: 40px; padding-top: 32px;
+      border-top: 1px solid #EDE8E0;
+      display: flex; gap: 16px;
+    }
+    .btn {
+      padding: 12px 28px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; border: none;
+      letter-spacing: 0.3px; transition: all 0.2s;
+    }
+    .btn-primary { background: #2C2520; color: #FAF8F4; }
+    .btn-secondary { background: transparent; color: #2C2520; border: 1.5px solid #D4CEC4; }
+    .btn-accent { background: #C8913A; color: #FFFFFF; }
+
+    /* ========== DASHBOARD CARDS — MUSEUM GALLERY STYLE ========== */
+    .gallery-grid {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+    }
+    .gallery-card {
+      background: #FFFFFF;
+      border-radius: 12px; padding: 36px;
+      border: 1px solid #EDE8E0;
+      box-shadow: 0 1px 12px rgba(44, 37, 32, 0.03);
+    }
+    .gallery-card .card-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+      color: #9A8E82; font-weight: 600; margin-bottom: 12px;
+    }
+    .gallery-card .card-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 44px; color: #2C2520;
+      margin-bottom: 4px;
+    }
+    .gallery-card .card-desc {
+      font-size: 13px; color: #9A8E82; line-height: 1.6;
+    }
+    .card-value.gold { color: #C8913A; }
+    .card-value.sky { color: #4A8DB7; }
+
+    /* ========== CONTENT CARDS ========== */
+    .content-grid {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .content-card {
+      background: #FFFFFF;
+      border-radius: 12px; padding: 40px;
+      border: 1px solid #EDE8E0;
+      box-shadow: 0 1px 12px rgba(44, 37, 32, 0.03);
+    }
+    .content-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px; color: #2C2520; margin-bottom: 12px;
+    }
+    .content-card p {
+      font-size: 14px; line-height: 1.8; color: #7A6E60;
+    }
+    .badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-gold { background: rgba(200, 145, 58, 0.1); color: #C8913A; }
+    .badge-sky { background: rgba(74, 141, 183, 0.1); color: #4A8DB7; }
+    .badge-sage { background: rgba(107, 142, 97, 0.1); color: #6B8E61; }
+
+    /* ========== PRICING / SUBSCRIPTION ========== */
+    .pricing-grid {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+    }
+    .pricing-card {
+      background: #FFFFFF; border-radius: 12px; padding: 40px;
+      border: 1px solid #EDE8E0; text-align: center;
+    }
+    .pricing-card.featured {
+      border-color: #C8913A;
+      box-shadow: 0 4px 32px rgba(200, 145, 58, 0.1);
+    }
+    .pricing-tier {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px; color: #2C2520; margin-bottom: 8px;
+    }
+    .pricing-price {
+      font-size: 14px; color: #9A8E82; margin-bottom: 24px;
+    }
+    .pricing-features {
+      text-align: left; font-size: 13px; color: #7A6E60; line-height: 2.2;
+    }
+    .pricing-features li { list-style: none; }
+    .pricing-features li::before { content: '· '; color: #C8913A; font-weight: 700; }
+
+    /* ========== COLOR PALETTE DISPLAY ========== */
+    .palette-display {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+      display: flex; gap: 12px;
+    }
+    .pd-swatch {
+      flex: 1; border-radius: 12px; overflow: hidden;
+      border: 1px solid #EDE8E0;
+    }
+    .pd-color { height: 80px; }
+    .pd-info { padding: 12px; background: #FFFFFF; }
+    .pd-name { font-size: 12px; font-weight: 600; color: #2C2520; margin-bottom: 2px; }
+    .pd-hex { font-size: 10px; color: #9A8E82; font-family: monospace; }
+
+    /* ========== TYPOGRAPHY SCALE ========== */
+    .type-scale {
+      max-width: 1200px; margin: 48px auto 0; padding: 0 48px;
+    }
+    .type-specimen {
+      background: #FFFFFF; border-radius: 12px; padding: 48px;
+      border: 1px solid #EDE8E0;
+    }
+    .ts-row { margin-bottom: 24px; display: flex; align-items: baseline; gap: 24px; }
+    .ts-label { font-size: 10px; color: #9A8E82; text-transform: uppercase; letter-spacing: 1.5px; width: 100px; flex-shrink: 0; padding-top: 4px; }
+    .ts-sample { flex: 1; }
+
+    /* ========== DARK MODE SECTION ========== */
+    .dark-section {
+      margin-top: 80px;
+      background: #1C1915;
+      padding: 80px 0;
+    }
+    .dark-section .section-divider {
+      color: #7A6E60; border-bottom-color: #2E2A24;
+    }
+
+    .dark-hero {
+      max-width: 1200px; margin: 0 auto; padding: 0 48px 48px;
+      text-align: center;
+    }
+    .dark-hero .logo { font-family: 'DM Serif Display', serif; font-size: 64px; color: #F0EBE3; letter-spacing: 3px; margin-bottom: 20px; }
+    .dark-hero .tagline { font-family: 'DM Serif Text', serif; font-size: 20px; color: #9A8E82; font-style: italic; }
+    .dark-hero .accent-line { width: 48px; height: 3px; background: #C8913A; margin: 28px auto; border-radius: 2px; }
+
+    .dark-grid {
+      max-width: 1200px; margin: 0 auto; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+    }
+    .dark-card {
+      background: #242019; border-radius: 12px; padding: 36px;
+      border: 1px solid #332E26;
+    }
+    .dark-card .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #7A6E60; font-weight: 600; margin-bottom: 12px; }
+    .dark-card .card-value { font-family: 'DM Serif Display', serif; font-size: 44px; color: #F0EBE3; margin-bottom: 4px; }
+    .dark-card .card-desc { font-size: 13px; color: #7A6E60; }
+    .dark-card .card-value.gold { color: #C8913A; }
+    .dark-card .card-value.sky { color: #6AAFDB; }
+
+    .dark-exhibit {
+      max-width: 1200px; margin: 32px auto 0; padding: 0 48px;
+    }
+    .dark-exhibit-inner {
+      background: #242019; border-radius: 16px; padding: 56px;
+      border: 1px solid #332E26;
+    }
+    .dark-exhibit-inner .exhibit-label { color: #C8913A; }
+    .dark-exhibit-inner .exhibit-title { color: #F0EBE3; }
+    .dark-exhibit-inner .exhibit-meta { color: #7A6E60; }
+    .dark-exhibit-inner .exhibit-body { color: #A89E90; }
+    .dark-exhibit-inner .exhibit-actions { border-top-color: #332E26; }
+    .dark-btn-primary { background: #F0EBE3; color: #1C1915; }
+    .dark-btn-secondary { background: transparent; color: #F0EBE3; border: 1.5px solid #3D3830; }
+    .dark-btn-accent { background: #C8913A; color: #FFFFFF; }
+
+    .dark-nav {
+      max-width: 1200px; margin: 0 auto 48px; padding: 0 48px;
+    }
+    .dark-nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; border-bottom: 1px solid #2E2A24;
+    }
+    .dark-nav .logo { font-family: 'DM Serif Display', serif; font-size: 28px; color: #F0EBE3; }
+    .dark-nav .links { display: flex; gap: 32px; font-size: 13px; color: #7A6E60; font-weight: 500; }
+    .dark-nav .links .active { color: #F0EBE3; }
+    .dark-nav .cta { padding: 10px 24px; background: #F0EBE3; color: #1C1915; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+
+    .dark-palette {
+      max-width: 1200px; margin: 32px auto 0; padding: 0 48px;
+      display: flex; gap: 12px;
+    }
+    .dark-pd-swatch { flex: 1; border-radius: 12px; overflow: hidden; border: 1px solid #332E26; }
+    .dark-pd-color { height: 80px; }
+    .dark-pd-info { padding: 12px; background: #242019; }
+    .dark-pd-name { font-size: 12px; font-weight: 600; color: #F0EBE3; margin-bottom: 2px; }
+    .dark-pd-hex { font-size: 10px; color: #7A6E60; font-family: monospace; }
+
+    /* Footer */
+    .footer {
+      max-width: 1200px; margin: 80px auto; padding: 48px;
+      text-align: center; font-size: 12px; color: #9A8E82;
+    }
+    .dark-section .footer { color: #5A4F44; margin-top: 48px; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== LIGHT MODE ========== -->
+
+  <div class="hero">
+    <div class="logo">Josi</div>
+    <div class="tagline">Ancient eyes on an infinite sky.</div>
+    <div class="accent-line"></div>
+    <div class="subtitle">Multi-tradition astrology guided by ancient wisdom. Find your place in the cosmos.</div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="logo">Josi</div>
+      <div class="links">
+        <span class="active">Dashboard</span>
+        <span>Charts</span>
+        <span>Compatibility</span>
+        <span>AI Insights</span>
+        <span>Consultations</span>
+      </div>
+      <button class="cta">New Chart</button>
+    </div>
+  </div>
+
+  <div class="section-divider">Color Palette — Light Mode</div>
+  <div class="palette-display">
+    <div class="pd-swatch"><div class="pd-color" style="background:#FAF8F4"></div><div class="pd-info"><div class="pd-name">Parchment</div><div class="pd-hex">#FAF8F4 · page bg</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#FFFFFF"></div><div class="pd-info"><div class="pd-name">Gallery White</div><div class="pd-hex">#FFFFFF · cards</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#EDE8E0"></div><div class="pd-info"><div class="pd-name">Linen</div><div class="pd-hex">#EDE8E0 · borders</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#2C2520"></div><div class="pd-info"><div class="pd-name">Umber</div><div class="pd-hex">#2C2520 · text</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#C8913A"></div><div class="pd-info"><div class="pd-name">Saffron</div><div class="pd-hex">#C8913A · accent</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#4A8DB7"></div><div class="pd-info"><div class="pd-name">Horizon</div><div class="pd-hex">#4A8DB7 · sky blue</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#6B8E61"></div><div class="pd-info"><div class="pd-name">Meadow</div><div class="pd-hex">#6B8E61 · success</div></div></div>
+    <div class="pd-swatch"><div class="pd-color" style="background:#C45D4A"></div><div class="pd-info"><div class="pd-name">Ember</div><div class="pd-hex">#C45D4A · error</div></div></div>
+  </div>
+
+  <div class="section-divider">The Gallery — Chart Reading</div>
+  <div class="gallery">
+    <div class="gallery-exhibit">
+      <div class="exhibit-label">Vedic Birth Chart · Sidereal</div>
+      <div class="exhibit-title">Sun in Pisces, Moon in Scorpio,<br>Ascendant in Cancer</div>
+      <div class="exhibit-meta">
+        <span>Born March 15, 1992 · Chennai, India</span>
+        <span>·</span>
+        <span>Nakshatra: Anuradha · Pada 3</span>
+      </div>
+      <div class="exhibit-body">
+        <p>Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio in the fifth house creates a deep well of creative intensity — you don't just feel things, you transform through feeling.</p>
+        <p>The Cancer ascendant wraps this intensity in warmth. Others experience you as nurturing and approachable, even as your inner world runs far deeper than most will ever know.</p>
+      </div>
+      <div class="exhibit-actions">
+        <button class="btn btn-primary">Full Chart Analysis</button>
+        <button class="btn btn-secondary">AI Deep Reading</button>
+        <button class="btn btn-accent">Book Astrologer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">Dashboard</div>
+  <div class="gallery-grid">
+    <div class="gallery-card">
+      <div class="card-label">Charts Created</div>
+      <div class="card-value">12</div>
+      <div class="card-desc">Across 3 traditions</div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-label">AI Readings</div>
+      <div class="card-value gold">7</div>
+      <div class="card-desc">3 remaining this month</div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-label">Consultations</div>
+      <div class="card-value sky">3</div>
+      <div class="card-desc">Next: March 15 with Priya S.</div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="content-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+        <h3>Today's Panchang</h3>
+        <span class="badge badge-gold">Shubh Muhurta</span>
+      </div>
+      <p>Tithi: Shukla Chaturthi. Nakshatra: Rohini. The Moon transits through Taurus today, bringing stability and grounding to creative pursuits. A favorable day for new beginnings and financial decisions.</p>
+      <button class="btn btn-secondary" style="margin-top:20px">View Full Panchang</button>
+    </div>
+    <div class="content-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+        <h3>Your Subscription</h3>
+        <span class="badge badge-gold">Mystic</span>
+      </div>
+      <p>25 charts · 10 AI readings · Unlimited consultations. Your plan renews on April 1, 2026.</p>
+      <button class="btn btn-accent" style="margin-top:20px">Upgrade to Master</button>
+    </div>
+  </div>
+
+  <div class="section-divider">Pricing</div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-tier">Explorer</div>
+      <div class="pricing-price">Free forever</div>
+      <ul class="pricing-features">
+        <li>3 birth charts per month</li>
+        <li>Basic AI interpretations</li>
+        <li>Daily panchang</li>
+        <li>Community access</li>
+      </ul>
+      <button class="btn btn-secondary" style="width:100%;margin-top:24px">Get Started</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tier" style="color:#C8913A">Mystic</div>
+      <div class="pricing-price">$12 / month</div>
+      <ul class="pricing-features">
+        <li>25 charts across all traditions</li>
+        <li>10 AI deep readings</li>
+        <li>Compatibility analysis</li>
+        <li>Priority astrologer booking</li>
+        <li>Transit alerts</li>
+      </ul>
+      <button class="btn btn-accent" style="width:100%;margin-top:24px">Start Free Trial</button>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-tier">Master</div>
+      <div class="pricing-price">$29 / month</div>
+      <ul class="pricing-features">
+        <li>Unlimited charts</li>
+        <li>Unlimited AI readings</li>
+        <li>Unlimited consultations</li>
+        <li>API access</li>
+        <li>Custom traditions</li>
+      </ul>
+      <button class="btn btn-primary" style="width:100%;margin-top:24px">Contact Us</button>
+    </div>
+  </div>
+
+  <div class="section-divider">Typography</div>
+  <div class="type-scale">
+    <div class="type-specimen">
+      <div class="ts-row">
+        <div class="ts-label">Display</div>
+        <div class="ts-sample" style="font-family:'DM Serif Display',serif;font-size:48px;color:#2C2520">Ancient eyes on an infinite sky.</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Heading 1</div>
+        <div class="ts-sample" style="font-family:'DM Serif Display',serif;font-size:36px;color:#2C2520">Find your place in the cosmos</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Heading 2</div>
+        <div class="ts-sample" style="font-family:'DM Serif Display',serif;font-size:24px;color:#2C2520">Sun in Pisces, Moon in Scorpio</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Heading 3</div>
+        <div class="ts-sample" style="font-family:'Inter',sans-serif;font-size:18px;font-weight:600;color:#2C2520">Today's Panchang — Shukla Chaturthi</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Body Serif</div>
+        <div class="ts-sample" style="font-family:'DM Serif Text',serif;font-size:16px;line-height:1.9;color:#5A4F44">Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio creates depth.</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Body Sans</div>
+        <div class="ts-sample" style="font-family:'Inter',sans-serif;font-size:14px;line-height:1.8;color:#7A6E60">25 charts remaining · 10 AI readings · Unlimited consultations. Plan renews April 1, 2026.</div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-label">Caption</div>
+        <div class="ts-sample" style="font-family:'Inter',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#9A8E82;font-weight:600">Vedic Birth Chart · Sidereal · Nakshatra: Anuradha</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Light Mode — The primary experience. Warm parchment background, gallery-white cards, saffron accent. Like a museum in daylight.</div>
+
+  <!-- ========== DARK MODE ========== -->
+  <div class="dark-section">
+
+    <div class="section-divider" style="margin-top:0;padding-top:0">Dark Mode — Evening Gallery</div>
+
+    <div style="max-width:1200px;margin:48px auto 0;padding:0 48px">
+      <div class="dark-palette">
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#141210"></div><div class="dark-pd-info"><div class="dark-pd-name">Obsidian</div><div class="dark-pd-hex">#141210 · base</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#1C1915"></div><div class="dark-pd-info"><div class="dark-pd-name">Charcoal</div><div class="dark-pd-hex">#1C1915 · page bg</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#242019"></div><div class="dark-pd-info"><div class="dark-pd-name">Walnut</div><div class="dark-pd-hex">#242019 · cards</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#332E26"></div><div class="dark-pd-info"><div class="dark-pd-name">Bark</div><div class="dark-pd-hex">#332E26 · border</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#F0EBE3"></div><div class="dark-pd-info"><div class="dark-pd-name">Ivory</div><div class="dark-pd-hex">#F0EBE3 · text</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#C8913A"></div><div class="dark-pd-info"><div class="dark-pd-name">Saffron</div><div class="dark-pd-hex">#C8913A · accent</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#6AAFDB"></div><div class="dark-pd-info"><div class="dark-pd-name">Horizon</div><div class="dark-pd-hex">#6AAFDB · sky blue</div></div></div>
+        <div class="dark-pd-swatch"><div class="dark-pd-color" style="background:#82A87A"></div><div class="dark-pd-info"><div class="dark-pd-name">Meadow</div><div class="dark-pd-hex">#82A87A · success</div></div></div>
+      </div>
+    </div>
+
+    <div class="dark-nav" style="margin-top:48px">
+      <div class="dark-nav-inner">
+        <div class="logo">Josi</div>
+        <div class="links">
+          <span class="active">Dashboard</span>
+          <span>Charts</span>
+          <span>Compatibility</span>
+          <span>AI Insights</span>
+          <span>Consultations</span>
+        </div>
+        <button class="cta">New Chart</button>
+      </div>
+    </div>
+
+    <div class="dark-hero">
+      <div class="logo">Josi</div>
+      <div class="tagline">Ancient eyes on an infinite sky.</div>
+      <div class="accent-line"></div>
+    </div>
+
+    <div class="dark-grid">
+      <div class="dark-card">
+        <div class="card-label">Charts Created</div>
+        <div class="card-value" style="color:#F0EBE3">12</div>
+        <div class="card-desc">Across 3 traditions</div>
+      </div>
+      <div class="dark-card">
+        <div class="card-label">AI Readings</div>
+        <div class="card-value gold">7</div>
+        <div class="card-desc">3 remaining this month</div>
+      </div>
+      <div class="dark-card">
+        <div class="card-label">Consultations</div>
+        <div class="card-value sky">3</div>
+        <div class="card-desc">Next: March 15 with Priya S.</div>
+      </div>
+    </div>
+
+    <div class="dark-exhibit">
+      <div class="dark-exhibit-inner">
+        <div class="exhibit-label">Vedic Birth Chart · Sidereal</div>
+        <div class="exhibit-title">Sun in Pisces, Moon in Scorpio,<br>Ascendant in Cancer</div>
+        <div class="exhibit-meta">
+          <span>Born March 15, 1992 · Chennai, India</span>
+          <span>·</span>
+          <span>Nakshatra: Anuradha · Pada 3</span>
+        </div>
+        <div class="exhibit-body">
+          <p>Your water-dominant chart speaks to a life guided by emotional intelligence and intuitive knowing. The Moon in Scorpio in the fifth house creates a deep well of creative intensity — you don't just feel things, you transform through feeling.</p>
+        </div>
+        <div class="exhibit-actions">
+          <button class="btn dark-btn-primary">Full Chart Analysis</button>
+          <button class="btn dark-btn-secondary">AI Deep Reading</button>
+          <button class="btn dark-btn-accent">Book Astrologer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" style="color:#5A4F44">Dark Mode — The evening experience. Warm charcoal backgrounds, walnut cards, same saffron accent. Like a museum after hours.</div>
+  </div>
+
+</body>
+</html>
