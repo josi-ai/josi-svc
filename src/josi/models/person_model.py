@@ -100,7 +100,7 @@ class Person(PersonModel, table=True):
 @strawberry.experimental.pydantic.type(
     model=Person,
     fields=[
-        "person_id", "organization_id", "name", "email", "phone",
+        "person_id", "organization_id", "user_id", "name", "email", "phone",
         "date_of_birth", "time_of_birth", "place_of_birth",
         "latitude", "longitude", "timezone",
         "gender", "birth_certificate_id", "notes",

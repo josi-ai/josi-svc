@@ -58,7 +58,7 @@ async def generate_interpretation(
             pass
         
         # Get chart
-        chart_service = ChartService(db, organization_id=None)  # User's personal charts
+        chart_service = ChartService(db, user_id=current_user.user_id)
         chart = await chart_service.get_chart(request.chart_id)
         
         if not chart:
@@ -121,7 +121,7 @@ async def generate_neural_pathway_questions(
             )
         
         # Get chart
-        chart_service = ChartService(db, organization_id=None)
+        chart_service = ChartService(db, user_id=current_user.user_id)
         chart = await chart_service.get_chart(request.chart_id)
         
         if not chart:

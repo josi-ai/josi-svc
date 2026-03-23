@@ -369,7 +369,7 @@ Please provide a detailed, insightful interpretation addressing the user's quest
                 interpretation=interpretation,
                 chart_type=chart_type,
                 content_hash=content_hash,
-                organization_id=chart_data.get("organization_id"),
+                user_id=chart_data.get("user_id"),
             ).on_conflict_do_update(
                 index_elements=["content_hash"],
                 set_={

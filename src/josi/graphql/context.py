@@ -44,12 +44,12 @@ class ServiceContext(BaseContext):
         self.db = db
         self.user_organization = user_organization
         
-        # Get organization ID from context
-        org_id = user_organization.organization_id if user_organization else UUID("00000000-0000-0000-0000-000000000000")
-        
+        # Get user_id from context
+        uid = user_organization.user_id if user_organization else None
+
         # Initialize services
-        self.person_service = PersonService(db=db, organization_id=org_id)
-        self.chart_service = ChartService(db=db, organization_id=org_id)
+        self.person_service = PersonService(db=db, user_id=uid)
+        self.chart_service = ChartService(db=db, user_id=uid)
         self.organization_service = OrganizationService(db=db)
 
 

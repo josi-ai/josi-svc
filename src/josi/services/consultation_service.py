@@ -423,7 +423,7 @@ class ConsultationService:
         try:
             # Get chart data
             from josi.services.chart_service import ChartService
-            chart_service = ChartService(self.db, organization_id=None)
+            chart_service = ChartService(self.db, user_id=None)
             chart = await chart_service.get_chart(chart_id)
             
             if not chart:

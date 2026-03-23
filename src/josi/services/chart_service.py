@@ -29,10 +29,10 @@ from josi.services.interpretation_engine_service import InterpretationEngine
 class ChartService:
     """Service for chart calculations and management."""
     
-    def __init__(self, db: AsyncSession, organization_id: UUID):
+    def __init__(self, db: AsyncSession, user_id: UUID):
         self.db = db
-        self.organization_id = organization_id
-        self.chart_repo = ChartRepository(AstrologyChart, db, organization_id)
+        self.user_id = user_id
+        self.chart_repo = ChartRepository(AstrologyChart, db, user_id)
         
         # Initialize calculators
         self.astrology_calculator = AstrologyCalculator()
@@ -308,7 +308,7 @@ class ChartService:
         for planet_name, planet_data in planets.items():
             position_dict = {
                 "chart_id": chart_id,
-                "organization_id": self.organization_id,
+                "user_id": self.user_id,
                 "planet_name": planet_name,
                 "longitude": planet_data["longitude"],
                 "latitude": planet_data.get("latitude", 0),
@@ -421,7 +421,7 @@ class ChartService:
         for interp_type, interp_data in interpretations.items():
             interp_dict = {
                 "chart_id": chart.chart_id,
-                "organization_id": self.organization_id,
+                "user_id": self.user_id,
                 "interpretation_type": interp_type,
                 "language": "en",
                 "title": interp_data.get("title", ""),
@@ -430,10 +430,10 @@ class ChartService:
                 "interpreter_version": "1.0",
                 "confidence_score": interp_data.get("confidence", 0.8)
             }
-            
+
             interpretation = ChartInterpretation(**interp_dict)
             self.db.add(interpretation)
-    
+
     def _determine_sect(self, chart_data: Dict) -> str:
         """Determine if chart is diurnal or nocturnal (Hellenistic)."""
         sun = chart_data.get("planets", {}).get("Sun", {})
@@ -587,7 +587,7 @@ class ChartService:
             
             interp_dict = {
                 "chart_id": chart_id,
-                "organization_id": self.organization_id,
+                "user_id": self.user_id,
                 "interpretation_type": interp_type,
                 "language": language,
                 "title": interp_data.get("title", ""),
@@ -615,17 +615,17 @@ class ChartService:
         from sqlalchemy import select
         query = select(AstrologyChart).where(AstrologyChart.is_deleted == False)
         
-        if self.organization_id:
-            query = query.where(AstrologyChart.organization_id == self.organization_id)
-        
+        if self.user_id:
+            query = query.where(AstrologyChart.user_id == self.user_id)
+
         if chart_type:
             query = query.where(AstrologyChart.chart_type == chart_type)
-        
+
         query = query.limit(limit).offset(offset)
-        
+
         result = await self.db.execute(query)
         return result.scalars().all()
-    
+
     async def get_person_charts_count(
         self,
         person_id: UUID,
@@ -638,15 +638,15 @@ class ChartService:
             AstrologyChart.is_deleted == False
         )
         
-        if self.organization_id:
-            query = query.where(AstrologyChart.organization_id == self.organization_id)
-        
+        if self.user_id:
+            query = query.where(AstrologyChart.user_id == self.user_id)
+
         if chart_type:
             query = query.where(AstrologyChart.chart_type == chart_type)
-        
+
         result = await self.db.execute(query)
         return result.scalar_one()
-    
+
     async def get_chart_interpretations(
         self,
         chart_id: UUID,
@@ -659,9 +659,9 @@ class ChartService:
             ChartInterpretation.is_deleted == False
         )
         
-        if self.organization_id:
-            query = query.where(ChartInterpretation.organization_id == self.organization_id)
-        
+        if self.user_id:
+            query = query.where(ChartInterpretation.user_id == self.user_id)
+
         result = await self.db.execute(query)
         return result.scalars().all()
     
@@ -676,7 +676,7 @@ class ChartService:
         """Calculate charts for a person by ID."""
         # Get person first
         from josi.repositories.person_repository import PersonRepository
-        person_repo = PersonRepository(Person, self.db, self.organization_id)
+        person_repo = PersonRepository(Person, self.db, self.user_id)
         person = await person_repo.get(person_id)
         
         if not person:
@@ -711,12 +711,12 @@ class ChartService:
         from sqlalchemy import select
         query = select(AstrologyChart).where(AstrologyChart.chart_id == chart_id)
         
-        if self.organization_id:
-            query = query.where(AstrologyChart.organization_id == self.organization_id)
-        
+        if self.user_id:
+            query = query.where(AstrologyChart.user_id == self.user_id)
+
         result = await self.db.execute(query)
         chart = result.scalar_one_or_none()
-        
+
         if chart and chart.is_deleted:
             chart.is_deleted = False
             chart.deleted_at = None

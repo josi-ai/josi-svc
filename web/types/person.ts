@@ -7,7 +7,8 @@ export interface Person {
   latitude: number;
   longitude: number;
   timezone: string;
-  organization_id: string;
+  organization_id?: string;
+  user_id?: string;
   created_at: string;
   updated_at: string;
 }

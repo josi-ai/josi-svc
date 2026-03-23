@@ -94,7 +94,6 @@ async def find_muhurta(
         logger.info(
             "Muhurta calculation completed",
             purpose=request.purpose,
-            organization_id=str(organization.organization_id),
             result_count=len(muhurtas)
         )
         
@@ -117,7 +116,7 @@ async def find_muhurta(
         logger.error(
             "Failed to calculate muhurta",
             error=str(e),
-            organization_id=str(organization.organization_id)
+            purpose=request.purpose
         )
         raise HTTPException(
             status_code=500,
@@ -148,7 +147,6 @@ async def calculate_rahu_kaal(
         logger.info(
             "Rahu Kaal calculation completed",
             date=request.date.date(),
-            organization_id=str(organization.organization_id)
         )
         
         return ResponseModel(
@@ -161,7 +159,6 @@ async def calculate_rahu_kaal(
         logger.error(
             "Failed to calculate Rahu Kaal",
             error=str(e),
-            organization_id=str(organization.organization_id)
         )
         raise HTTPException(
             status_code=500,
@@ -197,7 +194,6 @@ async def get_monthly_calendar(
             "Monthly calendar generated",
             year=request.year,
             month=request.month,
-            organization_id=str(organization.organization_id),
             auspicious_days=auspicious_count
         )
         
@@ -221,7 +217,6 @@ async def get_monthly_calendar(
         logger.error(
             "Failed to generate monthly calendar",
             error=str(e),
-            organization_id=str(organization.organization_id)
         )
         raise HTTPException(
             status_code=500,
@@ -328,7 +323,7 @@ async def get_best_times_today(
         logger.error(
             "Failed to get today's best times",
             error=str(e),
-            organization_id=str(organization.organization_id)
+            purpose=purpose
         )
         raise HTTPException(
             status_code=500,

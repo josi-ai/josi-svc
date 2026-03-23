@@ -35,9 +35,17 @@ class SQLBaseModel(SQLModel):
 
 class TenantBaseModel(SQLBaseModel):
     """Base model for multi-tenant entities."""
-    
-    organization_id: UUID = Field(
-        nullable=False,
+
+    organization_id: Optional[UUID] = Field(
+        default=None,
+        nullable=True,
         index=True,
         foreign_key="organization.organization_id"
+    )
+
+    user_id: Optional[UUID] = Field(
+        default=None,
+        nullable=True,
+        index=True,
+        foreign_key="users.user_id"
     )

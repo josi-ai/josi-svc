@@ -221,7 +221,7 @@ Person.__annotations__["charts"] = List["AstrologyChart"]
 @strawberry.experimental.pydantic.type(
     model=AstrologyChart,
     fields=[
-        "chart_id", "organization_id", "person_id", "chart_type",
+        "chart_id", "organization_id", "user_id", "person_id", "chart_type",
         "house_system", "ayanamsa", "calculated_at", "calculation_version",
         "divisional_chart_type", "progression_type",
         "created_at", "updated_at", "is_deleted", "deleted_at"
@@ -254,7 +254,7 @@ class ChartCreateInput:
 @strawberry.experimental.pydantic.type(
     model=PlanetPosition,
     fields=[
-        "planet_position_id", "organization_id", "chart_id",
+        "planet_position_id", "organization_id", "user_id", "chart_id",
         "planet_name", "longitude", "latitude", "distance", "speed",
         "sign", "sign_degree", "house", "house_degree",
         "nakshatra", "nakshatra_pada", "dignity",
@@ -272,7 +272,7 @@ class PlanetPositionSchema:
 @strawberry.experimental.pydantic.type(
     model=ChartInterpretation,
     fields=[
-        "chart_interpretation_id", "organization_id", "chart_id",
+        "chart_interpretation_id", "organization_id", "user_id", "chart_id",
         "interpretation_type", "language", "title", "summary",
         "interpreter_version", "confidence_score",
         "created_at", "updated_at", "is_deleted", "deleted_at"

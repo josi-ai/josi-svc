@@ -23,8 +23,8 @@ logger = structlog.get_logger(__name__)
 class RemedyRepository(BaseRepository[Remedy]):
     """Repository for remedy operations."""
     
-    def __init__(self, db: AsyncSession, organization_id: UUID):
-        super().__init__(db, Remedy, organization_id)
+    def __init__(self, db: AsyncSession, user_id: UUID = None):
+        super().__init__(Remedy, db, user_id)
     
     async def list_remedies(
         self,

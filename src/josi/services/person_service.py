@@ -15,10 +15,10 @@ from josi.services.geocoding_service import GeocodingService
 class PersonService:
     """Service for person-related operations."""
     
-    def __init__(self, db: AsyncSession, organization_id: UUID):
+    def __init__(self, db: AsyncSession, user_id: UUID):
         self.db = db
-        self.organization_id = organization_id
-        self.person_repo = PersonRepository(Person, db, organization_id)
+        self.user_id = user_id
+        self.person_repo = PersonRepository(Person, db, user_id)
         self.geocoding_service = GeocodingService()
     
     async def create_person(self, person_data: PersonEntity) -> Person:
@@ -117,9 +117,9 @@ class PersonService:
     async def get_total_persons_count(self, search: Optional[str] = None) -> int:
         """Get total count of persons."""
         query = select(func.count(Person.person_id)).where(Person.is_deleted == False)
-        
-        if self.organization_id:
-            query = query.where(Person.organization_id == self.organization_id)
+
+        if self.user_id:
+            query = query.where(Person.user_id == self.user_id)
         
         if search:
             search_filter = or_(
@@ -182,6 +182,15 @@ class PersonService:
     
     async def get_person_charts(self, person_id: UUID):
         """Get all charts for a person."""
-        # This would be implemented with ChartService
-        # For now, return empty list
-        return []
+        from josi.models.chart_model import AstrologyChart
+        from sqlalchemy import select
+
+        query = select(AstrologyChart).where(
+            AstrologyChart.person_id == person_id,
+            AstrologyChart.is_deleted == False,
+        )
+        if self.user_id:
+            query = query.where(AstrologyChart.user_id == self.user_id)
+        query = query.order_by(AstrologyChart.created_at.desc())
+        result = await self.db.execute(query)
+        return result.scalars().all()

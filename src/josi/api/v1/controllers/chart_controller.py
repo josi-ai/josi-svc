@@ -267,7 +267,7 @@ async def get_chart(
     Example:
         GET /api/v1/charts/456e7890?include_interpretations=true
     """
-    chart = await chart_service.get_chart_by_id(chart_id)
+    chart = await chart_service.get_chart(chart_id)
     if not chart:
         raise HTTPException(status_code=404, detail=f"Chart with id {chart_id} not found")
     

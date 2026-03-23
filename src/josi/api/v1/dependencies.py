@@ -1,5 +1,6 @@
 """V1 API Dependencies — Clean architecture dependency injection."""
 from typing import Annotated
+from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,14 +28,16 @@ CurrentUserDep = Annotated[CurrentUser, Depends(resolve_current_user)]
 # Service Dependencies
 async def get_person_service(
     db: Annotated[AsyncSession, Depends(get_async_db)],
+    current_user: CurrentUserDep,
 ) -> PersonService:
-    return PersonService(db, None)
+    return PersonService(db, current_user.user_id)
 
 
 async def get_chart_service(
     db: Annotated[AsyncSession, Depends(get_async_db)],
+    current_user: CurrentUserDep,
 ) -> ChartService:
-    return ChartService(db, None)
+    return ChartService(db, current_user.user_id)
 
 
 async def get_geocoding_service() -> GeocodingService:

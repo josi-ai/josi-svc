@@ -2,6 +2,7 @@ from typing import Generic, TypeVar, Type, Optional, List, Dict, Any
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, and_, func
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 from sqlmodel import SQLModel
@@ -13,39 +14,27 @@ log = logging.getLogger("uvicorn")
 
 
 class BaseRepository(Generic[ModelType]):
-    """Base repository with common CRUD operations and multi-tenant support."""
-    
-    def __init__(self, model: Type[ModelType], session: AsyncSession, organization_id: Optional[UUID] = None):
+    """Base repository with common CRUD operations and user-scoped tenant support."""
+
+    def __init__(self, model: Type[ModelType], session: AsyncSession, user_id: Optional[UUID] = None):
         self.model = model
         self.session = session
-        self.organization_id = organization_id
-        # Check if model has organization_id field for multi-tenancy
-        self.is_multi_tenant = hasattr(model, 'organization_id')
-    
+        self.user_id = user_id
+        # Check if model has user_id field for user-scoped tenancy
+        self.is_user_scoped = hasattr(model, 'user_id')
+
     def _apply_tenant_filter(self, query):
-        """Apply organization filter if model supports multi-tenancy."""
-        if self.is_multi_tenant and self.organization_id:
-            return query.where(self.model.organization_id == self.organization_id)
+        """Apply user_id filter if model supports user-scoped tenancy."""
+        if self.is_user_scoped and self.user_id:
+            return query.where(self.model.user_id == self.user_id)
         return query
-    
+
     async def get(self, id: UUID) -> Optional[ModelType]:
         """Get a single record by ID."""
-        # Handle different ID field names
-        id_field = None
-        if hasattr(self.model, 'id'):
-            id_field = self.model.id
-        elif hasattr(self.model, f'{self.model.__tablename__}_id'):
-            id_field = getattr(self.model, f'{self.model.__tablename__}_id')
-        else:
-            # Try to find the primary key field
-            for attr_name in dir(self.model):
-                attr = getattr(self.model, attr_name)
-                if hasattr(attr, 'primary_key') and attr.primary_key:
-                    id_field = attr
-                    break
-        
-        if id_field is None:
-            raise ValueError(f"Could not find ID field for model {self.model.__name__}")
+        # Use SQLAlchemy inspect to find the primary key column
+        mapper = sa_inspect(self.model)
+        pk_columns = mapper.primary_key
+        id_field = pk_columns[0]
         
         query = select(self.model).where(
             and_(
@@ -98,9 +87,9 @@ class BaseRepository(Generic[ModelType]):
     
     async def create(self, obj_in: Dict[str, Any]) -> ModelType:
         """Create a new record."""
-        # Add organization_id if model supports multi-tenancy
-        if self.is_multi_tenant and self.organization_id:
-            obj_in["organization_id"] = self.organization_id
+        # Add user_id if model supports user-scoped tenancy
+        if self.is_user_scoped and self.user_id:
+            obj_in["user_id"] = self.user_id
         
         db_obj = self.model(**obj_in)
         self.session.add(db_obj)
@@ -117,7 +106,7 @@ class BaseRepository(Generic[ModelType]):
         
         # Update fields
         for field, value in obj_in.items():
-            if hasattr(entity, field) and field not in ['id', 'created_at', 'organization_id']:
+            if hasattr(entity, field) and field not in ['id', 'created_at', 'organization_id', 'user_id']:
                 setattr(entity, field, value)
         
         # Update timestamp if available
@@ -178,9 +167,9 @@ class BaseRepository(Generic[ModelType]):
         """Create multiple records."""
         db_objs = []
         for obj_in in objs_in:
-            # Add organization_id if model supports multi-tenancy
-            if self.is_multi_tenant and self.organization_id:
-                obj_in["organization_id"] = self.organization_id
+            # Add user_id if model supports user-scoped tenancy
+            if self.is_user_scoped and self.user_id:
+                obj_in["user_id"] = self.user_id
             db_objs.append(self.model(**obj_in))
         
         self.session.add_all(db_objs)

@@ -54,7 +54,7 @@ async def get_remedy_recommendations(
             user_id=str(current_user.user_id),
             chart_id=str(request.chart_id),
             recommendation_count=len(recommendations),
-            organization_id=str(None)
+
         )
         
         return ResponseModel(
@@ -86,7 +86,7 @@ async def get_remedy_recommendations(
             "Failed to generate remedy recommendations",
             error=str(e),
             user_id=str(current_user.user_id),
-            organization_id=str(None)
+
         )
         raise HTTPException(
             status_code=500,
@@ -163,7 +163,7 @@ async def list_remedies(
         logger.error(
             "Failed to list remedies",
             error=str(e),
-            organization_id=str(None)
+
         )
         raise HTTPException(
             status_code=500,
@@ -209,7 +209,7 @@ async def get_remedy(
             "Failed to get remedy",
             error=str(e),
             remedy_id=str(remedy_id),
-            organization_id=str(None)
+
         )
         raise HTTPException(
             status_code=500,
@@ -242,7 +242,7 @@ async def create_remedy(
             "Remedy created",
             remedy_id=str(remedy.remedy_id),
             created_by=str(current_user.user_id),
-            organization_id=str(None)
+
         )
         
         return ResponseModel(
@@ -258,7 +258,7 @@ async def create_remedy(
             "Failed to create remedy",
             error=str(e),
             user_id=str(current_user.user_id),
-            organization_id=str(None)
+
         )
         raise HTTPException(
             status_code=500,
@@ -295,7 +295,7 @@ async def update_remedy(
             "Remedy updated",
             remedy_id=str(remedy_id),
             updated_by=str(current_user.user_id),
-            organization_id=str(None)
+
         )
         
         return ResponseModel(
@@ -311,7 +311,7 @@ async def update_remedy(
             "Failed to update remedy",
             error=str(e),
             remedy_id=str(remedy_id),
-            organization_id=str(None)
+
         )
         raise HTTPException(
             status_code=500,

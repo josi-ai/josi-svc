@@ -163,7 +163,7 @@ async def list_persons(
     if search:
         persons = await person_service.search(search, skip, limit)
     else:
-        persons = await person_service.list(skip, limit)
+        persons = await person_service.list_persons(skip, limit)
     
     return ResponseModel(
         success=True,
