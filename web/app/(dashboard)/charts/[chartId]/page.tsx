@@ -385,8 +385,8 @@ function SouthIndianChart({ planets }: { planets: Record<string, PlanetData> }) 
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
         gridTemplateRows: 'repeat(4, 1fr)',
-        width: 300,
-        height: 300,
+        width: 350,
+        height: 350,
         border: '1.5px solid var(--border-strong)',
         borderRadius: 4,
         overflow: 'hidden',
@@ -407,32 +407,43 @@ function QuickInfoPanel({ chart }: { chart: Chart }) {
   const isVedic = chart.chart_type === 'vedic';
   const panchang = chart.chart_data?.panchang;
 
+  // Determine nakshatra value
+  let nakshatraValue = '\u2014';
+  if (isVedic && moon?.nakshatra) {
+    nakshatraValue = moon.nakshatra;
+  } else if (isVedic && panchang?.nakshatra) {
+    nakshatraValue = safeStr(panchang.nakshatra?.name || panchang.nakshatra);
+  }
+
   const items: { label: string; value: string }[] = [
     { label: 'Sun Sign', value: sun?.sign || '\u2014' },
     { label: 'Moon Sign', value: moon?.sign || '\u2014' },
     { label: 'Ascendant', value: asc?.sign || '\u2014' },
+    { label: 'Nakshatra', value: nakshatraValue },
+    { label: 'Ayanamsa', value: chart.ayanamsa ? chart.ayanamsa.charAt(0).toUpperCase() + chart.ayanamsa.slice(1) : '\u2014' },
+    { label: 'House System', value: chart.house_system ? chart.house_system.charAt(0).toUpperCase() + chart.house_system.slice(1) : '\u2014' },
+    { label: 'Chart Type', value: chart.chart_type ? chart.chart_type.charAt(0).toUpperCase() + chart.chart_type.slice(1) : '\u2014' },
+    { label: 'Calculated Date', value: chart.calculated_at ? new Date(chart.calculated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '\u2014' },
   ];
 
-  if (isVedic && moon?.nakshatra) {
-    items.push({ label: 'Nakshatra', value: moon.nakshatra });
-  } else if (isVedic && panchang?.nakshatra) {
-    items.push({ label: 'Nakshatra', value: safeStr(panchang.nakshatra?.name || panchang.nakshatra) });
-  }
-
-  if (isVedic && chart.ayanamsa) {
-    items.push({ label: 'Ayanamsa', value: chart.ayanamsa.charAt(0).toUpperCase() + chart.ayanamsa.slice(1) });
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, minWidth: 180 }}>
-      {items.map((item) => (
-        <div key={item.label}>
-          <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>
-            {item.label}
-          </p>
-          <p style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600 }}>{item.value}</p>
-        </div>
-      ))}
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '16px 24px',
+        }}
+      >
+        {items.map((item) => (
+          <div key={item.label}>
+            <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>
+              {item.label}
+            </p>
+            <p style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600 }}>{item.value}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -452,7 +463,7 @@ function OverviewTab({ chart }: { chart: Chart }) {
     <div style={{ animation: 'fadeIn 0.25s ease-out' }}>
       {/* Key Placements */}
       <SectionHeading>Key Placements</SectionHeading>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
         {sun && (
           <PlacementCard
             label="Sun"
@@ -480,13 +491,22 @@ function OverviewTab({ chart }: { chart: Chart }) {
             nakshatra={isVedic ? ascendant.nakshatra : undefined}
           />
         )}
+        {planets['Rahu'] && (
+          <PlacementCard
+            label="Rahu"
+            icon={<Star style={{ width: 15, height: 15, color: 'var(--gold)' }} />}
+            sign={planets['Rahu'].sign}
+            degree={planets['Rahu'].sign_degree}
+            nakshatra={isVedic ? planets['Rahu'].nakshatra : undefined}
+          />
+        )}
       </div>
 
       {/* Panchang (Vedic only) */}
       {isVedic && panchang && (
         <>
           <SectionHeading>Panchang</SectionHeading>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 28 }}>
             <PanchangCard label="Tithi" item={panchang.tithi} />
             <PanchangCard label="Nakshatra" item={panchang.nakshatra} />
             <PanchangCard label="Yoga" item={panchang.yoga} />

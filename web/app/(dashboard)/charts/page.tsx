@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Plus,
   Star,
+  Globe,
   LayoutGrid,
   List,
   ArrowUpDown,
@@ -349,9 +350,14 @@ function WesternMiniChart() {
   );
 }
 
-/** Chinese four-pillars mini visualization */
+/** Chinese four-pillars mini visualization with heavenly stem characters */
 function ChineseMiniChart() {
-  const pillars = ['Year', 'Month', 'Day', 'Hour'];
+  const pillars = [
+    { label: 'Year', stem: '\u7532' },
+    { label: 'Month', stem: '\u4E59' },
+    { label: 'Day', stem: '\u4E19' },
+    { label: 'Hour', stem: '\u4E01' },
+  ];
   return (
     <div
       style={{
@@ -360,14 +366,14 @@ function ChineseMiniChart() {
         flexShrink: 0,
         display: 'flex',
         gap: 4,
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
-        padding: '12px 4px',
+        padding: '8px 6px',
       }}
     >
-      {pillars.map((p, i) => (
+      {pillars.map((p) => (
         <div
-          key={p}
+          key={p.label}
           style={{
             flex: 1,
             display: 'flex',
@@ -379,30 +385,114 @@ function ChineseMiniChart() {
           <div
             style={{
               width: '100%',
-              height: 40 + i * 10,
+              height: 70,
               borderRadius: 3,
               border: '1.5px solid var(--border-strong)',
               background: 'var(--card)',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 2,
             }}
           >
-            <span style={{ fontSize: 6, color: 'var(--text-faint)', fontWeight: 600 }}>
-              {p.slice(0, 2)}
+            <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600, lineHeight: 1 }}>
+              {p.stem}
+            </span>
+            <span style={{ fontSize: 5.5, color: 'var(--text-faint)', fontWeight: 500 }}>
+              {p.label.slice(0, 2)}
             </span>
           </div>
-          <span style={{ fontSize: 5.5, color: 'var(--text-faint)' }}>{p}</span>
         </div>
       ))}
     </div>
   );
 }
 
-/** Generic mini chart for other traditions */
+/** Hellenistic circle chart with triangular inner pattern */
+function HellenisticMiniChart() {
+  return (
+    <div
+      style={{
+        width: 120,
+        height: 120,
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+      }}
+    >
+      {/* Outer ring */}
+      <div
+        style={{
+          width: 110,
+          height: 110,
+          borderRadius: '50%',
+          border: '2px solid var(--border-strong)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        {/* Inner ring */}
+        <div
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: '50%',
+            border: '1.5px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {/* Diagonal cross lines */}
+          <div
+            style={{
+              width: 30,
+              height: 1,
+              background: 'var(--border)',
+              position: 'absolute',
+              transform: 'rotate(45deg)',
+            }}
+          />
+          <div
+            style={{
+              width: 30,
+              height: 1,
+              background: 'var(--border)',
+              position: 'absolute',
+              transform: 'rotate(-45deg)',
+            }}
+          />
+        </div>
+        {/* 12 spoke marks around the outer ring */}
+        {Array.from({ length: 12 }).map((_, idx) => (
+          <div
+            key={idx}
+            style={{
+              position: 'absolute',
+              width: 1,
+              height: 10,
+              background: 'var(--border)',
+              transformOrigin: '50% 55px',
+              transform: `rotate(${idx * 30}deg)`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Generic mini chart for mayan, celtic, and other traditions */
 function GenericMiniChart({ tradition }: { tradition: string }) {
-  const style = TRADITION_STYLES[tradition.toLowerCase()];
-  const color = style?.color || 'var(--text-muted)';
+  const tradStyle = TRADITION_STYLES[tradition.toLowerCase()];
+  const color = tradStyle?.color || 'var(--text-muted)';
+  const t = tradition.toLowerCase();
+  const Icon = t === 'mayan' || t === 'celtic' ? Globe : Star;
   return (
     <div
       style={{
@@ -416,7 +506,7 @@ function GenericMiniChart({ tradition }: { tradition: string }) {
         borderRadius: 6,
       }}
     >
-      <Star style={{ width: 28, height: 28, color, opacity: 0.5 }} />
+      <Icon style={{ width: 28, height: 28, color, opacity: 0.5 }} />
     </div>
   );
 }
@@ -426,6 +516,7 @@ function MiniChart({ chart }: { chart: ChartItem }) {
   if (type === 'vedic') return <VedicMiniChart chart={chart} />;
   if (type === 'western') return <WesternMiniChart />;
   if (type === 'chinese') return <ChineseMiniChart />;
+  if (type === 'hellenistic') return <HellenisticMiniChart />;
   return <GenericMiniChart tradition={chart.chart_type} />;
 }
 
@@ -614,7 +705,7 @@ function EmptyState() {
       >
         Create your first birth chart to explore planetary positions across six astrological traditions.
       </p>
-      <Link href="/chart-calculator">
+      <Link href="/charts/new">
         <button
           style={{
             display: 'inline-flex',
@@ -1116,7 +1207,7 @@ export default function ChartsPage() {
             View and manage your birth charts across traditions
           </p>
         </div>
-        <Link href="/chart-calculator">
+        <Link href="/charts/new">
           <button
             style={{
               display: 'inline-flex',
