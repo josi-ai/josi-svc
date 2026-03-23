@@ -1,14 +1,33 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 let getSessionToken: (() => Promise<string | null>) | null = null;
+let authReadyPromise: Promise<void> | null = null;
+let resolveAuthReady: (() => void) | null = null;
+
+// Create a promise that resolves when auth is ready
+function resetAuthReady() {
+  authReadyPromise = new Promise((resolve) => {
+    resolveAuthReady = resolve;
+  });
+}
+resetAuthReady();
 
 export function setTokenGetter(getter: () => string | undefined) {
-  // Wrap sync getter in async for backward compat
   getSessionToken = async () => getter() ?? null;
 }
 
 export function setAsyncTokenGetter(getter: () => Promise<string | null>) {
   getSessionToken = getter;
+}
+
+/** Call this once Clerk is loaded and the user is signed in */
+export function signalAuthReady() {
+  resolveAuthReady?.();
+}
+
+/** Call this when the user signs out or auth state resets */
+export function signalAuthReset() {
+  resetAuthReady();
 }
 
 interface ApiResponse<T = any> {
@@ -22,6 +41,15 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
+  // Wait for auth to be ready before making any authenticated request
+  // Times out after 5s to avoid hanging forever if auth never resolves
+  if (authReadyPromise) {
+    await Promise.race([
+      authReadyPromise,
+      new Promise((resolve) => setTimeout(resolve, 5000)),
+    ]);
+  }
+
   const token = await getSessionToken?.();
 
   const headers: Record<string, string> = {

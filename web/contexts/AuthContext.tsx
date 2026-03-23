@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useEffect, useCallback } from 'react';
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
-import { setAsyncTokenGetter } from '@/lib/api-client';
+import { setAsyncTokenGetter, signalAuthReady, signalAuthReset } from '@/lib/api-client';
 import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -24,6 +24,8 @@ interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  /** True once Clerk is loaded AND signed in — safe to fire authenticated API calls */
+  isAuthReady: boolean;
   getToken: () => Promise<string | null>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -33,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
+  isAuthReady: false,
   getToken: async () => null,
   logout: async () => {},
   refreshUser: async () => {},
@@ -42,11 +45,24 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
   const { user: clerkUser, isLoaded: isUserLoaded } = useClerkUser();
 
+  const isAuthReady = isLoaded && !!isSignedIn;
+
   // Wire the async token getter into the API and GraphQL clients
+  setAsyncTokenGetter(getToken);
+  setAsyncGraphQLTokenGetter(getToken);
+
+  // Signal to apiClient that auth is ready (resolves the wait promise)
   useEffect(() => {
-    setAsyncTokenGetter(getToken);
-    setAsyncGraphQLTokenGetter(getToken);
-  }, [getToken]);
+    if (isAuthReady) {
+      signalAuthReady();
+    } else if (isLoaded && !isSignedIn) {
+      // Not signed in — release the gate so public API calls don't hang
+      signalAuthReady();
+    }
+    return () => {
+      signalAuthReset();
+    };
+  }, [isAuthReady, isLoaded, isSignedIn]);
 
   // Build user profile from Clerk user + publicMetadata (no API call needed)
   const user: UserProfile | null = useMemo(() => {
@@ -97,11 +113,12 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       user,
       isLoading: !isLoaded || !isUserLoaded,
       isAuthenticated: !!isSignedIn,
+      isAuthReady,
       getToken,
       logout,
       refreshUser,
     }),
-    [user, isLoaded, isUserLoaded, isSignedIn, getToken, logout, refreshUser],
+    [user, isLoaded, isUserLoaded, isSignedIn, isAuthReady, getToken, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

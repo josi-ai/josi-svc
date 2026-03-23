@@ -152,7 +152,7 @@ function ChartCard({ chart, personName }: { chart: ChartItem; personName?: strin
 export default function ChartsPage() {
   const [filter, setFilter] = useState<TraditionFilter>('All');
 
-  // Fetch all persons
+  // apiClient internally waits for auth before making requests
   const { data: personsResponse, isLoading: personsLoading } = useQuery({
     queryKey: ['persons'],
     queryFn: () => apiClient.get<Person[]>('/api/v1/persons/'),

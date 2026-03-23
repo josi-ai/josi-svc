@@ -107,6 +107,49 @@ class UserService:
         await invalidate_user(clerk_user_id)
         return user
 
+    # --- Ensure user exists (called from middleware on every auth) ---
+
+    async def ensure_user_exists(
+        self,
+        user_id: UUID,
+        auth_provider_id: str,
+        email: str,
+        full_name: str,
+    ) -> None:
+        """Ensure a user record exists in the DB for this user_id.
+
+        Called on every authenticated request (behind a Redis flag so it only
+        hits DB once per hour). Handles the case where JWT claims reference a
+        user_id that doesn't exist in the DB (e.g., after a DB reset, or when
+        the Clerk fast-path was used before the users table existed).
+        """
+        user = await self.user_repository.get_by_id(user_id)
+        if user:
+            return  # Already exists
+
+        # Try by auth_provider_id (might exist with a different user_id)
+        user = await self.user_repository.get_by_auth_provider_id(auth_provider_id)
+        if user:
+            return  # Exists under different ID — close enough
+
+        # Create the user record
+        logger.info(
+            "Creating missing user record from JWT claims",
+            user_id=str(user_id),
+            email=email,
+        )
+        new_user = User(
+            user_id=user_id,
+            auth_provider_id=auth_provider_id,
+            auth_provider="clerk",
+            email=email or "unknown@josiam.com",
+            full_name=full_name or "User",
+            is_active=True,
+            is_verified=bool(email),
+            last_login=datetime.utcnow(),
+        )
+        await self.user_repository.create(new_user)
+
     # --- Auth resolution (used by middleware) ---
 
     async def resolve_user_from_db(self, auth_provider_id: str, email: str) -> CurrentUser:
