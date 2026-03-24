@@ -58,15 +58,6 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     } else if (isLoaded && !isSignedIn) {
       // Not signed in — release the gate so public API calls don't hang
       signalAuthReady();
-
-      // If we're on a protected route and session expired, redirect to login
-      if (typeof window !== 'undefined') {
-        const path = window.location.pathname;
-        const isPublicRoute = path === '/' || path.startsWith('/auth/') || path === '/pricing' || path === '/chart-calculator';
-        if (!isPublicRoute) {
-          window.location.href = '/auth/login';
-        }
-      }
     }
     return () => {
       signalAuthReset();
