@@ -22,7 +22,7 @@ interface Person {
   person_id: string;
   name: string;
   email: string | null;
-  date_of_birth: string;
+  date_of_birth: string | null;
   time_of_birth: string | null;
   place_of_birth: string | null;
   latitude: string | number | null;
@@ -30,6 +30,7 @@ interface Person {
   timezone: string | null;
   gender: string | null;
   notes: string | null;
+  is_default?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -41,9 +42,10 @@ interface PersonFormData {
   place_of_birth: string;
 }
 
-/* ---------- Helpers ---------- */
+/* ---------- Helpers (updated) ---------- */
 
-function formatDateOfBirth(dateStr: string): string {
+function formatDateOfBirth(dateStr: string | null): string | null {
+  if (!dateStr) return null;
   // dateStr is "YYYY-MM-DD"
   const [year, month, day] = dateStr.split('-').map(Number);
   const date = new Date(year, month - 1, day);
@@ -642,18 +644,43 @@ function ProfileCard({
         gap: 12,
       }}
     >
-      {/* Name */}
-      <p
-        className="font-display"
-        style={{
-          fontSize: 18,
-          color: 'var(--text-primary)',
-          lineHeight: 1.3,
-          margin: 0,
-        }}
-      >
-        {person.name}
-      </p>
+      {/* Name + Default indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <p
+          className="font-display"
+          style={{
+            fontSize: 18,
+            color: 'var(--text-primary)',
+            lineHeight: 1.3,
+            margin: 0,
+          }}
+        >
+          {person.is_default && (
+            <span style={{ color: '#D4A843', marginRight: 6 }}>{'\u2605'}</span>
+          )}
+          {person.name}
+        </p>
+        {person.is_default && (
+          <span
+            style={{
+              display: 'inline-block',
+              fontSize: 9,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: '#D4A843',
+              background: 'rgba(212, 168, 67, 0.12)',
+              border: '1px solid rgba(212, 168, 67, 0.25)',
+              borderRadius: 4,
+              padding: '2px 6px',
+              lineHeight: 1.4,
+              flexShrink: 0,
+            }}
+          >
+            Default
+          </span>
+        )}
+      </div>
 
       {/* Birth details */}
       <div
@@ -747,7 +774,7 @@ function ProfileCard({
         }}
       >
         <Link
-          href="/charts"
+          href={`/charts?person_id=${person.person_id}`}
           style={{
             fontSize: 12,
             color: 'var(--gold)',
@@ -786,26 +813,28 @@ function ProfileCard({
           >
             <Pencil style={{ width: 14, height: 14 }} />
           </button>
-          <button
-            onClick={() => onDelete(person)}
-            title="Delete profile"
-            className="action-btn action-btn-delete"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: '1px solid var(--border)',
-              background: 'var(--background)',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-              transition: 'all 0.15s',
-            }}
-          >
-            <Trash2 style={{ width: 14, height: 14 }} />
-          </button>
+          {!person.is_default && (
+            <button
+              onClick={() => onDelete(person)}
+              title="Delete profile"
+              className="action-btn action-btn-delete"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                border: '1px solid var(--border)',
+                background: 'var(--background)',
+                cursor: 'pointer',
+                color: 'var(--text-muted)',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Trash2 style={{ width: 14, height: 14 }} />
+            </button>
+          )}
         </div>
       </div>
     </div>

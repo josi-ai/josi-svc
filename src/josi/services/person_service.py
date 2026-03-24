@@ -180,6 +180,17 @@ class PersonService:
             return person
         return None
     
+    async def find_default_profile(self) -> Optional[Person]:
+        """Find the user's default birth profile."""
+        result = await self.db.execute(
+            select(Person).where(
+                Person.user_id == self.user_id,
+                Person.is_default == True,
+                Person.is_deleted == False,
+            )
+        )
+        return result.scalars().first()
+
     async def get_person_charts(self, person_id: UUID):
         """Get all charts for a person."""
         from josi.models.chart_model import AstrologyChart

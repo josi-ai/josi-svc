@@ -150,6 +150,45 @@ class UserService:
         )
         await self.user_repository.create(new_user)
 
+    # --- Default profile creation ---
+
+    async def ensure_default_profile_exists(
+        self, user_id: UUID, full_name: str, email: str
+    ) -> None:
+        """Ensure a default birth profile exists for this user."""
+        from josi.models.person_model import Person
+        from josi.db.async_db import get_async_session
+        from sqlalchemy import select, and_
+
+        async with get_async_session() as session:
+            # Check if default profile already exists
+            result = await session.execute(
+                select(Person).where(
+                    and_(
+                        Person.user_id == user_id,
+                        Person.is_default == True,
+                        Person.is_deleted == False,
+                    )
+                )
+            )
+            existing = result.scalars().first()
+            if existing:
+                return
+
+            # Create default profile
+            person = Person(
+                name=full_name or "My Profile",
+                email=email,
+                is_default=True,
+                user_id=user_id,
+            )
+            session.add(person)
+            await session.commit()
+            logger.info(
+                "Created default profile for user",
+                user_id=str(user_id),
+            )
+
     # --- Auth resolution (used by middleware) ---
 
     async def resolve_user_from_db(self, auth_provider_id: str, email: str) -> CurrentUser:

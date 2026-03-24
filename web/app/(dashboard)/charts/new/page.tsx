@@ -1,11 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import PlaceAutocomplete from '@/components/ui/place-autocomplete';
+
+/* ---------- Types ---------- */
+
+interface Person {
+  person_id: string;
+  name: string;
+  date_of_birth: string;
+  time_of_birth: string | null;
+  place_of_birth: string | null;
+  is_default?: boolean;
+}
+
+/* ---------- Constants ---------- */
 
 const TRADITIONS = [
   { value: 'vedic', label: 'Vedic' },
@@ -26,10 +40,35 @@ const AYANAMSAS = [
   { value: 'kp', label: 'KP' },
 ];
 
+const NEW_PROFILE_VALUE = '__new__';
+
+/* ---------- Helpers ---------- */
+
+function extractTimeValue(timeStr: string | null): string {
+  if (!timeStr) return '';
+  if (timeStr.includes('T')) {
+    const d = new Date(timeStr);
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  }
+  return timeStr.substring(0, 5);
+}
+
 export default function NewChartPage() {
   const router = useRouter();
   const { user } = useAuth();
 
+  // Fetch all profiles
+  const { data: personsResponse, isLoading: personsLoading } = useQuery({
+    queryKey: ['persons'],
+    queryFn: () => apiClient.get<Person[]>('/api/v1/persons/'),
+  });
+
+  const persons = personsResponse?.data || [];
+
+  // Find default profile
+  const defaultProfile = persons.find((p) => p.is_default === true) || persons[0] || null;
+
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [name, setName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [timeOfBirth, setTimeOfBirth] = useState('');
@@ -41,11 +80,53 @@ export default function NewChartPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Initialize selected profile when persons load
+  useEffect(() => {
+    if (persons.length > 0 && !selectedProfileId) {
+      const def = persons.find((p) => p.is_default === true) || persons[0];
+      if (def) {
+        setSelectedProfileId(def.person_id);
+        prefillFromProfile(def);
+      }
+    }
+  }, [persons]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isExistingProfile = selectedProfileId && selectedProfileId !== NEW_PROFILE_VALUE;
+
+  function prefillFromProfile(person: Person) {
+    setName(person.name);
+    setDateOfBirth(person.date_of_birth || '');
+    setTimeOfBirth(extractTimeValue(person.time_of_birth));
+    setPlaceOfBirth(person.place_of_birth || '');
+  }
+
+  function clearForm() {
+    setName('');
+    setDateOfBirth('');
+    setTimeOfBirth('');
+    setPlaceOfBirth('');
+  }
+
+  const handleProfileChange = (value: string) => {
+    setSelectedProfileId(value);
+    setError('');
+
+    if (value === NEW_PROFILE_VALUE) {
+      clearForm();
+      return;
+    }
+
+    const person = persons.find((p) => p.person_id === value);
+    if (person) {
+      prefillFromProfile(person);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!dateOfBirth) {
+    if (!isExistingProfile && !dateOfBirth) {
       setError('Date of birth is required.');
       return;
     }
@@ -53,15 +134,21 @@ export default function NewChartPage() {
     setIsSubmitting(true);
 
     try {
-      // Step 1: Create person
-      const personRes = await apiClient.post<{ person_id: string }>('/api/v1/persons/', {
-        name: name || 'Unnamed',
-        date_of_birth: dateOfBirth,
-        time_of_birth: timeOfBirth || null,
-        place_of_birth: placeOfBirth || null,
-      });
+      let personId: string;
 
-      const personId = personRes.data.person_id;
+      if (isExistingProfile) {
+        // Use the existing profile directly
+        personId = selectedProfileId;
+      } else {
+        // Step 1: Create person
+        const personRes = await apiClient.post<{ person_id: string }>('/api/v1/persons/', {
+          name: name || 'Unnamed',
+          date_of_birth: dateOfBirth,
+          time_of_birth: timeOfBirth || null,
+          place_of_birth: placeOfBirth || null,
+        });
+        personId = personRes.data.person_id;
+      }
 
       // Step 2: Calculate chart
       const params = new URLSearchParams({
@@ -159,6 +246,35 @@ export default function NewChartPage() {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Profile Selector */}
+            <div>
+              <label style={labelStyle}>Calculate For</label>
+              <select
+                value={selectedProfileId}
+                onChange={(e) => handleProfileChange(e.target.value)}
+                style={selectStyle}
+                onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                disabled={personsLoading}
+              >
+                {personsLoading && (
+                  <option value="">Loading profiles...</option>
+                )}
+                {!personsLoading && persons.length === 0 && (
+                  <option value="">No profiles found</option>
+                )}
+                {persons.map((p) => (
+                  <option key={p.person_id} value={p.person_id}>
+                    {p.is_default ? `\u2605 ${p.name}` : p.name}
+                  </option>
+                ))}
+                <option value={NEW_PROFILE_VALUE}>+ New Profile</option>
+              </select>
+            </div>
+
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid var(--border)', margin: '0 -28px', padding: '0 28px' }} />
+
             {/* Name */}
             <div>
               <label style={labelStyle}>Name</label>
@@ -167,10 +283,23 @@ export default function NewChartPage() {
                 placeholder="Enter name (e.g., John Doe)"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                style={{
+                  ...inputStyle,
+                  ...(isExistingProfile
+                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
+                    : {}),
+                }}
+                readOnly={!!isExistingProfile}
+                onFocus={(e) => {
+                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
+                }}
                 onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
               />
+              {isExistingProfile && (
+                <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>
+                  Auto-filled from selected profile
+                </p>
+              )}
             </div>
 
             {/* Date of Birth */}
@@ -178,11 +307,19 @@ export default function NewChartPage() {
               <label style={labelStyle}>Date of Birth</label>
               <input
                 type="date"
-                required
+                required={!isExistingProfile}
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                style={{
+                  ...inputStyle,
+                  ...(isExistingProfile
+                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
+                    : {}),
+                }}
+                readOnly={!!isExistingProfile}
+                onFocus={(e) => {
+                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
+                }}
                 onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
               />
             </div>
@@ -194,8 +331,16 @@ export default function NewChartPage() {
                 type="time"
                 value={timeOfBirth}
                 onChange={(e) => setTimeOfBirth(e.target.value)}
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                style={{
+                  ...inputStyle,
+                  ...(isExistingProfile
+                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
+                    : {}),
+                }}
+                readOnly={!!isExistingProfile}
+                onFocus={(e) => {
+                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
+                }}
                 onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
               />
               <p
@@ -213,13 +358,27 @@ export default function NewChartPage() {
             {/* Place of Birth */}
             <div>
               <label style={labelStyle}>Place of Birth</label>
-              <PlaceAutocomplete
-                value={placeOfBirth}
-                onChange={setPlaceOfBirth}
-                placeholder="City, Country"
-                className=""
-                style={inputStyle}
-              />
+              {isExistingProfile ? (
+                <input
+                  type="text"
+                  value={placeOfBirth}
+                  readOnly
+                  style={{
+                    ...inputStyle,
+                    background: 'var(--card)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'default',
+                  }}
+                />
+              ) : (
+                <PlaceAutocomplete
+                  value={placeOfBirth}
+                  onChange={setPlaceOfBirth}
+                  placeholder="City, Country"
+                  className=""
+                  style={inputStyle}
+                />
+              )}
             </div>
 
             {/* Tradition */}

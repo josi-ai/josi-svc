@@ -24,14 +24,17 @@ class PersonEntity(SQLModel):
     phone: Optional[str] = Field(default=None, nullable=True)
     
     # Birth Information
-    date_of_birth: date = Field(nullable=False)
-    time_of_birth: datetime = Field(nullable=False)
-    place_of_birth: str = Field(nullable=False)
-    
+    date_of_birth: Optional[date] = Field(default=None, nullable=True)
+    time_of_birth: Optional[datetime] = Field(default=None, nullable=True)
+    place_of_birth: Optional[str] = Field(default=None, nullable=True)
+
     # Location coordinates
-    latitude: Decimal = Field(nullable=False, decimal_places=6, max_digits=9)
-    longitude: Decimal = Field(nullable=False, decimal_places=6, max_digits=9)
-    timezone: str = Field(nullable=False)
+    latitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=6, max_digits=9)
+    longitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=6, max_digits=9)
+    timezone: Optional[str] = Field(default=None, nullable=True)
+
+    # Profile flags
+    is_default: Optional[bool] = Field(default=False, nullable=False)
     
     # Additional Information
     gender: Optional[str] = Field(default=None, nullable=True)
@@ -104,7 +107,7 @@ class Person(PersonModel, table=True):
         "date_of_birth", "time_of_birth", "place_of_birth",
         "latitude", "longitude", "timezone",
         "gender", "birth_certificate_id", "notes",
-        "external_id", "source_system",
+        "external_id", "source_system", "is_default",
         "created_at", "updated_at", "is_deleted", "deleted_at"
     ]
 )

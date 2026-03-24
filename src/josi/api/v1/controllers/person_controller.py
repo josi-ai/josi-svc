@@ -6,7 +6,7 @@ from typing import List, Optional
 from uuid import UUID
 import logging
 
-from josi.api.v1.dependencies import PersonServiceDep
+from josi.api.v1.dependencies import PersonServiceDep, CurrentUserDep
 from josi.api.response import ResponseModel
 from josi.models.person_model import PersonEntity
 from josi.api.v1.dto.person_dto import CreatePersonRequest
@@ -86,6 +86,18 @@ async def create_person(
     except Exception as e:
         log.error(f"Failed to create person: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create person: {str(e)}")
+
+
+@router.get("/me", response_model=ResponseModel)
+async def get_my_profile(
+    person_service: PersonServiceDep,
+    current_user: CurrentUserDep,
+) -> ResponseModel:
+    """Get the current user's default birth profile."""
+    person = await person_service.find_default_profile()
+    if not person:
+        raise HTTPException(status_code=404, detail="Default profile not found")
+    return ResponseModel(success=True, message="Default profile found", data=person)
 
 
 @router.get("/{person_id}", response_model=ResponseModel)

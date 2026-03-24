@@ -15,6 +15,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!pendingChart || creatingChart) return;
 
+    const chart = pendingChart; // capture non-null value for async closure
     async function createChart() {
       setCreatingChart(true);
       try {
@@ -26,10 +27,10 @@ export default function DashboardPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({
-            name: pendingChart.name || 'My Profile',
-            date_of_birth: pendingChart.dob,
-            time_of_birth: pendingChart.tob || null,
-            place_of_birth: pendingChart.place || null,
+            name: chart.name || 'My Profile',
+            date_of_birth: chart.dob,
+            time_of_birth: chart.tob || null,
+            place_of_birth: chart.place || null,
           }),
         });
 

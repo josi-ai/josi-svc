@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -14,6 +15,8 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
+  X,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,6 +28,7 @@ interface Person {
   date_of_birth: string;
   time_of_birth?: string;
   place_of_birth?: string;
+  is_default?: boolean;
 }
 
 interface PlanetData {
@@ -1106,11 +1110,29 @@ function ChartListView({
 
 /* ---------- Main Page ---------- */
 
-export default function ChartsPage() {
+function ChartsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const personIdParam = searchParams.get('person_id');
+
   const [filter, setFilter] = useState<TraditionFilter>('All');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [showAll, setShowAll] = useState(false);
 
-  // apiClient internally waits for auth before making requests
+  // Fetch user's default profile
+  const { data: defaultProfileResponse } = useQuery({
+    queryKey: ['default-profile'],
+    queryFn: () => apiClient.get<Person>('/api/v1/persons/me'),
+  });
+  const defaultProfile = defaultProfileResponse?.data || null;
+
+  // Determine the active person_id filter
+  // Priority: query param > default profile (unless "show all" is active)
+  const activePersonId = showAll
+    ? null
+    : personIdParam || defaultProfile?.person_id || null;
+
+  // Fetch all persons (needed for personMap in both modes)
   const { data: personsResponse, isLoading: personsLoading } = useQuery({
     queryKey: ['persons'],
     queryFn: () => apiClient.get<Person[]>('/api/v1/persons/'),
@@ -1125,28 +1147,42 @@ export default function ChartsPage() {
     return map;
   }, [persons]);
 
-  // Fetch charts for each person (enabled once persons are loaded)
+  // The name of the person being filtered
+  const activePersonName = activePersonId ? personMap[activePersonId] : null;
+
+  // Fetch charts: either for one person or for all persons
   const personIds = persons.map((p) => p.person_id);
 
   const { data: chartsResponse, isLoading: chartsLoading } = useQuery({
-    queryKey: ['all-charts', personIds],
+    queryKey: ['charts', activePersonId, personIds],
     queryFn: async () => {
-      if (personIds.length === 0) return [];
-      const results = await Promise.all(
-        personIds.map((pid) =>
-          apiClient
-            .get<ChartItem[]>(`/api/v1/persons/${pid}/charts`)
-            .then((res) => res.data || [])
-            .catch(() => [] as ChartItem[])
-        )
-      );
-      return results.flat();
+      if (activePersonId) {
+        // Fetch charts for a single person
+        const res = await apiClient
+          .get<ChartItem[]>(`/api/v1/persons/${activePersonId}/charts`)
+          .catch(() => ({ data: [] as ChartItem[], success: false, message: '' }));
+        return res.data || [];
+      } else {
+        // Fetch charts for all persons
+        if (personIds.length === 0) return [];
+        const results = await Promise.all(
+          personIds.map((pid) =>
+            apiClient
+              .get<ChartItem[]>(`/api/v1/persons/${pid}/charts`)
+              .then((res) => res.data || [])
+              .catch(() => [] as ChartItem[])
+          )
+        );
+        return results.flat();
+      }
     },
-    enabled: personIds.length > 0 && !personsLoading,
+    enabled: activePersonId
+      ? true
+      : personIds.length > 0 && !personsLoading,
   });
 
   const allCharts = chartsResponse || [];
-  const isLoading = personsLoading || (personIds.length > 0 && chartsLoading);
+  const isLoading = personsLoading || (activePersonId ? chartsLoading : (personIds.length > 0 && chartsLoading));
 
   // Filter charts by tradition
   const filteredCharts = useMemo(() => {
@@ -1155,6 +1191,25 @@ export default function ChartsPage() {
       (c) => c.chart_type.toLowerCase() === filter.toLowerCase()
     );
   }, [allCharts, filter]);
+
+  const handleShowAll = () => {
+    setShowAll(true);
+    // Clear person_id from URL if present
+    if (personIdParam) {
+      router.push('/charts');
+    }
+  };
+
+  const handleClearFilter = () => {
+    setShowAll(false);
+    // Reset to default profile by clearing the query param
+    if (personIdParam) {
+      router.push('/charts');
+    }
+  };
+
+  // Whether we are in a filtered-by-person mode
+  const isFilteredByPerson = activePersonId !== null;
 
   return (
     <div>
@@ -1235,6 +1290,109 @@ export default function ChartsPage() {
           </button>
         </Link>
       </div>
+
+      {/* Person filter banner */}
+      {isFilteredByPerson && activePersonName && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: 'var(--gold-bg)',
+            border: '1px solid var(--gold)',
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>
+            Showing charts for <strong>{activePersonName}</strong>
+          </span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button
+              onClick={handleShowAll}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 12px',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 500,
+                background: 'var(--card)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Users style={{ width: 12, height: 12 }} />
+              See All Profiles' Charts
+            </button>
+            {personIdParam && (
+              <button
+                onClick={handleClearFilter}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: 'transparent',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <X style={{ width: 12, height: 12 }} />
+                Clear filter
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* "All profiles" mode banner — show option to go back to default */}
+      {showAll && defaultProfile && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Showing charts for all profiles
+          </span>
+          <button
+            onClick={() => setShowAll(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '5px 12px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 500,
+              background: 'var(--gold-bg)',
+              color: 'var(--gold)',
+              border: '1px solid var(--gold)',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            Show only my profile
+          </button>
+        </div>
+      )}
 
       {/* Filter bar + View toggle */}
       <div
@@ -1365,5 +1523,13 @@ export default function ChartsPage() {
         <ChartListView charts={filteredCharts} personMap={personMap} />
       )}
     </div>
+  );
+}
+
+export default function ChartsPage() {
+  return (
+    <Suspense fallback={<LoadingGrid />}>
+      <ChartsPageContent />
+    </Suspense>
   );
 }
