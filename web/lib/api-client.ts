@@ -67,6 +67,17 @@ async function request<T>(
   });
 
   if (!response.ok) {
+    // Session expired — redirect to login instead of showing a broken page
+    if (response.status === 401 && typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      const isPublicRoute = path === '/' || path.startsWith('/auth/') || path === '/pricing';
+      if (!isPublicRoute) {
+        window.location.href = '/auth/login';
+        // Return a never-resolving promise so the redirect completes
+        return new Promise(() => {});
+      }
+    }
+
     const error = await response.json().catch(() => ({ message: response.statusText }));
     throw new Error(error.detail || error.message || 'Request failed');
   }
