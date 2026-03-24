@@ -8,6 +8,7 @@ import { register as registerDoctor } from '../src/commands/init/doctor.js';
 
 // Command groups
 import { register as registerRedock } from '../src/commands/redock/index.js';
+import { register as registerWeb } from '../src/commands/web/index.js';
 import { register as registerDb } from '../src/commands/db/index.js';
 import { register as registerSecrets } from '../src/commands/secrets/index.js';
 import { register as registerGcp } from '../src/commands/gcp/index.js';
@@ -34,6 +35,7 @@ program
 registerInit(program);
 registerDoctor(program);
 registerRedock(program);
+registerWeb(program);
 registerDb(program);
 registerTest(program);
 registerLint(program);

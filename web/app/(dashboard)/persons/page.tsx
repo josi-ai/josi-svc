@@ -44,9 +44,8 @@ interface PersonFormData {
 
 /* ---------- Helpers (updated) ---------- */
 
-function formatDateOfBirth(dateStr: string | null): string | null {
-  if (!dateStr) return null;
-  // dateStr is "YYYY-MM-DD"
+function formatDateOfBirth(dateStr: unknown): string | null {
+  if (!dateStr || typeof dateStr !== 'string') return null;
   const [year, month, day] = dateStr.split('-').map(Number);
   const date = new Date(year, month - 1, day);
   return date.toLocaleDateString('en-US', {

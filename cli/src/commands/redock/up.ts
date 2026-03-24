@@ -11,10 +11,10 @@ import * as logger from '../../lib/logger.js';
 export function register(parent: Command): void {
   parent
     .command('up <env>')
-    .description('Start services with specified environment (dev, prod)')
+    .description('Start backend services (API, DB, Redis). Web runs locally via `josi web dev`.')
     .option('--local', 'Use local database instead of Cloud SQL')
     .option('--no-logs', 'Do not follow logs after starting')
-    .option('--no-web', 'Do not start the web service')
+    .option('--with-web', 'Also start web in Docker (not recommended for dev)')
     .option('--no-build', 'Skip rebuilding images')
     .addHelpText(
       'after',
@@ -23,18 +23,21 @@ Environments:
   dev, prod
 
 Examples:
+  $ josi redock up dev --local    # Backend only (recommended)
   $ josi redock up dev            # Cloud mode: connect to dev Cloud SQL
-  $ josi redock up prod           # Cloud mode: connect to prod Cloud SQL
-  $ josi redock up dev --local    # Local mode: local Postgres
-  $ josi redock up dev --no-logs  # Start without following logs`
+  $ josi redock up dev --with-web # Include web container (not recommended)
+
+After starting backend, run the frontend locally:
+  $ josi web dev`
     )
-    .action(async (envArg: string, opts: UpOptions) => {
+    .action(async (envArg: string, opts: UpOptions & { withWeb?: boolean }) => {
       if (!VALID_ENVS.includes(envArg as Env)) {
         logger.error(`Invalid environment '${envArg}'. Must be one of: ${VALID_ENVS.join(', ')}`);
         process.exit(1);
       }
       const env = envArg as Env;
       const mode = opts.local ? 'local' : 'cloud';
+      const includeWeb = !!opts.withWeb;
 
       if (!isDockerRunning()) {
         logger.error('Docker is not running. Start Docker Desktop first.');
@@ -81,10 +84,16 @@ Examples:
         silent: true,
       });
 
-      // Build and start
+      // Build and start — exclude web unless --with-web
       logger.step('Building and starting...');
       const upArgs = [...fileArgs, ...profileArgs, 'up', '-d', '--pull', 'missing'];
       if (opts.build !== false) upArgs.push('--build');
+
+      // Specify services explicitly to exclude web
+      if (!includeWeb) {
+        upArgs.push('api');  // api depends on db + redis, so they start too
+      }
+
       const upResult = await exec(upArgs, { cwd: root, env: secretEnv });
 
       if (upResult.code !== 0) {
@@ -93,7 +102,7 @@ Examples:
       }
 
       logger.blank();
-      logger.success('Services started!');
+      logger.success('Backend services started!');
       logger.blank();
       logger.dim(`  Mode:      ${mode}`);
       logger.dim(`  Env:       ${env}`);
@@ -104,7 +113,15 @@ Examples:
       } else {
         logger.dim('  Proxy:     localhost:15432');
       }
+      logger.dim('  Redis:     localhost:6399');
       logger.blank();
+
+      if (!includeWeb) {
+        logger.step('Start the frontend locally:');
+        logger.blank();
+        logger.dim('  $ josi web dev');
+        logger.blank();
+      }
 
       // Follow logs unless --no-logs
       if (opts.logs !== false) {
