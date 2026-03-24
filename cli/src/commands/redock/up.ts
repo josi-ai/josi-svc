@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, writeFileSync, mkdirSync, openSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { VALID_ENVS, type Env, type UpOptions } from '../../types.js';
@@ -137,7 +137,7 @@ Examples:
             if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
             const logFile = resolve(logDir, 'web-dev.log');
 
-            const out = require('node:fs').openSync(logFile, 'a');
+            const out = openSync(logFile, 'a');
             const webChild = spawn('npx', ['next', 'dev', '-p', '1989'], {
               cwd: webDir,
               detached: true,
