@@ -625,8 +625,8 @@ function ProfileCard({
   onEdit: (person: Person) => void;
   onDelete: (person: Person) => void;
 }) {
-  const formattedDob = formatDateOfBirth(person.date_of_birth);
-  const formattedTime = formatTimeOfBirth(person.time_of_birth);
+  const formattedDob = person.date_of_birth ? formatDateOfBirth(person.date_of_birth) : null;
+  const formattedTime = person.time_of_birth ? formatTimeOfBirth(person.time_of_birth) : null;
 
   return (
     <div
