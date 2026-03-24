@@ -83,7 +83,7 @@ Examples:
 
       // Build and start
       logger.step('Building and starting...');
-      const upArgs = [...fileArgs, ...profileArgs, 'up', '-d'];
+      const upArgs = [...fileArgs, ...profileArgs, 'up', '-d', '--pull', 'missing'];
       if (opts.build !== false) upArgs.push('--build');
       const upResult = await exec(upArgs, { cwd: root, env: secretEnv });
 
