@@ -92,6 +92,8 @@ export default function NewChartPage() {
   }, [persons]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isExistingProfile = selectedProfileId && selectedProfileId !== NEW_PROFILE_VALUE;
+  const selectedPerson = isExistingProfile ? persons.find((p) => p.person_id === selectedProfileId) : null;
+  const isProfileComplete = !!(selectedPerson?.date_of_birth);
 
   function prefillFromProfile(person: Person) {
     setName(person.name);
@@ -126,7 +128,7 @@ export default function NewChartPage() {
     e.preventDefault();
     setError('');
 
-    if (!isExistingProfile && !dateOfBirth) {
+    if (!isProfileComplete && !dateOfBirth) {
       setError('Date of birth is required.');
       return;
     }
@@ -136,8 +138,17 @@ export default function NewChartPage() {
     try {
       let personId: string;
 
-      if (isExistingProfile) {
-        // Use the existing profile directly
+      if (isExistingProfile && isProfileComplete) {
+        // Profile has birth data — use it directly
+        personId = selectedProfileId;
+      } else if (isExistingProfile && !isProfileComplete) {
+        // Incomplete profile — update it with the form data, then use it
+        await apiClient.put(`/api/v1/persons/${selectedProfileId}`, {
+          name: name || selectedPerson?.name,
+          date_of_birth: dateOfBirth,
+          time_of_birth: timeOfBirth || null,
+          place_of_birth: placeOfBirth || null,
+        });
         personId = selectedProfileId;
       } else {
         // Step 1: Create person
@@ -275,8 +286,8 @@ export default function NewChartPage() {
             {/* Divider */}
             <div style={{ borderTop: '1px solid var(--border)', margin: '0 -28px', padding: '0 28px' }} />
 
-            {isExistingProfile ? (
-              /* ---- Existing profile: show summary card ---- */
+            {isExistingProfile && isProfileComplete ? (
+              /* ---- Complete profile: show summary card ---- */
               <div
                 style={{
                   background: 'var(--surface, var(--card))',
@@ -323,8 +334,14 @@ export default function NewChartPage() {
                 )}
               </div>
             ) : (
-              /* ---- New profile: show full form ---- */
+              /* ---- New or incomplete profile: show full form ---- */
               <>
+                {isExistingProfile && !isProfileComplete && (
+                  <p style={{ fontSize: 12, color: 'var(--gold)', marginBottom: -8 }}>
+                    Complete your birth details to calculate a chart
+                  </p>
+                )}
+
                 {/* Name */}
                 <div>
                   <label style={labelStyle}>Name</label>
