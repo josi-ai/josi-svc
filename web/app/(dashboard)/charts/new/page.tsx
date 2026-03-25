@@ -275,111 +275,113 @@ export default function NewChartPage() {
             {/* Divider */}
             <div style={{ borderTop: '1px solid var(--border)', margin: '0 -28px', padding: '0 28px' }} />
 
-            {/* Name */}
-            <div>
-              <label style={labelStyle}>Name</label>
-              <input
-                type="text"
-                placeholder="Enter name (e.g., John Doe)"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+            {isExistingProfile ? (
+              /* ---- Existing profile: show summary card ---- */
+              <div
                 style={{
-                  ...inputStyle,
-                  ...(isExistingProfile
-                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
-                    : {}),
-                }}
-                readOnly={!!isExistingProfile}
-                onFocus={(e) => {
-                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
-                }}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-              />
-              {isExistingProfile && (
-                <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>
-                  Auto-filled from selected profile
-                </p>
-              )}
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label style={labelStyle}>Date of Birth</label>
-              <input
-                type="date"
-                required={!isExistingProfile}
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                style={{
-                  ...inputStyle,
-                  ...(isExistingProfile
-                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
-                    : {}),
-                }}
-                readOnly={!!isExistingProfile}
-                onFocus={(e) => {
-                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
-                }}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-              />
-            </div>
-
-            {/* Time of Birth */}
-            <div>
-              <label style={labelStyle}>Time of Birth</label>
-              <input
-                type="time"
-                value={timeOfBirth}
-                onChange={(e) => setTimeOfBirth(e.target.value)}
-                style={{
-                  ...inputStyle,
-                  ...(isExistingProfile
-                    ? { background: 'var(--card)', color: 'var(--text-secondary)', cursor: 'default' }
-                    : {}),
-                }}
-                readOnly={!!isExistingProfile}
-                onFocus={(e) => {
-                  if (!isExistingProfile) e.target.style.borderColor = 'var(--gold)';
-                }}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
-              />
-              <p
-                style={{
-                  fontSize: 12,
-                  color: 'var(--text-faint)',
-                  marginTop: 6,
-                  lineHeight: 1.4,
+                  background: 'var(--surface, var(--card))',
+                  border: '1px solid var(--border)',
+                  borderRadius: 10,
+                  padding: '16px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
                 }}
               >
-                Birth time affects house positions. If unknown, we&rsquo;ll use sunrise.
-              </p>
-            </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{name}</span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: 'var(--gold)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      textUnderlineOffset: 2,
+                    }}
+                    onClick={() => {
+                      setSelectedProfileId(NEW_PROFILE_VALUE);
+                      clearForm();
+                    }}
+                  >
+                    Use different details instead
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 20px', fontSize: 13, color: 'var(--text-secondary)' }}>
+                  {dateOfBirth && (
+                    <span>Born {new Date(dateOfBirth + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  )}
+                  {timeOfBirth && <span>at {timeOfBirth}</span>}
+                  {placeOfBirth && <span>in {placeOfBirth}</span>}
+                </div>
+                {!dateOfBirth && (
+                  <p style={{ fontSize: 12, color: 'var(--text-faint)', fontStyle: 'italic' }}>
+                    Birth details incomplete — <span
+                      style={{ color: 'var(--gold)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}
+                      onClick={() => router.push('/persons')}
+                    >edit profile</span> to add them, or select &quot;+ New Profile&quot; above.
+                  </p>
+                )}
+              </div>
+            ) : (
+              /* ---- New profile: show full form ---- */
+              <>
+                {/* Name */}
+                <div>
+                  <label style={labelStyle}>Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter name (e.g., John Doe)"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={inputStyle}
+                    onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                  />
+                </div>
 
-            {/* Place of Birth */}
-            <div>
-              <label style={labelStyle}>Place of Birth</label>
-              {isExistingProfile ? (
-                <input
-                  type="text"
-                  value={placeOfBirth}
-                  readOnly
-                  style={{
-                    ...inputStyle,
-                    background: 'var(--card)',
-                    color: 'var(--text-secondary)',
-                    cursor: 'default',
-                  }}
-                />
-              ) : (
-                <PlaceAutocomplete
-                  value={placeOfBirth}
-                  onChange={setPlaceOfBirth}
-                  placeholder="City, Country"
-                  className=""
-                  style={inputStyle}
-                />
-              )}
-            </div>
+                {/* Date of Birth */}
+                <div>
+                  <label style={labelStyle}>Date of Birth</label>
+                  <input
+                    type="date"
+                    required
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    style={inputStyle}
+                    onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                  />
+                </div>
+
+                {/* Time of Birth */}
+                <div>
+                  <label style={labelStyle}>Time of Birth</label>
+                  <input
+                    type="time"
+                    value={timeOfBirth}
+                    onChange={(e) => setTimeOfBirth(e.target.value)}
+                    style={inputStyle}
+                    onFocus={(e) => (e.target.style.borderColor = 'var(--gold)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+                  />
+                  <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 6, lineHeight: 1.4 }}>
+                    Birth time affects house positions. If unknown, we&rsquo;ll use sunrise.
+                  </p>
+                </div>
+
+                {/* Place of Birth */}
+                <div>
+                  <label style={labelStyle}>Place of Birth</label>
+                  <PlaceAutocomplete
+                    value={placeOfBirth}
+                    onChange={setPlaceOfBirth}
+                    placeholder="City, Country"
+                    className=""
+                    style={inputStyle}
+                  />
+                </div>
+              </>
+            )}
 
             {/* Tradition */}
             <div>
