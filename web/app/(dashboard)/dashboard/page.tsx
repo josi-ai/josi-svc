@@ -29,7 +29,7 @@ export default function DashboardPage() {
           body: JSON.stringify({
             name: chart.name || 'My Profile',
             date_of_birth: chart.dob,
-            time_of_birth: chart.tob || null,
+            time_of_birth: chart.tob ? `${chart.dob} ${chart.tob.length === 5 ? chart.tob + ':00' : chart.tob}` : null,
             place_of_birth: chart.place || null,
           }),
         });

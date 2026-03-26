@@ -42,6 +42,14 @@ interface PersonFormData {
   place_of_birth: string;
 }
 
+/** Format time for API: "HH:MM" → "YYYY-MM-DD HH:MM:SS" */
+function formatTimeForApi(time: string | null, dob: string | null): string | null {
+  if (!time) return null;
+  const t = time.length === 5 ? `${time}:00` : time;
+  const date = dob || '2000-01-01';
+  return `${date} ${t}`;
+}
+
 /* ---------- Helpers (updated) ---------- */
 
 function formatDateOfBirth(dateStr: unknown): string | null {
@@ -868,7 +876,7 @@ export default function PersonsPage() {
       apiClient.post<Person>('/api/v1/persons/', {
         name: data.name,
         date_of_birth: data.date_of_birth,
-        time_of_birth: data.time_of_birth || null,
+        time_of_birth: formatTimeForApi(data.time_of_birth, data.date_of_birth),
         place_of_birth: data.place_of_birth || null,
       }),
     onSuccess: () => {
@@ -887,7 +895,7 @@ export default function PersonsPage() {
       apiClient.put<Person>(`/api/v1/persons/${id}`, {
         name: data.name,
         date_of_birth: data.date_of_birth,
-        time_of_birth: data.time_of_birth || null,
+        time_of_birth: formatTimeForApi(data.time_of_birth, data.date_of_birth),
         place_of_birth: data.place_of_birth || null,
       }),
     onSuccess: () => {

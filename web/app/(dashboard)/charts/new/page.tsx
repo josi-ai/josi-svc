@@ -102,6 +102,14 @@ export default function NewChartPage() {
     setPlaceOfBirth(person.place_of_birth || '');
   }
 
+  /** Format time for API: "HH:MM" → "YYYY-MM-DD HH:MM:SS" using the DOB date */
+  function formatTimeForApi(time: string, dob: string): string | null {
+    if (!time) return null;
+    const t = time.length === 5 ? `${time}:00` : time; // "12:12" → "12:12:00"
+    const date = dob || '2000-01-01'; // fallback date if no DOB
+    return `${date} ${t}`;
+  }
+
   function clearForm() {
     setName('');
     setDateOfBirth('');
@@ -146,7 +154,7 @@ export default function NewChartPage() {
         await apiClient.put(`/api/v1/persons/${selectedProfileId}`, {
           name: name || selectedPerson?.name,
           date_of_birth: dateOfBirth,
-          time_of_birth: timeOfBirth || null,
+          time_of_birth: formatTimeForApi(timeOfBirth, dateOfBirth),
           place_of_birth: placeOfBirth || null,
         });
         personId = selectedProfileId;
@@ -155,7 +163,7 @@ export default function NewChartPage() {
         const personRes = await apiClient.post<{ person_id: string }>('/api/v1/persons/', {
           name: name || 'Unnamed',
           date_of_birth: dateOfBirth,
-          time_of_birth: timeOfBirth || null,
+          time_of_birth: formatTimeForApi(timeOfBirth, dateOfBirth),
           place_of_birth: placeOfBirth || null,
         });
         personId = personRes.data.person_id;
