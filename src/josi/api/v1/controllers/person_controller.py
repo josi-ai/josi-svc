@@ -220,7 +220,7 @@ async def update_person(
         }
     """
     try:
-        person = await person_service.update(person_id, payload)
+        person = await person_service.update_person(person_id, payload)
         return ResponseModel(
             success=True,
             message="Person updated successfully",
