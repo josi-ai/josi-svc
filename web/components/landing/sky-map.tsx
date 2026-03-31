@@ -150,7 +150,7 @@ export default function SkyMap() {
 
       const edgeThreshold = 0.75; // only pan when cursor is in outer 25%
       // Edge panning overrides auto-pan; auto-pan is just the idle state
-      const autoPanSpeed = 0.0004;
+      const autoPanSpeed = 0.00055;
       const edgeActive = Math.abs(normX) > edgeThreshold || Math.abs(normY) > edgeThreshold;
 
       let targetDeltaRA = edgeActive ? 0 : autoPanSpeed;

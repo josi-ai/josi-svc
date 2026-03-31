@@ -226,12 +226,12 @@ export default function CosmicCanvas({ preset = 'cosmic' }: { preset?: string })
 
     /* ═══ Aurora Orbs ═══ */
     const orbs: AuroraOrb[] = [
-      { x: 0.4, y: 0.3, radius: 0.4, r: 200, g: 145, b: 58, alpha: 0.18, driftX: 50, driftY: -30, speed: 0.0003, phase: 0 },
-      { x: 0.15, y: 0.5, radius: 0.35, r: 20, g: 50, b: 140, alpha: 0.14, driftX: -40, driftY: 35, speed: 0.00025, phase: 1 },
-      { x: 0.75, y: 0.35, radius: 0.3, r: 90, g: 40, b: 150, alpha: 0.11, driftX: 30, driftY: 30, speed: 0.00035, phase: 2 },
-      { x: 0.25, y: 0.75, radius: 0.3, r: 20, g: 130, b: 110, alpha: 0.10, driftX: -25, driftY: -25, speed: 0.0004, phase: 3 },
-      { x: 0.7, y: 0.7, radius: 0.28, r: 210, g: 160, b: 50, alpha: 0.14, driftX: 35, driftY: 25, speed: 0.00028, phase: 4 },
-      { x: 0.5, y: 0.8, radius: 0.4, r: 30, g: 20, b: 100, alpha: 0.12, driftX: -20, driftY: -35, speed: 0.00032, phase: 5 },
+      { x: 0.4, y: 0.3, radius: 0.4, r: 200, g: 145, b: 58, alpha: 0.18, driftX: 50, driftY: -30, speed: 0.0004, phase: 0 },
+      { x: 0.15, y: 0.5, radius: 0.35, r: 20, g: 50, b: 140, alpha: 0.14, driftX: -40, driftY: 35, speed: 0.00033, phase: 1 },
+      { x: 0.75, y: 0.35, radius: 0.3, r: 90, g: 40, b: 150, alpha: 0.11, driftX: 30, driftY: 30, speed: 0.00045, phase: 2 },
+      { x: 0.25, y: 0.75, radius: 0.3, r: 20, g: 130, b: 110, alpha: 0.10, driftX: -25, driftY: -25, speed: 0.00052, phase: 3 },
+      { x: 0.7, y: 0.7, radius: 0.28, r: 210, g: 160, b: 50, alpha: 0.14, driftX: 35, driftY: 25, speed: 0.00036, phase: 4 },
+      { x: 0.5, y: 0.8, radius: 0.4, r: 30, g: 20, b: 100, alpha: 0.12, driftX: -20, driftY: -35, speed: 0.00042, phase: 5 },
     ];
 
     /* ═══ Particles ═══ */
