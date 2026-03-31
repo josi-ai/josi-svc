@@ -254,5 +254,10 @@ web/node_modules/
 web/.next/
 web/out/
 web/.env.local
+web/tsconfig.tsbuildinfo
 node_modules
 .playwright-mcp/
+
+# Dev artifacts
+.web-dev.pid
+*.png
