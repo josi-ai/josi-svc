@@ -114,6 +114,7 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
 
   return (
     <aside
+      suppressHydrationWarning
       style={{
         background: 'var(--sb-bg)',
         display: 'flex',

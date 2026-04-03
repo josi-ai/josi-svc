@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import SQLModel
 
-from josi.core.database import get_db
+from josi.db.async_db import get_async_db as get_db
 from josi.core.config import settings
 from josi.services.ai.interpretation_service import (
     AIInterpretationService, 

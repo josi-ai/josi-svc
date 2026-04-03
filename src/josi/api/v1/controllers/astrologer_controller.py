@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 
-from josi.core.database import get_db
+from josi.db.async_db import get_async_db as get_db
 from josi.auth.middleware import resolve_current_user
 from josi.auth.schemas import CurrentUser
 from josi.models.astrologer_model import (

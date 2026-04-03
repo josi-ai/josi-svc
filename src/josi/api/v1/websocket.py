@@ -7,7 +7,7 @@ from typing import Optional
 import json
 from datetime import datetime
 
-from josi.core.database import get_db
+from josi.db.async_db import get_async_db as get_db
 from josi.services.realtime_service import (
     realtime_manager,
     verify_websocket_token,

@@ -12,7 +12,7 @@ from josi.services.astrology_service import AstrologyCalculator
 from josi.services.realtime_service import realtime_manager
 from josi.models.chart_model import AstrologyChart
 from josi.models.user_model import User
-from josi.core.database import get_async_session
+from josi.db.async_db import get_async_db as get_async_session
 import structlog
 
 logger = structlog.get_logger(__name__)

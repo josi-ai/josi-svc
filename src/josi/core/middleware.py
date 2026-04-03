@@ -204,9 +204,25 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
 def setup_middleware(app: FastAPI) -> None:
     """Configure all middleware for the FastAPI app"""
     
-    # CORS Configuration (must be first)
+    # Middleware stack: last added = outermost = first executed.
+    # CORS must be outermost so error responses still get CORS headers.
+
+    # Inner middleware (added first = innermost = last executed)
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=getattr(settings, 'ALLOWED_HOSTS', ["*"])
+    )
+    app.add_middleware(
+        GZipMiddleware,
+        minimum_size=getattr(settings, 'GZIP_MINIMUM_SIZE', 1000)
+    )
+    app.add_middleware(ErrorHandlingMiddleware)
+    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    # CORS Configuration (added last = outermost = first executed)
     # When allow_credentials=True, origins cannot be ["*"] per CORS spec.
-    # Use allow_origin_regex for dev, or explicit origins for prod.
     cors_origins = settings.cors_origins
     use_wildcard = cors_origins == ["*"]
     app.add_middleware(
@@ -214,28 +230,10 @@ def setup_middleware(app: FastAPI) -> None:
         allow_origins=[] if use_wildcard else cors_origins,
         allow_origin_regex=r"https?://localhost(:\d+)?" if use_wildcard else None,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["*"],
         expose_headers=["X-Correlation-ID", "X-Process-Time", "X-Request-ID"]
     )
-    
-    # Trusted Host Middleware (second)
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=getattr(settings, 'ALLOWED_HOSTS', ["*"])
-    )
-    
-    # Compression (third)
-    app.add_middleware(
-        GZipMiddleware,
-        minimum_size=getattr(settings, 'GZIP_MINIMUM_SIZE', 1000)
-    )
-    
-    # Custom middleware (in order of execution)
-    app.add_middleware(ErrorHandlingMiddleware)
-    app.add_middleware(LoggingMiddleware)
-    app.add_middleware(RateLimitMiddleware)
-    app.add_middleware(SecurityHeadersMiddleware)
     
     logger.info("Middleware configuration completed", 
                 cors_origins=getattr(settings, 'ALLOWED_ORIGINS', ["*"]),

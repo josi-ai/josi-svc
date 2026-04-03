@@ -7,7 +7,7 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
 
-from josi.core.database import get_db
+from josi.db.async_db import get_async_db as get_db
 from josi.services.vedic.muhurta_service import MuhurtaCalculator
 from josi.api.response import ResponseModel
 import structlog
