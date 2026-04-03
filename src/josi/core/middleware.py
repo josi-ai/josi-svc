@@ -205,9 +205,14 @@ def setup_middleware(app: FastAPI) -> None:
     """Configure all middleware for the FastAPI app"""
     
     # CORS Configuration (must be first)
+    # When allow_credentials=True, origins cannot be ["*"] per CORS spec.
+    # Use allow_origin_regex for dev, or explicit origins for prod.
+    cors_origins = settings.cors_origins
+    use_wildcard = cors_origins == ["*"]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=[] if use_wildcard else cors_origins,
+        allow_origin_regex=r"https?://localhost(:\d+)?" if use_wildcard else None,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],

@@ -13,6 +13,13 @@ interface Transit {
   natal_planet: string
   intensity?: number | string
   description?: string
+  // API field names (mapped below)
+  planet?: string
+  aspect?: string
+  natal_sign?: string
+  current_sign?: string
+  effects?: string
+  orb?: number
 }
 
 /* ---------- Component ---------- */
@@ -33,7 +40,19 @@ export default function WesternTransit({ onRemove }: { onRemove: () => void }) {
     enabled: !!defaultProfile?.person_id,
   })
 
-  const transits = transitsResponse?.data || []
+  const rawData = transitsResponse?.data;
+  const rawTransits: Transit[] = Array.isArray(rawData)
+    ? rawData
+    : (rawData as any)?.major_transits || [];
+  // Normalize API fields to widget fields
+  const transits = rawTransits.map((t) => ({
+    ...t,
+    transiting_planet: t.transiting_planet || t.planet || 'Unknown',
+    aspect_type: t.aspect_type || t.aspect || '',
+    natal_planet: t.natal_planet || `natal ${t.natal_sign || ''}`.trim(),
+    intensity: t.intensity ?? t.orb,
+    description: t.description || t.effects || '',
+  }));
   const isLoading = profileLoading || transitsLoading
 
   /* ---------- No profile state ---------- */

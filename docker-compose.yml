@@ -66,6 +66,7 @@ services:
       AUTO_DB_MIGRATION: "True"
       EPHEMERIS_PATH: /usr/share/swisseph
       REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+asyncpg://josi:josi@db:5432/josi
     volumes:
       - ./src:/app/src
       - ./alembic.ini:/app/alembic.ini
