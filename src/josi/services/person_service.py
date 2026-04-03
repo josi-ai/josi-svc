@@ -80,22 +80,35 @@ class PersonService:
     
     async def update_person(self, person_id: UUID, update_data: dict) -> Optional[Person]:
         """Update person details."""
-        # Re-geocode if location changed
-        if any(key in update_data for key in ['place_of_birth_city', 'place_of_birth_state', 'place_of_birth_country']):
+        # Re-geocode if any location field changed
+        location_changed = any(
+            key in update_data
+            for key in ['place_of_birth', 'place_of_birth_city', 'place_of_birth_state', 'place_of_birth_country']
+        )
+        if location_changed:
             person = await self.person_repo.get(person_id)
             if person:
-                city = update_data.get('place_of_birth_city', person.place_of_birth_city)
-                state = update_data.get('place_of_birth_state', person.place_of_birth_state)
-                country = update_data.get('place_of_birth_country', person.place_of_birth_country)
-                
-                lat, lon, tz = self.geocoding_service.get_coordinates_and_timezone(city, state, country)
-                
-                update_data.update({
-                    'latitude': lat,
-                    'longitude': lon,
-                    'timezone': tz
-                })
-        
+                # If the combined place_of_birth string was sent, parse it
+                if 'place_of_birth' in update_data and update_data['place_of_birth']:
+                    parts = update_data['place_of_birth'].split(',')
+                    city = parts[0].strip() if len(parts) > 0 else ""
+                    state = parts[1].strip() if len(parts) > 1 else ""
+                    country = parts[2].strip() if len(parts) > 2 else ""
+                else:
+                    city = update_data.get('place_of_birth_city', getattr(person, 'place_of_birth_city', ''))
+                    state = update_data.get('place_of_birth_state', getattr(person, 'place_of_birth_state', ''))
+                    country = update_data.get('place_of_birth_country', getattr(person, 'place_of_birth_country', ''))
+
+                try:
+                    lat, lon, tz = self.geocoding_service.get_coordinates_and_timezone(city, state, country)
+                    update_data.update({
+                        'latitude': lat,
+                        'longitude': lon,
+                        'timezone': tz,
+                    })
+                except ValueError:
+                    pass  # Geocoding failed — keep existing coordinates
+
         return await self.person_repo.update(person_id, update_data)
     
     async def delete_person(self, person_id: UUID) -> bool:

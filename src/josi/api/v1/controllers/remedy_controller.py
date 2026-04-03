@@ -1,8 +1,10 @@
 """
 Remedy (Pariharam) recommendation API controller.
 """
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
 from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel
@@ -10,10 +12,16 @@ from pydantic import BaseModel
 from josi.core.database import get_db
 from josi.auth.middleware import resolve_current_user
 from josi.auth.schemas import CurrentUser
+from josi.db.async_db import get_async_session
 from josi.models.remedy_model import (
     RemedyCreate, RemedyUpdate, RemedyResponse,
     RecommendationRequest, RecommendationResponse,
     ProgressUpdate, ProgressResponse,
+)
+from josi.models.remedy_progress_model import (
+    RemedyProgress,
+    RemedyProgressCreate,
+    RemedyProgressResponse,
 )
 from josi.enums.remedy_type_enum import RemedyTypeEnum as RemedyType
 from josi.enums.tradition_enum import TraditionEnum as Tradition
@@ -516,3 +524,151 @@ async def get_remedy_categories(
         message="Remedy categories retrieved successfully",
         data=categories
     )
+
+
+# ---------------------------------------------------------------------------
+# Remedy Progress Tracking (T34)
+# ---------------------------------------------------------------------------
+
+
+@router.post("/track", response_model=ResponseModel)
+async def track_remedy_progress(
+    body: RemedyProgressCreate,
+    current_user: CurrentUser = Depends(resolve_current_user),
+) -> ResponseModel:
+    """
+    Create or update remedy progress for a person.
+
+    If a record with the same person_id + remedy_type + remedy_name already
+    exists, it will be updated. Otherwise a new record is created.
+
+    Body:
+        - person_id: UUID of the person
+        - remedy_type: "mantra", "gemstone", "donation", "ritual", "temple_visit", etc.
+        - remedy_name: Name/description of the specific remedy
+        - status: "not_started" | "in_progress" | "completed" | "skipped"
+        - notes: Optional free-text notes
+    """
+    VALID_STATUSES = {"not_started", "in_progress", "completed", "skipped"}
+    if body.status not in VALID_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status '{body.status}'. Must be one of: {', '.join(sorted(VALID_STATUSES))}",
+        )
+
+    try:
+        async with get_async_session() as session:
+            # Check for existing record
+            result = await session.execute(
+                select(RemedyProgress).where(
+                    and_(
+                        RemedyProgress.person_id == body.person_id,
+                        RemedyProgress.remedy_type == body.remedy_type,
+                        RemedyProgress.remedy_name == body.remedy_name,
+                        RemedyProgress.is_deleted == False,
+                    )
+                )
+            )
+            existing = result.scalar_one_or_none()
+
+            now = datetime.utcnow()
+
+            if existing:
+                # Update existing record
+                existing.status = body.status
+                if body.notes is not None:
+                    existing.notes = body.notes
+                if body.status == "in_progress" and existing.started_at is None:
+                    existing.started_at = now
+                if body.status == "completed":
+                    existing.completed_at = now
+                existing.updated_at = now
+                await session.flush()
+                await session.refresh(existing)
+                progress = existing
+                message = "Remedy progress updated"
+            else:
+                # Create new record
+                progress = RemedyProgress(
+                    person_id=body.person_id,
+                    remedy_type=body.remedy_type,
+                    remedy_name=body.remedy_name,
+                    status=body.status,
+                    notes=body.notes,
+                    user_id=current_user.user_id,
+                    started_at=now if body.status == "in_progress" else None,
+                    completed_at=now if body.status == "completed" else None,
+                )
+                session.add(progress)
+                await session.flush()
+                await session.refresh(progress)
+                message = "Remedy progress created"
+
+        logger.info(
+            "remedy_progress_tracked",
+            user_id=str(current_user.user_id),
+            person_id=str(body.person_id),
+            remedy_type=body.remedy_type,
+            status=body.status,
+        )
+
+        return ResponseModel(
+            success=True,
+            message=message,
+            data=RemedyProgressResponse.model_validate(progress).model_dump(mode="json"),
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to track remedy progress", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to track remedy progress")
+
+
+@router.get("/progress/{person_id}", response_model=ResponseModel)
+async def get_remedy_progress(
+    person_id: UUID = Path(..., description="Person ID"),
+    current_user: CurrentUser = Depends(resolve_current_user),
+) -> ResponseModel:
+    """
+    Get all remedy progress records for a person.
+
+    Returns a list of remedy progress entries including status, timestamps,
+    and notes. Sorted by most recently updated first.
+    """
+    try:
+        async with get_async_session() as session:
+            result = await session.execute(
+                select(RemedyProgress)
+                .where(
+                    and_(
+                        RemedyProgress.person_id == person_id,
+                        RemedyProgress.is_deleted == False,
+                    )
+                )
+                .order_by(RemedyProgress.updated_at.desc())
+            )
+            records = result.scalars().all()
+
+        progress_list = [
+            RemedyProgressResponse.model_validate(r).model_dump(mode="json")
+            for r in records
+        ]
+
+        return ResponseModel(
+            success=True,
+            message=f"Found {len(progress_list)} remedy progress records",
+            data={
+                "progress": progress_list,
+                "total": len(progress_list),
+                "person_id": str(person_id),
+            },
+        )
+
+    except Exception as e:
+        logger.error(
+            "Failed to get remedy progress",
+            error=str(e),
+            person_id=str(person_id),
+        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve remedy progress")

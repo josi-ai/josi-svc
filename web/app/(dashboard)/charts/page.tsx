@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, Suspense } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +15,12 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
+  Trash2,
   X,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 /* ---------- Types ---------- */
 
@@ -760,9 +762,11 @@ function NoFilterResults({ filter }: { filter: string }) {
 function ChartGridCard({
   chart,
   personName,
+  onDelete,
 }: {
   chart: ChartItem;
   personName?: string;
+  onDelete?: (chartId: string) => void;
 }) {
   const tradition = getTradition(chart);
   const chartName = getChartName(chart);
@@ -784,6 +788,34 @@ function ChartGridCard({
           overflow: 'hidden',
         }}
       >
+        {/* Delete button */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete(chart.chart_id);
+            }}
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              borderRadius: 6,
+              color: 'var(--text-faint)',
+              transition: 'color 0.15s, background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#E5484D'; e.currentTarget.style.background = 'rgba(229,72,77,0.08)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-faint)'; e.currentTarget.style.background = 'transparent'; }}
+            title="Delete chart"
+          >
+            <Trash2 style={{ width: 14, height: 14 }} />
+          </button>
+        )}
+
         <div style={{ display: 'flex', gap: 16 }}>
           {/* Mini chart visualization */}
           <MiniChart chart={chart} />
@@ -913,9 +945,11 @@ function SortableHeader({
 function ChartListView({
   charts,
   personMap,
+  onDelete,
 }: {
   charts: ChartItem[];
   personMap: Record<string, string>;
+  onDelete?: (chartId: string) => void;
 }) {
   const [sortCol, setSortCol] = useState<SortColumn>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -1081,22 +1115,50 @@ function ChartListView({
                     {chart.calculated_at ? formatDate(chart.calculated_at) : '-'}
                   </td>
                   <td style={{ padding: '14px 20px', textAlign: 'center' }}>
-                    <Link
-                      href={`/charts/${chart.chart_id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: 'var(--gold)',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      <Eye style={{ width: 13, height: 13 }} />
-                      View
-                    </Link>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+                      <Link
+                        href={`/charts/${chart.chart_id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: 'var(--gold)',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <Eye style={{ width: 13, height: 13 }} />
+                        View
+                      </Link>
+                      {onDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(chart.chart_id);
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: 'var(--text-faint)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            transition: 'color 0.15s',
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = '#E5484D'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-faint)'; }}
+                        >
+                          <Trash2 style={{ width: 13, height: 13 }} />
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -1114,10 +1176,28 @@ function ChartsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const personIdParam = searchParams.get('person_id');
+  const queryClient = useQueryClient();
 
   const [filter, setFilter] = useState<TraditionFilter>('All');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showAll, setShowAll] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (chartId: string) => apiClient.delete(`/api/v1/charts/${chartId}`),
+    onSuccess: () => {
+      setDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ['charts'] });
+    },
+  });
+
+  const handleDeleteChart = (chartId: string) => {
+    setDeleteTarget(chartId);
+  };
+
+  const confirmDelete = () => {
+    if (deleteTarget) deleteMutation.mutate(deleteTarget);
+  };
 
   // Fetch user's default profile
   const { data: defaultProfileResponse } = useQuery({
@@ -1516,12 +1596,24 @@ function ChartsPageContent() {
               key={chart.chart_id}
               chart={chart}
               personName={personMap[chart.person_id]}
+              onDelete={handleDeleteChart}
             />
           ))}
         </div>
       ) : (
-        <ChartListView charts={filteredCharts} personMap={personMap} />
+        <ChartListView charts={filteredCharts} personMap={personMap} onDelete={handleDeleteChart} />
       )}
+
+      {/* Delete confirmation modal */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete this chart?"
+        description="This chart and its interpretations will be removed. You can always recalculate it later."
+        confirmLabel="Delete Chart"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }

@@ -39,6 +39,9 @@ class User(SQLModel, table=True):
     preferences: Dict = Field(default_factory=dict, sa_column=Column(JSON))
     notification_settings: Dict = Field(default_factory=dict, sa_column=Column(JSON))
 
+    # Demographics
+    ethnicity: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+
     # Authorization (owned by us, not Clerk)
     roles: List[str] = Field(default=["user"], sa_column=Column(JSON))
 
@@ -123,6 +126,7 @@ class UserUpdate(SQLModel):
     birth_location: Optional[Dict] = None
     preferences: Optional[Dict] = None
     notification_settings: Optional[Dict] = None
+    ethnicity: Optional[List[str]] = None
 
 
 class UserResponse(SQLModel):
@@ -132,6 +136,7 @@ class UserResponse(SQLModel):
     full_name: str
     phone: Optional[str]
     avatar_url: Optional[str]
+    ethnicity: Optional[List[str]] = None
     subscription_tier_id: Optional[int]
     subscription_tier_name: Optional[str]
     subscription_end_date: Optional[datetime]

@@ -1,8 +1,57 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+import { useDefaultProfile } from '@/hooks/use-default-profile'
 import { WidgetCard } from './widget-card'
 
+/* ---------- Types ---------- */
+
+interface Transit {
+  transiting_planet: string
+  aspect_type: string
+  natal_planet: string
+  intensity?: number | string
+  description?: string
+}
+
+/* ---------- Component ---------- */
+
 export default function WesternTransit({ onRemove }: { onRemove: () => void }) {
+  const { defaultProfile, isLoading: profileLoading } = useDefaultProfile()
+
+  const {
+    data: transitsResponse,
+    isLoading: transitsLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['transits', 'current', defaultProfile?.person_id],
+    queryFn: () =>
+      apiClient.get<Transit[]>(
+        `/api/v1/transits/current/${defaultProfile!.person_id}`
+      ),
+    enabled: !!defaultProfile?.person_id,
+  })
+
+  const transits = transitsResponse?.data || []
+  const isLoading = profileLoading || transitsLoading
+
+  /* ---------- No profile state ---------- */
+  if (!profileLoading && !defaultProfile) {
+    return (
+      <WidgetCard tradition="western" onRemove={onRemove}>
+        <div className="p-5">
+          <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3.5">
+            Western Transit Alert
+          </div>
+          <div className="text-xs text-[var(--text-muted)] leading-relaxed">
+            Create a profile to see transits
+          </div>
+        </div>
+      </WidgetCard>
+    )
+  }
+
   return (
     <WidgetCard tradition="western" onRemove={onRemove}>
       <div className="p-5">
@@ -12,32 +61,47 @@ export default function WesternTransit({ onRemove }: { onRemove: () => void }) {
 
         <div className="flex gap-4 items-start">
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col gap-3">
-              {/* Transit 1 */}
-              <div>
-                <div className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">
-                  Mercury enters Aries in 3 days
-                </div>
-                <div className="text-xs text-[var(--text-body)] leading-relaxed">
-                  Communication becomes more direct and assertive. Good for bold
-                  conversations.
-                </div>
+            {isLoading ? (
+              <div className="flex flex-col gap-3">
+                <div className="h-4 w-3/4 rounded bg-[var(--surface)] animate-pulse" />
+                <div className="h-3 w-full rounded bg-[var(--surface)] animate-pulse" />
+                <div className="h-3 w-2/3 rounded bg-[var(--surface)] animate-pulse" />
               </div>
-
-              {/* Divider + Transit 2 */}
-              <div
-                className="border-t pt-3"
-                style={{ borderColor: 'var(--border-divider)' }}
-              >
-                <div className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">
-                  Venus conjunct your natal Mars
-                </div>
-                <div className="text-xs text-[var(--text-body)] leading-relaxed">
-                  Passionate energy this week. Creative and romantic impulses are
-                  heightened.
-                </div>
+            ) : isError ? (
+              <div className="text-xs text-[var(--text-muted)] leading-relaxed">
+                Unable to load transits right now
               </div>
-            </div>
+            ) : transits.length === 0 ? (
+              <div className="text-xs text-[var(--text-muted)] leading-relaxed">
+                No significant transits active
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {transits.slice(0, 3).map((t, i) => (
+                  <div
+                    key={`${t.transiting_planet}-${t.natal_planet}-${i}`}
+                    className={i > 0 ? 'border-t pt-3' : ''}
+                    style={i > 0 ? { borderColor: 'var(--border-divider)' } : undefined}
+                  >
+                    <div className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">
+                      {t.transiting_planet} {t.aspect_type} {t.natal_planet}
+                      {t.intensity != null && (
+                        <span className="ml-2 text-[10px] font-medium text-[var(--text-muted)]">
+                          {typeof t.intensity === 'number'
+                            ? `${Math.round(t.intensity * 100)}%`
+                            : t.intensity}
+                        </span>
+                      )}
+                    </div>
+                    {t.description && (
+                      <div className="text-xs text-[var(--text-body)] leading-relaxed">
+                        {t.description}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Circular chart preview (CSS-only) */}
@@ -83,9 +147,7 @@ export default function WesternTransit({ onRemove }: { onRemove: () => void }) {
                 background: 'var(--green)',
               }}
             />
-            <span
-              className="z-[1] text-[7px] font-semibold uppercase tracking-wider text-[var(--text-faint)]"
-            >
+            <span className="z-[1] text-[7px] font-semibold uppercase tracking-wider text-[var(--text-faint)]">
               Transit
             </span>
           </div>

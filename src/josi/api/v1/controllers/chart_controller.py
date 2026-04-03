@@ -109,12 +109,14 @@ async def calculate_chart(
             ayanamsa=ayanamsa_enum,
             include_interpretations=include_interpretations
         )
-        
+
         return ResponseModel(
             success=True,
             message=f"Successfully calculated {len(charts)} charts",
             data=charts
         )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate charts: {str(e)}")
 

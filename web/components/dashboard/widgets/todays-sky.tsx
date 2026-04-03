@@ -1,70 +1,208 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+import { useDefaultProfile } from '@/hooks/use-default-profile'
 import { WidgetCard } from './widget-card'
 
-export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
+/* ---------- Types ---------- */
+
+interface PanchangDetail {
+  tithi: { name: string; paksha: string; percent: number }
+  nakshatra: { name: string; ruler: string; pada: number; percent: number }
+  yoga: { name: string; quality: string; percent: number }
+  karana: { name: string; quality: string }
+  vara: { day: string; ruler: string }
+  inauspicious_times: {
+    rahu_kaal: string
+    gulika_kaal: string
+    yamaganda: string
+  }
+  sunrise: string
+  sunset: string
+}
+
+interface PanchangResponse {
+  tithi: string
+  nakshatra: string
+  yoga: string
+  karana: string
+  detailed_panchang: PanchangDetail
+}
+
+/* ---------- Skeleton ---------- */
+
+function Skeleton() {
   return (
-    <WidgetCard tradition="vedic" onRemove={onRemove}>
-      <div
-        className="p-7 relative overflow-hidden"
-        style={{ background: 'var(--hero-gradient)', borderRadius: 'inherit' }}
-      >
-        {/* Subtle gold glow */}
+    <div
+      className="p-7 relative overflow-hidden"
+      style={{ background: 'var(--hero-gradient)', borderRadius: 'inherit' }}
+    >
+      <div className="relative space-y-3 animate-pulse">
         <div
-          className="absolute -top-16 -right-10 w-48 h-48 rounded-full"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(200,145,58,0.06) 0%, transparent 70%)',
-          }}
+          className="h-3 w-20 rounded"
+          style={{ background: 'var(--border)' }}
         />
-        {/* Secondary blue glow */}
         <div
-          className="absolute -bottom-10 left-[30%] w-40 h-40 rounded-full"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(106,159,216,0.03) 0%, transparent 60%)',
-          }}
+          className="h-7 w-60 rounded"
+          style={{ background: 'var(--border)' }}
         />
-        <div className="relative">
+        <div
+          className="h-4 w-80 rounded"
+          style={{ background: 'var(--border-subtle)' }}
+        />
+        <div className="flex gap-2 pt-1">
           <div
-            className="text-[10px] uppercase tracking-[2.5px] font-semibold mb-3"
-            style={{ color: 'var(--gold-bright)' }}
-          >
-            Today&apos;s Sky
-          </div>
-          <h2 className="font-display text-[28px] text-[var(--text-primary)] mb-2 leading-tight">
-            Shukla Chaturthi in Rohini
-          </h2>
-          <p className="font-reading text-[15px] leading-relaxed text-[var(--text-body)] mb-5 max-w-xl">
-            The Moon transits through Taurus in Rohini nakshatra. A day of
-            nurturing abundance &mdash; creative and material pursuits are
-            strongly favored.
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            <span
-              className="text-[11px] font-medium px-3 py-1 rounded-full"
-              style={{
-                background: 'var(--gold-bg)',
-                color: 'var(--gold-bright)',
-              }}
-            >
-              Shubh Muhurta
-            </span>
-            <span
-              className="text-[11px] font-medium px-3 py-1 rounded-full"
-              style={{ background: 'var(--blue-bg)', color: 'var(--blue)' }}
-            >
-              Moon in Taurus
-            </span>
-            <span
-              className="text-[11px] font-medium px-3 py-1 rounded-full"
-              style={{ background: 'var(--green-bg)', color: 'var(--green)' }}
-            >
-              Wednesday &middot; Mercury
-            </span>
-          </div>
+            className="h-6 w-24 rounded-full"
+            style={{ background: 'var(--border-subtle)' }}
+          />
+          <div
+            className="h-6 w-28 rounded-full"
+            style={{ background: 'var(--border-subtle)' }}
+          />
+          <div
+            className="h-6 w-32 rounded-full"
+            style={{ background: 'var(--border-subtle)' }}
+          />
         </div>
       </div>
+    </div>
+  )
+}
+
+/* ---------- Component ---------- */
+
+export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
+  const { location, isLoading: profileLoading } = useDefaultProfile()
+
+  const today = new Date().toISOString().split('T')[0] + 'T06:00:00'
+
+  const {
+    data: panchangResponse,
+    isLoading: panchangLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['panchang', today, location.latitude, location.longitude],
+    queryFn: () =>
+      apiClient.get<PanchangResponse>(
+        `/api/v1/panchang/?date=${encodeURIComponent(today)}&latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`
+      ),
+    enabled: !profileLoading,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    retry: 1,
+  })
+
+  const isLoading = profileLoading || panchangLoading
+
+  const panchang = panchangResponse?.data
+  const detail = panchang?.detailed_panchang
+
+  /* ---------- Derived display values ---------- */
+
+  const headline = detail
+    ? `${detail.tithi.paksha} ${detail.tithi.name} in ${detail.nakshatra.name}`
+    : ''
+
+  const description = detail
+    ? `The Moon transits through ${detail.nakshatra.name} nakshatra (ruled by ${detail.nakshatra.ruler}). ${detail.yoga.name} yoga is active — ${detail.yoga.quality || 'a period of cosmic influence'}.`
+    : ''
+
+  const rahuKaal = detail?.inauspicious_times?.rahu_kaal
+
+  return (
+    <WidgetCard tradition="vedic" onRemove={onRemove}>
+      {isLoading ? (
+        <Skeleton />
+      ) : isError || !detail ? (
+        <div
+          className="p-7 relative overflow-hidden"
+          style={{ background: 'var(--hero-gradient)', borderRadius: 'inherit' }}
+        >
+          <div className="relative">
+            <div
+              className="text-[10px] uppercase tracking-[2.5px] font-semibold mb-3"
+              style={{ color: 'var(--gold-bright)' }}
+            >
+              Today&apos;s Sky
+            </div>
+            <p className="text-sm text-[var(--text-muted)]">
+              Unable to load panchang data. Please try again later.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="p-7 relative overflow-hidden"
+          style={{ background: 'var(--hero-gradient)', borderRadius: 'inherit' }}
+        >
+          {/* Subtle gold glow */}
+          <div
+            className="absolute -top-16 -right-10 w-48 h-48 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(200,145,58,0.06) 0%, transparent 70%)',
+            }}
+          />
+          {/* Secondary blue glow */}
+          <div
+            className="absolute -bottom-10 left-[30%] w-40 h-40 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(106,159,216,0.03) 0%, transparent 60%)',
+            }}
+          />
+          <div className="relative">
+            <div
+              className="text-[10px] uppercase tracking-[2.5px] font-semibold mb-3"
+              style={{ color: 'var(--gold-bright)' }}
+            >
+              Today&apos;s Sky
+            </div>
+            <h2 className="font-display text-[28px] text-[var(--text-primary)] mb-2 leading-tight">
+              {headline}
+            </h2>
+            <p className="font-reading text-[15px] leading-relaxed text-[var(--text-body)] mb-5 max-w-xl">
+              {description}
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {detail.yoga.quality && (
+                <span
+                  className="text-[11px] font-medium px-3 py-1 rounded-full"
+                  style={{
+                    background: 'var(--gold-bg)',
+                    color: 'var(--gold-bright)',
+                  }}
+                >
+                  {detail.yoga.name} Yoga
+                </span>
+              )}
+              <span
+                className="text-[11px] font-medium px-3 py-1 rounded-full"
+                style={{ background: 'var(--blue-bg)', color: 'var(--blue)' }}
+              >
+                Karana: {detail.karana.name}
+              </span>
+              <span
+                className="text-[11px] font-medium px-3 py-1 rounded-full"
+                style={{ background: 'var(--green-bg)', color: 'var(--green)' }}
+              >
+                {detail.vara.day} &middot; {detail.vara.ruler}
+              </span>
+              {rahuKaal && (
+                <span
+                  className="text-[11px] font-medium px-3 py-1 rounded-full"
+                  style={{
+                    background: 'var(--red-bg)',
+                    color: 'var(--red)',
+                  }}
+                >
+                  Rahu Kaal: {rahuKaal}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </WidgetCard>
   )
 }

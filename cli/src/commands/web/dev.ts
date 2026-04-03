@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { getProjectRoot } from '../../lib/detect.js';
@@ -46,11 +46,22 @@ export function register(parent: Command): void {
       logger.dim('  API:   http://localhost:1954 (must be running via josi redock up)');
       logger.blank();
 
+      // Kill any existing process on the target port
+      try {
+        const pids = execFileSync('lsof', [`-ti:${opts.port}`], { encoding: 'utf8' }).trim();
+        if (pids) {
+          for (const pid of pids.split('\n')) {
+            try { process.kill(Number(pid), 'SIGKILL'); } catch { /* already dead */ }
+          }
+          logger.dim(`  Killed existing process on port ${opts.port}`);
+        }
+      } catch { /* no process on port — fine */ }
+
       // Start Next.js dev server
       const child = spawn('npx', ['next', 'dev', '-p', opts.port], {
         cwd: webDir,
         stdio: 'inherit',
-        env: { ...process.env },
+        env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' },
       });
 
       child.on('error', (err) => {

@@ -964,7 +964,7 @@ export default function PersonsPage() {
       }
       return {
         name: editingPerson.name,
-        date_of_birth: editingPerson.date_of_birth,
+        date_of_birth: editingPerson.date_of_birth || '',
         time_of_birth: timeValue,
         place_of_birth: editingPerson.place_of_birth || '',
       };

@@ -12,13 +12,28 @@ export type WidgetType =
 export type WidgetSize = 'full' | 'half' | 'third';
 export type TraditionBadge = 'vedic' | 'western' | 'chinese' | 'celtic' | 'ai' | 'general';
 
+export interface WidgetGridDimensions {
+  /** Grid columns the widget spans (out of 3) */
+  w: number;
+  /** Grid rows the widget spans */
+  h: number;
+  /** Minimum width in grid columns */
+  minW?: number;
+  /** Minimum height in grid rows */
+  minH?: number;
+}
+
 export interface WidgetDefinition {
   type: WidgetType;
   label: string;
   description: string;
+  /** Extended description shown in the add-widget modal preview */
+  previewDescription: string;
   icon: string;
   tradition: TraditionBadge;
   defaultSize: WidgetSize;
+  /** Default grid dimensions for react-grid-layout */
+  gridDimensions: WidgetGridDimensions;
   category: string;
 }
 
@@ -42,84 +57,114 @@ export const widgetCatalog: WidgetDefinition[] = [
     type: 'todays-sky',
     label: "Today's Sky",
     description: 'Tithi, nakshatra, yoga for today',
+    previewDescription:
+      'Live Vedic panchang showing today\'s tithi, nakshatra, yoga, karana, and vara. Includes Rahu Kaal and other inauspicious time windows at a glance.',
     icon: '\u2600',
     tradition: 'vedic',
     defaultSize: 'full',
-    category: 'Daily & Timing',
+    gridDimensions: { w: 3, h: 2, minW: 2, minH: 2 },
+    category: 'Vedic',
   },
   {
     type: 'muhurta-timeline',
     label: 'Muhurta Timeline',
     description: 'Auspicious/inauspicious time windows',
+    previewDescription:
+      'Visual timeline of today\'s muhurta periods, color-coded by auspiciousness. See at a glance when to schedule important activities.',
     icon: '\u23F0',
     tradition: 'vedic',
     defaultSize: 'half',
-    category: 'Daily & Timing',
+    gridDimensions: { w: 2, h: 2, minW: 1, minH: 2 },
+    category: 'Vedic',
   },
   {
     type: 'chart-quick-view',
     label: 'Chart Quick View',
     description: 'Mini birth chart with key placements',
+    previewDescription:
+      'Compact view of your birth chart showing lagna, Moon sign, Sun sign, and key planetary placements. Quick access to your chart details.',
     icon: '\uD83D\uDCCA',
     tradition: 'vedic',
     defaultSize: 'third',
-    category: 'Your Charts',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'Vedic',
   },
   {
     type: 'current-dasha',
     label: 'Current Dasha',
     description: 'Your active planetary period',
+    previewDescription:
+      'Displays your current Vimshottari Dasha period (Maha, Antar, Pratyantar) with start/end dates and the ruling planet\'s significations.',
     icon: '\uD83D\uDCC8',
     tradition: 'vedic',
     defaultSize: 'third',
-    category: 'Your Charts',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'Vedic',
   },
   {
     type: 'ai-chat-access',
     label: 'AI Chat',
     description: 'Ask Josi AI anything',
+    previewDescription:
+      'Quick access to Josi AI for personalized astrological guidance. Ask about your chart, current transits, compatibility, or any astrology question.',
     icon: '\uD83E\uDD16',
     tradition: 'ai',
     defaultSize: 'third',
-    category: 'AI & Insights',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'General',
   },
   {
     type: 'latest-reading',
     label: 'Latest Reading',
     description: 'Most recent AI-generated insight',
+    previewDescription:
+      'Shows your most recent AI-generated reading with a summary and link to the full interpretation. Keeps your latest insights front and center.',
     icon: '\uD83D\uDCD6',
     tradition: 'vedic',
     defaultSize: 'third',
-    category: 'AI & Insights',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'General',
   },
   {
     type: 'bazi-summary',
     label: 'BaZi Summary',
     description: 'Chinese Four Pillars overview',
+    previewDescription:
+      'Overview of your BaZi (Four Pillars of Destiny) chart showing Year, Month, Day, and Hour pillars with their Heavenly Stems and Earthly Branches.',
     icon: '\uD83C\uDFEE',
     tradition: 'chinese',
     defaultSize: 'third',
-    category: 'Multi-Tradition',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'Chinese',
   },
   {
     type: 'western-transit',
     label: 'Western Transit',
     description: 'Current Western transits',
+    previewDescription:
+      'Real-time Western tropical transits showing major planetary aspects to your natal chart. Highlights significant transits happening now.',
     icon: '\u2B50',
     tradition: 'western',
     defaultSize: 'half',
-    category: 'Multi-Tradition',
+    gridDimensions: { w: 2, h: 2, minW: 1, minH: 2 },
+    category: 'Western',
   },
   {
     type: 'available-astrologers',
     label: 'Available Astrologers',
     description: "Who's online now",
+    previewDescription:
+      'See which professional astrologers are currently available for consultations. Browse by tradition, rating, and specialty.',
     icon: '\uD83D\uDC64',
     tradition: 'general',
     defaultSize: 'third',
-    category: 'Connect',
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    category: 'General',
   },
 ];
+
+/** Ordered category labels for the add-widget modal */
+export const WIDGET_CATEGORIES = ['Vedic', 'Western', 'Chinese', 'General'] as const;
 
 export const defaultWidgets: WidgetInstance[] = [
   { id: 'w1', type: 'todays-sky', size: 'full' },
@@ -132,3 +177,36 @@ export const defaultWidgets: WidgetInstance[] = [
   { id: 'w8', type: 'latest-reading', size: 'third' },
   { id: 'w9', type: 'available-astrologers', size: 'third' },
 ];
+
+/**
+ * Build a react-grid-layout Layout array from a list of widget instances.
+ * Widgets are placed left-to-right, wrapping at `cols` columns.
+ */
+export function buildLayoutFromWidgets(
+  widgets: WidgetInstance[],
+  cols: number,
+): Array<{ i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number }> {
+  let x = 0;
+  let y = 0;
+  return widgets.map((widget) => {
+    const def = widgetCatalog.find((w) => w.type === widget.type);
+    const dim = def?.gridDimensions ?? { w: 1, h: 2 };
+    // Scale width to the number of columns available
+    const w = Math.min(Math.round((dim.w / 3) * cols), cols);
+    const minW = dim.minW ? Math.min(Math.round((dim.minW / 3) * cols), cols) : undefined;
+    const minH = dim.minH;
+
+    if (x + w > cols) {
+      x = 0;
+      y += 2; // default row height
+    }
+
+    const item = { i: widget.id, x, y, w, h: dim.h, minW, minH };
+    x += w;
+    if (x >= cols) {
+      x = 0;
+      y += dim.h;
+    }
+    return item;
+  });
+}

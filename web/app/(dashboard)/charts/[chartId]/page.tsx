@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Sun, Moon, Star, RotateCcw, ChevronDown, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Star, RotateCcw, ChevronDown, Sparkles, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { SouthIndianChart, NorthIndianChart, WesternWheelChart } from '@/components/charts/chart-visualizations';
 
 /* ================================================================
    Types
@@ -122,45 +124,6 @@ const PLANET_ORDER = [
   'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu',
 ];
 
-const PLANET_ABBREV: Record<string, string> = {
-  Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me',
-  Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke',
-};
-
-const SIGN_ABBREV: Record<string, string> = {
-  Aries: 'Ar', Taurus: 'Ta', Gemini: 'Ge', Cancer: 'Ca',
-  Leo: 'Le', Virgo: 'Vi', Libra: 'Li', Scorpio: 'Sc',
-  Sagittarius: 'Sg', Capricorn: 'Cp', Aquarius: 'Aq', Pisces: 'Pi',
-};
-
-// South Indian chart: signs in cell order (row-major, skipping center 2x2)
-// Row 0: Pi, Ar, Ta, Ge
-// Row 1: Aq, [center], [center], Ca
-// Row 2: Cp, [center], [center], Le
-// Row 3: Sg, Sc, Li, Vi
-const SI_CELL_SIGNS = [
-  'Pisces', 'Aries', 'Taurus', 'Gemini',
-  'Aquarius', /* center */ /* center */ 'Cancer',
-  'Capricorn', /* center */ /* center */ 'Leo',
-  'Sagittarius', 'Scorpio', 'Libra', 'Virgo',
-];
-
-// Cell index in the 4x4 grid for each sign (row * 4 + col), center cells excluded
-const SI_CELL_POSITIONS: { sign: string; row: number; col: number }[] = [
-  { sign: 'Pisces', row: 0, col: 0 },
-  { sign: 'Aries', row: 0, col: 1 },
-  { sign: 'Taurus', row: 0, col: 2 },
-  { sign: 'Gemini', row: 0, col: 3 },
-  { sign: 'Cancer', row: 1, col: 3 },
-  { sign: 'Leo', row: 2, col: 3 },
-  { sign: 'Virgo', row: 3, col: 3 },
-  { sign: 'Libra', row: 3, col: 2 },
-  { sign: 'Scorpio', row: 3, col: 1 },
-  { sign: 'Sagittarius', row: 3, col: 0 },
-  { sign: 'Capricorn', row: 2, col: 0 },
-  { sign: 'Aquarius', row: 1, col: 0 },
-];
-
 const TRADITION_STYLES: Record<string, { label: string; variant: 'default' | 'blue' | 'green' | 'outline'; color: string }> = {
   vedic: { label: 'Vedic', variant: 'default', color: 'var(--gold)' },
   western: { label: 'Western', variant: 'blue', color: 'var(--blue)' },
@@ -215,17 +178,6 @@ function getPlanets(chart: Chart): Record<string, PlanetData> {
   return chart.chart_data?.planets || chart.planet_positions || {};
 }
 
-function getPlanetsBySign(planets: Record<string, PlanetData>): Record<string, string[]> {
-  const map: Record<string, string[]> = {};
-  for (const [name, data] of Object.entries(planets)) {
-    const sign = data.sign;
-    if (!sign) continue;
-    if (!map[sign]) map[sign] = [];
-    map[sign].push(PLANET_ABBREV[name] || name.substring(0, 2));
-  }
-  return map;
-}
-
 /* ================================================================
    Sub-components
    ================================================================ */
@@ -267,8 +219,8 @@ function ErrorState({ message }: { message: string }) {
   );
 }
 
-/* --- Dropdown (visual only) --- */
-function Dropdown({ value, options }: { value: string; options: readonly string[] }) {
+/* --- Dropdown (functional) --- */
+function Dropdown({ value, options, onChange }: { value: string; options: readonly string[]; onChange?: (val: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ position: 'relative' }}>
@@ -297,6 +249,7 @@ function Dropdown({ value, options }: { value: string; options: readonly string[
           {options.map((opt) => (
             <div
               key={opt}
+              onClick={() => { onChange?.(opt); setOpen(false); }}
               style={{
                 padding: '8px 12px', fontSize: 12, color: opt === value ? 'var(--gold)' : 'var(--text-secondary)',
                 cursor: 'pointer', fontWeight: opt === value ? 600 : 400,
@@ -308,92 +261,6 @@ function Dropdown({ value, options }: { value: string; options: readonly string[
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-/* --- South Indian Chart Grid --- */
-function SouthIndianChart({ planets }: { planets: Record<string, PlanetData> }) {
-  const planetsBySign = getPlanetsBySign(planets);
-
-  // Build a 4x4 grid. Center 2x2 (rows 1-2, cols 1-2) is the label.
-  const cells: React.ReactNode[] = [];
-
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
-      // Center cells
-      if ((row === 1 || row === 2) && (col === 1 || col === 2)) continue;
-
-      const cellInfo = SI_CELL_POSITIONS.find((c) => c.row === row && c.col === col);
-      const signFull = cellInfo?.sign || '';
-      const signAbbr = SIGN_ABBREV[signFull] || '';
-      const cellPlanets = planetsBySign[signFull] || [];
-
-      cells.push(
-        <div
-          key={`${row}-${col}`}
-          style={{
-            gridRow: row + 1,
-            gridColumn: col + 1,
-            border: '0.5px solid var(--border)',
-            padding: 4,
-            fontSize: 10,
-            lineHeight: '1.3',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            overflow: 'hidden',
-          }}
-        >
-          <span style={{ color: 'var(--text-faint)', fontWeight: 500, letterSpacing: 0.3 }}>
-            {signAbbr}
-          </span>
-          {cellPlanets.length > 0 && (
-            <span style={{ color: 'var(--gold)', fontWeight: 600, fontSize: 9, wordBreak: 'break-word' }}>
-              {cellPlanets.join(' ')}
-            </span>
-          )}
-        </div>
-      );
-    }
-  }
-
-  // Center label cell
-  cells.push(
-    <div
-      key="center"
-      style={{
-        gridColumn: '2 / 4',
-        gridRow: '2 / 4',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border: '1px solid var(--border-strong)',
-        fontFamily: "'DM Serif Display', serif",
-        fontSize: 16,
-        color: 'var(--text-muted)',
-        letterSpacing: 1,
-      }}
-    >
-      Rasi
-    </div>
-  );
-
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gridTemplateRows: 'repeat(4, 1fr)',
-        width: 350,
-        height: 350,
-        border: '1.5px solid var(--border-strong)',
-        borderRadius: 4,
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}
-    >
-      {cells}
     </div>
   );
 }
@@ -877,14 +744,87 @@ function HousesTab({ chart }: { chart: Chart }) {
 }
 
 /* --- Aspects Tab --- */
-function AspectsTab() {
+function AspectsTab({ chart }: { chart: Chart }) {
+  const aspects: AspectData[] = chart.aspects || (chart.chart_data as unknown as Record<string, unknown>)?.aspects as AspectData[] || [];
+
+  if (aspects.length === 0) {
+    return (
+      <div style={{ animation: 'fadeIn 0.25s ease-out' }}>
+        <ComingSoonCard
+          icon={<Sparkles style={{ width: 20, height: 20, color: 'var(--green)' }} />}
+          bgColor="var(--green-bg)"
+          message="No aspects data available for this chart"
+        />
+      </div>
+    );
+  }
+
+  const headerStyle: React.CSSProperties = {
+    padding: '10px 16px', fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.8,
+    color: 'var(--text-faint)', fontWeight: 600, textAlign: 'left', borderBottom: '1px solid var(--border)',
+  };
+  const cellStyle: React.CSSProperties = {
+    padding: '10px 16px', fontSize: 13, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)',
+  };
+
   return (
     <div style={{ animation: 'fadeIn 0.25s ease-out' }}>
-      <ComingSoonCard
-        icon={<Sparkles style={{ width: 20, height: 20, color: 'var(--green)' }} />}
-        bgColor="var(--green-bg)"
-        message="Aspects analysis coming soon"
-      />
+      <div style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-card)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={headerStyle}>Planet 1</th>
+                <th style={headerStyle}>Aspect</th>
+                <th style={headerStyle}>Planet 2</th>
+                <th style={headerStyle}>Orb</th>
+                <th style={{ ...headerStyle, textAlign: 'center' }}>Applying / Separating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aspects.map((a, i) => (
+                <tr
+                  key={`${a.planet1}-${a.planet2}-${a.aspect}-${i}`}
+                  style={{ transition: 'background 0.15s' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-card-hover, var(--border))')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <td style={{ ...cellStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{a.planet1}</td>
+                  <td style={cellStyle}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span>{a.aspect}</span>
+                      {a.angle != null && (
+                        <span style={{ fontSize: 10, color: 'var(--text-faint)', fontFamily: 'monospace' }}>
+                          {a.angle}&deg;
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                  <td style={{ ...cellStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{a.planet2}</td>
+                  <td style={{ ...cellStyle, fontFamily: 'monospace', fontSize: 11 }}>
+                    {a.orb != null ? `${a.orb.toFixed(2)}\u00B0` : '\u2014'}
+                  </td>
+                  <td style={{ ...cellStyle, textAlign: 'center' }}>
+                    {a.applying != null ? (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: a.applying ? 'var(--green)' : 'var(--text-faint)',
+                        }}
+                      >
+                        {a.applying ? 'Applying' : 'Separating'}
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-faint)' }}>{'\u2014'}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
@@ -918,7 +858,15 @@ function ComingSoonCard({ icon, bgColor, message }: { icon: React.ReactNode; bgC
 export default function ChartDetailPage() {
   const params = useParams<{ chartId: string }>();
   const chartId = params.chartId;
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
+  const [chartFormat, setChartFormat] = useState<string>('South Indian');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiClient.delete(`/api/v1/charts/${chartId}`),
+    onSuccess: () => router.push('/charts'),
+  });
 
   // Fetch chart
   const {
@@ -1024,10 +972,33 @@ export default function ChartDetailPage() {
             </div>
           </div>
 
-          {/* Dropdowns (UI only) */}
+          {/* Actions */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             <Dropdown value={tradition.label} options={TRADITIONS_LIST} />
-            <Dropdown value="South Indian" options={CHART_FORMATS} />
+            <Dropdown value={chartFormat} options={CHART_FORMATS} onChange={setChartFormat} />
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={deleteMutation.isPending}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '7px 12px',
+                fontSize: 12,
+                fontWeight: 500,
+                color: 'var(--text-faint)',
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                cursor: deleteMutation.isPending ? 'not-allowed' : 'pointer',
+                transition: 'color 0.15s, border-color 0.15s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#E5484D'; e.currentTarget.style.borderColor = 'rgba(229,72,77,0.3)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-faint)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+            >
+              <Trash2 style={{ width: 13, height: 13 }} />
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </button>
           </div>
         </div>
       </div>
@@ -1046,7 +1017,9 @@ export default function ChartDetailPage() {
           background: 'var(--bg-card)',
         }}
       >
-        <SouthIndianChart planets={planets} />
+        {chartFormat === 'South Indian' && <SouthIndianChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
+        {chartFormat === 'North Indian' && <NorthIndianChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
+        {chartFormat === 'Western Wheel' && <WesternWheelChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
         <QuickInfoPanel chart={chart} />
       </div>
 
@@ -1093,7 +1066,18 @@ export default function ChartDetailPage() {
       {activeTab === 'Overview' && <OverviewTab chart={chart} />}
       {activeTab === 'Planets' && <PlanetsTab chart={chart} />}
       {activeTab === 'Houses' && <HousesTab chart={chart} />}
-      {activeTab === 'Aspects' && <AspectsTab />}
+      {activeTab === 'Aspects' && <AspectsTab chart={chart} />}
+
+      {/* Delete confirmation modal */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="Delete this chart?"
+        description="This chart and its interpretations will be removed. You can always recalculate it later."
+        confirmLabel="Delete Chart"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }

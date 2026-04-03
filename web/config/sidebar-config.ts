@@ -10,6 +10,7 @@ import {
   Sparkles,
   Settings,
   MessageSquare,
+  Calendar,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -112,6 +113,13 @@ const items: Record<string, SidebarMenuItem> = {
     counterColorBgVar: '--ct-consultations-bg',
     counterColorTextVar: '--ct-consultations-text',
   },
+  events: {
+    key: 'events',
+    label: 'Cultural Events',
+    path: '/events',
+    icon: Calendar,
+    iconColorVar: '--ic-panchang',
+  },
   settings: {
     key: 'settings',
     label: 'Settings',
@@ -130,7 +138,7 @@ export const sidebarGroups: SidebarGroup[] = [
   },
   {
     label: 'Explore',
-    items: [items.compatibility, items.transits, items.panchang, items.dasha, items.muhurta],
+    items: [items.compatibility, items.transits, items.panchang, items.dasha, items.muhurta, items.events],
   },
   {
     label: 'Connect',

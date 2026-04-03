@@ -1,5 +1,5 @@
 """User service — business logic for user management and auth resolution."""
-from typing import Optional
+from typing import Any, Dict, Optional
 from datetime import datetime
 from uuid import UUID
 
@@ -12,6 +12,28 @@ from josi.repositories.user_repository import UserRepository
 from josi.services.session_cache_service import invalidate_user
 
 logger = structlog.get_logger()
+
+
+def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively merge *override* into *base*.
+
+    - Dict values are merged recursively.
+    - All other values in *override* replace those in *base*.
+    - Keys present only in *base* are preserved.
+
+    Returns a **new** dict (does not mutate *base*).
+    """
+    merged = dict(base)
+    for key, value in override.items():
+        if (
+            key in merged
+            and isinstance(merged[key], dict)
+            and isinstance(value, dict)
+        ):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
 
 
 class UserService:
@@ -188,6 +210,38 @@ class UserService:
                 "Created default profile for user",
                 user_id=str(user_id),
             )
+
+    # --- Preferences ---
+
+    async def get_preferences(self, user_id: UUID) -> Dict[str, Any]:
+        """Return preferences dict for the given user (empty dict if none set)."""
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            return {}
+        return user.preferences or {}
+
+    async def update_preferences(
+        self, user_id: UUID, incoming: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Deep-merge *incoming* into the user's existing preferences and persist.
+
+        Returns the full merged preferences dict.
+        """
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        existing = user.preferences or {}
+        merged = _deep_merge(existing, incoming)
+        user.preferences = merged
+        user.updated_at = datetime.utcnow()
+        await self.user_repository.update(user)
+        logger.info(
+            "Updated user preferences",
+            user_id=str(user_id),
+            keys=list(incoming.keys()),
+        )
+        return merged
 
     # --- Auth resolution (used by middleware) ---
 

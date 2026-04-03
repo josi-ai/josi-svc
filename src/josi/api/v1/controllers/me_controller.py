@@ -1,8 +1,9 @@
 """User self-service endpoints — profile, usage, subscription info."""
-from typing import Annotated, Optional
+from typing import Annotated, Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 
+from josi.api.response import ResponseModel
 from josi.auth.middleware import resolve_current_user
 from josi.auth.schemas import CurrentUser
 from josi.models.user_model import UserResponse, UserUpdate
@@ -56,3 +57,46 @@ async def get_my_subscription(current_user: CurrentUserDep):
         "has_premium": user.has_premium_features(),
         "limits": user.get_tier_limits(),
     }
+
+
+@router.get("/preferences", response_model=ResponseModel)
+async def get_preferences(current_user: CurrentUserDep):
+    """Get current user's preferences (widget layout, chart defaults, theme, etc.)."""
+    user_service = UserService(current_user=current_user)
+    preferences = await user_service.get_preferences(current_user.user_id)
+    return ResponseModel(
+        success=True,
+        message="Preferences retrieved",
+        data=preferences,
+    )
+
+
+@router.put("/preferences", response_model=ResponseModel)
+async def update_preferences(
+    current_user: CurrentUserDep,
+    preferences: Dict[str, Any] = Body(...),
+):
+    """Update user preferences. Merges with existing preferences (not replace).
+
+    Supports nested keys such as:
+    - ``dashboard.widget_layout`` — array of widget positions
+    - ``dashboard.active_widgets`` — list of enabled widget types
+    - ``chart.default_tradition`` — "vedic" | "western" | "chinese"
+    - ``chart.default_house_system`` — "whole_sign" | "placidus" etc.
+    - ``chart.default_ayanamsa`` — "lahiri" | "raman" etc.
+    - ``chart.default_format`` — "South Indian" | "North Indian" | "Western Wheel"
+    - ``theme`` — "dark" | "light"
+    """
+    user_service = UserService(current_user=current_user)
+    try:
+        merged = await user_service.update_preferences(
+            current_user.user_id, preferences
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    return ResponseModel(
+        success=True,
+        message="Preferences updated",
+        data=merged,
+    )

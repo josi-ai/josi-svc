@@ -1,19 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Plus } from 'lucide-react';
+import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Plus, GripVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  type WidgetType,
-  type WidgetInstance,
-  type WidgetSize,
-  widgetCatalog,
-  defaultWidgets,
-} from '@/config/widget-config';
+import { type WidgetType } from '@/config/widget-config';
+import { useWidgetLayout } from '@/hooks/use-widget-layout';
 import { AddWidgetModal } from './add-widget-modal';
 
-const STORAGE_KEY = 'josi-dashboard-widgets';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface WidgetComponentProps {
   onRemove: () => void;
@@ -22,8 +21,6 @@ export interface WidgetComponentProps {
 /* ------------------------------------------------------------------
  * Dynamic widget component map
  * Each widget file is loaded on demand via next/dynamic.
- * Another agent owns the actual widget component files — this map
- * simply points at them.
  * ------------------------------------------------------------------ */
 const widgetComponents: Record<
   WidgetType,
@@ -43,84 +40,40 @@ const widgetComponents: Record<
 };
 
 /* ------------------------------------------------------------------
- * Size → Tailwind grid-column class mapping
+ * Grid configuration
  * ------------------------------------------------------------------ */
-const sizeClasses: Record<WidgetSize, string> = {
-  full: 'col-span-1 md:col-span-2 lg:col-span-3',
-  half: 'col-span-1 md:col-span-2 lg:col-span-2',
-  third: 'col-span-1',
-};
-
-/* ------------------------------------------------------------------
- * localStorage helpers
- * ------------------------------------------------------------------ */
-function loadWidgets(): WidgetInstance[] {
-  if (typeof window === 'undefined') return defaultWidgets;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as WidgetInstance[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    // corrupted data — fall back to defaults
-  }
-  return defaultWidgets;
-}
-
-function saveWidgets(widgets: WidgetInstance[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
-  } catch {
-    // localStorage might be full or unavailable — silently ignore
-  }
-}
+const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480 };
+const COLS = { lg: 3, md: 2, sm: 1, xs: 1 };
+const ROW_HEIGHT = 180;
+const MARGIN: [number, number] = [20, 20];
 
 /* ------------------------------------------------------------------
  * WidgetGrid component
  * ------------------------------------------------------------------ */
 export function WidgetGrid() {
-  const [widgets, setWidgets] = useState<WidgetInstance[]>(defaultWidgets);
   const [modalOpen, setModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
+  const {
+    widgets,
+    layouts,
+    mounted,
+    addWidget,
+    removeWidget,
+    onLayoutChange,
+  } = useWidgetLayout();
 
   const displayName = user?.full_name || user?.email || 'User';
   const now = new Date();
   const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const greeting =
+    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  // Load from localStorage after mount (avoids SSR mismatch)
-  useEffect(() => {
-    setWidgets(loadWidgets());
-    setMounted(true);
-  }, []);
-
-  // Persist whenever widgets change (skip initial default render)
-  useEffect(() => {
-    if (mounted) saveWidgets(widgets);
-  }, [widgets, mounted]);
-
-  const addWidget = useCallback(
-    (type: WidgetType) => {
-      const def = widgetCatalog.find((w) => w.type === type);
-      if (!def) return;
-
-      const id = `w-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      setWidgets((prev) => [
-        ...prev,
-        { id, type, size: def.defaultSize },
-      ]);
-    },
-    [],
-  );
-
-  const removeWidget = useCallback((id: string) => {
-    setWidgets((prev) => prev.filter((w) => w.id !== id));
-  }, []);
-
-  const activeTypes = widgets.map((w) => w.type);
+  const activeTypes = useMemo(() => widgets.map((w) => w.type), [widgets]);
 
   return (
     <div>
@@ -128,35 +81,81 @@ export function WidgetGrid() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {greeting}, <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{displayName}</strong>
+            {greeting},{' '}
+            <strong
+              style={{ color: 'var(--text-primary)', fontWeight: 600 }}
+            >
+              {displayName}
+            </strong>
           </p>
-          <h2 className="font-display mt-1" style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}>
+          <h2
+            className="font-display mt-1"
+            style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}
+          >
             {dateStr}
           </h2>
         </div>
         <button
           onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
-          style={{ background: 'var(--gold)', color: 'var(--btn-add-text)' }}
+          style={{
+            background: 'var(--gold)',
+            color: 'var(--btn-add-text)',
+          }}
         >
           <Plus className="h-3.5 w-3.5" />
           Add Widget
         </button>
       </div>
 
-      {/* Widget grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {widgets.map((instance) => {
-          const Component = widgetComponents[instance.type];
-          if (!Component) return null;
+      {/* Widget grid — react-grid-layout */}
+      {mounted && (
+        <ResponsiveGridLayout
+          className="widget-grid-layout"
+          layouts={layouts}
+          breakpoints={BREAKPOINTS}
+          cols={COLS}
+          rowHeight={ROW_HEIGHT}
+          margin={MARGIN}
+          containerPadding={[0, 0]}
+          draggableHandle=".widget-drag-handle"
+          onLayoutChange={onLayoutChange}
+          isResizable={false}
+          useCSSTransforms={true}
+          compactType="vertical"
+        >
+          {widgets.map((instance) => {
+            const Component = widgetComponents[instance.type];
+            if (!Component) return null;
 
-          return (
-            <div key={instance.id} className={sizeClasses[instance.size]}>
-              <Component onRemove={() => removeWidget(instance.id)} />
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <div key={instance.id} className="widget-grid-item">
+                {/* Drag handle */}
+                <div className="widget-drag-handle">
+                  <GripVertical className="h-4 w-4" />
+                </div>
+                <Component onRemove={() => removeWidget(instance.id)} />
+              </div>
+            );
+          })}
+        </ResponsiveGridLayout>
+      )}
+
+      {/* Fallback while not mounted (SSR / loading) */}
+      {!mounted && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-[180px] rounded-2xl animate-pulse"
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Add Widget modal */}
       <AddWidgetModal
@@ -168,6 +167,63 @@ export function WidgetGrid() {
         }}
         activeWidgets={activeTypes}
       />
+
+      {/* Scoped styles for grid items */}
+      <style jsx global>{`
+        .widget-grid-layout {
+          position: relative;
+        }
+        .widget-grid-item {
+          position: relative;
+        }
+        .widget-grid-item > :last-child {
+          height: 100%;
+        }
+        /* Ensure widget cards fill their grid cell */
+        .widget-grid-item > :last-child > div {
+          height: 100%;
+        }
+        .widget-drag-handle {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 20;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          color: var(--text-faint);
+          cursor: grab;
+          opacity: 0;
+          transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+        }
+        .widget-grid-item:hover .widget-drag-handle {
+          opacity: 1;
+        }
+        .widget-drag-handle:hover {
+          background: var(--border);
+          color: var(--text-secondary);
+        }
+        .widget-drag-handle:active {
+          cursor: grabbing;
+        }
+        /* While dragging, highlight the item */
+        .react-grid-item.react-draggable-dragging {
+          z-index: 100;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          border-radius: 16px;
+          opacity: 0.9;
+        }
+        /* Placeholder shown where the item will land */
+        .react-grid-placeholder {
+          background: var(--gold) !important;
+          opacity: 0.08 !important;
+          border-radius: 16px;
+          border: 2px dashed var(--gold) !important;
+        }
+      `}</style>
     </div>
   );
 }

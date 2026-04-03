@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import { existsSync, writeFileSync, mkdirSync, openSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, execFileSync, type ChildProcess } from 'node:child_process';
 import { VALID_ENVS, type Env, type UpOptions } from '../../types.js';
 import { buildComposeConfig, composeFileArgs, composeProfileArgs, allComposeArgs } from '../../lib/compose.js';
 import { exec, isDockerRunning } from '../../lib/docker.js';
@@ -129,6 +129,17 @@ Examples:
             });
           }
 
+          // Kill any existing process on port 1989
+          try {
+            const pids = execFileSync('lsof', ['-ti:1989'], { encoding: 'utf8' }).trim();
+            if (pids) {
+              for (const pid of pids.split('\n')) {
+                try { process.kill(Number(pid), 'SIGKILL'); } catch { /* already dead */ }
+              }
+              logger.dim('  Killed existing process on port 1989');
+            }
+          } catch { /* no process on port — fine */ }
+
           if (detach) {
             // Background mode: spawn detached, write PID file
             logger.step('Starting frontend in background...');
@@ -145,6 +156,7 @@ Examples:
               env: {
                 ...process.env,
                 NEXT_PUBLIC_API_URL: apiUrl,
+                NODE_OPTIONS: '--max-old-space-size=4096',
               },
             });
 
@@ -173,6 +185,7 @@ Examples:
               env: {
                 ...process.env,
                 NEXT_PUBLIC_API_URL: apiUrl,
+                NODE_OPTIONS: '--max-old-space-size=4096',
               },
             });
 

@@ -54,9 +54,11 @@ export default function DashboardPage() {
         if (res.ok) {
           const data = await res.json();
           clearPendingChart();
-          // Redirect to the new chart if we got an ID back
-          if (data?.data?.chart_id) {
-            router.push(`/charts/${data.data.chart_id}`);
+          // API returns an array of charts (one per system), not a single object
+          const charts = Array.isArray(data.data) ? data.data : [data.data];
+          const chartId = charts[0]?.chart_id;
+          if (chartId) {
+            router.push(`/charts/${chartId}`);
             return;
           }
         }

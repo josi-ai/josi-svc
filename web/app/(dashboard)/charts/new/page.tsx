@@ -179,11 +179,26 @@ export default function NewChartPage() {
         params.set('ayanamsa', ayanamsa);
       }
 
-      const chartRes = await apiClient.post<{ chart_id: string }>(
+      const chartRes = await apiClient.post<any>(
         `/api/v1/charts/calculate?${params.toString()}`
       );
 
-      const chartId = chartRes.data.chart_id;
+      // Debug: log full response to understand shape
+      console.log('[ChartCalc] full response:', JSON.stringify(chartRes, null, 2));
+
+      // The API returns { success, message, data: [...charts] }
+      // apiClient unwraps to ApiResponse<T>, so chartRes.data is the array
+      const raw = chartRes.data;
+      const charts = Array.isArray(raw) ? raw : [raw];
+      const chartId = charts[0]?.chart_id;
+
+      console.log('[ChartCalc] extracted chartId:', chartId, 'from charts:', charts.map((c: any) => ({ chart_id: c?.chart_id, keys: Object.keys(c || {}).slice(0, 5) })));
+
+      if (!chartId) {
+        setError(`Chart was calculated but no chart ID was returned. Response keys: ${Object.keys(charts[0] || {}).join(', ')}`);
+        setIsSubmitting(false);
+        return;
+      }
 
       // Step 3: Redirect to chart detail
       router.push(`/charts/${chartId}`);

@@ -52,6 +52,42 @@ class ChartService:
         include_interpretations: bool = False
     ) -> List[AstrologyChart]:
         """Calculate multiple chart types for a person."""
+        # Auto-geocode from place_of_birth if coordinates/timezone are missing
+        if (person.latitude is None or person.longitude is None or person.timezone is None) and person.place_of_birth:
+            from josi.services.geocoding_service import GeocodingService
+            geo = GeocodingService()
+            parts = person.place_of_birth.split(',')
+            city = parts[0].strip() if len(parts) > 0 else ""
+            state = parts[1].strip() if len(parts) > 1 else ""
+            country = parts[2].strip() if len(parts) > 2 else ""
+            try:
+                lat, lon, tz = geo.get_coordinates_and_timezone(city, state, country)
+                person.latitude = lat
+                person.longitude = lon
+                person.timezone = tz
+            except ValueError:
+                pass  # Geocoding failed — fall through to validation below
+
+        if person.time_of_birth is None:
+            raise ValueError(
+                f"Person '{person.name}' is missing time_of_birth. "
+                f"Update the profile with birth time before calculating charts."
+            )
+
+        missing = []
+        if person.latitude is None:
+            missing.append("latitude")
+        if person.longitude is None:
+            missing.append("longitude")
+        if person.timezone is None:
+            missing.append("timezone")
+        if missing:
+            place = f" (place_of_birth: '{person.place_of_birth}')" if person.place_of_birth else ""
+            raise ValueError(
+                f"Person '{person.name}' is missing required location data: {', '.join(missing)}{place}. "
+                f"Could not geocode automatically. Update the profile with coordinates or a valid city name."
+            )
+
         charts = []
         
         for system in systems:

@@ -20,6 +20,7 @@ from josi.api.v1.controllers.clerk_webhook_controller import auth_router
 from josi.api.v1.controllers.api_key_controller import router as api_key_router
 from josi.api.v1.controllers.lookup_controller import router as lookup_router
 from josi.api.v1.controllers.me_controller import router as me_router
+from josi.api.v1.controllers.cultural_events_controller import router as cultural_events_router
 from josi.api.v1.health import router as health_router
 
 # Create main v1 router
@@ -46,5 +47,6 @@ v1_router.include_router(auth_router)
 v1_router.include_router(api_key_router)
 v1_router.include_router(lookup_router)
 v1_router.include_router(me_router)
+v1_router.include_router(cultural_events_router)
 
 __all__ = ["v1_router"]
