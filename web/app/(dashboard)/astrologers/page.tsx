@@ -1,721 +1,449 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Search,
-  Star,
-  ChevronDown,
-  Clock,
-  Globe,
-  BadgeCheck,
-  Users,
-  SlidersHorizontal,
-  Sparkles,
-  Calendar,
-  Video,
-  MessageSquare,
-  Phone,
-  FileText,
-  ArrowRight,
-} from 'lucide-react';
+import { Search, ChevronDown, Clock, Globe, BadgeCheck, Users, Sparkles, Video, MessageSquare, Phone, FileText, ArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
 
-/* ================================================================
-   Types
-   ================================================================ */
+/* ── Types ─────────────────────────────────────────────────────── */
 
 interface Astrologer {
-  astrologer_id: string;
-  user_id: string;
-  professional_name: string;
-  bio: string | null;
-  years_experience: number;
-  specializations: string[];
-  languages: string[];
-  hourly_rate: number;
-  currency: string;
-  rating: number;
-  total_consultations: number;
-  total_reviews: number;
-  verification_status_id: number;
-  verification_status_name: string;
-  is_active: boolean;
-  is_featured: boolean;
-  profile_image_url: string | null;
-  joined_at: string;
+  astrologer_id: string; user_id: string; professional_name: string;
+  bio: string | null; years_experience: number; specializations: string[];
+  languages: string[]; hourly_rate: number; currency: string; rating: number;
+  total_consultations: number; total_reviews: number; verification_status_id: number;
+  verification_status_name: string; is_active: boolean; is_featured: boolean;
+  profile_image_url: string | null; joined_at: string;
 }
+interface SearchResponse { astrologers: Astrologer[]; total: number; limit: number; offset: number; }
 
-interface SearchResponse {
-  astrologers: Astrologer[];
-  total: number;
-  limit: number;
-  offset: number;
-}
+/* ── Demo Data ─────────────────────────────────────────────────── */
 
-/* ================================================================
-   Demo Data
-   ================================================================ */
+const mk = (id: string, uid: string, name: string, bio: string, yrs: number, specs: string[], langs: string[], rate: number, cur: string, rat: number, cons: number, revs: number, feat: boolean, joined: string): Astrologer => ({
+  astrologer_id: id, user_id: uid, professional_name: name, bio, years_experience: yrs,
+  specializations: specs, languages: langs, hourly_rate: rate, currency: cur, rating: rat,
+  total_consultations: cons, total_reviews: revs, verification_status_id: 2,
+  verification_status_name: 'Verified', is_active: true, is_featured: feat,
+  profile_image_url: null, joined_at: joined,
+});
 
 const DEMO_ASTROLOGERS: Astrologer[] = [
-  {
-    astrologer_id: 'demo-1',
-    user_id: 'u1',
-    professional_name: 'Priya Shankar',
-    bio: 'Renowned Vedic astrologer specializing in predictive techniques and relationship compatibility analysis with a deep foundation in Parashari and Jaimini systems.',
-    years_experience: 15,
-    specializations: ['Vedic', 'Predictive', 'Relationship'],
-    languages: ['Tamil', 'English'],
-    hourly_rate: 1500,
-    currency: 'INR',
-    rating: 4.9,
-    total_consultations: 2340,
-    total_reviews: 487,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: false,
-    profile_image_url: null,
-    joined_at: '2023-06-15',
-  },
-  {
-    astrologer_id: 'demo-2',
-    user_id: 'u2',
-    professional_name: 'Dr. Rajesh Sharma',
-    bio: 'PhD in Jyotish Shastra with dual expertise in Vedic and Western systems. Specializes in career timing, medical astrology, and karmic pattern analysis.',
-    years_experience: 22,
-    specializations: ['Career', 'Medical', 'Karmic'],
-    languages: ['Hindi', 'English'],
-    hourly_rate: 2000,
-    currency: 'INR',
-    rating: 4.8,
-    total_consultations: 3120,
-    total_reviews: 612,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: false,
-    profile_image_url: null,
-    joined_at: '2022-11-01',
-  },
-  {
-    astrologer_id: 'demo-3',
-    user_id: 'u3',
-    professional_name: 'Sarah Chen',
-    bio: 'Bridging Eastern and Western traditions with expertise in Chinese BaZi, Zi Wei Dou Shu, and modern Western psychological astrology.',
-    years_experience: 10,
-    specializations: ['Chinese', 'Western', 'Spiritual'],
-    languages: ['English', 'Mandarin'],
-    hourly_rate: 75,
-    currency: 'USD',
-    rating: 4.7,
-    total_consultations: 1250,
-    total_reviews: 298,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: false,
-    profile_image_url: null,
-    joined_at: '2024-01-20',
-  },
-  {
-    astrologer_id: 'demo-4',
-    user_id: 'u4',
-    professional_name: 'Meenakshi Iyer',
-    bio: 'Third-generation Vedic astrologer with deep expertise in Nadi astrology and relationship counseling rooted in classical Jyotish traditions.',
-    years_experience: 18,
-    specializations: ['Vedic', 'Relationship', 'Spiritual'],
-    languages: ['Tamil', 'Malayalam', 'English'],
-    hourly_rate: 1200,
-    currency: 'INR',
-    rating: 4.9,
-    total_consultations: 1870,
-    total_reviews: 401,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: false,
-    profile_image_url: null,
-    joined_at: '2023-03-10',
-  },
-  {
-    astrologer_id: 'demo-5',
-    user_id: 'u5',
-    professional_name: 'David Williams',
-    bio: 'Classical astrologer blending Hellenistic time-lord techniques with modern Western chart interpretation for precise life-event timing.',
-    years_experience: 12,
-    specializations: ['Western', 'Hellenistic', 'Predictive'],
-    languages: ['English'],
-    hourly_rate: 60,
-    currency: 'USD',
-    rating: 4.6,
-    total_consultations: 980,
-    total_reviews: 215,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: false,
-    profile_image_url: null,
-    joined_at: '2023-09-05',
-  },
-  {
-    astrologer_id: 'demo-6',
-    user_id: 'u6',
-    professional_name: 'Lakshmi Narayanan',
-    bio: 'One of India\u2019s most respected Vedic astrologers with 25 years of practice. Known for precise karmic analysis and medical astrology consultations.',
-    years_experience: 25,
-    specializations: ['Vedic', 'Karmic', 'Medical'],
-    languages: ['Tamil', 'Hindi', 'English'],
-    hourly_rate: 2500,
-    currency: 'INR',
-    rating: 5.0,
-    total_consultations: 5200,
-    total_reviews: 1038,
-    verification_status_id: 2,
-    verification_status_name: 'Verified',
-    is_active: true,
-    is_featured: true,
-    profile_image_url: null,
-    joined_at: '2022-05-01',
-  },
+  mk('demo-1','u1','Priya Shankar','Renowned Vedic astrologer specializing in predictive techniques and relationship compatibility analysis with a deep foundation in Parashari and Jaimini systems.',15,['Vedic','Predictive','Relationship'],['Tamil','English'],1500,'INR',4.9,2340,487,false,'2023-06-15'),
+  mk('demo-2','u2','Dr. Rajesh Sharma','PhD in Jyotish Shastra with dual expertise in Vedic and Western systems. Specializes in career timing, medical astrology, and karmic pattern analysis.',22,['Career','Medical','Karmic'],['Hindi','English'],2000,'INR',4.8,3120,612,false,'2022-11-01'),
+  mk('demo-3','u3','Sarah Chen','Bridging Eastern and Western traditions with expertise in Chinese BaZi, Zi Wei Dou Shu, and modern Western psychological astrology.',10,['Chinese','Western','Spiritual'],['English','Mandarin'],75,'USD',4.7,1250,298,false,'2024-01-20'),
+  mk('demo-4','u4','Meenakshi Iyer','Third-generation Vedic astrologer with deep expertise in Nadi astrology and relationship counseling rooted in classical Jyotish traditions.',18,['Vedic','Relationship','Spiritual'],['Tamil','Malayalam','English'],1200,'INR',4.9,1870,401,false,'2023-03-10'),
+  mk('demo-5','u5','David Williams','Classical astrologer blending Hellenistic time-lord techniques with modern Western chart interpretation for precise life-event timing.',12,['Western','Hellenistic','Predictive'],['English'],60,'USD',4.6,980,215,false,'2023-09-05'),
+  mk('demo-6','u6','Lakshmi Narayanan','One of India\u2019s most respected Vedic astrologers with 25 years of practice. Known for precise karmic analysis and medical astrology consultations.',25,['Vedic','Karmic','Medical'],['Tamil','Hindi','English'],2500,'INR',5.0,5200,1038,true,'2022-05-01'),
 ];
 
-/* ================================================================
-   Constants
-   ================================================================ */
-
-const SPECIALIZATIONS = [
-  'Vedic', 'Western', 'Chinese', 'Hellenistic',
-  'Medical', 'Karmic', 'Relationship', 'Career',
-  'Spiritual', 'Predictive',
-];
+/* ── Constants ─────────────────────────────────────────────────── */
 
 const TRADITIONS = ['Vedic', 'Western', 'Chinese', 'Hellenistic'];
-
 const LANGUAGES = ['English', 'Hindi', 'Tamil', 'Malayalam', 'Mandarin'];
+const RATINGS = ['4.5+', '4.0+', '3.5+'];
 
-const AVATAR_COLORS: Record<string, string> = {
-  P: '#7C3AED', // violet
-  D: '#0891B2', // cyan
-  S: '#059669', // emerald
-  M: '#DB2777', // pink
-  L: '#D97706', // amber
+const AVATAR_GRAD: Record<string, string> = {
+  P: 'linear-gradient(135deg,#7C3AED,#A855F7)', D: 'linear-gradient(135deg,#0891B2,#22D3EE)',
+  S: 'linear-gradient(135deg,#059669,#34D399)', M: 'linear-gradient(135deg,#DB2777,#F472B6)',
+  L: 'linear-gradient(135deg,#C8913A,#E0B060)',
 };
 
-function getAvatarColor(name: string): string {
-  const initial = name.charAt(0).toUpperCase();
-  return AVATAR_COLORS[initial] || '#6366F1';
-}
-
-const SPEC_COLORS: Record<string, { bg: string; text: string }> = {
-  Vedic:        { bg: 'rgba(217, 119, 6, 0.12)',  text: '#D97706' },
-  Western:      { bg: 'rgba(99, 102, 241, 0.12)', text: '#818CF8' },
-  Chinese:      { bg: 'rgba(220, 38, 38, 0.12)',  text: '#F87171' },
-  Hellenistic:  { bg: 'rgba(139, 92, 246, 0.12)', text: '#A78BFA' },
-  Medical:      { bg: 'rgba(5, 150, 105, 0.12)',  text: '#34D399' },
-  Karmic:       { bg: 'rgba(168, 85, 247, 0.12)', text: '#C084FC' },
-  Relationship: { bg: 'rgba(236, 72, 153, 0.12)', text: '#F472B6' },
-  Career:       { bg: 'rgba(14, 165, 233, 0.12)', text: '#38BDF8' },
-  Spiritual:    { bg: 'rgba(20, 184, 166, 0.12)', text: '#2DD4BF' },
-  Predictive:   { bg: 'rgba(245, 158, 11, 0.12)', text: '#FBBF24' },
+const TAG_CLR: Record<string, [string, string]> = {
+  Vedic: ['rgba(200,145,58,0.12)','#D4A04A'], Western: ['rgba(106,159,216,0.12)','#6A9FD8'],
+  Chinese: ['rgba(220,80,80,0.12)','#E07070'], Hellenistic: ['rgba(80,184,208,0.12)','#50B8D0'],
+  Medical: ['rgba(106,175,122,0.12)','#6AAF7A'], Karmic: ['rgba(150,120,200,0.12)','#9678C8'],
+  Relationship: ['rgba(218,122,148,0.12)','#DA7A94'], Career: ['rgba(80,160,210,0.12)','#50A0D2'],
+  Spiritual: ['rgba(80,176,152,0.12)','#50B098'], Predictive: ['rgba(224,168,72,0.12)','#E0A848'],
 };
 
-function formatRate(currency: string, rate: number): string {
-  if (currency === 'USD') return `$${rate}`;
-  if (currency === 'INR') return `\u20B9${rate.toLocaleString('en-IN')}`;
-  return `${currency} ${rate}`;
+function fmtRate(cur: string, r: number) {
+  return cur === 'USD' ? `$${r}` : cur === 'INR' ? `\u20B9${r.toLocaleString('en-IN')}` : `${cur} ${r}`;
 }
 
-/* ================================================================
-   Sub-components
-   ================================================================ */
+/* ── Dropdown ──────────────────────────────────────────────────── */
 
-function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
+function Dropdown({ label, value, options, onChange }: {
+  label: string; value: string; options: string[]; onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const focusRing = open ? { borderColor: 'var(--gold)', boxShadow: '0 0 0 2px rgba(200,145,58,0.15)' } : {};
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star
-            key={s}
-            className={`h-3.5 w-3.5 ${
-              s <= Math.round(rating)
-                ? 'fill-amber-400 text-amber-400'
-                : 'fill-transparent text-text-faint'
-            }`}
-          />
-        ))}
-      </div>
-      <span className="text-xs text-text-muted">
-        {rating.toFixed(1)} ({reviews.toLocaleString()})
-      </span>
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(!open)} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+        height: 40, padding: '0 12px', background: 'var(--card)', border: '1px solid var(--border)',
+        borderRadius: 10, color: value ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 13,
+        cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s', outline: 'none', ...focusRing,
+      }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value || label}</span>
+        <ChevronDown style={{ width: 14, height: 14, flexShrink: 0, marginLeft: 8, color: 'var(--text-faint)',
+          transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50,
+          background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10,
+          boxShadow: 'var(--shadow-dropdown)', overflow: 'hidden' }}>
+          {['', ...options].map((opt) => {
+            const active = value === opt;
+            const display = opt || `All ${label}s`;
+            return (
+              <button key={opt} type="button" onClick={() => { onChange(opt); setOpen(false); }}
+                style={{ display: 'block', width: '100%', padding: '9px 12px', textAlign: 'left', fontSize: 13,
+                  color: active ? 'var(--gold)' : opt ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: active ? 'var(--gold-bg-subtle)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'background 0.15s' }}
+                onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--card-hover)'; }}
+                onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+                {display}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
-function SpecBadge({ spec }: { spec: string }) {
-  const colors = SPEC_COLORS[spec] || { bg: 'rgba(100,100,100,0.12)', text: 'var(--text-secondary)' };
+/* ── Filter Chip ───────────────────────────────────────────────── */
+
+function Chip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
-      style={{ backgroundColor: colors.bg, color: colors.text }}
-    >
-      {spec}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px',
+      borderRadius: 20, fontSize: 12, fontWeight: 500, background: 'rgba(200,145,58,0.1)',
+      color: 'var(--gold)', border: '1px solid rgba(200,145,58,0.2)' }}>
+      {label}
+      <button type="button" onClick={onClear} style={{ background: 'none', border: 'none',
+        padding: 0, cursor: 'pointer', display: 'flex', color: 'var(--gold)' }}>
+        <X style={{ width: 12, height: 12 }} />
+      </button>
     </span>
   );
 }
 
-function AstrologerCard({ astrologer }: { astrologer: Astrologer }) {
-  const isVerified = astrologer.verification_status_name === 'Verified';
-  const avatarBg = getAvatarColor(astrologer.professional_name);
+/* ── Stars ──────────────────────────────────────────────────────── */
 
+function Stars({ rating, reviews }: { rating: number; reviews: number }) {
+  const full = Math.round(rating);
   return (
-    <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-gold/30 hover:shadow-[0_0_24px_rgba(212,175,55,0.06)]">
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ color: '#C8913A', fontSize: 13, letterSpacing: 1 }}>{'★'.repeat(full)}</span>
+      {full < 5 && <span style={{ color: 'var(--text-faint)', fontSize: 13, letterSpacing: 1 }}>{'★'.repeat(5 - full)}</span>}
+      <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 2 }}>
+        {rating.toFixed(1)} ({reviews.toLocaleString()})
+      </span>
+    </span>
+  );
+}
+
+/* ── Tag Pill ──────────────────────────────────────────────────── */
+
+function Tag({ label }: { label: string }) {
+  const [bg, fg] = TAG_CLR[label] || ['rgba(100,100,100,0.12)', 'var(--text-secondary)'];
+  return (
+    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 20, fontSize: 10,
+      fontWeight: 600, letterSpacing: 0.3, background: bg, color: fg, lineHeight: '18px' }}>
+      {label}
+    </span>
+  );
+}
+
+/* ── Astrologer Card ───────────────────────────────────────────── */
+
+function Card({ a }: { a: Astrologer }) {
+  const grad = AVATAR_GRAD[a.professional_name.charAt(0).toUpperCase()] || 'linear-gradient(135deg,#6366F1,#818CF8)';
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)',
+      borderLeft: a.is_featured ? '3px solid var(--gold)' : '1px solid var(--border)',
+      borderRadius: 14, padding: 20, transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s' }}
+      onMouseEnter={(e) => { const s = e.currentTarget.style; s.transform = 'translateY(-2px)'; s.boxShadow = '0 4px 24px rgba(0,0,0,0.2)'; s.borderColor = 'rgba(200,145,58,0.25)'; }}
+      onMouseLeave={(e) => { const s = e.currentTarget.style; s.transform = ''; s.boxShadow = ''; s.borderColor = 'var(--border)'; }}>
+
       {/* Header */}
-      <div className="flex items-start gap-3">
-        <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-white"
-          style={{ backgroundColor: avatarBg }}
-        >
-          {astrologer.professional_name.charAt(0).toUpperCase()}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: grad, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22, fontWeight: 600, color: '#fff' }}>
+          {a.professional_name.charAt(0)}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <h3 className="truncate font-display text-sm font-semibold text-text-primary">
-              {astrologer.professional_name}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <h3 className="font-display" style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)',
+              margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {a.professional_name}
             </h3>
-            {isVerified && (
-              <BadgeCheck className="h-4 w-4 shrink-0 text-blue" />
+            {a.verification_status_name === 'Verified' && (
+              <BadgeCheck style={{ width: 16, height: 16, color: 'var(--gold)', flexShrink: 0 }} />
             )}
-            {astrologer.is_featured && (
-              <span
-                className="inline-flex items-center rounded-full px-2 py-0 text-[10px] font-bold tracking-wide uppercase"
-                style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: 'var(--gold)' }}
-              >
-                Featured
+            {a.is_featured && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 8px',
+                borderRadius: 20, fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase',
+                background: 'rgba(200,145,58,0.15)', color: 'var(--gold)' }}>
+                <Sparkles style={{ width: 10, height: 10 }} /> Featured
               </span>
             )}
           </div>
-          <StarRating rating={astrologer.rating} reviews={astrologer.total_reviews} />
+          <div style={{ marginTop: 4 }}><Stars rating={a.rating} reviews={a.total_reviews} /></div>
         </div>
       </div>
 
-      {/* Bio snippet */}
-      {astrologer.bio && (
-        <p className="mt-3 line-clamp-2 text-xs text-text-muted leading-relaxed">
-          {astrologer.bio}
+      {/* Bio */}
+      {a.bio && (
+        <p style={{ marginTop: 14, fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {a.bio}
         </p>
       )}
 
-      {/* Specializations */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {astrologer.specializations.slice(0, 4).map((spec) => (
-          <SpecBadge key={spec} spec={spec} />
-        ))}
-        {astrologer.specializations.length > 4 && (
-          <span className="text-[10px] text-text-faint self-center">
-            +{astrologer.specializations.length - 4} more
+      {/* Tags */}
+      <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {a.specializations.slice(0, 4).map((s) => <Tag key={s} label={s} />)}
+        {a.specializations.length > 4 && (
+          <span style={{ fontSize: 10, color: 'var(--text-faint)', alignSelf: 'center' }}>
+            +{a.specializations.length - 4}
           </span>
         )}
       </div>
 
-      {/* Meta row */}
-      <div className="mt-3 flex items-center gap-3 text-xs text-text-muted">
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {astrologer.years_experience}y exp
+      {/* Meta */}
+      <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-faint)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Clock style={{ width: 12, height: 12 }} />{a.years_experience}y exp
         </span>
-        <span className="flex items-center gap-1">
-          <Globe className="h-3 w-3" />
-          {astrologer.languages.slice(0, 2).join(', ')}
-          {astrologer.languages.length > 2 && ` +${astrologer.languages.length - 2}`}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Globe style={{ width: 12, height: 12 }} />{a.languages.slice(0, 2).join(', ')}
+          {a.languages.length > 2 && ` +${a.languages.length - 2}`}
         </span>
-        <span className="flex items-center gap-1">
-          <Users className="h-3 w-3" />
-          {astrologer.total_consultations.toLocaleString()}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Users style={{ width: 12, height: 12 }} />{a.total_consultations.toLocaleString()}
         </span>
       </div>
 
       {/* Footer */}
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-        <span className="text-sm font-semibold text-text-primary">
-          {formatRate(astrologer.currency, astrologer.hourly_rate)}
-          <span className="text-xs font-normal text-text-muted">/hr</span>
+      <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--gold)' }}>{fmtRate(a.currency, a.hourly_rate)}</span>
+          <span style={{ fontSize: 12, color: 'var(--text-faint)', marginLeft: 2 }}>/hr</span>
         </span>
-        <Link href={`/astrologers/${astrologer.astrologer_id}`}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold-bright"
-          >
+        <Link href={`/astrologers/${a.astrologer_id}`}>
+          <button type="button" style={{ padding: '7px 18px', borderRadius: 8,
+            border: '1px solid rgba(200,145,58,0.4)', background: 'transparent', color: 'var(--gold)',
+            fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={(e) => { const s = e.currentTarget.style; s.background = 'rgba(200,145,58,0.1)'; s.borderColor = 'var(--gold)'; s.boxShadow = '0 0 12px rgba(200,145,58,0.15)'; }}
+            onMouseLeave={(e) => { const s = e.currentTarget.style; s.background = 'transparent'; s.borderColor = 'rgba(200,145,58,0.4)'; s.boxShadow = 'none'; }}>
             View Profile
-          </Button>
+          </button>
         </Link>
       </div>
     </div>
   );
 }
 
-function FilterSelect({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (v: string) => void;
+/* ── Skeleton ──────────────────────────────────────────────────── */
+
+function Skel() {
+  const bar = (w: string, h: number, mt = 0) => (
+    <div style={{ height: h, width: w, borderRadius: 6, background: 'var(--border)', marginTop: mt,
+      animation: 'pulse 2s infinite' }} />
+  );
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: 20 }}>
+      <div style={{ display: 'flex', gap: 14 }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--border)', animation: 'pulse 2s infinite' }} />
+        <div style={{ flex: 1 }}>{bar('60%', 16)}{bar('40%', 12, 10)}</div>
+      </div>
+      {bar('100%', 12, 16)}{bar('70%', 12, 8)}
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>{bar('52px', 22)}{bar('60px', 22)}</div>
+    </div>
+  );
+}
+
+/* ── Consultation Card ─────────────────────────────────────────── */
+
+function ConCard({ icon: Icon, title, desc, price }: {
+  icon: React.ComponentType<{ style?: React.CSSProperties }>; title: string; desc: string; price: string;
 }) {
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full appearance-none rounded-lg border border-border bg-input px-3 pr-8 text-sm text-text-primary transition-colors focus:border-gold/60 focus:outline-none focus:ring-1 focus:ring-gold/50"
-      >
-        <option value="">{label}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-faint" />
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
+      padding: 18, transition: 'border-color 0.2s', flex: '1 0 220px', minWidth: 200 }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(200,145,58,0.25)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
+      <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(200,145,58,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+        <Icon style={{ width: 20, height: 20, color: 'var(--gold)' }} />
+      </div>
+      <h3 className="font-display" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{title}</h3>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>{desc}</p>
+      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--gold)', marginTop: 10 }}>{price}</p>
     </div>
   );
 }
 
-function AstrologerSkeleton() {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5 animate-pulse">
-      <div className="flex items-start gap-4">
-        <div className="h-12 w-12 rounded-full bg-border" />
-        <div className="flex-1 space-y-2">
-          <div className="h-4 w-32 rounded bg-border" />
-          <div className="h-3 w-48 rounded bg-border" />
-        </div>
-      </div>
-      <div className="mt-4 space-y-2">
-        <div className="h-3 w-full rounded bg-border" />
-        <div className="h-3 w-2/3 rounded bg-border" />
-      </div>
-      <div className="mt-4 flex gap-2">
-        <div className="h-6 w-16 rounded-full bg-border" />
-        <div className="h-6 w-16 rounded-full bg-border" />
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   How It Works Card
-   ================================================================ */
-
-function HowItWorksCard({
-  icon: Icon,
-  step,
-  title,
-  description,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  step: number;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5 text-center">
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)' }}>
-        <Icon className="h-5 w-5 text-gold" />
-      </div>
-      <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-text-faint">
-        Step {step}
-      </div>
-      <h3 className="font-display text-sm font-semibold text-text-primary">{title}</h3>
-      <p className="mt-1.5 text-xs text-text-muted leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-/* ================================================================
-   Consultation Type Card
-   ================================================================ */
-
-function ConsultationCard({
-  icon: Icon,
-  title,
-  description,
-  price,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-  price: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-gold/20">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)' }}>
-        <Icon className="h-5 w-5 text-gold" />
-      </div>
-      <h3 className="font-display text-sm font-semibold text-text-primary">{title}</h3>
-      <p className="mt-1.5 text-xs text-text-muted leading-relaxed">{description}</p>
-      <p className="mt-3 text-xs font-semibold text-gold">{price}</p>
-    </div>
-  );
-}
-
-/* ================================================================
+/* ═════════════════════════════════════════════════════════════════
    Main Page
-   ================================================================ */
+   ═════════════════════════════════════════════════════════════════ */
 
 export default function AstrologersPage() {
   const [searchName, setSearchName] = useState('');
-  const [specialization, setSpecialization] = useState('');
-  const [language, setLanguage] = useState('');
   const [tradition, setTradition] = useState('');
+  const [language, setLanguage] = useState('');
+  const [ratingFilter, setRatingFilter] = useState('');
 
-  /* --- Fetch from API (gracefully falls back to demo) --- */
   const { data, isLoading } = useQuery({
     queryKey: ['astrologers', 'marketplace'],
     queryFn: () => apiClient.get<SearchResponse>('/api/v1/astrologers/search?limit=20'),
     retry: false,
   });
 
-  const apiAstrologers = data?.data?.astrologers || data?.data || [];
-  const rawAstrologers: Astrologer[] = (Array.isArray(apiAstrologers) && apiAstrologers.length > 0)
-    ? apiAstrologers
-    : DEMO_ASTROLOGERS;
-  const isDemo = !Array.isArray(apiAstrologers) || apiAstrologers.length === 0;
+  const apiData = data?.data?.astrologers || data?.data || [];
+  const astrologers: Astrologer[] = Array.isArray(apiData) && apiData.length > 0 ? apiData : DEMO_ASTROLOGERS;
+  const isDemo = !Array.isArray(apiData) || apiData.length === 0;
 
-  /* --- Client-side filtering --- */
-  const filtered = useMemo(() => {
-    return rawAstrologers.filter((a) => {
-      if (searchName && !a.professional_name.toLowerCase().includes(searchName.toLowerCase())) return false;
-      if (specialization && !a.specializations.includes(specialization)) return false;
-      if (language && !a.languages.includes(language)) return false;
-      if (tradition && !a.specializations.includes(tradition)) return false;
-      return true;
-    });
-  }, [rawAstrologers, searchName, specialization, language, tradition]);
+  const filtered = useMemo(() => astrologers.filter((a) => {
+    if (searchName && !a.professional_name.toLowerCase().includes(searchName.toLowerCase())) return false;
+    if (tradition && !a.specializations.includes(tradition)) return false;
+    if (language && !a.languages.includes(language)) return false;
+    if (ratingFilter) { if (a.rating < parseFloat(ratingFilter)) return false; }
+    return true;
+  }), [astrologers, searchName, tradition, language, ratingFilter]);
 
-  const hasFilters = !!(searchName || specialization || language || tradition);
-
-  function clearFilters() {
-    setSearchName('');
-    setSpecialization('');
-    setLanguage('');
-    setTradition('');
-  }
+  const hasFilters = !!(searchName || tradition || language || ratingFilter);
+  const clearAll = () => { setSearchName(''); setTradition(''); setLanguage(''); setRatingFilter(''); };
 
   return (
-    <div className="space-y-8">
-      {/* ============================================================
-          Hero Section
-          ============================================================ */}
-      <section className="rounded-2xl border border-border bg-card px-6 py-10 text-center sm:px-12 sm:py-14">
-        <h1 className="font-display text-display-lg text-text-primary leading-tight">
-          Connect with Expert Astrologers
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section style={{ padding: '48px 24px 40px', textAlign: 'center',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.08) 0%, transparent 70%)', marginBottom: 32 }}>
+        <h1 className="font-display" style={{ fontSize: 32, fontWeight: 400, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
+          Find Your Guide
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-text-muted">
-          Get personalized guidance from verified professionals across Vedic, Western,
-          Chinese, and Hellenistic traditions
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.6, maxWidth: 440, marginInline: 'auto' }}>
+          Verified astrologers across six traditions, ready for one-on-one sessions
         </p>
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <Badge variant="default">6 Traditions</Badge>
-          <Badge variant="default">1-on-1 Sessions</Badge>
-        </div>
       </section>
 
-      {/* ============================================================
-          How It Works
-          ============================================================ */}
-      <section>
-        <h2 className="mb-4 font-display text-lg font-semibold text-text-primary">
-          How It Works
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <HowItWorksCard
-            icon={Search}
-            step={1}
-            title="Browse & Match"
-            description="Find astrologers by tradition, language, specialization, and rating"
-          />
-          <HowItWorksCard
-            icon={Calendar}
-            step={2}
-            title="Book a Session"
-            description="Choose video, chat, or voice consultations at times that work for you"
-          />
-          <HowItWorksCard
-            icon={Sparkles}
-            step={3}
-            title="Get Guidance"
-            description="Receive personalized insights with your chart data shared securely"
-          />
-        </div>
-      </section>
-
-      {/* ============================================================
-          Featured Astrologers
-          ============================================================ */}
-      <section>
-        <h2 className="mb-4 font-display text-lg font-semibold text-text-primary">
-          {isDemo ? 'Featured Astrologers' : 'Browse Astrologers'}
-        </h2>
-
-        {/* Search & Filters */}
-        <div className="mb-5 rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <SlidersHorizontal className="h-4 w-4 text-text-muted" />
-            <span className="text-xs font-medium uppercase tracking-wider text-text-faint">
-              Search &amp; Filter
-            </span>
-            {hasFilters && (
-              <button
-                onClick={clearFilters}
-                className="ml-auto text-xs text-gold hover:underline"
-              >
-                Clear all
-              </button>
-            )}
+      {/* ── Filters ───────────────────────────────────────────── */}
+      <section style={{ marginBottom: 24, padding: '0 4px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+          <div style={{ position: 'relative' }}>
+            <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+              width: 14, height: 14, color: 'var(--text-faint)', pointerEvents: 'none' }} />
+            <input type="text" placeholder="Search by name..." value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              style={{ width: '100%', height: 40, padding: '0 12px 0 34px', background: 'var(--card)',
+                border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)',
+                fontSize: 13, outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(200,145,58,0.15)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }} />
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-faint" />
-              <Input
-                placeholder="Search by name..."
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <FilterSelect
-              label="Specialization"
-              value={specialization}
-              options={SPECIALIZATIONS}
-              onChange={setSpecialization}
-            />
-            <FilterSelect
-              label="Language"
-              value={language}
-              options={LANGUAGES}
-              onChange={setLanguage}
-            />
-            <FilterSelect
-              label="Tradition"
-              value={tradition}
-              options={TRADITIONS}
-              onChange={setTradition}
-            />
-          </div>
+          <Dropdown label="Tradition" value={tradition} options={TRADITIONS} onChange={setTradition} />
+          <Dropdown label="Language" value={language} options={LANGUAGES} onChange={setLanguage} />
+          <Dropdown label="Rating" value={ratingFilter} options={RATINGS} onChange={setRatingFilter} />
         </div>
 
-        {/* Demo banner */}
-        {isDemo && !hasFilters && (
-          <div
-            className="mb-5 rounded-xl px-4 py-3 text-center text-xs text-text-muted"
-            style={{ backgroundColor: 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.12)' }}
-          >
-            <Sparkles className="mr-1.5 inline h-3.5 w-3.5 text-gold" />
-            Featured astrologers — our marketplace is launching soon. These profiles showcase what to expect.
+        {hasFilters && (
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {searchName && <Chip label={`"${searchName}"`} onClear={() => setSearchName('')} />}
+            {tradition && <Chip label={tradition} onClear={() => setTradition('')} />}
+            {language && <Chip label={language} onClear={() => setLanguage('')} />}
+            {ratingFilter && <Chip label={`${ratingFilter} stars`} onClear={() => setRatingFilter('')} />}
+            <button type="button" onClick={clearAll} style={{ fontSize: 12, color: 'var(--gold)',
+              background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>Clear all</button>
           </div>
         )}
+      </section>
 
-        {/* Grid */}
+      {/* ── Demo banner ───────────────────────────────────────── */}
+      {isDemo && !hasFilters && (
+        <div style={{ margin: '0 4px 20px', padding: '10px 16px', borderRadius: 10,
+          background: 'rgba(200,145,58,0.06)', border: '1px solid rgba(200,145,58,0.12)',
+          textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
+          <Sparkles style={{ width: 14, height: 14, display: 'inline', verticalAlign: -2, marginRight: 6, color: 'var(--gold)' }} />
+          Featured astrologers — our marketplace is launching soon
+        </div>
+      )}
+
+      {/* ── Grid ──────────────────────────────────────────────── */}
+      <section style={{ padding: '0 4px', marginBottom: 40 }}>
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <AstrologerSkeleton key={i} />
-            ))}
-          </div>
+          <div className="astro-grid">{Array.from({ length: 6 }).map((_, i) => <Skel key={i} />)}</div>
         ) : filtered.length === 0 && hasFilters ? (
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <Users className="mx-auto h-10 w-10 text-text-faint mb-3" />
-            <h3 className="font-display text-sm font-semibold text-text-primary mb-1">
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+            padding: '56px 24px', textAlign: 'center' }}>
+            <Users style={{ width: 36, height: 36, color: 'var(--text-faint)', margin: '0 auto 12px' }} />
+            <h3 className="font-display" style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px' }}>
               No astrologers found
             </h3>
-            <p className="text-sm text-text-muted">
-              No astrologers match your criteria. Try adjusting your filters.
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px' }}>
+              Try adjusting your filters to see more results.
             </p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={clearFilters}>
-              Clear Filters
-            </Button>
+            <button type="button" onClick={clearAll} style={{ padding: '8px 20px', borderRadius: 8,
+              border: '1px solid rgba(200,145,58,0.4)', background: 'transparent', color: 'var(--gold)',
+              fontSize: 13, cursor: 'pointer' }}>Clear Filters</button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((astrologer) => (
-              <AstrologerCard key={astrologer.astrologer_id} astrologer={astrologer} />
-            ))}
-          </div>
+          <div className="astro-grid">{filtered.map((a) => <Card key={a.astrologer_id} a={a} />)}</div>
         )}
       </section>
 
-      {/* ============================================================
-          Consultation Types
-          ============================================================ */}
-      <section>
-        <h2 className="mb-4 font-display text-lg font-semibold text-text-primary">
+      {/* ── Consultation Types ────────────────────────────────── */}
+      <section style={{ padding: '0 4px', marginBottom: 40 }}>
+        <h2 className="font-display" style={{ fontSize: 20, fontWeight: 400, color: 'var(--text-primary)', margin: '0 0 16px' }}>
           Consultation Types
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <ConsultationCard
-            icon={Video}
-            title="Video Call"
-            description="Face-to-face with screen sharing for chart review"
-            price="From &#8377;1,200/session"
-          />
-          <ConsultationCard
-            icon={MessageSquare}
-            title="Live Chat"
-            description="Real-time text consultation for quick questions"
-            price="From &#8377;500/session"
-          />
-          <ConsultationCard
-            icon={Phone}
-            title="Voice Call"
-            description="Audio consultations, perfect for on-the-go"
-            price="From &#8377;800/session"
-          />
-          <ConsultationCard
-            icon={FileText}
-            title="Detailed Report"
-            description="Written analysis delivered within 48 hours"
-            price="From &#8377;1,500/report"
-          />
+        <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
+          <ConCard icon={Video} title="Video Call" desc="Face-to-face with screen sharing for chart review" price="From &#8377;1,200/session" />
+          <ConCard icon={MessageSquare} title="Live Chat" desc="Real-time text consultation for quick questions" price="From &#8377;500/session" />
+          <ConCard icon={Phone} title="Voice Call" desc="Audio consultations, perfect for on-the-go" price="From &#8377;800/session" />
+          <ConCard icon={FileText} title="Detailed Report" desc="Written analysis delivered within 48 hours" price="From &#8377;1,500/report" />
         </div>
       </section>
 
-      {/* ============================================================
-          Bottom CTA — Join as Astrologer
-          ============================================================ */}
-      <section
-        className="rounded-2xl border px-6 py-10 text-center sm:px-12"
-        style={{
-          borderColor: 'rgba(212, 175, 55, 0.2)',
-          background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.04) 0%, rgba(212, 175, 55, 0.01) 100%)',
-        }}
-      >
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+      {/* ── Join CTA ──────────────────────────────────────────── */}
+      <section style={{ margin: '0 4px 32px', borderRadius: 14, padding: '48px 24px', textAlign: 'center',
+        background: 'radial-gradient(ellipse at 50% 50%, rgba(200,145,58,0.08) 0%, transparent 70%)',
+        border: '1px solid rgba(200,145,58,0.12)' }}>
+        <h2 className="font-display" style={{ fontSize: 22, fontWeight: 400, color: 'var(--text-primary)', margin: 0 }}>
           Are you a professional astrologer?
         </h2>
-        <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-text-muted">
-          Join our marketplace and connect with thousands of seekers worldwide.
-          Grow your practice with tools built for modern astrologers.
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 8, maxWidth: 400, marginInline: 'auto', lineHeight: 1.6 }}>
+          Join our marketplace and connect with seekers worldwide. Grow your practice with tools built for modern astrologers.
         </p>
         <a href="mailto:astrologers@josiam.com">
-          <Button
-            size="default"
-            className="mt-5 bg-gold text-black font-semibold hover:opacity-90"
-          >
-            Apply to Join
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
+          <button type="button" style={{ marginTop: 20, padding: '10px 28px', borderRadius: 8, border: 'none',
+            background: 'var(--gold)', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 20px rgba(200,145,58,0.3)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>
+            Apply to Join <ArrowRight style={{ width: 16, height: 16 }} />
+          </button>
         </a>
-        <p className="mt-3 text-[11px] text-text-faint">
+        <p style={{ marginTop: 14, fontSize: 11, color: 'var(--text-faint)' }}>
           Verified credentials &middot; 3+ years experience &middot; Background check
         </p>
       </section>
+
+      {/* ── Inline styles for grid + skeleton pulse ───────────── */}
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        .astro-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+        @media(max-width:768px) {
+          .astro-grid { grid-template-columns:1fr !important; }
+          section > div[style*="grid-template-columns: repeat(4"] { grid-template-columns:repeat(2,1fr) !important; }
+        }
+        @media(max-width:480px) {
+          section > div[style*="grid-template-columns: repeat(2"] { grid-template-columns:1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
