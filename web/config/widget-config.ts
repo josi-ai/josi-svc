@@ -21,6 +21,10 @@ export interface WidgetGridDimensions {
   minW?: number;
   /** Minimum height in grid rows */
   minH?: number;
+  /** Maximum width in grid columns */
+  maxW?: number;
+  /** Maximum height in grid rows */
+  maxH?: number;
 }
 
 export interface WidgetDefinition {
@@ -62,7 +66,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u2600',
     tradition: 'vedic',
     defaultSize: 'full',
-    gridDimensions: { w: 3, h: 2, minW: 2, minH: 2 },
+    gridDimensions: { w: 3, h: 3, minW: 2, minH: 2, maxH: 6 },
     category: 'Vedic',
   },
   {
@@ -74,7 +78,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u23F0',
     tradition: 'vedic',
     defaultSize: 'half',
-    gridDimensions: { w: 2, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 2, h: 3, minW: 1, minH: 2, maxH: 6 },
     category: 'Vedic',
   },
   {
@@ -86,7 +90,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDCCA',
     tradition: 'vedic',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 5 },
     category: 'Vedic',
   },
   {
@@ -98,7 +102,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDCC8',
     tradition: 'vedic',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 5 },
     category: 'Vedic',
   },
   {
@@ -110,7 +114,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83E\uDD16',
     tradition: 'ai',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 5 },
     category: 'General',
   },
   {
@@ -122,7 +126,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDCD6',
     tradition: 'vedic',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 4 },
     category: 'General',
   },
   {
@@ -134,7 +138,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83C\uDFEE',
     tradition: 'chinese',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 4 },
     category: 'Chinese',
   },
   {
@@ -146,7 +150,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u2B50',
     tradition: 'western',
     defaultSize: 'half',
-    gridDimensions: { w: 2, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 2, h: 3, minW: 1, minH: 2, maxH: 6 },
     category: 'Western',
   },
   {
@@ -158,7 +162,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDC64',
     tradition: 'general',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2 },
+    gridDimensions: { w: 1, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 4 },
     category: 'General',
   },
 ];
@@ -167,14 +171,14 @@ export const widgetCatalog: WidgetDefinition[] = [
 export const WIDGET_CATEGORIES = ['Vedic', 'Western', 'Chinese', 'General'] as const;
 
 export const defaultWidgets: WidgetInstance[] = [
-  { id: 'w1', type: 'todays-sky', size: 'full' },
-  { id: 'w2', type: 'chart-quick-view', size: 'third' },
+  { id: 'w1', type: 'todays-sky', size: 'full' },       // row 1: full width
+  { id: 'w2', type: 'chart-quick-view', size: 'third' }, // row 2: 3 across
   { id: 'w3', type: 'current-dasha', size: 'third' },
   { id: 'w4', type: 'ai-chat-access', size: 'third' },
-  { id: 'w5', type: 'muhurta-timeline', size: 'half' },
+  { id: 'w5', type: 'muhurta-timeline', size: 'half' },  // row 3: 2 + 1
   { id: 'w6', type: 'western-transit', size: 'half' },
-  { id: 'w7', type: 'bazi-summary', size: 'third' },
-  { id: 'w8', type: 'latest-reading', size: 'third' },
+  { id: 'w7', type: 'latest-reading', size: 'third' },   // row 4: 3 across
+  { id: 'w8', type: 'bazi-summary', size: 'third' },
   { id: 'w9', type: 'available-astrologers', size: 'third' },
 ];
 
@@ -185,27 +189,35 @@ export const defaultWidgets: WidgetInstance[] = [
 export function buildLayoutFromWidgets(
   widgets: WidgetInstance[],
   cols: number,
-): Array<{ i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number }> {
+): Array<{ i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number; maxW?: number; maxH?: number }> {
   let x = 0;
   let y = 0;
+  let rowMaxH = 0;
   return widgets.map((widget) => {
     const def = widgetCatalog.find((w) => w.type === widget.type);
-    const dim = def?.gridDimensions ?? { w: 1, h: 2 };
+    const dim = def?.gridDimensions ?? { w: 1, h: 3 };
     // Scale width to the number of columns available
     const w = Math.min(Math.round((dim.w / 3) * cols), cols);
     const minW = dim.minW ? Math.min(Math.round((dim.minW / 3) * cols), cols) : undefined;
-    const minH = dim.minH;
+    const maxW = dim.maxW ? Math.min(dim.maxW, cols) : cols;
 
     if (x + w > cols) {
       x = 0;
-      y += 2; // default row height
+      y += rowMaxH;
+      rowMaxH = 0;
     }
 
-    const item = { i: widget.id, x, y, w, h: dim.h, minW, minH };
+    const item = {
+      i: widget.id, x, y, w, h: dim.h,
+      minW, minH: dim.minH,
+      maxW, maxH: dim.maxH,
+    };
     x += w;
+    rowMaxH = Math.max(rowMaxH, dim.h);
     if (x >= cols) {
       x = 0;
-      y += dim.h;
+      y += rowMaxH;
+      rowMaxH = 0;
     }
     return item;
   });

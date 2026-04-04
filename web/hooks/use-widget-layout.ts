@@ -253,6 +253,8 @@ export function useWidgetLayout() {
                 ? Math.min(Math.round((def.gridDimensions.minW / 3) * cols), cols)
                 : undefined,
               minH: def.gridDimensions.minH,
+              maxW: def.gridDimensions.maxW ? Math.min(def.gridDimensions.maxW, cols) : cols,
+              maxH: def.gridDimensions.maxH,
             },
           ];
         }

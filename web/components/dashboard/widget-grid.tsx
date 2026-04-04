@@ -44,8 +44,8 @@ const widgetComponents: Record<
  * ------------------------------------------------------------------ */
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480 };
 const COLS = { lg: 3, md: 2, sm: 1, xs: 1 };
-const ROW_HEIGHT = 180;
-const MARGIN: [number, number] = [20, 20];
+const ROW_HEIGHT = 120;
+const MARGIN: [number, number] = [16, 16];
 
 /* ------------------------------------------------------------------
  * WidgetGrid component
@@ -120,7 +120,8 @@ export function WidgetGrid() {
           containerPadding={[0, 0]}
           draggableHandle=".widget-drag-handle"
           onLayoutChange={onLayoutChange}
-          isResizable={false}
+          isResizable={true}
+          resizeHandles={['se']}
           useCSSTransforms={true}
           compactType="vertical"
         >
@@ -222,6 +223,45 @@ export function WidgetGrid() {
           opacity: 0.08 !important;
           border-radius: 16px;
           border: 2px dashed var(--gold) !important;
+        }
+        /* Resize handle styling */
+        .react-grid-item > .react-resizable-handle {
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          bottom: 4px;
+          right: 4px;
+          cursor: se-resize;
+          opacity: 0;
+          transition: opacity 0.15s;
+        }
+        .react-grid-item:hover > .react-resizable-handle {
+          opacity: 0.5;
+        }
+        .react-grid-item > .react-resizable-handle::after {
+          content: '';
+          position: absolute;
+          right: 4px;
+          bottom: 4px;
+          width: 8px;
+          height: 8px;
+          border-right: 2px solid var(--text-faint);
+          border-bottom: 2px solid var(--text-faint);
+          border-radius: 0 0 2px 0;
+        }
+        /* While resizing */
+        .react-grid-item.resizing {
+          z-index: 100;
+          opacity: 0.9;
+        }
+        /* Widget content should overflow properly when resized */
+        .widget-grid-item > :last-child {
+          height: 100%;
+          overflow: auto;
+        }
+        .widget-grid-item > :last-child > div {
+          height: 100%;
+          min-height: 100%;
         }
       `}</style>
     </div>
