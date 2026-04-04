@@ -66,7 +66,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u2600',
     tradition: 'vedic',
     defaultSize: 'full',
-    gridDimensions: { w: 3, h: 4, minW: 2, minH: 3, maxH: 6 },
+    gridDimensions: { w: 3, h: 3, minW: 2, minH: 2, maxH: 6 },
     category: 'Vedic',
   },
   {
@@ -78,7 +78,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u23F0',
     tradition: 'vedic',
     defaultSize: 'half',
-    gridDimensions: { w: 2, h: 5, minW: 1, minH: 3, maxH: 8 },
+    gridDimensions: { w: 2, h: 4, minW: 1, minH: 3, maxH: 8 },
     category: 'Vedic',
   },
   {
@@ -90,7 +90,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDCCA',
     tradition: 'vedic',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 4, minW: 1, minH: 3, maxW: 2, maxH: 6 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 6 },
     category: 'Vedic',
   },
   {
@@ -102,7 +102,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83D\uDCC8',
     tradition: 'vedic',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 4, minW: 1, minH: 3, maxW: 2, maxH: 6 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 6 },
     category: 'Vedic',
   },
   {
@@ -114,7 +114,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\uD83E\uDD16',
     tradition: 'ai',
     defaultSize: 'third',
-    gridDimensions: { w: 1, h: 4, minW: 1, minH: 3, maxW: 2, maxH: 6 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 6 },
     category: 'General',
   },
   {
@@ -150,7 +150,7 @@ export const widgetCatalog: WidgetDefinition[] = [
     icon: '\u2B50',
     tradition: 'western',
     defaultSize: 'half',
-    gridDimensions: { w: 1, h: 4, minW: 1, minH: 3, maxH: 6 },
+    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxH: 6 },
     category: 'Western',
   },
   {

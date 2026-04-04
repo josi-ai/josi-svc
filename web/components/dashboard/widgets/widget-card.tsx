@@ -15,7 +15,7 @@ export function WidgetCard({ tradition, onRemove, children, className }: WidgetC
   return (
     <div
       className={`group relative bg-[var(--card)] border border-[var(--border)] rounded-2xl transition-colors ${className || ''}`}
-      style={{ boxShadow: 'var(--shadow-card)' }}
+      style={{ boxShadow: 'var(--shadow-card)', height: '100%', display: 'flex', flexDirection: 'column' }}
     >
       {/* Tradition badge */}
       <span
@@ -31,7 +31,9 @@ export function WidgetCard({ tradition, onRemove, children, className }: WidgetC
       >
         <X size={12} />
       </button>
-      {children}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+        {children}
+      </div>
     </div>
   )
 }
