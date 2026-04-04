@@ -6,6 +6,7 @@ from uuid import UUID
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select
 
 from josi.db.async_db import get_async_db as get_db
@@ -137,6 +138,18 @@ async def get_my_consultations(
             }
         )
 
+    except ProgrammingError:
+        # Table doesn't exist yet (migration not run) — return empty results
+        return ResponseModel(
+            success=True,
+            message="Retrieved 0 consultations",
+            data={
+                "consultations": [],
+                "total": 0,
+                "limit": limit,
+                "offset": offset
+            }
+        )
     except Exception as e:
         logger.error(
             "Failed to get user consultations",
