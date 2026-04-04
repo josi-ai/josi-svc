@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import AppSidebar from '@/components/layout/app-sidebar';
+import dynamic from 'next/dynamic';
+
+// Client-only render — the sidebar uses usePathname/useRouter/useAuth which are
+// client-only hooks, and its inline styles serialize differently on SSR vs client.
+// Rendering client-only eliminates hydration mismatches permanently.
+const AppSidebar = dynamic(() => import('@/components/layout/app-sidebar'), {
+  ssr: false,
+  loading: () => <div style={{ width: '100%', height: '100%', background: 'var(--sb-bg, #0a0e1a)' }} />,
+});
 
 export default function DashboardLayout({
   children,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { AvatarUser } from '@/components/ui/avatar';
@@ -30,20 +30,17 @@ function NavItem({
   isActive,
   collapsed,
   onClick,
-  mounted,
 }: {
   item: SidebarMenuItem;
   isActive: boolean;
   collapsed: boolean;
   onClick: () => void;
-  mounted: boolean;
 }) {
   const Icon = item.icon;
-  const counter = mounted ? counterValues[item.key] : undefined;
+  const counter = counterValues[item.key];
 
   return (
     <button
-      suppressHydrationWarning
       onClick={onClick}
       title={collapsed ? item.label : undefined}
       style={{
@@ -102,8 +99,6 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const allItems = Object.values(sidebarMenuItems);
   const activeKey = allItems.find(
@@ -115,7 +110,7 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
 
   return (
     <aside
-      suppressHydrationWarning
+
       style={{
         background: 'var(--sb-bg)',
         display: 'flex',
@@ -212,15 +207,13 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
 
       {/* Navigation */}
       <nav
-        suppressHydrationWarning
+  
         style={{
-          flexGrow: 1,
-          flexShrink: 1,
-          flexBasis: '0%',
+          flex: 1,
           minHeight: 0,
-          overflowY: 'auto' as const,
+          overflowY: 'auto',
           padding: collapsed ? '12px 6px' : '12px 10px',
-          position: 'relative' as const,
+          position: 'relative',
           zIndex: 1,
         }}
       >
@@ -246,7 +239,6 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
                 item={item}
                 isActive={activeKey === item.key}
                 collapsed={collapsed}
-                mounted={mounted}
                 onClick={() => router.push(item.path)}
               />
             ))}
