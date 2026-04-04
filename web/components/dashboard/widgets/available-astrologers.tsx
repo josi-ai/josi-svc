@@ -32,10 +32,15 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
     retry: false,
   })
 
-  const rawData = astrologersResponse?.data;
-  const astrologers: Astrologer[] = Array.isArray(rawData)
-    ? rawData
-    : (rawData as any)?.astrologers || [];
+  // Extract astrologers array — API returns { astrologers: [], total: 0 } nested in data
+  const responseData = astrologersResponse?.data;
+  let astrologers: Astrologer[] = [];
+  if (Array.isArray(responseData)) {
+    astrologers = responseData;
+  } else if (responseData && typeof responseData === 'object') {
+    const nested = (responseData as Record<string, unknown>).astrologers;
+    astrologers = Array.isArray(nested) ? nested as Astrologer[] : [];
+  }
 
   /* ---------- Helpers ---------- */
   function getInitial(a: Astrologer): string {
