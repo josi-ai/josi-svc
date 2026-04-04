@@ -43,6 +43,7 @@ function NavItem({
 
   return (
     <button
+      suppressHydrationWarning
       onClick={onClick}
       title={collapsed ? item.label : undefined}
       style={{
