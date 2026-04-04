@@ -167,7 +167,8 @@ function ChartContextSidebar({
   const moonSign = planets['Moon']?.sign || planets['moon']?.sign;
   const ascSign = ascendant?.sign;
   const currentDasha = dashaRes?.data?.current_dasha || chart?.chart_data?.dasha?.current_dasha;
-  const transits = (transitsRes?.data || []).slice(0, 3);
+  const rawTransits = transitsRes?.data;
+  const transits = (Array.isArray(rawTransits) ? rawTransits : (rawTransits as any)?.major_transits || []).slice(0, 3);
 
   const hasData = sunSign || moonSign || ascSign || currentDasha || transits.length > 0;
 
