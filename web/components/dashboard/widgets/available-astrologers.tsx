@@ -85,7 +85,7 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
         )}
 
         {/* Error or empty */}
-        {!isLoading && (isError || astrologers.length === 0) && (
+        {!isLoading && (isError || !Array.isArray(astrologers) || astrologers.length === 0) && (
           <div className="text-xs text-[var(--text-muted)] leading-relaxed mb-3">
             No astrologers available yet — check back soon
           </div>
@@ -94,6 +94,7 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
         {/* Astrologer cards */}
         {!isLoading &&
           !isError &&
+          Array.isArray(astrologers) &&
           astrologers.map((a, i) => (
             <div
               key={a.astrologer_id}
