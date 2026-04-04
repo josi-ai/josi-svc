@@ -67,11 +67,14 @@ async function request<T>(
   });
 
   if (!response.ok) {
-    // Session expired — redirect to login instead of showing a broken page
+    // Session expired — redirect to login instead of showing a broken page.
+    // Only redirect if we actually sent a token (stale session). If no token
+    // was available yet (auth still loading), the caller should handle the
+    // error gracefully rather than triggering a redirect loop.
     if (response.status === 401 && typeof window !== 'undefined') {
       const path = window.location.pathname;
       const isPublicRoute = path === '/' || path.startsWith('/auth/') || path === '/pricing';
-      if (!isPublicRoute) {
+      if (!isPublicRoute && token) {
         window.location.href = '/auth/login';
         // Return a never-resolving promise so the redirect completes
         return new Promise(() => {});

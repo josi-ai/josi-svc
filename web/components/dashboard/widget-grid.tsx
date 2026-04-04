@@ -44,7 +44,7 @@ const widgetComponents: Record<
  * ------------------------------------------------------------------ */
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480 };
 const COLS = { lg: 3, md: 2, sm: 1, xs: 1 };
-const ROW_HEIGHT = 120;
+const ROW_HEIGHT = 80;
 const MARGIN: [number, number] = [16, 16];
 
 /* ------------------------------------------------------------------
@@ -124,6 +124,8 @@ export function WidgetGrid() {
           resizeHandles={['se']}
           useCSSTransforms={true}
           compactType="vertical"
+          autoSize={true}
+          style={{ minHeight: 'auto' }}
         >
           {widgets.map((instance) => {
             const Component = widgetComponents[instance.type];

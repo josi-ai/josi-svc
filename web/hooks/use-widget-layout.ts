@@ -101,12 +101,12 @@ export function useWidgetLayout() {
 
   /* ---------- Fetch preferences from backend ---------- */
 
-  const { data: prefsData, isSuccess: prefsFetched } = useQuery({
+  const { data: prefsData, isSuccess: prefsFetched, isError: prefsError } = useQuery({
     queryKey: ['me-preferences'],
     queryFn: () => apiClient.get<UserPreferences>('/api/v1/me/preferences'),
     enabled: isAuthReady,
     staleTime: 5 * 60 * 1000,
-    retry: 1,
+    retry: false, // Don't retry on 401 — just use defaults
   });
 
   /* ---------- Save preferences mutation ---------- */
@@ -152,7 +152,18 @@ export function useWidgetLayout() {
     setMounted(true);
   }, [prefsFetched, prefsData]);
 
-  // If prefs fetch fails (e.g. not logged in), still load from localStorage
+  // If prefs fetch fails (e.g. 401 before auth is ready), still mount with defaults
+  useEffect(() => {
+    if (prefsError && !mounted) {
+      const localWidgets = loadLocalWidgets();
+      const localLayouts = loadLocalLayouts();
+      setWidgets(localWidgets);
+      setLayouts(localLayouts ?? buildDefaultLayouts(localWidgets));
+      setMounted(true);
+    }
+  }, [prefsError, mounted]);
+
+  // If auth is not ready (e.g. anonymous user), still load from localStorage
   useEffect(() => {
     if (!isAuthReady) {
       const localWidgets = loadLocalWidgets();
