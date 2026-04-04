@@ -14,11 +14,8 @@ import {
 } from '@/config/sidebar-config';
 
 // TODO: Replace with real data from API
-const counterValues: Record<string, string> = {
-  charts: '12',
-  ai: '7',
-  consultations: '1',
-};
+// No hardcoded counters — badges only shown when real data is available
+const counterValues: Record<string, string> = {};
 
 interface AppSidebarProps {
   collapsed?: boolean;
