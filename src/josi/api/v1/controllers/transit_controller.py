@@ -19,61 +19,16 @@ async def get_current_transits(
     person_service: PersonServiceDep,
     astrology_calculator: AstrologyCalculatorDep
 ) -> ResponseModel:
-    """
-    Get current planetary transits affecting a person's natal chart.
-    
-    Analyzes how current planetary positions interact with birth chart positions.
-    Focuses on slow-moving planets that have longer-lasting effects.
-    
-    Args:
-        person_id (UUID): Unique identifier of the person
-        person_service (PersonServiceDep): Injected person service
-        astrology_calculator (AstrologyCalculatorDep): Injected astrology calculator
-    
-    Returns:
-        ResponseModel: Success response containing:
-            - person_id: Person's UUID
-            - current_date: Current date/time (UTC)
-            - major_transits: List of significant transits with:
-                - planet: Transiting planet name
-                - current_sign: Planet's current zodiac sign
-                - current_degree: Exact degree within sign
-                - natal_sign: Planet's birth chart sign
-                - natal_degree: Birth chart degree
-                - aspect: Type of aspect formed (0°, 60°, 90°, 120°, 180°)
-                - orb: Exactness of aspect in degrees
-                - intensity: "Strong" (<2° orb) or "Moderate" (2-5° orb)
-                - effects: Interpretation of this transit
-            - current_planetary_positions: All planets' current positions:
-                - sign: Current zodiac sign
-                - degree: Degree within sign
-                - retrograde: True if planet is retrograde
-    
-    Raises:
-        HTTPException(404): If person not found
-    
-    Transit Planets Tracked:
-        - Jupiter: 12-year cycle, expansion and growth
-        - Saturn: 29.5-year cycle, discipline and karma
-        - Rahu: 18-year cycle, desires and ambition
-        - Ketu: 18-year cycle, spirituality and letting go
-    
-    Aspects Considered:
-        - Conjunction (0°): Fusion of energies
-        - Sextile (60°): Opportunities
-        - Square (90°): Challenges
-        - Trine (120°): Harmony
-        - Opposition (180°): Awareness
-    
-    Example:
-        GET /api/v1/transits/current/123e4567-e89b-12d3-a456-426614174000
-    """
+    """Get current planetary transits affecting a person's natal chart."""
     person = await person_service.get_person(person_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    
+
+    if not person.time_of_birth or person.latitude is None or person.longitude is None:
+        raise HTTPException(status_code=422, detail="Birth details incomplete. Update the profile with date, time, and place of birth.")
+
     current_time = datetime.utcnow()
-    
+
     # Calculate natal chart
     natal_chart = astrology_calculator.calculate_vedic_chart(
         person.time_of_birth, person.latitude, person.longitude

@@ -231,7 +231,7 @@ async def get_person_charts(
     Example:
         GET /api/v1/charts/person/123e4567?system=vedic
     """
-    charts = await chart_service.get_person_charts(person_id, system, chart_type)
+    charts = await chart_service.get_person_charts(person_id, chart_type=system or chart_type)
     
     return ResponseModel(
         success=True,

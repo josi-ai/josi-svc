@@ -68,7 +68,10 @@ async def get_vimshottari_dasha(
     person = await person_service.get_person(person_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    
+
+    if not person.time_of_birth or person.latitude is None or person.longitude is None:
+        raise HTTPException(status_code=422, detail="Birth details incomplete. Update the profile with date, time, and place of birth.")
+
     # Calculate natal chart to get Moon position
     natal_chart = astrology_calculator.calculate_vedic_chart(
         person.time_of_birth, person.latitude, person.longitude
@@ -164,7 +167,10 @@ async def get_yogini_dasha(
     person = await person_service.get_person(person_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    
+
+    if not person.time_of_birth or person.latitude is None or person.longitude is None:
+        raise HTTPException(status_code=422, detail="Birth details incomplete. Update the profile with date, time, and place of birth.")
+
     # Calculate natal chart to get Moon position
     natal_chart = astrology_calculator.calculate_vedic_chart(
         person.time_of_birth, person.latitude, person.longitude
