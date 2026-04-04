@@ -22,25 +22,20 @@ interface Astrologer {
 
 export default function AvailableAstrologers({ onRemove }: { onRemove: () => void }) {
   const {
-    data: astrologersResponse,
+    data: astrologers = [],
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<Astrologer[]>({
     queryKey: ['astrologers', 'search', 'widget'],
-    queryFn: () =>
-      apiClient.get<Astrologer[]>('/api/v1/astrologers/search?limit=3'),
+    queryFn: async (): Promise<Astrologer[]> => {
+      const res = await apiClient.get<any>('/api/v1/astrologers/search?limit=3');
+      const d = res?.data;
+      if (Array.isArray(d)) return d;
+      if (d && Array.isArray(d.astrologers)) return d.astrologers;
+      return [];
+    },
     retry: false,
   })
-
-  // Extract astrologers array — API returns { astrologers: [], total: 0 } nested in data
-  const responseData = astrologersResponse?.data;
-  let astrologers: Astrologer[] = [];
-  if (Array.isArray(responseData)) {
-    astrologers = responseData;
-  } else if (responseData && typeof responseData === 'object') {
-    const nested = (responseData as Record<string, unknown>).astrologers;
-    astrologers = Array.isArray(nested) ? nested as Astrologer[] : [];
-  }
 
   /* ---------- Helpers ---------- */
   function getInitial(a: Astrologer): string {
@@ -85,7 +80,7 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
         )}
 
         {/* Error or empty */}
-        {!isLoading && (isError || !Array.isArray(astrologers) || astrologers.length === 0) && (
+        {!isLoading && (isError || astrologers.length === 0) && (
           <div className="text-xs text-[var(--text-muted)] leading-relaxed mb-3">
             No astrologers available yet — check back soon
           </div>
@@ -94,7 +89,7 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
         {/* Astrologer cards */}
         {!isLoading &&
           !isError &&
-          Array.isArray(astrologers) &&
+          astrologers.length > 0 &&
           astrologers.map((a, i) => (
             <div
               key={a.astrologer_id}

@@ -34,7 +34,7 @@ const widgetComponents: Record<
   'western-transit': dynamic(() => import('./widgets/western-transit')),
   'latest-reading': dynamic(() => import('./widgets/latest-reading')),
   'available-astrologers': dynamic(
-    () => import('./widgets/astrologer-widget'),
+    () => import('./widgets/available-astrologers'),
   ),
   'bazi-summary': dynamic(() => import('./widgets/bazi-summary')),
 };
