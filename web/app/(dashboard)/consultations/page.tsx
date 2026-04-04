@@ -306,30 +306,57 @@ export default function ConsultationsPage() {
           </p>
         </div>
       ) : sorted.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
-          <Star className="mx-auto h-10 w-10 text-text-faint mb-3" />
-          <h3 className="font-display text-sm font-semibold text-text-primary mb-1">
-            {activeTab === 'All'
-              ? 'No consultations yet'
-              : activeTab === 'Upcoming'
-                ? 'No upcoming consultations'
-                : 'No past consultations'}
-          </h3>
-          <p className="text-sm text-text-muted mb-4">
-            {activeTab === 'All'
-              ? 'Browse astrologers to book your first session.'
-              : activeTab === 'Upcoming'
-                ? 'You have no scheduled sessions right now.'
-                : 'Your completed sessions will appear here.'}
+        <div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
+          {/* Illustration */}
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--gold-bg)]">
+            <Calendar className="h-10 w-10 text-gold" />
+          </div>
+
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            Your Consultations
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted">
+            Book a session with a professional astrologer to get personalized guidance
+            on your chart, life questions, and spiritual journey.
           </p>
-          {activeTab !== 'Past' && (
+
+          {/* Feature cards */}
+          <div className="mx-auto mt-8 grid max-w-xl grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <Video className="mx-auto mb-2 h-6 w-6 text-gold" />
+              <h4 className="text-xs font-semibold text-text-primary">Video Calls</h4>
+              <p className="mt-1 text-[11px] leading-snug text-text-muted">
+                Face-to-face sessions with screen sharing
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <MessageSquare className="mx-auto mb-2 h-6 w-6 text-gold" />
+              <h4 className="text-xs font-semibold text-text-primary">Live Chat</h4>
+              <p className="mt-1 text-[11px] leading-snug text-text-muted">
+                Real-time text consultations
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <Phone className="mx-auto mb-2 h-6 w-6 text-gold" />
+              <h4 className="text-xs font-semibold text-text-primary">Voice Calls</h4>
+              <p className="mt-1 text-[11px] leading-snug text-text-muted">
+                Audio consultations for on-the-go
+              </p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8">
             <Link href="/astrologers">
-              <Button variant="outline" size="sm" className="gap-1">
-                <Users className="h-3.5 w-3.5" />
+              <Button size="sm" className="gap-1 bg-gold text-black hover:bg-gold-bright">
                 Browse Astrologers
+                <span aria-hidden="true">&rarr;</span>
               </Button>
             </Link>
-          )}
+          </div>
+          <p className="mt-4 text-xs text-text-faint">
+            Your upcoming and past consultations will appear here.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

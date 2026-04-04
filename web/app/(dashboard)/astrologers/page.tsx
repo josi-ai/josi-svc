@@ -342,22 +342,49 @@ export default function AstrologersPage() {
           </p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
-          <Users className="mx-auto h-10 w-10 text-text-faint mb-3" />
-          <h3 className="font-display text-sm font-semibold text-text-primary mb-1">
-            {hasFilters ? 'No astrologers found' : 'No astrologers yet'}
-          </h3>
-          <p className="text-sm text-text-muted">
-            {hasFilters
-              ? 'No astrologers match your criteria. Try adjusting your filters.'
-              : 'No astrologers have registered yet — check back soon.'}
-          </p>
-          {hasFilters && (
+        hasFilters ? (
+          <div className="rounded-2xl border border-border bg-card p-12 text-center">
+            <Users className="mx-auto h-10 w-10 text-text-faint mb-3" />
+            <h3 className="font-display text-sm font-semibold text-text-primary mb-1">
+              No astrologers found
+            </h3>
+            <p className="text-sm text-text-muted">
+              No astrologers match your criteria. Try adjusting your filters.
+            </p>
             <Button variant="outline" size="sm" className="mt-4" onClick={clearFilters}>
               Clear Filters
             </Button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
+            {/* Illustration */}
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--gold-bg)]">
+              <Users className="h-10 w-10 text-gold" />
+            </div>
+
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              Astrologer Marketplace Coming Soon
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted">
+              We&apos;re onboarding verified professional astrologers from Vedic, Western, Chinese,
+              and Hellenistic traditions. Be among the first to connect with them.
+            </p>
+
+            {/* CTAs */}
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Button variant="outline" size="sm" disabled>
+                Notify me when astrologers are available
+              </Button>
+              <a
+                href="mailto:astrologers@josiam.com"
+                className="inline-flex items-center gap-1 text-sm font-medium text-gold transition-colors hover:text-gold-bright"
+              >
+                Are you an astrologer? Join us
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </div>
+        )
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

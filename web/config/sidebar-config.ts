@@ -144,8 +144,4 @@ export const sidebarGroups: SidebarGroup[] = [
     label: 'Connect',
     items: [items.astrologers, items.consultations],
   },
-  {
-    label: 'Account',
-    items: [items.settings],
-  },
 ];
