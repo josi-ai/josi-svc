@@ -318,7 +318,7 @@ function ChartContextSidebar({
               <div>
                 <div style={sectionLabel}>Active Transits</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {transits.map((t, i) => (
+                  {transits.map((t: any, i: number) => (
                     <div key={i} style={{
                       padding: '8px 10px', borderRadius: 8,
                       background: 'var(--background)', border: '1px solid var(--border)',

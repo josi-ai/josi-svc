@@ -3,22 +3,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-  Video,
-  MessageSquare,
-  Phone,
-  Mail,
-  Calendar,
-  Clock,
-  Star,
-  ArrowRight,
-  Users,
+  Video, MessageSquare, Phone, Mail, Calendar, Clock, ArrowRight,
 } from 'lucide-react';
 import Link from 'next/link';
 
-/* ---------- Types ---------- */
+/* ── Types ─────────────────────────────────────────────────────── */
 
 interface Consultation {
   consultation_id: string;
@@ -49,38 +39,38 @@ interface ConsultationsResponse {
   offset: number;
 }
 
-/* ---------- Constants ---------- */
+/* ── Constants ─────────────────────────────────────────────────── */
 
 const TABS = ['All', 'Upcoming', 'Past'] as const;
 type Tab = (typeof TABS)[number];
 
-const STATUS_STYLES: Record<string, { variant: 'blue' | 'default' | 'green' | 'destructive' | 'outline'; label: string }> = {
-  Pending:       { variant: 'outline',      label: 'Pending' },
-  Scheduled:     { variant: 'blue',         label: 'Scheduled' },
-  'In Progress': { variant: 'default',      label: 'In Progress' },
-  Completed:     { variant: 'green',        label: 'Completed' },
-  Cancelled:     { variant: 'destructive',  label: 'Cancelled' },
-  Refunded:      { variant: 'outline',      label: 'Refunded' },
-};
-
 const TYPE_ICONS: Record<string, React.ElementType> = {
-  Video: Video,
-  Chat: MessageSquare,
-  Voice: Phone,
-  Email: Mail,
+  Video, Chat: MessageSquare, Voice: Phone, Email: Mail,
 };
 
-const AVATAR_COLORS = [
-  'bg-amber-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600',
-  'bg-sky-600', 'bg-violet-600', 'bg-teal-600', 'bg-orange-600',
-];
+const TYPE_GRAD: Record<string, string> = {
+  Video: 'linear-gradient(135deg,#3B82F6,#60A5FA)',
+  Chat: 'linear-gradient(135deg,#7C3AED,#A855F7)',
+  Voice: 'linear-gradient(135deg,#059669,#34D399)',
+  Email: 'linear-gradient(135deg,#C8913A,#E0B060)',
+};
 
-function avatarColor(id: string): string {
-  const idx = id.charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[idx];
-}
+const STATUS_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
+  Pending:       { bg: 'transparent', fg: 'var(--text-muted)', border: '1px solid var(--border)' },
+  Scheduled:     { bg: 'rgba(200,145,58,0.12)', fg: '#D4A04A', border: '1px solid rgba(200,145,58,0.25)' },
+  'In Progress': { bg: 'rgba(200,145,58,0.18)', fg: '#C8913A', border: '1px solid rgba(200,145,58,0.3)' },
+  Completed:     { bg: 'rgba(52,211,153,0.12)', fg: '#34D399', border: '1px solid rgba(52,211,153,0.25)' },
+  Cancelled:     { bg: 'rgba(239,68,68,0.12)', fg: '#EF4444', border: '1px solid rgba(239,68,68,0.25)' },
+  Refunded:      { bg: 'transparent', fg: 'var(--text-muted)', border: '1px solid var(--border)' },
+};
 
-/* ---------- Helpers ---------- */
+const AREA_CLR: Record<string, [string, string]> = {
+  Career: ['rgba(80,160,210,0.10)','#50A0D2'], Relationship: ['rgba(218,122,148,0.10)','#DA7A94'],
+  Health: ['rgba(106,175,122,0.10)','#6AAF7A'], Finance: ['rgba(200,145,58,0.10)','#D4A04A'],
+  Spiritual: ['rgba(80,176,152,0.10)','#50B098'], Family: ['rgba(150,120,200,0.10)','#9678C8'],
+};
+
+/* ── Helpers ───────────────────────────────────────────────────── */
 
 function formatDateTime(dateStr: string | null): { date: string; time: string } | null {
   if (!dateStr) return null;
@@ -103,82 +93,96 @@ function isPast(c: Consultation): boolean {
     (!!c.scheduled_at && new Date(c.scheduled_at) < new Date());
 }
 
-/* ---------- Sub-components ---------- */
+/* ── Skeleton ──────────────────────────────────────────────────── */
 
 function ConsultationSkeleton() {
+  const bar = (w: string, h: number, mt = 0) => (
+    <div style={{ height: h, width: w, borderRadius: 6, background: 'var(--border)', marginTop: mt,
+      animation: 'pulse 2s infinite' }} />
+  );
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 animate-pulse">
-      <div className="flex items-start gap-4">
-        <div className="h-10 w-10 rounded-full bg-border" />
-        <div className="flex-1 space-y-2">
-          <div className="h-4 w-40 rounded bg-border" />
-          <div className="h-3 w-56 rounded bg-border" />
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: 20 }}>
+      <div style={{ display: 'flex', gap: 14 }}>
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--border)',
+          animation: 'pulse 2s infinite', flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          {bar('55%', 16)}
+          {bar('40%', 12, 10)}
         </div>
-        <div className="h-6 w-20 rounded-full bg-border" />
+        <div style={{ width: 72, height: 24, borderRadius: 20, background: 'var(--border)',
+          animation: 'pulse 2s infinite' }} />
       </div>
-      <div className="mt-4 flex gap-4">
-        <div className="h-3 w-32 rounded bg-border" />
-        <div className="h-3 w-24 rounded bg-border" />
+      <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+        {bar('120px', 12)}
+        {bar('80px', 12)}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        {bar('60px', 22)}
+        {bar('72px', 22)}
       </div>
     </div>
   );
 }
 
+/* ── Consultation Card ─────────────────────────────────────────── */
+
 function ConsultationCard({ consultation }: { consultation: Consultation }) {
   const dt = formatDateTime(consultation.scheduled_at);
-  const statusStyle = STATUS_STYLES[consultation.status_name] ?? { variant: 'outline' as const, label: consultation.status_name };
   const TypeIcon = TYPE_ICONS[consultation.consultation_type_name] ?? MessageSquare;
+  const grad = TYPE_GRAD[consultation.consultation_type_name] ?? TYPE_GRAD.Email;
+  const status = STATUS_STYLE[consultation.status_name] ?? STATUS_STYLE.Pending;
   const isLive = consultation.status_name === 'In Progress' || consultation.status_name === 'Scheduled';
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-gold/30">
-      <div className="flex items-start gap-3">
-        {/* Avatar */}
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white ${avatarColor(consultation.astrologer_id)}`}
-        >
-          <TypeIcon className="h-4 w-4" />
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+      padding: 20, transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s' }}
+      onMouseEnter={(e) => { const s = e.currentTarget.style; s.transform = 'translateY(-1px)'; s.boxShadow = '0 4px 20px rgba(0,0,0,0.18)'; s.borderColor = 'rgba(200,145,58,0.2)'; }}
+      onMouseLeave={(e) => { const s = e.currentTarget.style; s.transform = ''; s.boxShadow = ''; s.borderColor = 'var(--border)'; }}>
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        {/* Type icon */}
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: grad, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <TypeIcon style={{ width: 20, height: 20, color: '#fff' }} />
         </div>
 
-        {/* Main content */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-text-primary">
-                  {consultation.consultation_type_name} Consultation
-                </h3>
-                <Badge variant={statusStyle.variant}>{statusStyle.label}</Badge>
-              </div>
-              <p className="mt-0.5 text-xs text-text-muted">
-                Astrologer ID: {consultation.astrologer_id.slice(0, 8)}...
-              </p>
-            </div>
+        {/* Content */}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <h3 className="font-display" style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              {consultation.consultation_type_name} Consultation
+            </h3>
+            <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 20, fontSize: 10,
+              fontWeight: 600, letterSpacing: 0.3, background: status.bg, color: status.fg,
+              border: status.border, lineHeight: '18px' }}>
+              {consultation.status_name}
+            </span>
           </div>
 
-          {/* Details row */}
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+          <p style={{ marginTop: 4, fontSize: 12, color: 'var(--text-faint)' }}>
+            Astrologer: {consultation.astrologer_id.slice(0, 8)}...
+          </p>
+
+          {/* Date / time / duration / amount */}
+          <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-muted)' }}>
             {dt && (
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Calendar style={{ width: 13, height: 13, color: 'rgba(200,145,58,0.6)' }} />
                 {dt.date}
               </span>
             )}
             {dt && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Clock style={{ width: 13, height: 13, color: 'rgba(200,145,58,0.6)' }} />
                 {dt.time}
               </span>
             )}
             {consultation.duration_minutes && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {consultation.duration_minutes} min
-              </span>
+              <span>{consultation.duration_minutes} min</span>
             )}
             {consultation.total_amount != null && (
-              <span className="font-medium text-text-secondary">
-                {consultation.currency === 'USD' ? '$' : consultation.currency}
+              <span style={{ fontWeight: 600, color: 'var(--gold)' }}>
+                {consultation.currency === 'USD' ? '$' : consultation.currency === 'INR' ? '\u20B9' : consultation.currency}
                 {consultation.total_amount}
               </span>
             )}
@@ -186,43 +190,82 @@ function ConsultationCard({ consultation }: { consultation: Consultation }) {
 
           {/* Focus areas */}
           {consultation.focus_areas && consultation.focus_areas.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {consultation.focus_areas.slice(0, 3).map((area) => (
-                <Badge key={area} variant="outline" className="text-[10px] px-2 py-0.5">
-                  {area}
-                </Badge>
-              ))}
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {consultation.focus_areas.slice(0, 3).map((area) => {
+                const [bg, fg] = AREA_CLR[area] || ['rgba(100,100,100,0.08)', 'var(--text-muted)'];
+                return (
+                  <span key={area} style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 20,
+                    fontSize: 10, fontWeight: 600, letterSpacing: 0.3, background: bg, color: fg, lineHeight: '18px' }}>
+                    {area}
+                  </span>
+                );
+              })}
             </div>
           )}
 
-          {/* AI Summary snippet */}
+          {/* AI Summary */}
           {consultation.ai_summary && (
-            <p className="mt-2 line-clamp-2 text-xs text-text-muted italic">
+            <p style={{ marginTop: 10, fontSize: 12, lineHeight: 1.5, color: 'var(--text-muted)',
+              fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {consultation.ai_summary}
             </p>
           )}
         </div>
 
-        {/* Action button */}
-        <div className="shrink-0">
-          {isLive ? (
-            <Link href={`/consultations/${consultation.consultation_id}`}>
-              <Button size="sm" className="gap-1">
-                Join <ArrowRight className="h-3 w-3" />
-              </Button>
-            </Link>
-          ) : (
-            <Link href={`/consultations/${consultation.consultation_id}`}>
-              <Button variant="outline" size="sm">View</Button>
-            </Link>
-          )}
+        {/* Action */}
+        <div style={{ flexShrink: 0, alignSelf: 'center' }}>
+          <Link href={`/consultations/${consultation.consultation_id}`}>
+            {isLive ? (
+              <button type="button" style={{ padding: '8px 18px', borderRadius: 8, border: 'none',
+                background: 'var(--gold)', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 16px rgba(200,145,58,0.3)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>
+                Join <ArrowRight style={{ width: 14, height: 14 }} />
+              </button>
+            ) : (
+              <button type="button" style={{ padding: '8px 18px', borderRadius: 8,
+                border: '1px solid rgba(200,145,58,0.4)', background: 'transparent', color: 'var(--gold)',
+                fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { const s = e.currentTarget.style; s.background = 'rgba(200,145,58,0.1)'; s.borderColor = 'var(--gold)'; }}
+                onMouseLeave={(e) => { const s = e.currentTarget.style; s.background = 'transparent'; s.borderColor = 'rgba(200,145,58,0.4)'; }}>
+                View
+              </button>
+            )}
+          </Link>
         </div>
       </div>
     </div>
   );
 }
 
-/* ---------- Main Page ---------- */
+/* ── Consultation Type Card (empty state) ──────────────────────── */
+
+function TypeCard({ icon: Icon, title, desc, price, grad }: {
+  icon: React.ComponentType<{ style?: React.CSSProperties }>; title: string; desc: string; price: string; grad: string;
+}) {
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
+      padding: 20, textAlign: 'center', transition: 'border-color 0.2s', flex: '1 1 0' }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(200,145,58,0.25)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
+      <div style={{ width: 44, height: 44, borderRadius: '50%', background: grad, display: 'flex',
+        alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+        <Icon style={{ width: 20, height: 20, color: '#fff' }} />
+      </div>
+      <h3 className="font-display" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+        {title}
+      </h3>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>{desc}</p>
+      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--gold)', marginTop: 10 }}>{price}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Main Page
+   ═══════════════════════════════════════════════════════════════════ */
 
 export default function ConsultationsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('All');
@@ -234,25 +277,21 @@ export default function ConsultationsPage() {
   });
 
   const allConsultations = data?.data?.consultations ?? [];
+  const upcomingCount = allConsultations.filter(isUpcoming).length;
 
   const filtered = (() => {
     switch (activeTab) {
-      case 'Upcoming':
-        return allConsultations.filter(isUpcoming);
-      case 'Past':
-        return allConsultations.filter(isPast);
-      default:
-        return allConsultations;
+      case 'Upcoming': return allConsultations.filter(isUpcoming);
+      case 'Past': return allConsultations.filter(isPast);
+      default: return allConsultations;
     }
   })();
 
-  // Sort: upcoming first (by scheduled_at asc), then past (by scheduled_at desc)
   const sorted = [...filtered].sort((a, b) => {
     const aDate = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
     const bDate = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
     if (activeTab === 'Upcoming') return aDate - bDate;
     if (activeTab === 'Past') return bDate - aDate;
-    // "All" tab: upcoming first, then past
     const aUp = isUpcoming(a);
     const bUp = isUpcoming(b);
     if (aUp && !bUp) return -1;
@@ -261,110 +300,127 @@ export default function ConsultationsPage() {
   });
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="font-display text-display-md text-text-primary">Consultations</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          Manage your astrologer consultations and session history
+    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section style={{ padding: '40px 24px 32px', textAlign: 'center',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.08) 0%, transparent 70%)' }}>
+        <h1 className="font-display" style={{ fontSize: 30, fontWeight: 400, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
+          Your Sessions
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.6 }}>
+          Manage consultations with your astrologers
         </p>
+      </section>
+
+      {/* ── Tabs ──────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 4, padding: '4px', background: 'var(--card)',
+        borderRadius: 12, margin: '0 0 28px', border: '1px solid var(--border)' }}>
+        {TABS.map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <button key={tab} type="button" onClick={() => setActiveTab(tab)}
+              style={{ flex: 1, padding: '9px 16px', borderRadius: 9, border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 500, transition: 'all 0.2s',
+                background: active ? 'var(--gold)' : 'transparent',
+                color: active ? '#000' : 'var(--text-muted)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              {tab}
+              {tab === 'Upcoming' && upcomingCount > 0 && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  minWidth: 18, height: 18, padding: '0 5px', borderRadius: 20, fontSize: 10, fontWeight: 700,
+                  background: active ? 'rgba(0,0,0,0.2)' : 'rgba(200,145,58,0.15)',
+                  color: active ? '#000' : 'var(--gold)' }}>
+                  {upcomingCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-1 border-b border-border">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className="relative px-4 py-2.5 text-sm font-medium transition-colors"
-            style={{
-              color: activeTab === tab ? 'var(--gold)' : 'var(--text-muted)',
-              borderBottom: activeTab === tab ? '2px solid var(--gold)' : '2px solid transparent',
-            }}
-          >
-            {tab}
-            {tab === 'Upcoming' && allConsultations.filter(isUpcoming).length > 0 && (
-              <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--gold-bg)] px-1 text-[10px] font-semibold text-gold-bright">
-                {allConsultations.filter(isUpcoming).length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
+      {/* ── Content ───────────────────────────────────────────── */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <ConsultationSkeleton key={i} />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {Array.from({ length: 4 }).map((_, i) => <ConsultationSkeleton key={i} />)}
         </div>
       ) : isError ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
-          <p className="text-sm text-text-muted">
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+          padding: '48px 24px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
             Failed to load consultations. Please try again later.
           </p>
         </div>
       ) : sorted.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
-          {/* Illustration */}
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--gold-bg)]">
-            <Calendar className="h-10 w-10 text-gold" />
-          </div>
+        /* ── Empty State ──────────────────────────────────────── */
+        <div style={{ borderRadius: 14, padding: '48px 24px', textAlign: 'center', position: 'relative',
+          background: 'var(--card)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          {/* Atmospheric glow */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse at 50% 20%, rgba(200,145,58,0.06) 0%, transparent 60%)' }} />
 
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            Your Consultations
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted">
-            Book a session with a professional astrologer to get personalized guidance
-            on your chart, life questions, and spiritual journey.
-          </p>
+          <div style={{ position: 'relative' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(200,145,58,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Calendar style={{ width: 28, height: 28, color: 'var(--gold)' }} />
+            </div>
 
-          {/* Feature cards */}
-          <div className="mx-auto mt-8 grid max-w-xl grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <Video className="mx-auto mb-2 h-6 w-6 text-gold" />
-              <h4 className="text-xs font-semibold text-text-primary">Video Calls</h4>
-              <p className="mt-1 text-[11px] leading-snug text-text-muted">
-                Face-to-face sessions with screen sharing
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <MessageSquare className="mx-auto mb-2 h-6 w-6 text-gold" />
-              <h4 className="text-xs font-semibold text-text-primary">Live Chat</h4>
-              <p className="mt-1 text-[11px] leading-snug text-text-muted">
-                Real-time text consultations
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <Phone className="mx-auto mb-2 h-6 w-6 text-gold" />
-              <h4 className="text-xs font-semibold text-text-primary">Voice Calls</h4>
-              <p className="mt-1 text-[11px] leading-snug text-text-muted">
-                Audio consultations for on-the-go
-              </p>
-            </div>
-          </div>
+            <h2 className="font-display" style={{ fontSize: 22, fontWeight: 400, color: 'var(--text-primary)', margin: 0 }}>
+              Begin Your Journey
+            </h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.6, maxWidth: 380, marginInline: 'auto' }}>
+              Connect with a verified astrologer for personalized guidance on your chart, life path, and spiritual growth.
+            </p>
 
-          {/* CTA */}
-          <div className="mt-8">
-            <Link href="/astrologers">
-              <Button size="sm" className="gap-1 bg-gold text-black hover:bg-gold-bright">
-                Browse Astrologers
-                <span aria-hidden="true">&rarr;</span>
-              </Button>
-            </Link>
+            {/* Consultation type cards */}
+            <div style={{ display: 'flex', gap: 14, marginTop: 28 }}>
+              <TypeCard icon={Video} title="Video Session"
+                desc="Face-to-face chart reading with screen sharing"
+                price="From &#8377;1,200" grad="linear-gradient(135deg,#3B82F6,#60A5FA)" />
+              <TypeCard icon={MessageSquare} title="Live Chat"
+                desc="Real-time text guidance for quick questions"
+                price="From &#8377;500" grad="linear-gradient(135deg,#7C3AED,#A855F7)" />
+              <TypeCard icon={Phone} title="Voice Call"
+                desc="Audio consultations, perfect for on-the-go"
+                price="From &#8377;800" grad="linear-gradient(135deg,#059669,#34D399)" />
+            </div>
+
+            {/* CTA */}
+            <div style={{ marginTop: 28 }}>
+              <Link href="/astrologers">
+                <button type="button" style={{ padding: '10px 28px', borderRadius: 8, border: 'none',
+                  background: 'var(--gold)', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                  transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 20px rgba(200,145,58,0.3)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>
+                  Browse Astrologers <ArrowRight style={{ width: 16, height: 16 }} />
+                </button>
+              </Link>
+            </div>
+
+            <p style={{ marginTop: 16, fontSize: 11, color: 'var(--text-faint)' }}>
+              Your upcoming and past sessions will appear here
+            </p>
           </div>
-          <p className="mt-4 text-xs text-text-faint">
-            Your upcoming and past consultations will appear here.
-          </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {sorted.map((consultation) => (
-            <ConsultationCard key={consultation.consultation_id} consultation={consultation} />
+        /* ── Consultation List ────────────────────────────────── */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {sorted.map((c) => (
+            <ConsultationCard key={c.consultation_id} consultation={c} />
           ))}
         </div>
       )}
+
+      {/* ── Inline keyframes ──────────────────────────────────── */}
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        @media(max-width:640px) {
+          div[style*="flex"][style*="gap: 14"] > div[style*="flex: 1 1 0"] {
+            min-width: 100% !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
