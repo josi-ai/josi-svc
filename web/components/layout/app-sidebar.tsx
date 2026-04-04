@@ -211,12 +211,15 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
 
       {/* Navigation */}
       <nav
+        suppressHydrationWarning
         style={{
-          flex: 1,
+          flexGrow: 1,
+          flexShrink: 1,
+          flexBasis: '0%',
           minHeight: 0,
-          overflowY: 'auto',
+          overflowY: 'auto' as const,
           padding: collapsed ? '12px 6px' : '12px 10px',
-          position: 'relative',
+          position: 'relative' as const,
           zIndex: 1,
         }}
       >

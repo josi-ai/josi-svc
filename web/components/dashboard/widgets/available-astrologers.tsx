@@ -32,7 +32,10 @@ export default function AvailableAstrologers({ onRemove }: { onRemove: () => voi
     retry: false,
   })
 
-  const astrologers = astrologersResponse?.data || []
+  const rawData = astrologersResponse?.data;
+  const astrologers: Astrologer[] = Array.isArray(rawData)
+    ? rawData
+    : (rawData as any)?.astrologers || [];
 
   /* ---------- Helpers ---------- */
   function getInitial(a: Astrologer): string {

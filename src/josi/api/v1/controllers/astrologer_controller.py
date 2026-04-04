@@ -6,6 +6,7 @@ from uuid import UUID
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, func, and_, or_
 
 from josi.db.async_db import get_async_db as get_db
@@ -114,7 +115,7 @@ async def search_astrologers(
             Astrologer.verification_status_id == VerificationStatus.VERIFIED.id,
             Astrologer.is_deleted == False
         )
-        
+
         # Apply filters
         if specializations:
             # Check if any of the requested specializations match
@@ -124,7 +125,7 @@ async def search_astrologers(
                     func.json_contains(Astrologer.specializations, f'"{spec}"')
                 )
             query = query.where(or_(*spec_conditions))
-        
+
         if languages:
             # Check if any of the requested languages match
             lang_conditions = []
@@ -133,31 +134,31 @@ async def search_astrologers(
                     func.json_contains(Astrologer.languages, f'"{lang}"')
                 )
             query = query.where(or_(*lang_conditions))
-        
+
         if min_rating is not None:
             query = query.where(Astrologer.rating >= min_rating)
-        
+
         if max_hourly_rate is not None:
             query = query.where(Astrologer.hourly_rate <= max_hourly_rate)
-        
+
         # TODO: Implement real-time availability checking
         if is_available_now:
             query = query.where(Astrologer.is_active == True)
-        
+
         # Apply sorting
         sort_column = getattr(Astrologer, sort_by)
         if sort_order == "desc":
             query = query.order_by(sort_column.desc())
         else:
             query = query.order_by(sort_column.asc())
-        
+
         # Apply pagination
         query = query.limit(limit).offset(offset)
-        
+
         # Execute query
         result = await db.execute(query)
         astrologers = result.scalars().all()
-        
+
         # Format response
         astrologer_list = []
         for astrologer in astrologers:
@@ -181,7 +182,7 @@ async def search_astrologers(
                 profile_image_url=astrologer.profile_image_url,
                 joined_at=astrologer.joined_at
             ))
-        
+
         return ResponseModel(
             success=True,
             message=f"Found {len(astrologer_list)} astrologers",
@@ -192,7 +193,20 @@ async def search_astrologers(
                 "offset": offset
             }
         )
-        
+
+    except ProgrammingError:
+        # Table doesn't exist yet (migration not run) — return empty results
+        logger.warning("Astrologer table not found — returning empty results")
+        return ResponseModel(
+            success=True,
+            message="Found 0 astrologers",
+            data={
+                "astrologers": [],
+                "total": 0,
+                "limit": limit,
+                "offset": offset
+            }
+        )
     except Exception as e:
         logger.error(
             "Failed to search astrologers",

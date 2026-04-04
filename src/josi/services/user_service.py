@@ -282,6 +282,9 @@ class UserService:
                 )
                 user = await self.user_repository.create(user)
 
+        # Sync josi_* claims to auth provider so future JWTs include josi_user_id
+        await self.sync_provider_metadata(user)
+
         return CurrentUser(
             user_id=user.user_id,
             auth_provider_id=user.auth_provider_id,
