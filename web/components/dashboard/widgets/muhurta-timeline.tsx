@@ -4,418 +4,116 @@ import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
 import { WidgetCard } from './widget-card'
-
-/* ---------- Types ---------- */
-
-interface BestTimesResponse {
-  date: string
-  best_times: Array<{
-    start_time: string
-    end_time: string
-    quality: string
-    overall_score: number
-  }>
-  rahu_kaal: {
-    start: string
-    end: string
-    duration_minutes: number
-  }
-  general_advice: string
-}
-
-interface PanchangResponse {
-  detailed_panchang: {
-    sunrise: string
-    sunset: string
-    inauspicious_times: {
-      rahu_kaal: string
-      gulika_kaal: string
-      yamaganda: string
-    }
-    auspicious_times: {
-      abhijit_muhurta: string
-      brahma_muhurta: string
-    }
-  }
-}
-
-/* ---------- Types for timeline segments ---------- */
-
-interface TimeSegment {
-  label: string
-  startMinute: number // minutes from 6AM
-  endMinute: number
-  type: 'good' | 'avoid' | 'special' | 'neutral'
-}
+import Link from 'next/link'
 
 /* ---------- Helpers ---------- */
 
-const COLOR_MAP: Record<string, string> = {
-  good: 'var(--bar-good)',
-  avoid: 'var(--bar-avoid)',
-  special: 'var(--bar-special)',
-  neutral: 'var(--bar-neutral)',
+const DS = 360, DE = 1080 // 6AM, 6PM in minutes
+
+function pt(s: string): number {
+  if (!s) return 0
+  const ap = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (ap) { let h = +ap[1]; if (ap[3].toUpperCase() === 'PM' && h !== 12) h += 12; if (ap[3].toUpperCase() === 'AM' && h === 12) h = 0; return h * 60 + +ap[2] }
+  const h24 = s.match(/^(\d{1,2}):(\d{2})/); return h24 ? +h24[1] * 60 + +h24[2] : 0
 }
 
-const LEGEND: Array<{ label: string; type: string }> = [
-  { label: 'Good', type: 'good' },
-  { label: 'Rahu', type: 'avoid' },
-  { label: 'Shubh', type: 'special' },
-  { label: 'Neutral', type: 'neutral' },
-]
+function ft(m: number) { const h = Math.floor(m / 60), mn = m % 60, p = h >= 12 ? 'PM' : 'AM'; return `${h === 0 ? 12 : h > 12 ? h - 12 : h}:${String(mn).padStart(2, '0')} ${p}` }
 
-const TIME_LABELS = ['6 AM', '8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM']
+function pr(s: string) { const p = s.split(/\s*[-\u2013]\s*/); if (p.length !== 2) return null; const a = pt(p[0].trim()), b = pt(p[1].trim()); return a && b && a < b ? { start: a, end: b } : null }
 
-/** Parse "HH:MM" or "HH:MM AM/PM" into minutes from midnight */
-function parseTimeToMinutes(time: string): number {
-  if (!time) return 0
+type Seg = { s: number; e: number; t: string }
+const COLORS: Record<string, string> = { good: 'var(--bar-good)', rahu: 'var(--bar-avoid)', abhijit: 'var(--bar-special)' }
 
-  // Try "HH:MM AM/PM" format first
-  const amPmMatch = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
-  if (amPmMatch) {
-    let hours = parseInt(amPmMatch[1], 10)
-    const minutes = parseInt(amPmMatch[2], 10)
-    const period = amPmMatch[3].toUpperCase()
-    if (period === 'PM' && hours !== 12) hours += 12
-    if (period === 'AM' && hours === 12) hours = 0
-    return hours * 60 + minutes
-  }
-
-  // Try "HH:MM" (24-hour) format
-  const match24 = time.match(/^(\d{1,2}):(\d{2})$/)
-  if (match24) {
-    return parseInt(match24[1], 10) * 60 + parseInt(match24[2], 10)
-  }
-
-  return 0
-}
-
-/** Convert minutes-from-midnight to "h:mm AM/PM" */
-function minutesToLabel(m: number): string {
-  const h = Math.floor(m / 60)
-  const min = m % 60
-  const period = h >= 12 ? 'PM' : 'AM'
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-  return `${h12}:${min.toString().padStart(2, '0')} ${period}`
-}
-
-/** Build timeline segments from panchang timing data */
-function buildSegmentsFromPanchang(detail: PanchangResponse['detailed_panchang']): TimeSegment[] {
-  const DAY_START = 6 * 60 // 6 AM
-  const DAY_END = 18 * 60 // 6 PM
-
-  const segments: TimeSegment[] = []
-
-  // Parse inauspicious times
-  type TimePeriod = { label: string; start: number; end: number; type: 'avoid' | 'special' }
-  const periods: TimePeriod[] = []
-
-  // Rahu Kaal — could be "HH:MM - HH:MM" or "HH:MM AM - HH:MM PM" or just "HH:MM"
-  const rahuStr = detail.inauspicious_times?.rahu_kaal || ''
-  const rahuParts = rahuStr.split(/\s*-\s*/)
-  if (rahuParts.length === 2) {
-    const rs = parseTimeToMinutes(rahuParts[0].trim())
-    const re = parseTimeToMinutes(rahuParts[1].trim())
-    if (rs && re && rs < re) {
-      periods.push({ label: 'Rahu Kaal', start: rs, end: re, type: 'avoid' })
-    }
-  }
-
-  // Gulika Kaal
-  const gulikaStr = detail.inauspicious_times?.gulika_kaal || ''
-  const gulikaParts = gulikaStr.split(/\s*-\s*/)
-  if (gulikaParts.length === 2) {
-    const gs = parseTimeToMinutes(gulikaParts[0].trim())
-    const ge = parseTimeToMinutes(gulikaParts[1].trim())
-    if (gs && ge && gs < ge) {
-      periods.push({ label: 'Gulika', start: gs, end: ge, type: 'avoid' })
-    }
-  }
-
-  // Abhijit Muhurta (special / auspicious)
-  const abhijitStr = detail.auspicious_times?.abhijit_muhurta || ''
-  const abhijitParts = abhijitStr.split(/\s*-\s*/)
-  if (abhijitParts.length === 2) {
-    const as_ = parseTimeToMinutes(abhijitParts[0].trim())
-    const ae = parseTimeToMinutes(abhijitParts[1].trim())
-    if (as_ && ae && as_ < ae) {
-      periods.push({ label: 'Abhijit', start: as_, end: ae, type: 'special' })
-    }
-  }
-
-  // Sort periods by start time
-  periods.sort((a, b) => a.start - b.start)
-
-  // Fill timeline from DAY_START to DAY_END
-  let cursor = DAY_START
-  for (const p of periods) {
-    const pStart = Math.max(p.start, DAY_START)
-    const pEnd = Math.min(p.end, DAY_END)
-    if (pStart >= DAY_END || pEnd <= DAY_START) continue
-
-    if (cursor < pStart) {
-      segments.push({
-        label: 'Good',
-        startMinute: cursor,
-        endMinute: pStart,
-        type: 'good',
-      })
-    }
-    segments.push({
-      label: p.label,
-      startMinute: pStart,
-      endMinute: pEnd,
-      type: p.type,
-    })
-    cursor = pEnd
-  }
-  if (cursor < DAY_END) {
-    segments.push({
-      label: 'Good',
-      startMinute: cursor,
-      endMinute: DAY_END,
-      type: 'good',
-    })
-  }
-
-  return segments
-}
-
-/** Build segments from best-times-today response */
-function buildSegmentsFromBestTimes(data: BestTimesResponse): TimeSegment[] {
-  const DAY_START = 6 * 60
-  const DAY_END = 18 * 60
-  const segments: TimeSegment[] = []
-
-  type TimePeriod = { label: string; start: number; end: number; type: 'avoid' | 'special' | 'good' }
-  const periods: TimePeriod[] = []
-
-  // Rahu kaal
-  if (data.rahu_kaal) {
-    const rs = parseTimeToMinutes(data.rahu_kaal.start)
-    const re = parseTimeToMinutes(data.rahu_kaal.end)
-    if (rs && re && rs < re) {
-      periods.push({ label: 'Rahu Kaal', start: rs, end: re, type: 'avoid' })
-    }
-  }
-
-  // Best times
-  for (const t of data.best_times || []) {
-    const ts = parseTimeToMinutes(t.start_time)
-    const te = parseTimeToMinutes(t.end_time)
-    if (ts && te && ts < te) {
-      const type = t.quality === 'Excellent' ? 'special' : 'good'
-      periods.push({ label: t.quality || 'Good', start: ts, end: te, type })
-    }
-  }
-
-  periods.sort((a, b) => a.start - b.start)
-
-  let cursor = DAY_START
-  for (const p of periods) {
-    const pStart = Math.max(p.start, DAY_START)
-    const pEnd = Math.min(p.end, DAY_END)
-    if (pStart >= DAY_END || pEnd <= DAY_START) continue
-
-    if (cursor < pStart) {
-      segments.push({ label: 'Neutral', startMinute: cursor, endMinute: pStart, type: 'neutral' })
-    }
-    segments.push({ label: p.label, startMinute: pStart, endMinute: pEnd, type: p.type })
-    cursor = pEnd
-  }
-  if (cursor < DAY_END) {
-    segments.push({ label: 'Neutral', startMinute: cursor, endMinute: DAY_END, type: 'neutral' })
-  }
-
-  return segments
-}
-
-/* ---------- Skeleton ---------- */
-
-function Skeleton() {
-  return (
-    <div className="p-5 animate-pulse space-y-3">
-      <div className="h-3 w-28 rounded" style={{ background: 'var(--border)' }} />
-      <div className="h-7 w-full rounded-md" style={{ background: 'var(--border-subtle)' }} />
-      <div className="flex justify-between">
-        {TIME_LABELS.map((l) => (
-          <div
-            key={l}
-            className="h-2 w-6 rounded"
-            style={{ background: 'var(--border-subtle)' }}
-          />
-        ))}
-      </div>
-      <div className="h-10 w-full rounded-lg" style={{ background: 'var(--border-subtle)' }} />
-    </div>
-  )
+function buildSegs(rk: { start: number; end: number } | null, ab: { start: number; end: number } | null): Seg[] {
+  const ps: { s: number; e: number; t: string }[] = []
+  if (rk && rk.start < DE && rk.end > DS) ps.push({ s: Math.max(rk.start, DS), e: Math.min(rk.end, DE), t: 'rahu' })
+  if (ab && ab.start < DE && ab.end > DS) ps.push({ s: Math.max(ab.start, DS), e: Math.min(ab.end, DE), t: 'abhijit' })
+  ps.sort((a, b) => a.s - b.s)
+  const segs: Seg[] = []; let c = DS
+  for (const p of ps) { if (c < p.s) segs.push({ s: c, e: p.s, t: 'good' }); segs.push(p); c = p.e }
+  if (c < DE) segs.push({ s: c, e: DE, t: 'good' }); return segs
 }
 
 /* ---------- Component ---------- */
 
 export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) {
-  const { location, isLoading: profileLoading } = useDefaultProfile()
-
-  // Try best-times-today first
-  const {
-    data: bestTimesResponse,
-    isError: bestTimesError,
-    isLoading: bestTimesLoading,
-  } = useQuery({
-    queryKey: ['best-times-today', location.latitude, location.longitude],
-    queryFn: () =>
-      apiClient.get<BestTimesResponse>(
-        `/api/v1/muhurta/best-times-today?latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`
-      ),
-    enabled: !profileLoading,
-    staleTime: 1000 * 60 * 30,
-    retry: 0, // Don't retry — we have a fallback
-  })
-
-  // Fallback to panchang if best-times-today fails
+  const { location, isLoading: pl } = useDefaultProfile()
   const today = new Date().toISOString().split('T')[0] + 'T06:00:00'
-  const {
-    data: panchangResponse,
-    isLoading: panchangLoading,
-  } = useQuery({
-    queryKey: ['panchang-muhurta', today, location.latitude, location.longitude],
-    queryFn: () =>
-      apiClient.get<PanchangResponse>(
-        `/api/v1/panchang/?date=${encodeURIComponent(today)}&latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`
-      ),
-    enabled: !profileLoading && bestTimesError,
-    staleTime: 1000 * 60 * 30,
-    retry: 1,
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['muhurta-widget', today, location.latitude, location.longitude],
+    queryFn: async () => {
+      const res = await apiClient.get<any>(`/api/v1/panchang/?date=${encodeURIComponent(today)}&latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`)
+      const d = res.data?.detailed_panchang || res.data
+      const rk = pr(d?.inauspicious_times?.rahu_kaal || ''), ab = pr(d?.auspicious_times?.abhijit_muhurta || '')
+      return { rk: rk ? { start: ft(rk.start), end: ft(rk.end) } : null, ab: ab ? { start: ft(ab.start), end: ft(ab.end) } : null, sunrise: d?.sunrise || '', sunset: d?.sunset || '', segs: buildSegs(rk, ab) }
+    },
+    enabled: !pl, staleTime: 1000 * 60 * 30,
   })
 
-  const isLoading = profileLoading || bestTimesLoading || (bestTimesError && panchangLoading)
+  const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes()
+  const inR = nowMin >= DS && nowMin <= DE, pct = inR ? ((nowMin - DS) / (DE - DS)) * 100 : 0
 
-  // Build segments from whichever data source is available
-  let segments: TimeSegment[] = []
-  let rahuKaalLabel = ''
+  const status = !data ? null
+    : data.rk && nowMin >= pt(data.rk.start) && nowMin < pt(data.rk.end) ? { label: '\u26A0 Rahu Kalam active', color: 'var(--red)' }
+    : data.ab && nowMin >= pt(data.ab.start) && nowMin < pt(data.ab.end) ? { label: '\u2726 Auspicious period', color: 'var(--gold)' }
+    : { label: 'Neutral period', color: 'var(--text-faint)' }
 
-  const bestTimes = bestTimesResponse?.data
-  const panchangDetail = panchangResponse?.data?.detailed_panchang
+  if (isLoading || pl) return (
+    <WidgetCard tradition="vedic" onRemove={onRemove}>
+      <div className="p-5 animate-pulse space-y-3">
+        <div className="h-2.5 w-24 rounded" style={{ background: 'var(--border)' }} />
+        <div className="h-5 w-40 rounded" style={{ background: 'var(--border-subtle)' }} />
+        <div className="h-1.5 w-full rounded-full" style={{ background: 'var(--border-subtle)' }} />
+        <div className="grid grid-cols-2 gap-2">{[1,2,3,4].map(i => <div key={i} className="h-8 rounded" style={{ background: 'var(--border-subtle)' }} />)}</div>
+      </div>
+    </WidgetCard>
+  )
 
-  if (bestTimes) {
-    segments = buildSegmentsFromBestTimes(bestTimes)
-    if (bestTimes.rahu_kaal) {
-      rahuKaalLabel = `${bestTimes.rahu_kaal.start} - ${bestTimes.rahu_kaal.end}`
-    }
-  } else if (panchangDetail) {
-    segments = buildSegmentsFromPanchang(panchangDetail)
-    rahuKaalLabel = panchangDetail.inauspicious_times?.rahu_kaal || ''
-  }
-
-  // Find current-time marker position
-  const now = new Date()
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
-  const DAY_START = 6 * 60
-  const DAY_END = 18 * 60
-  const showMarker = nowMinutes >= DAY_START && nowMinutes <= DAY_END
-  const markerPercent = showMarker
-    ? ((nowMinutes - DAY_START) / (DAY_END - DAY_START)) * 100
-    : 0
-
-  const hasData = segments.length > 0
+  if (isError || !data) return (
+    <WidgetCard tradition="vedic" onRemove={onRemove}>
+      <div className="p-5">
+        <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 8 }}>Today&apos;s Muhurta</div>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>Unable to load timing data.</p>
+      </div>
+    </WidgetCard>
+  )
 
   return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
-      {isLoading ? (
-        <Skeleton />
-      ) : !hasData ? (
-        <div className="p-5">
-          <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3.5">
-            Muhurta Timeline
-          </div>
-          <p className="text-sm text-[var(--text-muted)]">
-            Unable to load muhurta data. Please try again later.
-          </p>
+      <div className="p-5">
+        <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 10 }}>Today&apos;s Muhurta</div>
+        {status && <div style={{ fontSize: 15, fontWeight: 600, color: status.color, marginBottom: 14, lineHeight: 1.2 }}>{status.label}</div>}
+
+        {/* Time bar */}
+        <div style={{ position: 'relative', height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', background: 'var(--border-subtle)', marginBottom: 4 }}>
+          {data.segs.map((seg, i) => <div key={i} style={{ flex: seg.e - seg.s, background: COLORS[seg.t] || 'var(--bar-neutral)', minWidth: 1 }} title={`${ft(seg.s)} - ${ft(seg.e)}`} />)}
+          {inR && <div style={{ position: 'absolute', top: -3, left: `${pct}%`, marginLeft: -4, width: 0, height: 0, borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '5px solid var(--gold-bright)', filter: 'drop-shadow(0 0 3px rgba(212,160,74,0.6))' }} />}
         </div>
-      ) : (
-        <div className="p-5">
-          <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3.5">
-            Muhurta Timeline
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-faint)', marginBottom: 14 }}><span>6 AM</span><span>12 PM</span><span>6 PM</span></div>
 
-          {/* Color-coded time bar */}
-          <div className="flex h-7 rounded-md overflow-hidden border border-[var(--border)] mb-2 relative">
-            {segments.map((seg, i) => {
-              const flex = seg.endMinute - seg.startMinute
-              return (
-                <div
-                  key={i}
-                  className="relative"
-                  style={{
-                    flex,
-                    background: COLOR_MAP[seg.type] || COLOR_MAP.neutral,
-                  }}
-                  title={`${seg.label}: ${minutesToLabel(seg.startMinute)} – ${minutesToLabel(seg.endMinute)}`}
-                />
-              )
-            })}
-            {/* Current time marker */}
-            {showMarker && (
-              <div
-                className="absolute top-[-4px] w-0.5 h-9 z-[2]"
-                style={{
-                  left: `${markerPercent}%`,
-                  background: 'var(--gold-bright)',
-                  boxShadow: '0 0 6px rgba(212,160,74,0.4)',
-                }}
-              >
-                <div
-                  className="absolute -top-[3px] -left-[3px] w-2 h-2 rounded-full"
-                  style={{ background: 'var(--gold-bright)' }}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Time labels */}
-          <div className="flex justify-between text-[9px] text-[var(--text-faint)] mb-3.5">
-            {TIME_LABELS.map((label) => (
-              <span key={label}>{label}</span>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex gap-3.5 mb-3">
-            {LEGEND.map((item) => (
-              <div key={item.label} className="flex items-center gap-1.5">
-                <div
-                  className="w-2.5 h-2.5 rounded-sm"
-                  style={{ background: COLOR_MAP[item.type] }}
-                />
-                <span className="text-[10px] text-[var(--text-muted)]">
-                  {item.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Rahu Kalam warning */}
-          {rahuKaalLabel && (
-            <div
-              className="py-2 px-3 rounded-lg border"
-              style={{
-                background: 'var(--red-bg)',
-                borderColor: 'rgba(196,93,74,0.15)',
-              }}
-            >
-              <div
-                className="text-[11px] font-semibold"
-                style={{ color: 'var(--red)' }}
-              >
-                &#9888; Rahu Kalam: {rahuKaalLabel}
-              </div>
-              <div className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                Avoid starting new ventures during this period
-              </div>
-            </div>
-          )}
+        {/* Key times */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+          {data.rk && <div style={{ padding: '6px 8px', borderRadius: 6, background: 'var(--red-bg)' }}>
+            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Rahu Kaal</div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--red)', marginTop: 1 }}>{data.rk.start} - {data.rk.end}</div>
+          </div>}
+          {data.ab && <div style={{ padding: '6px 8px', borderRadius: 6, background: 'var(--gold-bg)' }}>
+            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Abhijit</div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)', marginTop: 1 }}>{data.ab.start} - {data.ab.end}</div>
+          </div>}
+          {data.sunrise && <div style={{ padding: '6px 8px', borderRadius: 6 }}>
+            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Sunrise</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{data.sunrise}</div>
+          </div>}
+          {data.sunset && <div style={{ padding: '6px 8px', borderRadius: 6 }}>
+            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Sunset</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{data.sunset}</div>
+          </div>}
         </div>
-      )}
+
+        <Link href="/muhurta" style={{ display: 'inline-block', marginTop: 14, fontSize: 11, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none', letterSpacing: 0.3 }}>View full Muhurta &rarr;</Link>
+      </div>
     </WidgetCard>
   )
 }
