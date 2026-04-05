@@ -93,8 +93,8 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
             const isRahu = data.segs.some(s => s.t === 'rahu' && s.s < hourEnd && s.e > hourMin)
             const isAbhijit = data.segs.some(s => s.t === 'abhijit' && s.s < hourEnd && s.e > hourMin)
             const isNow = nowMin >= hourMin && nowMin < hourEnd
-            const bg = isRahu ? 'var(--bar-avoid)' : isAbhijit ? 'var(--bar-special)' : 'var(--surface)'
-            const border = isNow ? '2px solid var(--gold-bright)' : '1px solid var(--border)'
+            const bg = isRahu ? 'var(--bar-avoid)' : isAbhijit ? 'var(--bar-special)' : 'var(--border-subtle)'
+            const border = isNow ? '2px solid var(--gold-bright)' : '1px solid var(--border-strong)'
             return (
               <div key={i} style={{
                 flex: 1, height: 28, borderRadius: 4, background: bg, border,
