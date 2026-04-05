@@ -144,6 +144,65 @@ GraphQL is mounted at `/graphql` with merged schema (Organization + Person + Cha
 - pyswisseph for astronomical calculations, skyfield for modern data
 - Poetry for dependency management
 
+## Frontend Conventions (MUST FOLLOW)
+
+### File Size & Component Rules
+- **Max 300 lines per file.** If a page exceeds this, extract sub-components into the same directory or `components/`.
+- **One component per file.** No multiple exported components sharing state.
+- **No god components.** If a component has 3+ tabs, each tab is its own file.
+
+### Type Safety
+- **NEVER use `<any>` for API responses.** Define typed interfaces in `web/types/` and use them: `apiClient.get<Person[]>(...)`.
+- **Centralized types only.** All shared types (Person, Chart, PlanetData, etc.) live in `web/types/`. Do NOT redefine types in page files.
+- **Validate API responses in `queryFn`.** Transform and extract the data inside `queryFn` so the component only sees clean, typed data:
+  ```typescript
+  // GOOD: transform in queryFn
+  const { data: astrologers = [] } = useQuery<Astrologer[]>({
+    queryFn: async () => {
+      const res = await apiClient.get<any>('/api/v1/astrologers/search');
+      return Array.isArray(res.data?.astrologers) ? res.data.astrologers : [];
+    },
+  });
+
+  // BAD: transform after query
+  const { data } = useQuery({ queryFn: () => apiClient.get<any>('/api/v1/...') });
+  const items = data?.data?.items || data?.data || []; // fragile
+  ```
+
+### Styling Rules
+- **CSS variables for ALL colors.** No hardcoded hex values like `#3B82F6`. Use `var(--blue)`, `var(--gold)`, etc. from `globals.css`.
+- **Tailwind for layout** (flex, grid, padding, margin, responsive).
+- **CSS variables for theming** (colors, borders, shadows, typography).
+- **Inline styles ONLY for truly dynamic values** (calculated positions, conditional backgrounds based on data).
+- **No inline styles for common patterns.** If you write the same `style={{...}}` more than twice, extract it to a component or Tailwind class.
+
+### Widget System
+- Widget components live in `web/components/dashboard/widgets/`.
+- Each widget gets `{ onRemove: () => void }` as props.
+- Data fetching happens inside `queryFn` with proper typing — NOT after the query.
+- Use `useDefaultProfile()` for user location/profile data.
+- Widget types defined in `web/config/widget-config.ts`.
+- **After changing widget config, bump `CURRENT_VERSION` in `web/hooks/use-widget-layout.ts`** to invalidate stale localStorage.
+
+### Dashboard Layout
+- The entire `(dashboard)` route group renders client-only via `DashboardShell` (no SSR).
+- This prevents hydration mismatches. Do NOT add SSR to dashboard pages.
+- Public pages (landing, pricing, chart-calculator) DO use SSR.
+
+### Error Handling
+- Widget errors are caught by `WidgetErrorBoundary` in `widget-grid.tsx`.
+- API 401 errors only redirect to login if a token was actually sent (not during auth initialization).
+- API errors in widgets should show graceful fallback UI, not crash.
+
+### Database Import (Backend)
+- **ALWAYS use `from josi.db.async_db import get_async_db as get_db`**.
+- **NEVER use `from josi.core.database import get_db`** — that's a test stub that returns `None`.
+
+### Development Workflow
+- After changing widget-grid.tsx or widget imports, **restart the dev server** — Turbopack can't HMR class-based error boundaries or module-level dynamic imports.
+- The `josi redock up dev --local` CLI auto-kills port 1989 and sets `NODE_OPTIONS=--max-old-space-size=4096`.
+- Clear `.next` cache if you see "(stale)" in the Next.js error overlay.
+
 ## Deployment
 
 - Docker Compose for local dev (PostgreSQL, Redis, API with hot reload)
