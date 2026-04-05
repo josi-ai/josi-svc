@@ -86,33 +86,35 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
         {status && <div style={{ fontSize: 15, fontWeight: 600, color: status.color, marginBottom: 14, lineHeight: 1.2 }}>{status.label}</div>}
 
         {/* Time bar */}
-        <div style={{ position: 'relative', height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', background: 'var(--border-subtle)', marginBottom: 4 }}>
-          {data.segs.map((seg, i) => <div key={i} style={{ flex: seg.e - seg.s, background: COLORS[seg.t] || 'var(--bar-neutral)', minWidth: 1 }} title={`${ft(seg.s)} - ${ft(seg.e)}`} />)}
-          {inR && <div style={{ position: 'absolute', top: -3, left: `${pct}%`, marginLeft: -4, width: 0, height: 0, borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '5px solid var(--gold-bright)', filter: 'drop-shadow(0 0 3px rgba(212,160,74,0.6))' }} />}
+        <div style={{ position: 'relative', height: 14, borderRadius: 7, overflow: 'hidden', display: 'flex', background: 'var(--border-subtle)', marginBottom: 6 }}>
+          {data.segs.map((seg, i) => <div key={i} style={{ flex: seg.e - seg.s, background: COLORS[seg.t] || 'var(--bar-neutral)', minWidth: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            {(seg.e - seg.s) > 60 && <span style={{ fontSize: 8, fontWeight: 700, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', whiteSpace: 'nowrap' }}>{seg.t === 'rahu' ? 'Rahu' : seg.t === 'abhijit' ? 'Abhijit' : ''}</span>}
+          </div>)}
+          {inR && <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${pct}%`, width: 3, background: 'var(--gold-bright)', borderRadius: 2, boxShadow: '0 0 6px rgba(212,160,74,0.8)', zIndex: 2 }} />}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-faint)', marginBottom: 14 }}><span>6 AM</span><span>12 PM</span><span>6 PM</span></div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginBottom: 16 }}><span>6 AM</span><span>12 PM</span><span>6 PM</span></div>
 
         {/* Key times */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-          {data.rk && <div style={{ padding: '6px 8px', borderRadius: 6, background: 'var(--red-bg)' }}>
-            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Rahu Kaal</div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--red)', marginTop: 1 }}>{data.rk.start} - {data.rk.end}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {data.rk && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--red-bg)', border: '1px solid rgba(200,80,60,0.15)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--red)', marginBottom: 2 }}>Rahu Kaal</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{data.rk.start} – {data.rk.end}</div>
           </div>}
-          {data.ab && <div style={{ padding: '6px 8px', borderRadius: 6, background: 'var(--gold-bg)' }}>
-            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Abhijit</div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)', marginTop: 1 }}>{data.ab.start} - {data.ab.end}</div>
+          {data.ab && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--gold-bg)', border: '1px solid rgba(200,145,58,0.15)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--gold)', marginBottom: 2 }}>Abhijit Muhurta</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{data.ab.start} – {data.ab.end}</div>
           </div>}
-          {data.sunrise && <div style={{ padding: '6px 8px', borderRadius: 6 }}>
-            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Sunrise</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{data.sunrise}</div>
+          {data.sunrise && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--surface)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--text-faint)', marginBottom: 2 }}>Sunrise</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-secondary)' }}>{data.sunrise}</div>
           </div>}
-          {data.sunset && <div style={{ padding: '6px 8px', borderRadius: 6 }}>
-            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text-faint)' }}>Sunset</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{data.sunset}</div>
+          {data.sunset && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--surface)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--text-faint)', marginBottom: 2 }}>Sunset</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-secondary)' }}>{data.sunset}</div>
           </div>}
         </div>
 
-        <Link href="/muhurta" style={{ display: 'inline-block', marginTop: 14, fontSize: 11, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none', letterSpacing: 0.3 }}>View full Muhurta &rarr;</Link>
+        <Link href="/muhurta" style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none', letterSpacing: 0.3 }}>View full Muhurta &rarr;</Link>
       </div>
     </WidgetCard>
   )
