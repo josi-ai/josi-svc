@@ -179,7 +179,7 @@ export const defaultWidgets: WidgetInstance[] = [
   { id: 'w6', type: 'western-transit', size: 'half' },
   { id: 'w7', type: 'latest-reading', size: 'third' },   // row 4: 3 across
   { id: 'w8', type: 'bazi-summary', size: 'third' },
-  { id: 'w9', type: 'available-astrologers', size: 'third' },
+  // available-astrologers removed from defaults — no astrologers table yet, widget crashes on stale cache
 ];
 
 /**

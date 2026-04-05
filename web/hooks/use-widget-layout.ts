@@ -30,7 +30,7 @@ interface UserPreferences {
 const STORAGE_KEY = 'josi-dashboard-widgets';
 const LAYOUT_STORAGE_KEY = 'josi-dashboard-layouts';
 const VERSION_KEY = 'josi-dashboard-version';
-const CURRENT_VERSION = '2'; // Bump this to invalidate stale localStorage
+const CURRENT_VERSION = '3'; // Bump this to invalidate stale localStorage
 const DEBOUNCE_MS = 1000;
 
 const BREAKPOINT_COLS: Record<string, number> = {
