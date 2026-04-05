@@ -68,6 +68,53 @@
     --red: #B85545;
     --red-bg: rgba(184,85,69,0.07);
 
+    --amber: #B8860B;
+    --amber-bg: rgba(184,134,11,0.08);
+
+    --purple: #7B5AAF;
+    --purple-bg: rgba(123,90,175,0.09);
+
+    --indigo: #6366F1;
+    --indigo-bg: rgba(99,102,241,0.09);
+    --indigo-light: #818CF8;
+
+    --pink: #DB2777;
+    --pink-light: #F472B6;
+
+    --gray: #6B7280;
+    --gray-bg: rgba(107,114,128,0.09);
+
+    /* Semantic: Status */
+    --success: #528E62;
+    --success-bg: rgba(82,142,98,0.1);
+    --error: #B85545;
+    --error-bg: rgba(184,85,69,0.08);
+    --warning: #B8860B;
+    --warning-bg: rgba(184,134,11,0.08);
+
+    /* Semantic: Element Colors (Zodiac) */
+    --element-fire: #B85545;
+    --element-earth: #528E62;
+    --element-air: #A87E30;
+    --element-water: #5A6AB0;
+
+    /* Semantic: Planet Colors */
+    --planet-sun: #B85545;
+    --planet-moon: #5A6AB0;
+    --planet-mars: #B85545;
+    --planet-mercury: #528E62;
+    --planet-jupiter: #BA8E3A;
+    --planet-venus: #9A6EC0;
+    --planet-saturn: #6B7280;
+    --planet-rahu: #9CA3AF;
+    --planet-ketu: #78716C;
+
+    /* Semantic: Consultation type gradients */
+    --gradient-video: linear-gradient(135deg, #4A7FB5, #6AAFD8);
+    --gradient-chat: linear-gradient(135deg, #6A4FA0, #8B6EC0);
+    --gradient-voice: linear-gradient(135deg, #3A7A60, #5A9A7A);
+    --gradient-email: linear-gradient(135deg, #A87E30, #C8A050);
+
     /* Avatar */
     --avatar-bg: linear-gradient(135deg, #A87E30, #BA8E3A);
     --avatar-text: #FFFFFF;
@@ -184,6 +231,53 @@
 
     --red: #C45D4A;
     --red-bg: rgba(196,93,74,0.1);
+
+    --amber: #D4A04A;
+    --amber-bg: rgba(212,160,74,0.1);
+
+    --purple: #9678C8;
+    --purple-bg: rgba(150,120,200,0.12);
+
+    --indigo: #818CF8;
+    --indigo-bg: rgba(129,140,248,0.1);
+    --indigo-light: #A5B4FC;
+
+    --pink: #F472B6;
+    --pink-light: #F9A8D4;
+
+    --gray: #6B7280;
+    --gray-bg: rgba(107,114,128,0.12);
+
+    /* Semantic: Status */
+    --success: #6AAF7A;
+    --success-bg: rgba(106,175,122,0.12);
+    --error: #C45D4A;
+    --error-bg: rgba(196,93,74,0.1);
+    --warning: #D4A04A;
+    --warning-bg: rgba(212,160,74,0.1);
+
+    /* Semantic: Element Colors (Zodiac) */
+    --element-fire: #E5484D;
+    --element-earth: #46A758;
+    --element-air: #F5A623;
+    --element-water: #6E7BD0;
+
+    /* Semantic: Planet Colors */
+    --planet-sun: #E5484D;
+    --planet-moon: #6E7BD0;
+    --planet-mars: #E5484D;
+    --planet-mercury: #46A758;
+    --planet-jupiter: #F5A623;
+    --planet-venus: #C084FC;
+    --planet-saturn: #6B7280;
+    --planet-rahu: #9CA3AF;
+    --planet-ketu: #78716C;
+
+    /* Semantic: Consultation type gradients */
+    --gradient-video: linear-gradient(135deg, #3B82F6, #60A5FA);
+    --gradient-chat: linear-gradient(135deg, #7C3AED, #A855F7);
+    --gradient-voice: linear-gradient(135deg, #059669, #34D399);
+    --gradient-email: linear-gradient(135deg, #C8913A, #E0B060);
 
     /* Avatar */
     --avatar-bg: linear-gradient(135deg, #C8913A, #D4A04A);

@@ -44,17 +44,17 @@ const LANGUAGES = ['English', 'Hindi', 'Tamil', 'Malayalam', 'Mandarin'];
 const RATINGS = ['4.5+', '4.0+', '3.5+'];
 
 const AVATAR_GRAD: Record<string, string> = {
-  P: 'linear-gradient(135deg,#7C3AED,#A855F7)', D: 'linear-gradient(135deg,#0891B2,#22D3EE)',
-  S: 'linear-gradient(135deg,#059669,#34D399)', M: 'linear-gradient(135deg,#DB2777,#F472B6)',
-  L: 'linear-gradient(135deg,#C8913A,#E0B060)',
+  P: 'var(--gradient-chat)', D: 'linear-gradient(135deg,#0891B2,#22D3EE)',
+  S: 'var(--gradient-voice)', M: 'linear-gradient(135deg,var(--pink),var(--pink-light))',
+  L: 'var(--gradient-email)',
 };
 
 const TAG_CLR: Record<string, [string, string]> = {
-  Vedic: ['rgba(200,145,58,0.12)','#D4A04A'], Western: ['rgba(106,159,216,0.12)','#6A9FD8'],
-  Chinese: ['rgba(220,80,80,0.12)','#E07070'], Hellenistic: ['rgba(80,184,208,0.12)','#50B8D0'],
-  Medical: ['rgba(106,175,122,0.12)','#6AAF7A'], Karmic: ['rgba(150,120,200,0.12)','#9678C8'],
-  Relationship: ['rgba(218,122,148,0.12)','#DA7A94'], Career: ['rgba(80,160,210,0.12)','#50A0D2'],
-  Spiritual: ['rgba(80,176,152,0.12)','#50B098'], Predictive: ['rgba(224,168,72,0.12)','#E0A848'],
+  Vedic: ['var(--gold-bg)','var(--gold-bright)'], Western: ['var(--blue-bg)','var(--blue)'],
+  Chinese: ['var(--red-bg)','var(--red)'], Hellenistic: ['var(--ct-ai-bg)','var(--ic-transits)'],
+  Medical: ['var(--green-bg)','var(--green)'], Karmic: ['var(--purple-bg)','var(--purple)'],
+  Relationship: ['rgba(218,122,148,0.12)','var(--pink)'], Career: ['var(--blue-bg)','var(--blue)'],
+  Spiritual: ['var(--green-bg)','var(--green)'], Predictive: ['var(--gold-bg)','var(--gold-bright)'],
 };
 
 function fmtRate(cur: string, r: number) {
@@ -134,7 +134,7 @@ function Stars({ rating, reviews }: { rating: number; reviews: number }) {
   const full = Math.round(rating);
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ color: '#C8913A', fontSize: 13, letterSpacing: 1 }}>{'★'.repeat(full)}</span>
+      <span style={{ color: 'var(--gold)', fontSize: 13, letterSpacing: 1 }}>{'★'.repeat(full)}</span>
       {full < 5 && <span style={{ color: 'var(--text-faint)', fontSize: 13, letterSpacing: 1 }}>{'★'.repeat(5 - full)}</span>}
       <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 2 }}>
         {rating.toFixed(1)} ({reviews.toLocaleString()})
@@ -420,7 +420,7 @@ export default function AstrologersPage() {
         </p>
         <a href="mailto:astrologers@josiam.com">
           <button type="button" style={{ marginTop: 20, padding: '10px 28px', borderRadius: 8, border: 'none',
-            background: 'var(--gold)', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            background: 'var(--gold)', color: 'var(--primary-foreground)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
             transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 20px rgba(200,145,58,0.3)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>

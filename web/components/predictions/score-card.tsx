@@ -5,15 +5,15 @@
    ========================================================================== */
 
 export function scoreColor(score: number): string {
-  if (score > 7) return '#22c55e';
-  if (score >= 5) return '#eab308';
-  return '#ef4444';
+  if (score > 7) return 'var(--green)';
+  if (score >= 5) return 'var(--amber)';
+  return 'var(--red)';
 }
 
 export function scoreBg(score: number): string {
-  if (score > 7) return 'rgba(34,197,94,0.12)';
-  if (score >= 5) return 'rgba(234,179,8,0.12)';
-  return 'rgba(239,68,68,0.12)';
+  if (score > 7) return 'var(--green-bg)';
+  if (score >= 5) return 'var(--amber-bg)';
+  return 'var(--red-bg)';
 }
 
 export function OverallScoreCard({ score, summary }: { score: number; summary: string }) {

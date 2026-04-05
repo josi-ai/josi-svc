@@ -45,8 +45,8 @@ interface DashaResponse {
    ================================================================ */
 
 const PLANET_COLORS: Record<string, string> = {
-  Sun: '#E5484D', Moon: '#6E7BD0', Mars: '#E5484D', Mercury: '#46A758',
-  Jupiter: '#F5A623', Venus: '#C084FC', Saturn: '#6B7280', Rahu: '#9CA3AF', Ketu: '#78716C',
+  Sun: 'var(--planet-sun)', Moon: 'var(--planet-moon)', Mars: 'var(--planet-mars)', Mercury: 'var(--planet-mercury)',
+  Jupiter: 'var(--planet-jupiter)', Venus: 'var(--planet-venus)', Saturn: 'var(--planet-saturn)', Rahu: 'var(--planet-rahu)', Ketu: 'var(--planet-ketu)',
 };
 const pColor = (p: string) => PLANET_COLORS[p] || 'var(--text-muted)';
 
@@ -229,19 +229,19 @@ function DashaInterpretationPanel({ planet, startDate, endDate, onClose }: {
         {/* Do / Don't */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
           <div>
-            <p style={{ ...LABEL, color: '#46A758', marginBottom: 8 }}>Do</p>
+            <p style={{ ...LABEL, color: 'var(--green)', marginBottom: 8 }}>Do</p>
             {interp.doAdvice.map((item) => (
               <div key={item} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#46A758', fontSize: 12, lineHeight: '18px' }}>+</span>
+                <span style={{ color: 'var(--green)', fontSize: 12, lineHeight: '18px' }}>+</span>
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: '18px' }}>{item}</span>
               </div>
             ))}
           </div>
           <div>
-            <p style={{ ...LABEL, color: '#E5484D', marginBottom: 8 }}>Don&apos;t</p>
+            <p style={{ ...LABEL, color: 'var(--red)', marginBottom: 8 }}>Don&apos;t</p>
             {interp.dontAdvice.map((item) => (
               <div key={item} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#E5484D', fontSize: 12, lineHeight: '18px' }}>&minus;</span>
+                <span style={{ color: 'var(--red)', fontSize: 12, lineHeight: '18px' }}>&minus;</span>
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: '18px' }}>{item}</span>
               </div>
             ))}
@@ -561,7 +561,7 @@ export default function DashaPage() {
       {/* Error */}
       {error && !isLoading && (
         <div style={{ ...CARD, padding: 32, textAlign: 'center' as const }}>
-          <p style={{ fontSize: 14, color: '#E5484D', marginBottom: 8 }}>Failed to load dasha data</p>
+          <p style={{ fontSize: 14, color: 'var(--red)', marginBottom: 8 }}>Failed to load dasha data</p>
           <p style={{ fontSize: 12, color: 'var(--text-faint)' }}>{(error as Error).message}</p>
         </div>
       )}

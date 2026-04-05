@@ -166,7 +166,7 @@ export default function NewChartPage() {
           time_of_birth: formatTimeForApi(timeOfBirth, dateOfBirth),
           place_of_birth: placeOfBirth || null,
         });
-        personId = personRes.data.person_id;
+        personId = personRes.data!.person_id;
       }
 
       // Step 2: Calculate chart
@@ -483,7 +483,7 @@ export default function NewChartPage() {
                 padding: '10px 14px',
                 borderRadius: 8,
                 fontSize: 13,
-                color: '#E5484D',
+                color: 'var(--red)',
                 background: 'rgba(229,72,77,0.08)',
                 border: '1px solid rgba(229,72,77,0.2)',
               }}
@@ -502,7 +502,7 @@ export default function NewChartPage() {
               padding: '12px 24px',
               fontSize: 15,
               fontWeight: 600,
-              color: '#060A14',
+              color: 'var(--primary-foreground)',
               background: isSubmitting ? 'var(--gold-bright)' : 'var(--gold)',
               border: 'none',
               borderRadius: 10,

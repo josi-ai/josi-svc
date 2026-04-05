@@ -54,8 +54,8 @@ function formatPercent(val?: number): string {
 function qualityColor(quality?: string): string {
   if (!quality) return 'var(--text-muted)';
   const q = quality.toLowerCase();
-  if (q === 'auspicious') return '#46A758';
-  if (q === 'inauspicious') return '#E5484D';
+  if (q === 'auspicious') return 'var(--bar-good)';
+  if (q === 'inauspicious') return 'var(--bar-avoid)';
   return 'var(--text-secondary)';
 }
 
@@ -74,8 +74,8 @@ function overallDayQuality(tithi?: PanchangElement, nakshatra?: PanchangElement,
   if (nakshatra?.ruler) scores.push(0.5); // neutral default
 
   const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0.5;
-  if (avg >= 0.7) return { label: 'Auspicious Day', color: '#46A758' };
-  if (avg <= 0.3) return { label: 'Challenging Day', color: '#E5484D' };
+  if (avg >= 0.7) return { label: 'Auspicious Day', color: 'var(--bar-good)' };
+  if (avg <= 0.3) return { label: 'Challenging Day', color: 'var(--bar-avoid)' };
   return { label: 'Mixed Day', color: 'var(--gold)' };
 }
 
@@ -145,7 +145,7 @@ function TimingRow({ label, timeRange, auspicious }: { label: string; timeRange?
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: auspicious ? '#46A758' : '#E5484D',
+            background: auspicious ? 'var(--bar-good)' : 'var(--bar-avoid)',
             flexShrink: 0,
           }}
         />
@@ -228,7 +228,7 @@ function SunMoonCard({ data }: { data: PanchangData }) {
         <div style={{ textAlign: 'center', padding: 16, borderRadius: 10, background: 'var(--background)' }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>{'\uD83C\uDF05'}</div>
           <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>Sunset</p>
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#E5484D', fontFamily: 'monospace' }}>{data.sunset || '\u2014'}</p>
+          <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--bar-avoid)', fontFamily: 'monospace' }}>{data.sunset || '\u2014'}</p>
         </div>
       </div>
       {data.ayanamsa != null && (
@@ -555,9 +555,9 @@ function MonthlyCalendar({
           const isToday = date === today;
           const qualColor = dayQualityColor(data);
           const bgTint = data
-            ? qualColor === '#46A758' ? 'rgba(70,167,88,0.08)'
-              : qualColor === '#E5484D' ? 'rgba(229,72,77,0.08)'
-              : 'rgba(212,175,55,0.06)'
+            ? qualColor === 'var(--bar-good)' ? 'var(--green-bg)'
+              : qualColor === 'var(--bar-avoid)' ? 'var(--red-bg)'
+              : 'var(--gold-bg-subtle)'
             : 'transparent';
 
           return (
@@ -807,7 +807,7 @@ export default function PanchangPage() {
                 textAlign: 'center',
               }}
             >
-              <p style={{ fontSize: 14, color: '#E5484D', marginBottom: 8 }}>Failed to load panchang</p>
+              <p style={{ fontSize: 14, color: 'var(--red)', marginBottom: 8 }}>Failed to load panchang</p>
               <p style={{ fontSize: 12, color: 'var(--text-faint)' }}>{(error as Error).message}</p>
             </div>
           )}

@@ -19,7 +19,7 @@ export function DoshaSection({ doshas }: { doshas: { name: string; description: 
         style={{
           fontSize: 15,
           fontWeight: 600,
-          color: '#ef4444',
+          color: 'var(--red)',
           marginBottom: 10,
           display: 'flex',
           alignItems: 'center',

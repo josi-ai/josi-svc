@@ -49,25 +49,25 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
 };
 
 const TYPE_GRAD: Record<string, string> = {
-  Video: 'linear-gradient(135deg,#3B82F6,#60A5FA)',
-  Chat: 'linear-gradient(135deg,#7C3AED,#A855F7)',
-  Voice: 'linear-gradient(135deg,#059669,#34D399)',
-  Email: 'linear-gradient(135deg,#C8913A,#E0B060)',
+  Video: 'var(--gradient-video)',
+  Chat: 'var(--gradient-chat)',
+  Voice: 'var(--gradient-voice)',
+  Email: 'var(--gradient-email)',
 };
 
 const STATUS_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
   Pending:       { bg: 'transparent', fg: 'var(--text-muted)', border: '1px solid var(--border)' },
-  Scheduled:     { bg: 'rgba(200,145,58,0.12)', fg: '#D4A04A', border: '1px solid rgba(200,145,58,0.25)' },
-  'In Progress': { bg: 'rgba(200,145,58,0.18)', fg: '#C8913A', border: '1px solid rgba(200,145,58,0.3)' },
-  Completed:     { bg: 'rgba(52,211,153,0.12)', fg: '#34D399', border: '1px solid rgba(52,211,153,0.25)' },
-  Cancelled:     { bg: 'rgba(239,68,68,0.12)', fg: '#EF4444', border: '1px solid rgba(239,68,68,0.25)' },
+  Scheduled:     { bg: 'var(--gold-bg)', fg: 'var(--gold-bright)', border: '1px solid rgba(200,145,58,0.25)' },
+  'In Progress': { bg: 'var(--gold-bg)', fg: 'var(--gold)', border: '1px solid rgba(200,145,58,0.3)' },
+  Completed:     { bg: 'var(--green-bg)', fg: 'var(--green)', border: '1px solid rgba(52,211,153,0.25)' },
+  Cancelled:     { bg: 'var(--red-bg)', fg: 'var(--red)', border: '1px solid rgba(239,68,68,0.25)' },
   Refunded:      { bg: 'transparent', fg: 'var(--text-muted)', border: '1px solid var(--border)' },
 };
 
 const AREA_CLR: Record<string, [string, string]> = {
-  Career: ['rgba(80,160,210,0.10)','#50A0D2'], Relationship: ['rgba(218,122,148,0.10)','#DA7A94'],
-  Health: ['rgba(106,175,122,0.10)','#6AAF7A'], Finance: ['rgba(200,145,58,0.10)','#D4A04A'],
-  Spiritual: ['rgba(80,176,152,0.10)','#50B098'], Family: ['rgba(150,120,200,0.10)','#9678C8'],
+  Career: ['var(--blue-bg)','var(--blue)'], Relationship: ['rgba(218,122,148,0.10)','var(--pink)'],
+  Health: ['var(--green-bg)','var(--green)'], Finance: ['var(--gold-bg)','var(--gold-bright)'],
+  Spiritual: ['var(--green-bg)','var(--green)'], Family: ['var(--purple-bg)','var(--purple)'],
 };
 
 /* ── Helpers ───────────────────────────────────────────────────── */
@@ -218,7 +218,7 @@ function ConsultationCard({ consultation }: { consultation: Consultation }) {
           <Link href={`/consultations/${consultation.consultation_id}`}>
             {isLive ? (
               <button type="button" style={{ padding: '8px 18px', borderRadius: 8, border: 'none',
-                background: 'var(--gold)', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                background: 'var(--gold)', color: 'var(--primary-foreground)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                 transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 5 }}
                 onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 16px rgba(200,145,58,0.3)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>
@@ -323,14 +323,14 @@ export default function ConsultationsPage() {
               style={{ flex: 1, padding: '9px 16px', borderRadius: 9, border: 'none', cursor: 'pointer',
                 fontSize: 13, fontWeight: 500, transition: 'all 0.2s',
                 background: active ? 'var(--gold)' : 'transparent',
-                color: active ? '#000' : 'var(--text-muted)',
+                color: active ? 'var(--primary-foreground)' : 'var(--text-muted)',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               {tab}
               {tab === 'Upcoming' && upcomingCount > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   minWidth: 18, height: 18, padding: '0 5px', borderRadius: 20, fontSize: 10, fontWeight: 700,
                   background: active ? 'rgba(0,0,0,0.2)' : 'rgba(200,145,58,0.15)',
-                  color: active ? '#000' : 'var(--gold)' }}>
+                  color: active ? 'var(--primary-foreground)' : 'var(--gold)' }}>
                   {upcomingCount}
                 </span>
               )}
@@ -389,7 +389,7 @@ export default function ConsultationsPage() {
             <div style={{ marginTop: 28 }}>
               <Link href="/astrologers">
                 <button type="button" style={{ padding: '10px 28px', borderRadius: 8, border: 'none',
-                  background: 'var(--gold)', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                  background: 'var(--gold)', color: 'var(--primary-foreground)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
                   transition: 'opacity 0.2s, box-shadow 0.2s', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.boxShadow = '0 0 20px rgba(200,145,58,0.3)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.boxShadow = 'none'; }}>

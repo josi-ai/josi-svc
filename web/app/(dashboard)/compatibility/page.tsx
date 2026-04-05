@@ -504,7 +504,7 @@ export default function CompatibilityPage() {
             borderRadius: 10,
             border: 'none',
             background: canCalculate ? 'var(--gold)' : 'var(--border)',
-            color: canCalculate ? '#fff' : 'var(--text-faint)',
+            color: canCalculate ? 'var(--primary-foreground)' : 'var(--text-faint)',
             fontSize: 14,
             fontWeight: 700,
             cursor: canCalculate ? 'pointer' : 'not-allowed',

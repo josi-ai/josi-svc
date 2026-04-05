@@ -214,7 +214,7 @@ export default function PredictionsPage() {
 
       {/* Error */}
       {personId && isError && (
-        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#ef4444' }}>
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--red)' }}>
           <AlertTriangle size={40} style={{ marginBottom: 12 }} />
           <p style={{ fontSize: 14 }}>{(error as Error)?.message || 'Failed to load predictions.'}</p>
         </div>
@@ -268,7 +268,7 @@ export default function PredictionsPage() {
           {/* Caution periods */}
           {prediction.caution_periods && prediction.caution_periods.length > 0 && (
             <div style={{ marginTop: 16, background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 12, padding: 18 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 600, color: '#d97706', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--amber)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AlertTriangle size={16} />
                 Caution Periods
               </h3>

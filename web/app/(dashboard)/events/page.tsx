@@ -27,12 +27,12 @@ interface UserProfile {
 /* ---------- Constants ---------- */
 
 const TRADITION_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  Hindu:     { bg: 'rgba(245,166,35,0.12)', text: '#D4940A', dot: '#F5A623' },
-  Buddhist:  { bg: 'rgba(59,130,246,0.12)', text: '#2563EB', dot: '#3B82F6' },
-  Sikh:      { bg: 'rgba(249,115,22,0.12)', text: '#C2410C', dot: '#F97316' },
-  Jain:      { bg: 'rgba(34,197,94,0.12)',  text: '#15803D', dot: '#22C55E' },
-  Islam:     { bg: 'rgba(20,184,166,0.12)', text: '#0D9488', dot: '#14B8A6' },
-  Christian: { bg: 'rgba(168,85,247,0.12)', text: '#7C3AED', dot: '#A855F7' },
+  Hindu:     { bg: 'var(--gold-bg)', text: 'var(--amber)', dot: 'var(--gold-bright)' },
+  Buddhist:  { bg: 'var(--blue-bg)', text: 'var(--blue)', dot: 'var(--blue)' },
+  Sikh:      { bg: 'var(--amber-bg)', text: 'var(--amber)', dot: 'var(--amber)' },
+  Jain:      { bg: 'var(--green-bg)', text: 'var(--green)', dot: 'var(--green)' },
+  Islam:     { bg: 'var(--green-bg)', text: 'var(--green)', dot: 'var(--green)' },
+  Christian: { bg: 'var(--purple-bg)', text: 'var(--purple)', dot: 'var(--purple)' },
 };
 
 const ALL_TRADITIONS = Object.keys(TRADITION_COLORS);
@@ -111,7 +111,7 @@ function EmptyState() {
         href="/settings"
         style={{
           display: 'inline-block', padding: '10px 24px', fontSize: 14, fontWeight: 600,
-          color: '#060A14', background: 'var(--gold)', borderRadius: 10, textDecoration: 'none',
+          color: 'var(--primary-foreground)', background: 'var(--gold)', borderRadius: 10, textDecoration: 'none',
         }}
       >
         Go to Settings

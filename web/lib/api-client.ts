@@ -1,3 +1,5 @@
+import type { ApiResponse } from '@/types';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 let getSessionToken: (() => Promise<string | null>) | null = null;
@@ -28,13 +30,6 @@ export function signalAuthReady() {
 /** Call this when the user signs out or auth state resets */
 export function signalAuthReset() {
   resetAuthReady();
-}
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data: T;
-  errors?: string[];
 }
 
 async function request<T>(
@@ -87,10 +82,17 @@ async function request<T>(
 
   // Handle 204 No Content (e.g., DELETE responses)
   if (response.status === 204) {
-    return { success: true, message: 'OK', data: null as any };
+    return { success: true, message: 'OK', data: null as T };
   }
 
-  return response.json();
+  const json = await response.json();
+
+  // Validate response has expected wrapper shape
+  if (typeof json !== 'object' || json === null) {
+    throw new Error(`Invalid API response from ${endpoint}`);
+  }
+
+  return json as ApiResponse<T>;
 }
 
 export const apiClient = {

@@ -185,7 +185,7 @@ export function CategoryCard({ cat }: { cat: Category }) {
                 gap: 8,
                 alignItems: 'flex-start',
                 fontSize: 12,
-                color: '#d97706',
+                color: 'var(--amber)',
                 background: 'rgba(217,119,6,0.08)',
                 borderRadius: 8,
                 padding: '8px 10px',

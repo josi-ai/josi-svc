@@ -267,7 +267,7 @@ export function LocationPicker({
         <p
           style={{
             fontSize: 12,
-            color: '#E5484D',
+            color: 'var(--red)',
             marginTop: 6,
             marginBottom: 0,
           }}

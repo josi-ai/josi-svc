@@ -135,7 +135,7 @@ function SaveButton({ onClick, loading, disabled, label = 'Save Changes' }: { on
         padding: '10px 24px',
         fontSize: 14,
         fontWeight: 600,
-        color: '#060A14',
+        color: 'var(--primary-foreground)',
         background: loading || disabled ? 'var(--border)' : 'var(--gold)',
         border: 'none',
         borderRadius: 10,
@@ -157,9 +157,9 @@ function SuccessBanner({ message }: { message: string }) {
         padding: '10px 14px',
         borderRadius: 8,
         fontSize: 13,
-        color: '#30A46C',
-        background: 'rgba(48,164,108,0.08)',
-        border: '1px solid rgba(48,164,108,0.2)',
+        color: 'var(--green)',
+        background: 'var(--green-bg)',
+        border: '1px solid var(--green-bg)',
         marginBottom: 16,
       }}
     >
@@ -251,7 +251,7 @@ function AccountTab({ profile }: { profile: UserProfile }) {
       </div>
 
       {mutation.isError && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: 13, color: '#E5484D', background: 'rgba(229,72,77,0.08)', border: '1px solid rgba(229,72,77,0.2)' }}>
+        <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: 13, color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-bg)' }}>
           {(mutation.error as Error)?.message || 'Failed to update'}
         </div>
       )}
@@ -305,8 +305,8 @@ function SubscriptionTab() {
               padding: '4px 12px',
               fontSize: 11,
               fontWeight: 600,
-              color: isActive ? '#30A46C' : '#E5484D',
-              background: isActive ? 'rgba(48,164,108,0.1)' : 'rgba(229,72,77,0.1)',
+              color: isActive ? 'var(--green)' : 'var(--red)',
+              background: isActive ? 'var(--green-bg)' : 'var(--red-bg)',
               borderRadius: 20,
             }}
           >
@@ -336,7 +336,7 @@ function SubscriptionTab() {
                   {used} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>/ {displayLimit}</span>
                 </div>
                 <div style={{ height: 4, borderRadius: 2, background: 'var(--border)', marginTop: 8 }}>
-                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: 2, background: pct > 90 ? '#E5484D' : 'var(--gold)', transition: 'width 0.3s' }} />
+                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: 2, background: pct > 90 ? 'var(--red)' : 'var(--gold)', transition: 'width 0.3s' }} />
                 </div>
               </div>
             );
@@ -352,7 +352,7 @@ function SubscriptionTab() {
           padding: '10px 24px',
           fontSize: 14,
           fontWeight: 600,
-          color: '#060A14',
+          color: 'var(--primary-foreground)',
           background: 'var(--gold)',
           border: 'none',
           borderRadius: 10,
@@ -456,7 +456,7 @@ function NotificationsTab({ profile }: { profile: UserProfile }) {
       ))}
 
       {mutation.isError && (
-        <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, fontSize: 13, color: '#E5484D', background: 'rgba(229,72,77,0.08)', border: '1px solid rgba(229,72,77,0.2)' }}>
+        <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, fontSize: 13, color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-bg)' }}>
           {(mutation.error as Error)?.message || 'Failed to save'}
         </div>
       )}
@@ -536,7 +536,7 @@ function ChartDefaultsTab({ profile }: { profile: UserProfile }) {
       </div>
 
       {mutation.isError && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: 13, color: '#E5484D', background: 'rgba(229,72,77,0.08)', border: '1px solid rgba(229,72,77,0.2)' }}>
+        <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: 13, color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-bg)' }}>
           {(mutation.error as Error)?.message || 'Failed to save'}
         </div>
       )}
@@ -630,9 +630,9 @@ function DisplayTab({ profile }: { profile: UserProfile }) {
             padding: '10px 24px',
             fontSize: 14,
             fontWeight: 500,
-            color: '#E5484D',
-            background: 'rgba(229,72,77,0.08)',
-            border: '1px solid rgba(229,72,77,0.2)',
+            color: 'var(--red)',
+            background: 'var(--red-bg)',
+            border: '1px solid var(--red-bg)',
             borderRadius: 10,
             cursor: resetMutation.isPending ? 'not-allowed' : 'pointer',
             transition: 'opacity 0.2s',

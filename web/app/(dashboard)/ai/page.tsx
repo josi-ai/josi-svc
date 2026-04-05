@@ -255,7 +255,7 @@ function ChartContextSidebar({
                 {moonSign && (
                   <div style={dataRow}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}>
-                      <Moon size={13} style={{ color: '#a5b4fc' }} /> Moon
+                      <Moon size={13} style={{ color: 'var(--indigo-light)' }} /> Moon
                     </span>
                     <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{moonSign}</span>
                   </div>
@@ -263,7 +263,7 @@ function ChartContextSidebar({
                 {ascSign && (
                   <div style={dataRow}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}>
-                      <Star size={13} style={{ color: '#f472b6' }} /> Ascendant
+                      <Star size={13} style={{ color: 'var(--pink)' }} /> Ascendant
                     </span>
                     <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{ascSign}</span>
                   </div>
@@ -299,7 +299,7 @@ function ChartContextSidebar({
                     background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)',
                   }}>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>Antardasha</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#818cf8' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--indigo)' }}>
                       {currentDasha.antardasha.planet}
                     </div>
                     {currentDasha.antardasha.end_date && (

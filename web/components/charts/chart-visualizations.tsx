@@ -75,9 +75,9 @@ const PLANET_GLYPHS: Record<string, string> = {
 
 /* Element colors for Western wheel sign segments */
 const SIGN_ELEMENT_COLORS: Record<string, string> = {
-  Aries: '#E5484D', Taurus: '#46A758', Gemini: '#F5A623', Cancer: '#6E7BD0',
-  Leo: '#E5484D', Virgo: '#46A758', Libra: '#F5A623', Scorpio: '#6E7BD0',
-  Sagittarius: '#E5484D', Capricorn: '#46A758', Aquarius: '#F5A623', Pisces: '#6E7BD0',
+  Aries: 'var(--element-fire)', Taurus: 'var(--element-earth)', Gemini: 'var(--element-air)', Cancer: 'var(--element-water)',
+  Leo: 'var(--element-fire)', Virgo: 'var(--element-earth)', Libra: 'var(--element-air)', Scorpio: 'var(--element-water)',
+  Sagittarius: 'var(--element-fire)', Capricorn: 'var(--element-earth)', Aquarius: 'var(--element-air)', Pisces: 'var(--element-water)',
 };
 
 /* ================================================================

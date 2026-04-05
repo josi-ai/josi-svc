@@ -74,10 +74,10 @@ const REMEDY_TYPE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const TIER_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  free: { label: 'Free', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-  low: { label: 'Low Cost', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
-  medium: { label: 'Medium', color: 'var(--gold)', bg: 'rgba(212,175,55,0.1)' },
-  premium: { label: 'Premium', color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
+  free: { label: 'Free', color: 'var(--green)', bg: 'var(--green-bg)' },
+  low: { label: 'Low Cost', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+  medium: { label: 'Medium', color: 'var(--gold)', bg: 'var(--gold-bg)' },
+  premium: { label: 'Premium', color: 'var(--purple)', bg: 'var(--purple-bg)' },
 };
 
 const DIFFICULTY_LABELS: Record<number, string> = { 1: 'Easy', 2: 'Easy', 3: 'Moderate', 4: 'Advanced', 5: 'Advanced' };
@@ -121,11 +121,11 @@ export function RemedyCard({
 
   const statusBadge =
     progressStatus === 'in_progress'
-      ? { text: 'In Progress', bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' }
+      ? { text: 'In Progress', bg: 'var(--blue-bg)', color: 'var(--blue)' }
       : progressStatus === 'completed'
-        ? { text: 'Completed', bg: 'rgba(34,197,94,0.12)', color: '#22c55e' }
+        ? { text: 'Completed', bg: 'var(--green-bg)', color: 'var(--green)' }
         : progressStatus === 'skipped'
-          ? { text: 'Skipped', bg: 'rgba(107,114,128,0.12)', color: '#6b7280' }
+          ? { text: 'Skipped', bg: 'var(--gray-bg)', color: 'var(--gray)' }
           : null;
 
   const isCompleted = progressStatus === 'completed';
@@ -134,7 +134,7 @@ export function RemedyCard({
   return (
     <div style={{
       background: 'var(--card)',
-      border: `1px solid ${isCompleted ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
+      border: `1px solid ${isCompleted ? 'var(--green-bg)' : 'var(--border)'}`,
       borderRadius: 12,
       overflow: 'hidden',
       position: 'relative',
@@ -146,7 +146,7 @@ export function RemedyCard({
         <div style={{
           position: 'absolute', top: 12, right: 12, zIndex: 2,
           width: 28, height: 28, borderRadius: '50%',
-          background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 2px 6px rgba(34,197,94,0.3)',
         }}>
           <Check size={16} style={{ color: '#fff' }} />
@@ -158,11 +158,11 @@ export function RemedyCard({
           <div
             style={{
               width: 40, height: 40, borderRadius: 10,
-              background: isCompleted ? 'rgba(34,197,94,0.1)' : tier.bg,
+              background: isCompleted ? 'var(--green-bg)' : tier.bg,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}
           >
-            <Icon size={20} style={{ color: isCompleted ? '#22c55e' : tier.color }} />
+            <Icon size={20} style={{ color: isCompleted ? 'var(--green)' : tier.color }} />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -248,7 +248,7 @@ export function RemedyCard({
               <button
                 onClick={() => onAction('in_progress')}
                 disabled={isActioning}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: '#3b82f6', border: 'none', borderRadius: 8, cursor: isActioning ? 'wait' : 'pointer', opacity: isActioning ? 0.6 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: 'var(--blue)', border: 'none', borderRadius: 8, cursor: isActioning ? 'wait' : 'pointer', opacity: isActioning ? 0.6 : 1 }}
               >
                 <Play size={13} /> Start
               </button>
@@ -257,7 +257,7 @@ export function RemedyCard({
               <button
                 onClick={() => onAction('completed')}
                 disabled={isActioning}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 8, cursor: isActioning ? 'wait' : 'pointer', opacity: isActioning ? 0.6 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: 'var(--green)', border: 'none', borderRadius: 8, cursor: isActioning ? 'wait' : 'pointer', opacity: isActioning ? 0.6 : 1 }}
               >
                 <Check size={13} /> Complete
               </button>

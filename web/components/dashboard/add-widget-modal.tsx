@@ -293,7 +293,7 @@ export function AddWidgetModal({
                                 className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
                                 style={{
                                   background: 'rgba(48, 164, 108, 0.1)',
-                                  color: '#30A46C',
+                                  color: 'var(--green)',
                                 }}
                               >
                                 <Check className="h-2.5 w-2.5" />

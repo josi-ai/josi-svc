@@ -60,7 +60,7 @@ export default function ApiKeysPage() {
     mutationFn: (name: string) =>
       apiClient.post<ApiKeyCreatedResponse>('/api/v1/api-keys', { name }),
     onSuccess: (data) => {
-      setCreatedKey(data.data.key);
+      setCreatedKey(data.data?.key ?? '');
       setNewKeyName('');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       showToast('API key created');
@@ -79,7 +79,7 @@ export default function ApiKeysPage() {
     mutationFn: (keyId: string) =>
       apiClient.post<ApiKeyCreatedResponse>(`/api/v1/api-keys/${keyId}/rotate`),
     onSuccess: (data) => {
-      setCreatedKey(data.data.key);
+      setCreatedKey(data.data?.key ?? '');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       showToast('API key rotated');
     },

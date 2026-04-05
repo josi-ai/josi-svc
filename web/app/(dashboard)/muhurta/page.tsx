@@ -298,7 +298,7 @@ function ActivitySearch({ lat, lng, tz }: { lat: number; lng: number; tz: string
           <div><label style={labelS}>Start Date</label><input type="date" value={sd} onChange={e => setSd(e.target.value)} style={inputS} /></div>
           <div><label style={labelS}>End Date</label><input type="date" value={ed} onChange={e => setEd(e.target.value)} style={inputS} /></div>
         </div>
-        <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ marginTop: 20, padding: '12px 32px', fontSize: 15, fontWeight: 600, color: '#060A14', background: 'var(--gold)', border: 'none', borderRadius: 10, cursor: mut.isPending ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ marginTop: 20, padding: '12px 32px', fontSize: 15, fontWeight: 600, color: 'var(--primary-foreground)', background: 'var(--gold)', border: 'none', borderRadius: 10, cursor: mut.isPending ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {mut.isPending ? <><Spinner /> Searching...</> : 'Find Auspicious Times'}
         </button>
         {mut.isError && <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, fontSize: 13, color: 'var(--red)', background: 'var(--red-bg)' }}>{(mut.error as Error)?.message || 'Search failed'}</div>}

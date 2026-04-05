@@ -153,7 +153,7 @@ export default function AppSidebar({ collapsed = false, onToggleCollapse }: AppS
                 variant="plan"
                 style={{
                   background: 'rgba(200,145,58,0.12)',
-                  color: '#C8913A',
+                  color: 'var(--gold)',
                   border: '1px solid rgba(200,145,58,0.3)',
                 }}
               >

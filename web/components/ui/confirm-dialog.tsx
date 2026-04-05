@@ -27,8 +27,8 @@ export function ConfirmDialog({
   loading = false,
   variant = 'danger',
 }: ConfirmDialogProps) {
-  const iconColor = variant === 'danger' ? '#E5484D' : '#F5A623';
-  const iconBg = variant === 'danger' ? 'rgba(229,72,77,0.1)' : 'rgba(245,166,35,0.1)';
+  const iconColor = variant === 'danger' ? 'var(--red)' : 'var(--amber)';
+  const iconBg = variant === 'danger' ? 'var(--red-bg)' : 'var(--amber-bg)';
 
   return (
     <Dialog open={open} onClose={onClose}>

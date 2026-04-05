@@ -24,13 +24,13 @@ export function ProgressSummary({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6' }} />
+        <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--blue)' }} />
         <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
           <strong style={{ color: 'var(--text-primary)' }}>{started}</strong> started
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
+        <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--green)' }} />
         <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
           <strong style={{ color: 'var(--text-primary)' }}>{completed}</strong> completed
         </span>
@@ -49,7 +49,7 @@ export function ProgressSummary({
                 width: `${(completed / total) * 100}%`,
                 height: '100%',
                 borderRadius: 3,
-                background: '#22c55e',
+                background: 'var(--green)',
                 transition: 'width 0.4s ease',
               }}
             />
