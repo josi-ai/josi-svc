@@ -3,7 +3,6 @@
 import { createContext, useContext, useMemo, useEffect, useCallback } from 'react';
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/nextjs';
 import { setAsyncTokenGetter, signalAuthReady, signalAuthReset } from '@/lib/api-client';
-import { setAsyncGraphQLTokenGetter } from '@/lib/graphql-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -47,9 +46,8 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   const isAuthReady = isLoaded && !!isSignedIn;
 
-  // Wire the async token getter into the API and GraphQL clients
+  // Wire the async token getter into the API client
   setAsyncTokenGetter(getToken);
-  setAsyncGraphQLTokenGetter(getToken);
 
   // Signal to apiClient that auth is ready (resolves the wait promise)
   useEffect(() => {

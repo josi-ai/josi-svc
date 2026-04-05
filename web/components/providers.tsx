@@ -5,7 +5,6 @@ import { dark } from '@clerk/themes';
 import { ThemeProvider, useTheme } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContextProvider } from '@/contexts/AuthContext';
-import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,9 +38,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ClerkThemeWrapper>
         <QueryClientProvider client={queryClient}>
           <AuthContextProvider>
-            <SubscriptionProvider>
               {children}
-            </SubscriptionProvider>
           </AuthContextProvider>
         </QueryClientProvider>
       </ClerkThemeWrapper>
