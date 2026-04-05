@@ -85,35 +85,48 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
         <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 10 }}>Today&apos;s Muhurta</div>
         {status && <div style={{ fontSize: 15, fontWeight: 600, color: status.color, marginBottom: 14, lineHeight: 1.2 }}>{status.label}</div>}
 
-        {/* Hour strip — 12 blocks from 6AM to 6PM */}
-        <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
-          {Array.from({ length: 12 }, (_, i) => {
-            const hourMin = DS + i * 60
-            const hourEnd = hourMin + 60
-            const isRahu = data.segs.some(s => s.t === 'rahu' && s.s < hourEnd && s.e > hourMin)
-            const isAbhijit = data.segs.some(s => s.t === 'abhijit' && s.s < hourEnd && s.e > hourMin)
-            const isNow = nowMin >= hourMin && nowMin < hourEnd
-            const bg = isRahu ? 'var(--bar-avoid)' : isAbhijit ? 'var(--bar-special)' : 'rgba(255,255,255,0.06)'
-            const border = isNow ? '2px solid var(--gold-bright)' : '1px solid rgba(255,255,255,0.1)'
-            return (
-              <div key={i} style={{
-                flex: 1, height: 28, borderRadius: 4, background: bg, border,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative', boxShadow: isNow ? '0 0 8px rgba(212,160,74,0.4)' : 'none',
-              }}>
-                <span style={{ fontSize: 10, fontWeight: isNow ? 700 : 500, color: isRahu || isAbhijit ? '#fff' : 'var(--text-muted)', textShadow: isRahu || isAbhijit ? '0 1px 2px rgba(0,0,0,0.4)' : 'none' }}>
-                  {i + 6 > 12 ? i + 6 - 12 : i + 6}{i + 6 >= 12 ? 'p' : 'a'}
-                </span>
-                {isNow && <div style={{ position: 'absolute', top: -6, left: '50%', marginLeft: -4, width: 0, height: 0, borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '5px solid var(--gold-bright)' }} />}
-              </div>
-            )
-          })}
-        </div>
-        {/* Legend */}
-        <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-faint)', marginBottom: 14 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-avoid)' }} />Rahu</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-special)' }} />Abhijit</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--surface)', border: '1px solid var(--border)' }} />Neutral</span>
+        {/* Continuous bar — 6AM to 6PM, color-filled, hour dividers */}
+        <div style={{ position: 'relative', marginBottom: 20 }}>
+          {/* The bar */}
+          <div style={{ position: 'relative', height: 28, borderRadius: 6, overflow: 'hidden', display: 'flex', border: '1px solid rgba(255,255,255,0.08)' }}>
+            {data.segs.map((seg, i) => (
+              <div key={i} style={{ flex: seg.e - seg.s, background: COLORS[seg.t] || 'rgba(255,255,255,0.06)', minWidth: 1 }} />
+            ))}
+            {/* Hour dividers (bold) and 30-min dividers (light) */}
+            {Array.from({ length: 13 }, (_, i) => {
+              const m = DS + i * 60
+              const pct = ((m - DS) / (DE - DS)) * 100
+              return (
+                <div key={`h${i}`} style={{ position: 'absolute', top: 0, bottom: 0, left: `${pct}%`, width: i === 0 || i === 12 ? 0 : 1.5, background: 'rgba(255,255,255,0.25)', zIndex: 1 }} />
+              )
+            })}
+            {Array.from({ length: 12 }, (_, i) => {
+              const m = DS + i * 60 + 30
+              const pct = ((m - DS) / (DE - DS)) * 100
+              return (
+                <div key={`m${i}`} style={{ position: 'absolute', top: 0, bottom: 0, left: `${pct}%`, width: 0.5, background: 'rgba(255,255,255,0.1)', zIndex: 1 }} />
+              )
+            })}
+            {/* Now marker */}
+            {inR && <div style={{ position: 'absolute', top: -2, bottom: -2, left: `${pct}%`, width: 3, background: 'var(--gold-bright)', borderRadius: 2, boxShadow: '0 0 8px rgba(212,160,74,0.8)', zIndex: 3 }} />}
+          </div>
+          {/* Hour labels below the bar */}
+          <div style={{ position: 'relative', height: 16, marginTop: 3 }}>
+            {Array.from({ length: 13 }, (_, i) => {
+              const h = i + 6
+              const label = h === 12 ? '12p' : h > 12 ? `${h - 12}p` : `${h}a`
+              const pct = (i / 12) * 100
+              return (
+                <span key={i} style={{ position: 'absolute', left: `${pct}%`, transform: 'translateX(-50%)', fontSize: 9, fontWeight: 500, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{label}</span>
+              )
+            })}
+          </div>
+          {/* Legend */}
+          <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-faint)', marginTop: 2 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-avoid)' }} />Rahu</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-special)' }} />Abhijit</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />Neutral</span>
+          </div>
         </div>
 
         {/* Key times */}
