@@ -6,8 +6,7 @@ export type WidgetType =
   | 'ai-chat-access'
   | 'latest-reading'
   | 'bazi-summary'
-  | 'western-transit'
-  | 'available-astrologers';
+  | 'western-transit';
 
 export type WidgetSize = 'full' | 'half' | 'third';
 export type TraditionBadge = 'vedic' | 'western' | 'chinese' | 'celtic' | 'ai' | 'general';
@@ -152,18 +151,6 @@ export const widgetCatalog: WidgetDefinition[] = [
     defaultSize: 'half',
     gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxH: 6 },
     category: 'Western',
-  },
-  {
-    type: 'available-astrologers',
-    label: 'Available Astrologers',
-    description: "Who's online now",
-    previewDescription:
-      'See which professional astrologers are currently available for consultations. Browse by tradition, rating, and specialty.',
-    icon: '\uD83D\uDC64',
-    tradition: 'general',
-    defaultSize: 'third',
-    gridDimensions: { w: 1, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 5 },
-    category: 'General',
   },
 ];
 

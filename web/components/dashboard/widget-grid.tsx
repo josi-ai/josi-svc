@@ -44,7 +44,7 @@ class WidgetErrorBoundary extends React.Component<
   }
 }
 import { useAuth } from '@/contexts/AuthContext';
-import { type WidgetType } from '@/config/widget-config';
+import { type WidgetType, type WidgetInstance } from '@/config/widget-config';
 import { useWidgetLayout } from '@/hooks/use-widget-layout';
 import { AddWidgetModal } from './add-widget-modal';
 
@@ -72,9 +72,6 @@ const widgetComponents: Record<
   'muhurta-timeline': dynamic(() => import('./widgets/muhurta-timeline')),
   'western-transit': dynamic(() => import('./widgets/western-transit')),
   'latest-reading': dynamic(() => import('./widgets/latest-reading')),
-  'available-astrologers': dynamic(
-    () => import('./widgets/available-astrologers'),
-  ),
   'bazi-summary': dynamic(() => import('./widgets/bazi-summary')),
 };
 
