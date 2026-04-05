@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Plus, GripVertical, AlertTriangle } from 'lucide-react';
@@ -112,8 +112,8 @@ export function WidgetGrid() {
     day: 'numeric',
   });
 
-  const safeWidgets = Array.isArray(widgets) ? widgets : [];
-  const activeTypes = useMemo(() => safeWidgets.map((w) => w.type), [safeWidgets]);
+  const safeWidgets: WidgetInstance[] = Array.isArray(widgets) ? widgets : [];
+  const activeTypes: WidgetType[] = safeWidgets.map((w) => w.type);
 
   return (
     <div>
