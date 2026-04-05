@@ -85,14 +85,36 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
         <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 10 }}>Today&apos;s Muhurta</div>
         {status && <div style={{ fontSize: 15, fontWeight: 600, color: status.color, marginBottom: 14, lineHeight: 1.2 }}>{status.label}</div>}
 
-        {/* Time bar */}
-        <div style={{ position: 'relative', height: 14, borderRadius: 7, overflow: 'hidden', display: 'flex', background: 'var(--border-subtle)', marginBottom: 6 }}>
-          {data.segs.map((seg, i) => <div key={i} style={{ flex: seg.e - seg.s, background: COLORS[seg.t] || 'var(--bar-neutral)', minWidth: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-            {(seg.e - seg.s) > 60 && <span style={{ fontSize: 8, fontWeight: 700, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', whiteSpace: 'nowrap' }}>{seg.t === 'rahu' ? 'Rahu' : seg.t === 'abhijit' ? 'Abhijit' : ''}</span>}
-          </div>)}
-          {inR && <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${pct}%`, width: 3, background: 'var(--gold-bright)', borderRadius: 2, boxShadow: '0 0 6px rgba(212,160,74,0.8)', zIndex: 2 }} />}
+        {/* Hour strip — 12 blocks from 6AM to 6PM */}
+        <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
+          {Array.from({ length: 12 }, (_, i) => {
+            const hourMin = DS + i * 60
+            const hourEnd = hourMin + 60
+            const isRahu = data.segs.some(s => s.t === 'rahu' && s.s < hourEnd && s.e > hourMin)
+            const isAbhijit = data.segs.some(s => s.t === 'abhijit' && s.s < hourEnd && s.e > hourMin)
+            const isNow = nowMin >= hourMin && nowMin < hourEnd
+            const bg = isRahu ? 'var(--bar-avoid)' : isAbhijit ? 'var(--bar-special)' : 'var(--surface)'
+            const border = isNow ? '2px solid var(--gold-bright)' : '1px solid var(--border)'
+            return (
+              <div key={i} style={{
+                flex: 1, height: 28, borderRadius: 4, background: bg, border,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative', boxShadow: isNow ? '0 0 8px rgba(212,160,74,0.4)' : 'none',
+              }}>
+                <span style={{ fontSize: 10, fontWeight: isNow ? 700 : 500, color: isRahu || isAbhijit ? '#fff' : 'var(--text-muted)', textShadow: isRahu || isAbhijit ? '0 1px 2px rgba(0,0,0,0.4)' : 'none' }}>
+                  {i + 6 > 12 ? i + 6 - 12 : i + 6}{i + 6 >= 12 ? 'p' : 'a'}
+                </span>
+                {isNow && <div style={{ position: 'absolute', top: -6, left: '50%', marginLeft: -4, width: 0, height: 0, borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '5px solid var(--gold-bright)' }} />}
+              </div>
+            )
+          })}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginBottom: 16 }}><span>6 AM</span><span>12 PM</span><span>6 PM</span></div>
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-faint)', marginBottom: 14 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-avoid)' }} />Rahu</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--bar-special)' }} />Abhijit</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--surface)', border: '1px solid var(--border)' }} />Neutral</span>
+        </div>
 
         {/* Key times */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
