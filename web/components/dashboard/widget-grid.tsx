@@ -112,7 +112,8 @@ export function WidgetGrid() {
     day: 'numeric',
   });
 
-  const activeTypes = useMemo(() => widgets.map((w) => w.type), [widgets]);
+  const safeWidgets = Array.isArray(widgets) ? widgets : [];
+  const activeTypes = useMemo(() => safeWidgets.map((w) => w.type), [safeWidgets]);
 
   return (
     <div>
@@ -166,7 +167,7 @@ export function WidgetGrid() {
           autoSize={true}
           style={{ minHeight: 'auto' }}
         >
-          {widgets.map((instance) => {
+          {safeWidgets.map((instance) => {
             const Component = widgetComponents[instance.type];
             if (!Component) return null;
 

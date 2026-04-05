@@ -320,7 +320,7 @@ export function useWidgetLayout() {
   }, []);
 
   return {
-    widgets,
+    widgets: Array.isArray(widgets) ? widgets : defaultWidgets,
     layouts,
     mounted,
     addWidget,
