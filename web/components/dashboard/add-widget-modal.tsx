@@ -1,13 +1,13 @@
 'use client';
 
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { X, Search, Check } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import {
   type WidgetType,
   widgetCatalog,
-  TRADITION_COLORS,
   WIDGET_CATEGORIES,
 } from '@/config/widget-config';
+import { WidgetCatalogItem } from './widget-catalog-item';
 
 interface AddWidgetModalProps {
   isOpen: boolean;
@@ -60,7 +60,7 @@ export function AddWidgetModal({
     }
     // Also include any categories not in the ordered list
     for (const w of filteredWidgets) {
-      if (!WIDGET_CATEGORIES.includes(w.category as any)) {
+      if (!(WIDGET_CATEGORIES as readonly string[]).includes(w.category)) {
         const list = map.get(w.category) ?? [];
         if (!list.includes(w)) list.push(w);
         map.set(w.category, list);
@@ -233,121 +233,19 @@ export function AddWidgetModal({
               </div>
 
               <div className="space-y-1">
-                {widgets.map((w) => {
-                  const isActive = activeWidgets.includes(w.type);
-                  const colors = TRADITION_COLORS[w.tradition];
-
-                  return (
-                    <div
-                      key={w.type}
-                      className="rounded-xl p-3 transition-all duration-150"
-                      style={{
-                        background: isActive
-                          ? 'rgba(48, 164, 108, 0.04)'
-                          : 'transparent',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive)
-                          (e.currentTarget as HTMLElement).style.background =
-                            'var(--card-hover)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.background =
-                          isActive
-                            ? 'rgba(48, 164, 108, 0.04)'
-                            : 'transparent';
-                      }}
-                    >
-                      <div className="flex items-start gap-3.5">
-                        {/* Icon */}
-                        <div
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg"
-                          style={{
-                            background: 'var(--surface)',
-                            border: '1px solid var(--border-subtle)',
-                          }}
-                        >
-                          {w.icon}
-                        </div>
-
-                        {/* Text */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="text-[13px] font-semibold"
-                              style={{ color: 'var(--text-primary)' }}
-                            >
-                              {w.label}
-                            </span>
-                            <span
-                              className="inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
-                              style={{
-                                background: colors.bg,
-                                color: colors.text,
-                              }}
-                            >
-                              {w.tradition}
-                            </span>
-                            {isActive && (
-                              <span
-                                className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
-                                style={{
-                                  background: 'rgba(48, 164, 108, 0.1)',
-                                  color: 'var(--green)',
-                                }}
-                              >
-                                <Check className="h-2.5 w-2.5" />
-                                Active
-                              </span>
-                            )}
-                          </div>
-                          <div
-                            className="mt-0.5 text-[11px] leading-relaxed"
-                            style={{ color: 'var(--text-muted)' }}
-                          >
-                            {w.previewDescription}
-                          </div>
-                        </div>
-
-                        {/* Add / Added button */}
-                        <div className="shrink-0 pt-0.5">
-                          {isActive ? (
-                            <span
-                              className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[11px] font-semibold"
-                              style={{ color: 'var(--text-faint)' }}
-                            >
-                              Added
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => onAdd(w.type)}
-                              className="rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150"
-                              style={{
-                                border: '1px solid var(--border)',
-                                color: 'var(--text-secondary)',
-                                background: 'transparent',
-                              }}
-                              onMouseEnter={(e) => {
-                                const btn = e.currentTarget as HTMLElement;
-                                btn.style.borderColor = 'var(--gold)';
-                                btn.style.background = 'var(--gold)';
-                                btn.style.color = '#fff';
-                              }}
-                              onMouseLeave={(e) => {
-                                const btn = e.currentTarget as HTMLElement;
-                                btn.style.borderColor = 'var(--border)';
-                                btn.style.background = 'transparent';
-                                btn.style.color = 'var(--text-secondary)';
-                              }}
-                            >
-                              + Add
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {widgets.map((w) => (
+                  <WidgetCatalogItem
+                    key={w.type}
+                    type={w.type}
+                    label={w.label}
+                    description={w.description}
+                    previewDescription={w.previewDescription}
+                    icon={w.icon}
+                    tradition={w.tradition}
+                    isActive={activeWidgets.includes(w.type)}
+                    onAdd={() => onAdd(w.type)}
+                  />
+                ))}
               </div>
             </div>
           ))}

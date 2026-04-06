@@ -7,67 +7,15 @@ import PlaceAutocomplete from '@/components/ui/place-autocomplete';
 
 /* ---------- Types ---------- */
 
-export interface LocationValue {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  displayName: string;
-}
-
-interface Person {
-  person_id: string;
-  name: string;
-  latitude: string | number | null;
-  longitude: string | number | null;
-  timezone: string | null;
-  place_of_birth: string | null;
-  is_default?: boolean;
-}
-
-export interface LocationPickerProps {
-  value?: LocationValue;
-  onChange: (location: LocationValue) => void;
-  className?: string;
-  style?: React.CSSProperties;
-}
+export interface LocationValue { latitude: number; longitude: number; timezone: string; displayName: string; }
+interface Person { person_id: string; name: string; latitude: string | number | null; longitude: string | number | null; timezone: string | null; place_of_birth: string | null; is_default?: boolean; }
+export interface LocationPickerProps { value?: LocationValue; onChange: (location: LocationValue) => void; className?: string; style?: React.CSSProperties; }
 
 /* ---------- Styles ---------- */
 
-const buttonStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  padding: '8px 14px',
-  fontSize: 13,
-  fontWeight: 500,
-  color: 'var(--text-secondary)',
-  background: 'var(--background)',
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  cursor: 'pointer',
-  transition: 'border-color 0.2s, color 0.2s',
-  whiteSpace: 'nowrap',
-  flexShrink: 0,
-};
-
-const activeButtonStyle: React.CSSProperties = {
-  ...buttonStyle,
-  borderColor: 'var(--gold)',
-  color: 'var(--text-primary)',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 14px',
-  fontSize: 13,
-  color: 'var(--text-primary)',
-  background: 'var(--background)',
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  minWidth: 0,
-};
+const buttonStyle: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', background: 'var(--background)', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', transition: 'border-color 0.2s, color 0.2s', whiteSpace: 'nowrap', flexShrink: 0 };
+const activeButtonStyle: React.CSSProperties = { ...buttonStyle, borderColor: 'var(--gold)', color: 'var(--text-primary)' };
+const inputStyle: React.CSSProperties = { width: '100%', padding: '8px 14px', fontSize: 13, color: 'var(--text-primary)', background: 'var(--background)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', transition: 'border-color 0.2s', minWidth: 0 };
 
 /* ---------- Helpers ---------- */
 

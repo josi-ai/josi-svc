@@ -115,7 +115,7 @@ export default function NewChartPage() {
       });
       if (tradition === 'vedic') params.set('ayanamsa', ayanamsa);
 
-      const chartRes = await apiClient.post<any>(`/api/v1/charts/calculate?${params.toString()}`);
+      const chartRes = await apiClient.post<Record<string, unknown> | Record<string, unknown>[]>(`/api/v1/charts/calculate?${params.toString()}`);
       const raw = chartRes.data;
       const charts = Array.isArray(raw) ? raw : [raw];
       const chartId = charts[0]?.chart_id || charts[0]?.id || charts[0]?.chartId;
@@ -127,8 +127,8 @@ export default function NewChartPage() {
       }
 
       router.push(`/charts/${chartId}`);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setIsSubmitting(false);
     }
   };

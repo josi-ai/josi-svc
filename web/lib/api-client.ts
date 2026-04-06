@@ -97,9 +97,9 @@ async function request<T>(
 
 export const apiClient = {
   get: <T>(endpoint: string) => request<T>(endpoint),
-  post: <T>(endpoint: string, data?: any) =>
+  post: <T>(endpoint: string, data?: unknown) =>
     request<T>(endpoint, { method: 'POST', body: data ? JSON.stringify(data) : undefined }),
-  put: <T>(endpoint: string, data: any) =>
+  put: <T>(endpoint: string, data: unknown) =>
     request<T>(endpoint, { method: 'PUT', body: JSON.stringify(data) }),
   delete: <T>(endpoint: string) =>
     request<T>(endpoint, { method: 'DELETE' }),

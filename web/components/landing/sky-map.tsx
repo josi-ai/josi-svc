@@ -1,50 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-
-interface SkyData {
-  stars: { n?: string; ra: number; dec: number; mag: number; con?: string; c?: number[] }[];
-  faint: { ra: number; dec: number; mag: number; c?: number[] }[];
-  lines: Record<string, string[][]>;
-  illustrations: { con: string; ra: number; dec: number; size: number; file: string }[];
-  center: { ra: number; dec: number };
-}
-
-/* ─── Stereographic projection (centered on arbitrary RA/Dec) ─── */
-function project(
-  ra: number, dec: number,
-  centerRA: number, centerDec: number,
-  scale: number,
-  cx: number, cy: number
-): { x: number; y: number } {
-  const ra1 = (ra / 24) * Math.PI * 2;
-  const dec1 = (dec / 180) * Math.PI;
-  const ra0 = (centerRA / 24) * Math.PI * 2;
-  const dec0 = (centerDec / 180) * Math.PI;
-
-  const cosDec1 = Math.cos(dec1);
-  const sinDec1 = Math.sin(dec1);
-  const cosDec0 = Math.cos(dec0);
-  const sinDec0 = Math.sin(dec0);
-  const cosDRA = Math.cos(ra1 - ra0);
-  const sinDRA = Math.sin(ra1 - ra0);
-
-  const d = 1 + sinDec0 * sinDec1 + cosDec0 * cosDec1 * cosDRA;
-  if (d < 0.01) return { x: -9999, y: -9999 };
-
-  const x = (cosDec1 * sinDRA) / d;
-  const y = (cosDec0 * sinDec1 - sinDec0 * cosDec1 * cosDRA) / d;
-
-  return {
-    x: cx - x * scale,
-    y: cy - y * scale,
-  };
-}
+import { type SkyData, type ViewState, project, updatePanning } from './sky-projection';
 
 export default function SkyMap() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [skyData, setSkyData] = useState<SkyData | null>(null);
-  const viewRef = useRef({ ra: 18.7, dec: -30, _velRA: 0, _velDec: 0 } as any); // Start at Sagittarius
+  const viewRef = useRef<ViewState>({ ra: 18.7, dec: -30, _velRA: 0, _velDec: 0 }); // Start at Sagittarius
   const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -142,40 +104,8 @@ export default function SkyMap() {
       timeRef.current++;
       const time = timeRef.current;
 
-      // Edge-only panning: only the outer 25% of the screen triggers movement
-      const mx = mousePos.x || w / 2;
-      const my = mousePos.y || h / 2;
-      const normX = (mx - w / 2) / (w / 2); // -1 to 1
-      const normY = (my - h / 2) / (h / 2); // -1 to 1
-
-      const edgeThreshold = 0.75; // only pan when cursor is in outer 25%
-      // Edge panning overrides auto-pan; auto-pan is just the idle state
-      const autoPanSpeed = 0.00055;
-      const edgeActive = Math.abs(normX) > edgeThreshold || Math.abs(normY) > edgeThreshold;
-
-      let targetDeltaRA = edgeActive ? 0 : autoPanSpeed;
-      let targetDeltaDec = 0;
-
-      if (Math.abs(normX) > edgeThreshold) {
-        const edgeFactor = (Math.abs(normX) - edgeThreshold) / (1 - edgeThreshold);
-        targetDeltaRA = Math.sign(normX) * edgeFactor * edgeFactor * 0.004;
-      }
-      if (Math.abs(normY) > edgeThreshold) {
-        const edgeFactor = (Math.abs(normY) - edgeThreshold) / (1 - edgeThreshold);
-        targetDeltaDec = Math.sign(normY) * edgeFactor * edgeFactor * 0.02;
-      }
-
-      // Smooth lerp — ease toward target speed (no jerky starts/stops)
-      viewRef.current.ra -= targetDeltaRA * 0.3 + (viewRef.current as any)._velRA * 0.7;
-      viewRef.current.dec -= targetDeltaDec * 0.3 + (viewRef.current as any)._velDec * 0.7;
-      (viewRef.current as any)._velRA = targetDeltaRA * 0.3 + ((viewRef.current as any)._velRA || 0) * 0.7;
-      (viewRef.current as any)._velDec = targetDeltaDec * 0.3 + ((viewRef.current as any)._velDec || 0) * 0.7;
-
-      // Clamp and wrap
-      viewRef.current.dec = Math.max(-70, Math.min(90, viewRef.current.dec));
-      if (viewRef.current.ra < 0) viewRef.current.ra += 24;
-      if (viewRef.current.ra >= 24) viewRef.current.ra -= 24;
-
+      // Edge-based panning
+      updatePanning(viewRef.current, mousePos.x || w / 2, mousePos.y || h / 2, w, h);
       const viewRA = viewRef.current.ra;
       const viewDec = viewRef.current.dec;
 

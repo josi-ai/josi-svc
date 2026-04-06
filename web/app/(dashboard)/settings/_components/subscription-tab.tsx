@@ -68,7 +68,7 @@ export function SubscriptionTab() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           {Object.entries(limits).map(([key, limit]) => {
             const label = key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-            const used = (usage as any)?.[key] ?? 0;
+            const used = usage?.[key] ?? 0;
             const pct = (limit as number) <= 0 ? 0 : (limit as number) === -1 ? 5 : Math.min((used / (limit as number)) * 100, 100);
             const displayLimit = (limit as number) === -1 ? 'Unlimited' : String(limit);
             return (

@@ -56,7 +56,7 @@ export default function AIChatPage() {
         }]);
         return;
       }
-      const res = await apiClient.post<any>('/api/v1/ai/interpret', { chart_id: chartId, question: q, style });
+      const res = await apiClient.post<{ interpretation?: string; content?: string; text?: string }>('/api/v1/ai/interpret', { chart_id: chartId, question: q, style });
       const answer = res.data?.interpretation || res.data?.content || res.data?.text
         || (typeof res.data === 'string' ? res.data : JSON.stringify(res.data));
       setMessages((prev) => [...prev, { role: 'assistant', content: answer }]);

@@ -5,6 +5,7 @@ import { dark } from '@clerk/themes';
 import { ThemeProvider, useTheme } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContextProvider } from '@/contexts/AuthContext';
+import { CLERK_COLORS } from '@/config/clerk-theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,7 +24,7 @@ function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
       appearance={{
         baseTheme: resolvedTheme === 'dark' ? dark : undefined,
         variables: {
-          colorPrimary: '#C8913A',
+          colorPrimary: CLERK_COLORS.primary,
         },
       }}
     >

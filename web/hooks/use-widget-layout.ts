@@ -2,88 +2,25 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { z } from 'zod';
-import { type Layouts } from 'react-grid-layout';
+import { type Layout, type Layouts } from 'react-grid-layout';
 import { apiClient } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  loadFromStorage,
-  saveToStorage,
-  removeFromStorage,
-  widgetInstanceArraySchema,
-  layoutsSchema,
-} from '@/lib/storage';
 import {
   type WidgetType,
   type WidgetInstance,
   widgetCatalog,
   defaultWidgets,
-  buildLayoutFromWidgets,
 } from '@/config/widget-config';
-
-/* ---------- Types ---------- */
-
-interface DashboardPreferences {
-  widget_layout?: Layouts | null;
-  active_widgets?: WidgetInstance[] | null;
-}
-
-interface UserPreferences {
-  dashboard?: DashboardPreferences;
-  [key: string]: any;
-}
-
-/* ---------- Constants ---------- */
-
-const STORAGE_KEY = 'josi-dashboard-widgets';
-const LAYOUT_STORAGE_KEY = 'josi-dashboard-layouts';
-const VERSION_KEY = 'josi-dashboard-version';
-const CURRENT_VERSION = '3'; // Bump this to invalidate stale localStorage
-const DEBOUNCE_MS = 1000;
-
-const BREAKPOINT_COLS: Record<string, number> = {
-  lg: 3,
-  md: 2,
-  sm: 1,
-  xs: 1,
-};
-
-/* ---------- localStorage helpers ---------- */
-
-function loadLocalWidgets(): WidgetInstance[] {
-  if (typeof window === 'undefined') return defaultWidgets;
-  // Invalidate stale localStorage when widget config changes
-  const savedVersion = loadFromStorage(VERSION_KEY, z.string(), '');
-  if (savedVersion !== CURRENT_VERSION) {
-    removeFromStorage(STORAGE_KEY);
-    removeFromStorage(LAYOUT_STORAGE_KEY);
-    saveToStorage(VERSION_KEY, CURRENT_VERSION);
-    return defaultWidgets;
-  }
-  const widgets = loadFromStorage(STORAGE_KEY, widgetInstanceArraySchema, []);
-  return widgets.length > 0 ? (widgets as WidgetInstance[]) : defaultWidgets;
-}
-
-function loadLocalLayouts(): Layouts | null {
-  if (typeof window === 'undefined') return null;
-  const layouts = loadFromStorage(LAYOUT_STORAGE_KEY, layoutsSchema, null);
-  return layouts as Layouts | null;
-}
-
-function saveLocal(widgets: WidgetInstance[], layouts: Layouts) {
-  saveToStorage(STORAGE_KEY, widgets);
-  saveToStorage(LAYOUT_STORAGE_KEY, layouts);
-}
-
-/* ---------- Default layouts builder ---------- */
-
-function buildDefaultLayouts(widgets: WidgetInstance[]): Layouts {
-  const layouts: Layouts = {};
-  for (const [bp, cols] of Object.entries(BREAKPOINT_COLS)) {
-    layouts[bp] = buildLayoutFromWidgets(widgets, cols);
-  }
-  return layouts;
-}
+import {
+  type UserPreferences,
+  type DashboardPreferences,
+  BREAKPOINT_COLS,
+  DEBOUNCE_MS,
+  loadLocalWidgets,
+  loadLocalLayouts,
+  saveLocal,
+  buildDefaultLayouts,
+} from './widget-layout-helpers';
 
 /* ---------- Hook ---------- */
 
@@ -96,8 +33,6 @@ export function useWidgetLayout() {
     buildDefaultLayouts(defaultWidgets),
   );
   const [mounted, setMounted] = useState(false);
-
-  // Debounce timer ref for layout persistence
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ---------- Fetch preferences from backend ---------- */
@@ -107,7 +42,7 @@ export function useWidgetLayout() {
     queryFn: () => apiClient.get<UserPreferences>('/api/v1/me/preferences'),
     enabled: isAuthReady,
     staleTime: 5 * 60 * 1000,
-    retry: false, // Don't retry on 401 — just use defaults
+    retry: false,
   });
 
   /* ---------- Save preferences mutation ---------- */
@@ -130,7 +65,6 @@ export function useWidgetLayout() {
     const serverLayouts = dashboard?.widget_layout;
 
     if (serverWidgets && Array.isArray(serverWidgets) && serverWidgets.length > 0) {
-      // Validate widget types still exist in catalog
       const validWidgets = serverWidgets.filter((w: WidgetInstance) =>
         widgetCatalog.some((c) => c.type === w.type),
       );
@@ -143,7 +77,6 @@ export function useWidgetLayout() {
         setLayouts(buildDefaultLayouts(resolvedWidgets));
       }
     } else {
-      // Fall back to localStorage
       const localWidgets = loadLocalWidgets();
       const localLayouts = loadLocalLayouts();
       setWidgets(localWidgets);
@@ -153,7 +86,6 @@ export function useWidgetLayout() {
     setMounted(true);
   }, [prefsFetched, prefsData]);
 
-  // If prefs fetch fails (e.g. 401 before auth is ready), still mount with defaults
   useEffect(() => {
     if (prefsError && !mounted) {
       const localWidgets = loadLocalWidgets();
@@ -164,7 +96,6 @@ export function useWidgetLayout() {
     }
   }, [prefsError, mounted]);
 
-  // If auth is not ready (e.g. anonymous user), still load from localStorage
   useEffect(() => {
     if (!isAuthReady) {
       const localWidgets = loadLocalWidgets();
@@ -179,18 +110,12 @@ export function useWidgetLayout() {
 
   const persistToBackend = useCallback(
     (newWidgets: WidgetInstance[], newLayouts: Layouts) => {
-      // Always save locally for instant feedback
       saveLocal(newWidgets, newLayouts);
-
-      // Debounced backend save
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         if (isAuthReady) {
           saveMutation.mutate({
-            dashboard: {
-              active_widgets: newWidgets,
-              widget_layout: newLayouts,
-            },
+            dashboard: { active_widgets: newWidgets, widget_layout: newLayouts },
           });
         }
       }, DEBOUNCE_MS);
@@ -198,28 +123,23 @@ export function useWidgetLayout() {
     [isAuthReady, saveMutation],
   );
 
-  /* ---------- Persist immediately (for add/remove) ---------- */
-
   const persistImmediately = useCallback(
     (newWidgets: WidgetInstance[], newLayouts: Layouts) => {
       saveLocal(newWidgets, newLayouts);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (isAuthReady) {
         saveMutation.mutate({
-          dashboard: {
-            active_widgets: newWidgets,
-            widget_layout: newLayouts,
-          },
+          dashboard: { active_widgets: newWidgets, widget_layout: newLayouts },
         });
       }
     },
     [isAuthReady, saveMutation],
   );
 
-  /* ---------- Layout change handler (from react-grid-layout) ---------- */
+  /* ---------- Layout change handler ---------- */
 
   const onLayoutChange = useCallback(
-    (_currentLayout: any, allLayouts: Layouts) => {
+    (_currentLayout: Layout[], allLayouts: Layouts) => {
       setLayouts(allLayouts);
       persistToBackend(widgets, allLayouts);
     },
@@ -238,32 +158,20 @@ export function useWidgetLayout() {
 
       setWidgets((prev) => {
         const next = [...prev, newWidget];
-
-        // Add the new widget to all breakpoint layouts
         const newLayouts = { ...layouts };
         for (const [bp, cols] of Object.entries(BREAKPOINT_COLS)) {
           const existing = newLayouts[bp] || [];
-          // Find the max y position to place the new widget at the bottom
           let maxY = 0;
           for (const item of existing) {
             const bottom = item.y + item.h;
             if (bottom > maxY) maxY = bottom;
           }
-          const w = Math.min(
-            Math.round((def.gridDimensions.w / 3) * cols),
-            cols,
-          );
+          const w = Math.min(Math.round((def.gridDimensions.w / 3) * cols), cols);
           newLayouts[bp] = [
             ...existing,
             {
-              i: id,
-              x: 0,
-              y: maxY,
-              w,
-              h: def.gridDimensions.h,
-              minW: def.gridDimensions.minW
-                ? Math.min(Math.round((def.gridDimensions.minW / 3) * cols), cols)
-                : undefined,
+              i: id, x: 0, y: maxY, w, h: def.gridDimensions.h,
+              minW: def.gridDimensions.minW ? Math.min(Math.round((def.gridDimensions.minW / 3) * cols), cols) : undefined,
               minH: def.gridDimensions.minH,
               maxW: def.gridDimensions.maxW ? Math.min(def.gridDimensions.maxW, cols) : cols,
               maxH: def.gridDimensions.maxH,
@@ -272,7 +180,6 @@ export function useWidgetLayout() {
         }
         setLayouts(newLayouts);
         persistImmediately(next, newLayouts);
-
         return next;
       });
     },
@@ -285,24 +192,21 @@ export function useWidgetLayout() {
     (id: string) => {
       setWidgets((prev) => {
         const next = prev.filter((w) => w.id !== id);
-
-        // Remove from all breakpoint layouts
         const newLayouts = { ...layouts };
         for (const bp of Object.keys(newLayouts)) {
           newLayouts[bp] = (newLayouts[bp] || []).filter(
-            (item: any) => item.i !== id,
+            (item: Layout) => item.i !== id,
           );
         }
         setLayouts(newLayouts);
         persistImmediately(next, newLayouts);
-
         return next;
       });
     },
     [layouts, persistImmediately],
   );
 
-  /* ---------- Cleanup debounce on unmount ---------- */
+  /* ---------- Cleanup ---------- */
 
   useEffect(() => {
     return () => {

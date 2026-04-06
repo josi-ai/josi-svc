@@ -8,57 +8,20 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BookingModal } from '@/components/consultations/booking-modal';
 import {
-  ArrowLeft,
-  Star,
-  BadgeCheck,
-  Clock,
-  Globe,
-  Users,
-  Video,
-  MessageSquare,
-  Phone,
-  Mail,
-  ThumbsUp,
-  CheckCircle,
+  ArrowLeft, Star, BadgeCheck, Clock, Globe, Users,
+  Video, MessageSquare, Phone, Mail, ThumbsUp, CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { type Astrologer, avatarColor } from '../_components/astrologer-types';
 
 /* ---------- Types ---------- */
 
-interface Astrologer {
-  astrologer_id: string;
-  user_id: string;
-  professional_name: string;
-  bio: string;
-  years_experience: number;
-  specializations: string[];
-  languages: string[];
-  hourly_rate: number;
-  currency: string;
-  rating: number;
-  total_consultations: number;
-  total_reviews: number;
-  verification_status_id: number;
-  verification_status_name: string;
-  is_active: boolean;
-  is_featured: boolean;
-  profile_image_url: string | null;
-  joined_at: string;
-}
-
 interface Review {
-  review_id: string;
-  astrologer_id: string;
-  user_id: string;
-  rating: number;
-  title: string | null;
-  review_text: string | null;
-  accuracy_rating: number | null;
-  communication_rating: number | null;
-  empathy_rating: number | null;
-  is_verified: boolean;
-  helpful_votes: number;
-  created_at: string;
+  review_id: string; astrologer_id: string; user_id: string;
+  rating: number; title: string | null; review_text: string | null;
+  accuracy_rating: number | null; communication_rating: number | null;
+  empathy_rating: number | null; is_verified: boolean;
+  helpful_votes: number; created_at: string;
 }
 
 interface ProfileResponse {
@@ -69,11 +32,6 @@ interface ProfileResponse {
 
 /* ---------- Constants ---------- */
 
-const AVATAR_COLORS = [
-  'bg-amber-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600',
-  'bg-sky-600', 'bg-violet-600', 'bg-teal-600', 'bg-orange-600',
-];
-
 const TYPE_META: { type: string; Icon: React.ElementType }[] = [
   { type: 'Video', Icon: Video },
   { type: 'Chat', Icon: MessageSquare },
@@ -83,19 +41,12 @@ const TYPE_META: { type: string; Icon: React.ElementType }[] = [
 
 /* ---------- Helpers ---------- */
 
-function avatarColor(name: string) {
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-}
-
 function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star
-          key={s}
-          style={{ width: size, height: size }}
-          className={s <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'fill-transparent text-text-faint'}
-        />
+        <Star key={s} style={{ width: size, height: size }}
+          className={s <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'fill-transparent text-text-faint'} />
       ))}
     </div>
   );
@@ -109,10 +60,7 @@ function DetailItem({ icon, label, value }: { icon: React.ReactNode; label: stri
   return (
     <div className="flex items-start gap-2.5">
       <div className="mt-0.5 text-text-faint">{icon}</div>
-      <div>
-        <p className="text-xs text-text-faint">{label}</p>
-        <p className="text-sm font-medium text-text-primary">{value}</p>
-      </div>
+      <div><p className="text-xs text-text-faint">{label}</p><p className="text-sm font-medium text-text-primary">{value}</p></div>
     </div>
   );
 }

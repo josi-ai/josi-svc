@@ -70,7 +70,7 @@ export function BookingModal({
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
     onSuccess: (res) => {
-      setSuccessId((res.data as any)?.consultation_id || '');
+      setSuccessId((res.data as { consultation_id?: string })?.consultation_id || '');
       setStep(5);
     },
     onError: (err: Error) => setError(err.message),

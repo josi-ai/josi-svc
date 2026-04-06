@@ -3,65 +3,15 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Plus, GripVertical, AlertTriangle } from 'lucide-react';
-
-/* Error boundary so one broken widget can't crash the entire dashboard */
-class WidgetErrorBoundary extends React.Component<
-  { children: React.ReactNode; onRemove: () => void },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode; onRemove: () => void }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{
-          height: '100%', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 8,
-          background: 'var(--card)', borderRadius: 16,
-          border: '1px solid var(--border)', padding: 16,
-        }}>
-          <AlertTriangle style={{ width: 20, height: 20, color: 'var(--text-faint)' }} />
-          <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Widget failed to load</span>
-          <button
-            onClick={this.props.onRemove}
-            style={{
-              fontSize: 10, color: 'var(--gold)', background: 'none',
-              border: 'none', cursor: 'pointer', textDecoration: 'underline',
-            }}
-          >
-            Remove
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { Plus, GripVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { type WidgetType, type WidgetInstance } from '@/config/widget-config';
 import { useWidgetLayout } from '@/hooks/use-widget-layout';
+import { WidgetErrorBoundary, WidgetSkeleton } from './widget-error-boundary';
 import { AddWidgetModal } from './add-widget-modal';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-
-function WidgetSkeleton() {
-  return (
-    <div style={{ height: '100%', background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)', padding: 20 }}>
-      <div className="animate-pulse space-y-3">
-        <div className="h-3 w-24 rounded" style={{ background: 'var(--border)' }} />
-        <div className="h-4 w-40 rounded" style={{ background: 'var(--border-subtle)' }} />
-        <div className="h-3 w-full rounded" style={{ background: 'var(--border-subtle)' }} />
-      </div>
-    </div>
-  );
-}
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -71,7 +21,6 @@ export interface WidgetComponentProps {
 
 /* ------------------------------------------------------------------
  * Dynamic widget component map
- * Each widget file is loaded on demand via next/dynamic.
  * ------------------------------------------------------------------ */
 const widgetComponents: Record<
   WidgetType,
@@ -118,12 +67,8 @@ export function WidgetGrid() {
   const [modalOpen, setModalOpen] = useState(false);
   const { user } = useAuth();
   const {
-    widgets,
-    layouts,
-    mounted,
-    addWidget,
-    removeWidget,
-    onLayoutChange,
+    widgets, layouts, mounted,
+    addWidget, removeWidget, onLayoutChange,
   } = useWidgetLayout();
 
   const displayName = user?.full_name || user?.email || 'User';
@@ -132,9 +77,7 @@ export function WidgetGrid() {
   const greeting =
     hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const dateStr = now.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
+    weekday: 'long', month: 'long', day: 'numeric',
   });
 
   const safeWidgets: WidgetInstance[] = Array.isArray(widgets) ? widgets : [];
@@ -147,33 +90,25 @@ export function WidgetGrid() {
         <div>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             {greeting},{' '}
-            <strong
-              style={{ color: 'var(--text-primary)', fontWeight: 600 }}
-            >
+            <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
               {displayName}
             </strong>
           </p>
-          <h2
-            className="font-display mt-1"
-            style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}
-          >
+          <h2 className="font-display mt-1" style={{ fontSize: '1.75rem', color: 'var(--text-primary)' }}>
             {dateStr}
           </h2>
         </div>
         <button
           onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
-          style={{
-            background: 'var(--gold)',
-            color: 'var(--btn-add-text)',
-          }}
+          style={{ background: 'var(--gold)', color: 'var(--btn-add-text)' }}
         >
           <Plus className="h-3.5 w-3.5" />
           Add Widget
         </button>
       </div>
 
-      {/* Widget grid — react-grid-layout */}
+      {/* Widget grid */}
       {mounted && (
         <ResponsiveGridLayout
           className="widget-grid-layout"
@@ -195,7 +130,6 @@ export function WidgetGrid() {
           {safeWidgets.map((instance) => {
             const Component = widgetComponents[instance.type];
             if (!Component) return null;
-
             return (
               <div key={instance.id} className="widget-grid-item">
                 <div className="widget-drag-handle">
@@ -210,127 +144,45 @@ export function WidgetGrid() {
         </ResponsiveGridLayout>
       )}
 
-      {/* Fallback while not mounted (SSR / loading) */}
+      {/* Fallback while not mounted */}
       {!mounted && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-[180px] rounded-2xl animate-pulse"
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-              }}
-            />
+            <div key={i} className="h-[180px] rounded-2xl animate-pulse"
+              style={{ background: 'var(--card)', border: '1px solid var(--border)' }} />
           ))}
         </div>
       )}
 
-      {/* Add Widget modal */}
       <AddWidgetModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onAdd={(type) => {
-          addWidget(type);
-          setModalOpen(false);
-        }}
+        onAdd={(type) => { addWidget(type); setModalOpen(false); }}
         activeWidgets={activeTypes}
       />
 
       {/* Scoped styles for grid items */}
       <style jsx global>{`
-        .widget-grid-layout {
-          position: relative;
-        }
-        .widget-grid-item {
-          position: relative;
-        }
-        .widget-grid-item > :last-child {
-          height: 100%;
-        }
-        /* Ensure widget cards fill their grid cell */
-        .widget-grid-item > :last-child > div {
-          height: 100%;
-        }
+        .widget-grid-layout { position: relative; }
+        .widget-grid-item { position: relative; }
+        .widget-grid-item > :last-child { height: 100%; overflow: auto; }
+        .widget-grid-item > :last-child > div { height: 100%; min-height: 100%; }
         .widget-drag-handle {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          z-index: 20;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          border-radius: 6px;
-          color: var(--text-faint);
-          cursor: grab;
-          opacity: 0;
-          transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+          position: absolute; top: 10px; left: 10px; z-index: 20;
+          display: flex; align-items: center; justify-content: center;
+          width: 24px; height: 24px; border-radius: 6px;
+          color: var(--text-faint); cursor: grab;
+          opacity: 0; transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
         }
-        .widget-grid-item:hover .widget-drag-handle {
-          opacity: 1;
-        }
-        .widget-drag-handle:hover {
-          background: var(--border);
-          color: var(--text-secondary);
-        }
-        .widget-drag-handle:active {
-          cursor: grabbing;
-        }
-        /* While dragging, highlight the item */
-        .react-grid-item.react-draggable-dragging {
-          z-index: 100;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-          border-radius: 16px;
-          opacity: 0.9;
-        }
-        /* Placeholder shown where the item will land */
-        .react-grid-placeholder {
-          background: var(--gold) !important;
-          opacity: 0.08 !important;
-          border-radius: 16px;
-          border: 2px dashed var(--gold) !important;
-        }
-        /* Resize handle styling */
-        .react-grid-item > .react-resizable-handle {
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          bottom: 4px;
-          right: 4px;
-          cursor: se-resize;
-          opacity: 0;
-          transition: opacity 0.15s;
-        }
-        .react-grid-item:hover > .react-resizable-handle {
-          opacity: 0.5;
-        }
-        .react-grid-item > .react-resizable-handle::after {
-          content: '';
-          position: absolute;
-          right: 4px;
-          bottom: 4px;
-          width: 8px;
-          height: 8px;
-          border-right: 2px solid var(--text-faint);
-          border-bottom: 2px solid var(--text-faint);
-          border-radius: 0 0 2px 0;
-        }
-        /* While resizing */
-        .react-grid-item.resizing {
-          z-index: 100;
-          opacity: 0.9;
-        }
-        /* Widget content should overflow properly when resized */
-        .widget-grid-item > :last-child {
-          height: 100%;
-          overflow: auto;
-        }
-        .widget-grid-item > :last-child > div {
-          height: 100%;
-          min-height: 100%;
-        }
+        .widget-grid-item:hover .widget-drag-handle { opacity: 1; }
+        .widget-drag-handle:hover { background: var(--border); color: var(--text-secondary); }
+        .widget-drag-handle:active { cursor: grabbing; }
+        .react-grid-item.react-draggable-dragging { z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,0.2); border-radius: 16px; opacity: 0.9; }
+        .react-grid-placeholder { background: var(--gold) !important; opacity: 0.08 !important; border-radius: 16px; border: 2px dashed var(--gold) !important; }
+        .react-grid-item > .react-resizable-handle { position: absolute; width: 20px; height: 20px; bottom: 4px; right: 4px; cursor: se-resize; opacity: 0; transition: opacity 0.15s; }
+        .react-grid-item:hover > .react-resizable-handle { opacity: 0.5; }
+        .react-grid-item > .react-resizable-handle::after { content: ''; position: absolute; right: 4px; bottom: 4px; width: 8px; height: 8px; border-right: 2px solid var(--text-faint); border-bottom: 2px solid var(--text-faint); border-radius: 0 0 2px 0; }
+        .react-grid-item.resizing { z-index: 100; opacity: 0.9; }
       `}</style>
     </div>
   );

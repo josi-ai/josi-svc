@@ -1,176 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-
-interface CosmicConfig {
-  aurora: boolean;
-  stars: boolean;
-  constellations: boolean;
-  particles: boolean;
-}
-
-const PRESETS: Record<string, CosmicConfig> = {
-  aurora: { aurora: true, stars: false, constellations: false, particles: false },
-  starfield: { aurora: false, stars: true, constellations: false, particles: false },
-  constellation: { aurora: false, stars: true, constellations: true, particles: false },
-  cosmic: { aurora: true, stars: true, constellations: true, particles: true },
-};
-
-/* ─── Seeded PRNG ─── */
-function srand(seed: number): number {
-  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-/* ─── Constellation data with SVG illustration paths ─── */
-const CONSTELLATIONS = [
-  {
-    name: 'Orion',
-    stars: [
-      { x: 0.38, y: 0.22, b: 0.9 },  // Betelgeuse (left shoulder)
-      { x: 0.44, y: 0.22, b: 0.7 },   // Bellatrix (right shoulder)
-      { x: 0.39, y: 0.32, b: 0.8 },   // Alnitak (belt left)
-      { x: 0.41, y: 0.31, b: 0.9 },   // Alnilam (belt center)
-      { x: 0.43, y: 0.30, b: 0.8 },   // Mintaka (belt right)
-      { x: 0.37, y: 0.42, b: 0.6 },   // Saiph (left foot)
-      { x: 0.45, y: 0.40, b: 0.9 },   // Rigel (right foot)
-    ],
-    lines: [[0,1],[0,2],[1,4],[2,3],[3,4],[2,5],[4,6]] as [number,number][],
-    // Simplified hunter figure — head, torso, arms, shield, legs (normalized to constellation bounds)
-    illustration: [
-      // Head (circle indicated by arc path)
-      'M 0.41 0.16 A 0.02 0.02 0 1 1 0.41 0.15 A 0.02 0.02 0 1 1 0.41 0.16',
-      // Neck to shoulders
-      'M 0.41 0.18 L 0.41 0.20 L 0.38 0.22 M 0.41 0.20 L 0.44 0.22',
-      // Torso
-      'M 0.41 0.20 L 0.41 0.32',
-      // Left arm raised (holding club)
-      'M 0.38 0.22 L 0.35 0.17 L 0.34 0.13',
-      // Right arm (holding shield)
-      'M 0.44 0.22 L 0.47 0.19 L 0.48 0.22 L 0.47 0.26 L 0.44 0.28',
-      // Left leg
-      'M 0.41 0.32 L 0.37 0.42',
-      // Right leg
-      'M 0.41 0.32 L 0.45 0.40',
-    ],
-  },
-  {
-    name: 'Scorpius',
-    stars: [
-      { x: 0.78, y: 0.15, b: 0.6 },
-      { x: 0.80, y: 0.22, b: 1.0 },   // Antares
-      { x: 0.82, y: 0.30, b: 0.5 },
-      { x: 0.85, y: 0.36, b: 0.5 },
-      { x: 0.88, y: 0.40, b: 0.6 },
-      { x: 0.90, y: 0.44, b: 0.5 },
-      { x: 0.89, y: 0.48, b: 0.7 },
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]] as [number,number][],
-    // Scorpion body — claws, body segments, curved tail with stinger
-    illustration: [
-      // Left claw
-      'M 0.78 0.15 L 0.75 0.12 L 0.73 0.10 M 0.75 0.12 L 0.73 0.14',
-      // Right claw
-      'M 0.78 0.15 L 0.77 0.11 L 0.79 0.09 M 0.77 0.11 L 0.75 0.10',
-      // Body curve
-      'M 0.78 0.15 Q 0.79 0.18 0.80 0.22 Q 0.81 0.26 0.82 0.30 Q 0.84 0.33 0.85 0.36 Q 0.87 0.38 0.88 0.40 Q 0.89 0.42 0.90 0.44',
-      // Tail curl with stinger
-      'M 0.90 0.44 Q 0.91 0.46 0.89 0.48 L 0.88 0.50 L 0.87 0.49',
-      // Legs (3 pairs)
-      'M 0.80 0.22 L 0.77 0.25 M 0.80 0.22 L 0.83 0.25',
-      'M 0.82 0.30 L 0.79 0.33 M 0.82 0.30 L 0.85 0.33',
-      'M 0.85 0.36 L 0.82 0.39 M 0.85 0.36 L 0.88 0.37',
-    ],
-  },
-  {
-    name: 'Ursa Major',
-    stars: [
-      { x: 0.12, y: 0.10, b: 0.8 },
-      { x: 0.17, y: 0.08, b: 0.7 },
-      { x: 0.22, y: 0.11, b: 0.75 },
-      { x: 0.25, y: 0.16, b: 0.7 },
-      { x: 0.30, y: 0.15, b: 0.65 },
-      { x: 0.33, y: 0.12, b: 0.7 },
-      { x: 0.36, y: 0.14, b: 0.6 },
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]] as [number,number][],
-    // Bear figure — head, body, legs, tail
-    illustration: [
-      // Head
-      'M 0.10 0.10 Q 0.09 0.08 0.11 0.07 Q 0.13 0.06 0.14 0.08 L 0.12 0.10',
-      // Ear
-      'M 0.10 0.07 L 0.09 0.05 L 0.10 0.06',
-      // Body outline
-      'M 0.12 0.10 Q 0.15 0.09 0.17 0.08 Q 0.20 0.09 0.22 0.11 Q 0.24 0.13 0.25 0.16 Q 0.28 0.16 0.30 0.15',
-      // Back/tail
-      'M 0.30 0.15 Q 0.32 0.13 0.33 0.12 Q 0.35 0.13 0.36 0.14',
-      // Belly
-      'M 0.12 0.10 Q 0.14 0.14 0.18 0.15 Q 0.22 0.16 0.25 0.16',
-      // Front legs
-      'M 0.14 0.14 L 0.13 0.18 M 0.18 0.15 L 0.17 0.19',
-      // Back legs
-      'M 0.28 0.16 L 0.27 0.20 M 0.32 0.15 L 0.31 0.19',
-    ],
-  },
-  {
-    name: 'Leo',
-    stars: [
-      { x: 0.55, y: 0.60, b: 0.9 },   // Regulus
-      { x: 0.52, y: 0.54, b: 0.6 },
-      { x: 0.56, y: 0.50, b: 0.65 },
-      { x: 0.60, y: 0.53, b: 0.7 },
-      { x: 0.63, y: 0.58, b: 0.6 },
-      { x: 0.61, y: 0.64, b: 0.55 },
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]] as [number,number][],
-    // Lion figure — mane, body, legs, tail
-    illustration: [
-      // Mane (rough circle around head area)
-      'M 0.50 0.52 Q 0.49 0.50 0.50 0.48 Q 0.52 0.46 0.54 0.47 Q 0.56 0.48 0.55 0.50 Q 0.54 0.52 0.52 0.54',
-      // Head features
-      'M 0.51 0.49 L 0.50 0.48 M 0.53 0.49 L 0.54 0.48',
-      // Body
-      'M 0.54 0.52 Q 0.57 0.53 0.60 0.53 Q 0.62 0.54 0.63 0.56',
-      // Front legs
-      'M 0.55 0.55 L 0.54 0.62 L 0.55 0.63 M 0.57 0.55 L 0.56 0.62 L 0.57 0.63',
-      // Back legs
-      'M 0.62 0.56 L 0.61 0.64 L 0.62 0.65 M 0.64 0.57 L 0.63 0.64 L 0.64 0.65',
-      // Tail
-      'M 0.63 0.53 Q 0.66 0.50 0.68 0.48 Q 0.69 0.47 0.68 0.49',
-    ],
-  },
-];
-
-/* ─── Types ─── */
-interface Star { x: number; y: number; size: number; brightness: number; twinkleSpeed: number; twinkleOffset: number; isGold: boolean; }
-interface AuroraOrb { x: number; y: number; radius: number; r: number; g: number; b: number; alpha: number; driftX: number; driftY: number; speed: number; phase: number; }
-interface Particle { x: number; y: number; vx: number; vy: number; size: number; baseAlpha: number; alpha: number; isGold: boolean; depth: number; }
-
-/* ─── Parse SVG path to canvas commands ─── */
-function drawSvgPath(ctx: CanvasRenderingContext2D, path: string, w: number, h: number, scrollOffset: number) {
-  const tokens = path.match(/[MLQAHZ]|[-+]?\d*\.?\d+/gi) || [];
-  let i = 0;
-  const n = () => parseFloat(tokens[i++]);
-
-  ctx.beginPath();
-  while (i < tokens.length) {
-    const cmd = tokens[i++];
-    switch (cmd) {
-      case 'M': ctx.moveTo(n() * w, n() * h - scrollOffset); break;
-      case 'L': ctx.lineTo(n() * w, n() * h - scrollOffset); break;
-      case 'Q': { const cx = n() * w, cy = n() * h - scrollOffset, ex = n() * w, ey = n() * h - scrollOffset; ctx.quadraticCurveTo(cx, cy, ex, ey); break; }
-      case 'A': {
-        // Simplified arc handling for head circles
-        const rx = n(), ry = n(); n(); n(); n(); // skip rotation, large-arc, sweep
-        const ax = n() * w, ay = n() * h - scrollOffset;
-        ctx.arc(ax, ay, rx * w, 0, Math.PI * 2);
-        break;
-      }
-      case 'Z': ctx.closePath(); break;
-      default: i--; i++; break; // skip unknowns
-    }
-  }
-}
+import { CONSTELLATIONS, drawSvgPath } from './constellation-data';
+import {
+  type CosmicConfig, PRESETS, srand,
+  type Star, type AuroraOrb, type Particle,
+  AURORA_ORBS, initStars, initParticles,
+} from './cosmic-config';
 
 export default function CosmicCanvas({ preset = 'cosmic' }: { preset?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -210,46 +46,10 @@ export default function CosmicCanvas({ preset = 'cosmic' }: { preset?: string })
     const cW = () => W / devicePixelRatio;
     const cH = () => H / devicePixelRatio;
 
-    /* ═══ Initialize Stars — FIXED POSITIONS, twinkle only ═══ */
-    const stars: Star[] = [];
-    for (let i = 0; i < 500; i++) {
-      stars.push({
-        x: srand(i + 1000),  // 0-1 normalized
-        y: srand(i + 2000),
-        size: 0.4 + srand(i + 3000) * 2.5,
-        brightness: 0.2 + srand(i + 4000) * 0.8,
-        twinkleSpeed: 0.3 + srand(i + 5000) * 2.5,
-        twinkleOffset: srand(i + 6000) * Math.PI * 2,
-        isGold: srand(i + 7000) < 0.18,
-      });
-    }
-
-    /* ═══ Aurora Orbs ═══ */
-    const orbs: AuroraOrb[] = [
-      { x: 0.4, y: 0.3, radius: 0.4, r: 200, g: 145, b: 58, alpha: 0.18, driftX: 50, driftY: -30, speed: 0.0004, phase: 0 },
-      { x: 0.15, y: 0.5, radius: 0.35, r: 20, g: 50, b: 140, alpha: 0.14, driftX: -40, driftY: 35, speed: 0.00033, phase: 1 },
-      { x: 0.75, y: 0.35, radius: 0.3, r: 90, g: 40, b: 150, alpha: 0.11, driftX: 30, driftY: 30, speed: 0.00045, phase: 2 },
-      { x: 0.25, y: 0.75, radius: 0.3, r: 20, g: 130, b: 110, alpha: 0.10, driftX: -25, driftY: -25, speed: 0.00052, phase: 3 },
-      { x: 0.7, y: 0.7, radius: 0.28, r: 210, g: 160, b: 50, alpha: 0.14, driftX: 35, driftY: 25, speed: 0.00036, phase: 4 },
-      { x: 0.5, y: 0.8, radius: 0.4, r: 30, g: 20, b: 100, alpha: 0.12, driftX: -20, driftY: -35, speed: 0.00042, phase: 5 },
-    ];
-
-    /* ═══ Particles ═══ */
-    const particles: Particle[] = [];
-    for (let i = 0; i < 50; i++) {
-      const depth = srand(i + 8000);
-      particles.push({
-        x: srand(i + 9000) * 1440,
-        y: srand(i + 10000) * 900,
-        vx: (srand(i + 11000) - 0.5) * 0.3,
-        vy: (srand(i + 12000) - 0.5) * 0.2,
-        size: 1 + depth * 3,
-        baseAlpha: 0.1 + depth * 0.5,
-        alpha: 0.1 + depth * 0.5,
-        isGold: srand(i + 13000) < 0.35,
-        depth,
-      });
-    }
+    /* ═══ Initialize scene objects ═══ */
+    const stars = initStars(500);
+    const orbs = AURORA_ORBS;
+    const particles = initParticles(50);
 
     /* ═══ Constellation timing ═══ */
     const constellationStartTime = performance.now();

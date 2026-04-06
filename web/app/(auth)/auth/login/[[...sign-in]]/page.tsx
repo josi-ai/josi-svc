@@ -1,6 +1,7 @@
 'use client';
 
 import { SignIn } from '@clerk/nextjs';
+import { CLERK_COLORS } from '@/config/clerk-theme';
 
 export default function LoginPage() {
   return (
@@ -10,8 +11,8 @@ export default function LoginPage() {
       appearance={{
         elements: {
           rootBox: { width: '100%', maxWidth: 400 },
-          headerTitle: { color: '#e2dff0' },
-          headerSubtitle: { color: '#9b95b0' },
+          headerTitle: { color: CLERK_COLORS.headerTitle },
+          headerSubtitle: { color: CLERK_COLORS.headerSubtitle },
         },
       }}
     />

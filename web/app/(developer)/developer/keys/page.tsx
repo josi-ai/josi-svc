@@ -16,23 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Copy, Trash2, RefreshCw, Key } from 'lucide-react';
 
-interface ApiKeyResponse {
-  api_key_id: string;
-  key_prefix: string;
-  name: string;
-  is_active: boolean;
-  last_used_at: string | null;
-  expires_at: string | null;
-  created_at: string;
-}
-
-interface ApiKeyCreatedResponse {
-  api_key_id: string;
-  key: string;
-  key_prefix: string;
-  name: string;
-}
-
+interface ApiKeyResponse { api_key_id: string; key_prefix: string; name: string; is_active: boolean; last_used_at: string | null; expires_at: string | null; created_at: string; }
+interface ApiKeyCreatedResponse { api_key_id: string; key: string; key_prefix: string; name: string; }
 type Toast = { message: string; type: 'success' | 'error' } | null;
 
 export default function ApiKeysPage() {
