@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ChevronDown, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { ChartDetail, ChartDetailPerson } from '@/types';
-import { TRADITION_STYLES, TRADITIONS_LIST, CHART_FORMATS, getPlanets } from './chart-detail-helpers';
+import { TRADITION_STYLES, TRADITIONS_LIST, CHART_FORMATS, getPlanets, getFormatsForTradition } from './chart-detail-helpers';
 
 /* --- Dropdown --- */
 function Dropdown({ value, options, onChange }: { value: string; options: readonly string[]; onChange?: (val: string) => void }) {
@@ -57,6 +57,8 @@ function Dropdown({ value, options, onChange }: { value: string; options: readon
 interface ChartDetailHeaderProps {
   chart: ChartDetail;
   person?: ChartDetailPerson | null;
+  tradition: string;
+  onTraditionChange: (val: string) => void;
   chartFormat: string;
   onChartFormatChange: (val: string) => void;
   onDeleteClick: () => void;
@@ -66,6 +68,8 @@ interface ChartDetailHeaderProps {
 export function ChartDetailHeader({
   chart,
   person,
+  tradition: currentTradition,
+  onTraditionChange,
   chartFormat,
   onChartFormatChange,
   onDeleteClick,
@@ -74,7 +78,8 @@ export function ChartDetailHeader({
   const planets = getPlanets(chart);
   const sun = planets['Sun'];
   const moon = planets['Moon'];
-  const tradition = TRADITION_STYLES[chart.chart_type] || { label: chart.chart_type, variant: 'outline' as const, color: 'var(--text-secondary)' };
+  const tradition = TRADITION_STYLES[currentTradition.toLowerCase()] || TRADITION_STYLES[chart.chart_type] || { label: chart.chart_type, variant: 'outline' as const, color: 'var(--text-secondary)' };
+  const availableFormats = getFormatsForTradition(currentTradition);
 
   const chartTitle = [
     sun ? `Sun ${sun.sign}` : null,
@@ -138,8 +143,8 @@ export function ChartDetailHeader({
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-          <Dropdown value={tradition.label} options={TRADITIONS_LIST} />
-          <Dropdown value={chartFormat} options={CHART_FORMATS} onChange={onChartFormatChange} />
+          <Dropdown value={tradition.label} options={TRADITIONS_LIST} onChange={onTraditionChange} />
+          <Dropdown value={chartFormat} options={availableFormats} onChange={onChartFormatChange} />
           <button
             onClick={onDeleteClick}
             disabled={isDeleting}

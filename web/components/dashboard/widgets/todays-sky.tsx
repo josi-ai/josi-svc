@@ -3,6 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
+import { useGlossary } from '@/hooks/use-glossary'
+import { LocalizedTerm } from '@/components/ui/localized-term'
 import { WidgetCard } from './widget-card'
 
 /* ---------- Types ---------- */
@@ -74,6 +76,7 @@ function Skeleton() {
 
 export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
   const { location, isLoading: profileLoading } = useDefaultProfile()
+  const { t } = useGlossary()
 
   const today = new Date().toISOString().split('T')[0] + 'T06:00:00'
 
@@ -99,9 +102,18 @@ export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
 
   /* ---------- Derived display values ---------- */
 
+  // Localized term lookups for key astrological names
+  const tithiT = detail ? t(detail.tithi.name) : null
+  const nakshatraT = detail ? t(detail.nakshatra.name) : null
+  const yogaT = detail ? t(detail.yoga.name) : null
+
   const headline = detail
     ? `${detail.tithi.paksha} ${detail.tithi.name} in ${detail.nakshatra.name}`
     : ''
+
+  const headlineLocal = detail && (tithiT?.local || nakshatraT?.local)
+    ? [tithiT?.local, nakshatraT?.local].filter(Boolean).join(' \u2022 ')
+    : null
 
   const description = detail
     ? `The Moon transits through ${detail.nakshatra.name} nakshatra (ruled by ${detail.nakshatra.ruler}). ${detail.yoga.name} yoga is active — ${detail.yoga.quality || 'a period of cosmic influence'}.`
@@ -158,9 +170,14 @@ export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
             >
               Today&apos;s Sky
             </div>
-            <h2 className="font-display text-[28px] text-[var(--text-primary)] mb-2 leading-tight">
+            <h2 className="font-display text-[28px] text-[var(--text-primary)] mb-1 leading-tight">
               {headline}
             </h2>
+            {headlineLocal && (
+              <p className="text-[14px] mb-2" style={{ color: 'var(--text-muted)', opacity: 0.7, lineHeight: 1.3 }}>
+                {headlineLocal}
+              </p>
+            )}
             <p className="font-reading text-[15px] leading-relaxed text-[var(--text-body)] mb-5 max-w-xl">
               {description}
             </p>
@@ -173,14 +190,16 @@ export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
                     color: 'var(--gold-bright)',
                   }}
                 >
-                  {detail.yoga.name} Yoga
+                  <LocalizedTerm term={detail.yoga.name} style={{ display: 'inline' }} />{' '}
+                  <LocalizedTerm term="Yoga" style={{ display: 'inline' }} />
                 </span>
               )}
               <span
                 className="text-[11px] font-medium px-3 py-1 rounded-full"
                 style={{ background: 'var(--blue-bg)', color: 'var(--blue)' }}
               >
-                Karana: {detail.karana.name}
+                <LocalizedTerm term="Karana" style={{ display: 'inline' }} />:{' '}
+                <LocalizedTerm term={detail.karana.name} style={{ display: 'inline' }} />
               </span>
               <span
                 className="text-[11px] font-medium px-3 py-1 rounded-full"
@@ -196,7 +215,7 @@ export default function TodaysSky({ onRemove }: { onRemove: () => void }) {
                     color: 'var(--red)',
                   }}
                 >
-                  Rahu Kaal: {rahuKaal}
+                  <LocalizedTerm term="Rahu Kaal" style={{ display: 'inline' }} />: {rahuKaal}
                 </span>
               )}
             </div>

@@ -41,6 +41,7 @@ class User(SQLModel, table=True):
 
     # Demographics
     ethnicity: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    language_preference: Optional[str] = Field(default=None, nullable=True)
 
     # Authorization (owned by us, not Clerk)
     roles: List[str] = Field(default=["user"], sa_column=Column(JSON))
@@ -127,6 +128,7 @@ class UserUpdate(SQLModel):
     preferences: Optional[Dict] = None
     notification_settings: Optional[Dict] = None
     ethnicity: Optional[List[str]] = None
+    language_preference: Optional[str] = None
 
 
 class UserResponse(SQLModel):
@@ -137,6 +139,7 @@ class UserResponse(SQLModel):
     phone: Optional[str]
     avatar_url: Optional[str]
     ethnicity: Optional[List[str]] = None
+    language_preference: Optional[str] = None
     subscription_tier_id: Optional[int]
     subscription_tier_name: Optional[str]
     subscription_end_date: Optional[datetime]

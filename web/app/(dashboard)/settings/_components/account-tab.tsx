@@ -4,20 +4,30 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { UserProfile } from './settings-types';
-import { ETHNICITY_OPTIONS } from './settings-types';
-import { labelStyle, inputStyle, focusHandlers, SaveButton, SuccessBanner } from './settings-shared';
+import { ETHNICITY_OPTIONS, LANGUAGE_OPTIONS } from './settings-types';
+import { labelStyle, inputStyle, selectStyle, focusHandlers, SaveButton, SuccessBanner } from './settings-shared';
+
+const SUPPORTED_LANGS = ['ta', 'te', 'kn', 'hi', 'ml', 'bn', 'sa'];
+
+function detectBrowserLang(): string {
+  if (typeof navigator === 'undefined') return 'en';
+  const bl = navigator.language?.split('-')[0];
+  return SUPPORTED_LANGS.includes(bl) ? bl : 'en';
+}
 
 export function AccountTab({ profile }: { profile: UserProfile }) {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState(profile.full_name || '');
   const [phone, setPhone] = useState(profile.phone || '');
   const [ethnicity, setEthnicity] = useState<string[]>(profile.ethnicity || []);
+  const [languagePreference, setLanguagePreference] = useState(profile.language_preference || detectBrowserLang());
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
     setFullName(profile.full_name || '');
     setPhone(profile.phone || '');
     setEthnicity(profile.ethnicity || []);
+    setLanguagePreference(profile.language_preference || detectBrowserLang());
   }, [profile]);
 
   const mutation = useMutation({
@@ -26,6 +36,7 @@ export function AccountTab({ profile }: { profile: UserProfile }) {
         full_name: fullName,
         phone: phone || null,
         ethnicity: ethnicity.length > 0 ? ethnicity : null,
+        language_preference: languagePreference || null,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me-profile'] });
@@ -85,6 +96,25 @@ export function AccountTab({ profile }: { profile: UserProfile }) {
             );
           })}
         </div>
+      </div>
+
+      <div>
+        <label style={labelStyle}>Language</label>
+        <select
+          value={languagePreference}
+          onChange={(e) => setLanguagePreference(e.target.value)}
+          style={selectStyle}
+          {...focusHandlers}
+        >
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>
+          Astrological terms will show native-script translations alongside English
+        </p>
       </div>
 
       {mutation.isError && (

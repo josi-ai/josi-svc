@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
+import { useGlossary } from '@/hooks/use-glossary'
 import { WidgetCard } from './widget-card'
 import Link from 'next/link'
 import type { PanchangResponse } from '@/types'
@@ -48,6 +49,7 @@ function buildSegs(rk: { start: number; end: number } | null, ab: { start: numbe
 
 export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) {
   const { location, isLoading: pl } = useDefaultProfile()
+  const { t } = useGlossary()
   const today = new Date().toISOString().split('T')[0] + 'T06:00:00'
 
   const { data, isLoading, isError } = useQuery<MuhurtaWidgetData>({
@@ -64,10 +66,11 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
   const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes()
   const inR = nowMin >= DS && nowMin <= DE, pct = inR ? ((nowMin - DS) / (DE - DS)) * 100 : 0
 
+  const rahuKaalLocal = t('Rahu Kalam').local
   const status = !data ? null
-    : data.rk && nowMin >= pt(data.rk.start) && nowMin < pt(data.rk.end) ? { label: '\u26A0 Rahu Kalam active', color: 'var(--red)' }
-    : data.ab && nowMin >= pt(data.ab.start) && nowMin < pt(data.ab.end) ? { label: '\u2726 Auspicious period', color: 'var(--gold)' }
-    : { label: 'Neutral period', color: 'var(--text-faint)' }
+    : data.rk && nowMin >= pt(data.rk.start) && nowMin < pt(data.rk.end) ? { label: `\u26A0 ${t('Rahu Kalam').name} active`, sublabel: rahuKaalLocal, color: 'var(--red)' }
+    : data.ab && nowMin >= pt(data.ab.start) && nowMin < pt(data.ab.end) ? { label: '\u2726 Auspicious period', sublabel: null, color: 'var(--gold)' }
+    : { label: 'Neutral period', sublabel: null, color: 'var(--text-faint)' }
 
   if (isLoading || pl) return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
@@ -93,7 +96,12 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
     <WidgetCard tradition="vedic" onRemove={onRemove}>
       <div className="p-5">
         <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 10 }}>Today&apos;s Muhurta</div>
-        {status && <div style={{ fontSize: 15, fontWeight: 600, color: status.color, marginBottom: 14, lineHeight: 1.2 }}>{status.label}</div>}
+        {status && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: status.color, lineHeight: 1.2 }}>{status.label}</div>
+            {status.sublabel && <div style={{ fontSize: 11, color: status.color, opacity: 0.7, lineHeight: 1.2, marginTop: 1 }}>{status.sublabel}</div>}
+          </div>
+        )}
 
         {/* Continuous bar — 6AM to 6PM */}
         <div style={{ position: 'relative', marginBottom: 16 }}>
@@ -135,7 +143,7 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
           </div>
           {/* Legend */}
           <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--bar-avoid)' }} />Rahu Kaal</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--bar-avoid)' }} />{t('Rahu Kaal').name}{t('Rahu Kaal').local ? ` (${t('Rahu Kaal').local})` : ''}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--bar-special)' }} />Abhijit</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--bar-good)' }} />Good</span>
           </div>
@@ -144,11 +152,13 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
         {/* Key times */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {data.rk && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--red-bg)', border: '1px solid rgba(200,80,60,0.15)' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--red)', marginBottom: 2 }}>Rahu Kaal</div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--red)', marginBottom: 2 }}>{t('Rahu Kaal').name}</div>
+            {t('Rahu Kaal').local && <div style={{ fontSize: 9, color: 'var(--red)', opacity: 0.7, marginBottom: 1 }}>{t('Rahu Kaal').local}</div>}
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{data.rk.start} – {data.rk.end}</div>
           </div>}
           {data.ab && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--gold-bg)', border: '1px solid rgba(200,145,58,0.15)' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--gold)', marginBottom: 2 }}>Abhijit Muhurta</div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--gold)', marginBottom: 2 }}>{t('Abhijit Muhurta').name}</div>
+            {t('Abhijit Muhurta').local && <div style={{ fontSize: 9, color: 'var(--gold)', opacity: 0.7, marginBottom: 1 }}>{t('Abhijit Muhurta').local}</div>}
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{data.ab.start} – {data.ab.end}</div>
           </div>}
           {data.sunrise && <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--surface)' }}>
@@ -161,7 +171,7 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
           </div>}
         </div>
 
-        <Link href="/muhurta" style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none', letterSpacing: 0.3 }}>View full Muhurta &rarr;</Link>
+        <Link href="/muhurta" style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none', letterSpacing: 0.3 }}>View full {t('Muhurta').name}{t('Muhurta').local ? ` (${t('Muhurta').local})` : ''} &rarr;</Link>
       </div>
     </WidgetCard>
   )

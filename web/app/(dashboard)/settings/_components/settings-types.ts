@@ -9,6 +9,7 @@ export interface UserProfile {
   phone: string | null;
   avatar_url: string | null;
   ethnicity: string[] | null;
+  language_preference?: string | null;
   subscription_tier_id: number | null;
   subscription_tier_name: string | null;
   subscription_end_date: string | null;
@@ -38,6 +39,17 @@ export interface UsageInfo {
 
 export const TABS = ['Account', 'Subscription', 'Notifications', 'Chart Defaults', 'Display'] as const;
 export type Tab = (typeof TABS)[number];
+
+export const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'ta', label: 'Tamil' },
+  { value: 'te', label: 'Telugu' },
+  { value: 'kn', label: 'Kannada' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'ml', label: 'Malayalam' },
+  { value: 'bn', label: 'Bengali' },
+  { value: 'sa', label: 'Sanskrit' },
+];
 
 export const ETHNICITY_OPTIONS = [
   'Tamil Hindu', 'North Indian Hindu', 'Bengali Hindu', 'South Indian Christian',

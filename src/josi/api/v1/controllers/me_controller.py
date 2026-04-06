@@ -15,16 +15,17 @@ router = APIRouter(prefix="/me", tags=["me"])
 CurrentUserDep = Annotated[CurrentUser, Depends(resolve_current_user)]
 
 
-@router.get("", response_model=UserResponse)
+@router.get("", response_model=ResponseModel)
 async def get_my_profile(current_user: CurrentUserDep):
     user_service = UserService(current_user=current_user)
     user = await user_service.user_repository.get_by_id(current_user.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    user_data = UserResponse.model_validate(user).model_dump(mode="json")
+    return ResponseModel(success=True, message="Profile retrieved", data=user_data)
 
 
-@router.put("", response_model=UserResponse)
+@router.put("", response_model=ResponseModel)
 async def update_my_profile(body: UserUpdate, current_user: CurrentUserDep):
     user_service = UserService(current_user=current_user)
     user = await user_service.user_repository.get_by_id(current_user.user_id)
@@ -34,7 +35,8 @@ async def update_my_profile(body: UserUpdate, current_user: CurrentUserDep):
     for field, value in update_data.items():
         setattr(user, field, value)
     user = await user_service.user_repository.update(user)
-    return user
+    user_data = UserResponse.model_validate(user).model_dump(mode="json")
+    return ResponseModel(success=True, message="Profile updated", data=user_data)
 
 
 @router.get("/usage", response_model=UserUsageResponse)

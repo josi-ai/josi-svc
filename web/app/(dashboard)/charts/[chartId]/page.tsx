@@ -8,7 +8,7 @@ import { Star } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { SouthIndianChart, NorthIndianChart, WesternWheelChart } from '@/components/charts/chart-visualizations';
 import type { ChartDetail, ChartDetailPerson } from '@/types';
-import { TABS, type Tab, getPlanets } from './_components/chart-detail-helpers';
+import { TABS, type Tab, getPlanets, getDefaultFormat } from './_components/chart-detail-helpers';
 import { ChartDetailHeader } from './_components/chart-detail-header';
 import { QuickInfoPanel } from './_components/quick-info-panel';
 import { OverviewTab } from './_components/overview-tab';
@@ -55,6 +55,7 @@ export default function ChartDetailPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [chartFormat, setChartFormat] = useState<string>('South Indian');
+  const [tradition, setTradition] = useState<string>('Vedic');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const deleteMutation = useMutation({
@@ -93,6 +94,14 @@ export default function ChartDetailPage() {
 
   const planets = getPlanets(chart);
 
+
+
+
+  const handleTraditionChange = (newTradition: string) => {
+    setTradition(newTradition);
+    setChartFormat(getDefaultFormat(newTradition));
+  };
+
   return (
     <div>
       {/* ---- Inject keyframe for tab fade-in ---- */}
@@ -107,6 +116,8 @@ export default function ChartDetailPage() {
       <ChartDetailHeader
         chart={chart}
         person={person}
+        tradition={tradition}
+        onTraditionChange={handleTraditionChange}
         chartFormat={chartFormat}
         onChartFormatChange={setChartFormat}
         onDeleteClick={() => setShowDeleteConfirm(true)}

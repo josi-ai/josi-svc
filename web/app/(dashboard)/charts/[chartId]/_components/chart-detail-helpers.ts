@@ -23,6 +23,21 @@ export const TRADITION_STYLES: Record<string, { label: string; variant: 'default
 export const TRADITIONS_LIST = ['Vedic', 'Western', 'Chinese'] as const;
 export const CHART_FORMATS = ['South Indian', 'North Indian', 'Western Wheel'] as const;
 
+export const CHART_FORMATS_BY_TRADITION: Record<string, readonly string[]> = {
+  Vedic: ['South Indian', 'North Indian'],
+  Western: ['Western Wheel'],
+  Chinese: ['South Indian', 'North Indian'],
+};
+
+export function getFormatsForTradition(tradition: string): readonly string[] {
+  return CHART_FORMATS_BY_TRADITION[tradition] || CHART_FORMATS;
+}
+
+export function getDefaultFormat(tradition: string): string {
+  const formats = getFormatsForTradition(tradition);
+  return formats[0] || 'South Indian';
+}
+
 /* ================================================================
    Helpers
    ================================================================ */

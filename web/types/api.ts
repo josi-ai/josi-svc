@@ -75,6 +75,7 @@ export interface UserResponse {
   phone: string | null;
   avatar_url: string | null;
   ethnicity: string[] | null;
+  language_preference?: string | null;
   subscription_tier_id: number | null;
   subscription_tier_name: string | null;
   subscription_end_date: string | null;
@@ -96,6 +97,7 @@ export interface UserUpdate {
   preferences?: Record<string, unknown>;
   notification_settings?: Record<string, unknown>;
   ethnicity?: string[] | null;
+  language_preference?: string | null;
 }
 
 /** Tier limits included in usage and subscription responses. */

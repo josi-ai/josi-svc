@@ -12,6 +12,7 @@ interface UserProfile {
   email: string;
   full_name: string;
   phone?: string;
+  language_preference?: string | null;
   subscription_tier_name?: string;
   subscription_tier_id?: number;
   roles: string[];
@@ -77,6 +78,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       subscription_tier_name: (publicMetadata.josi_subscription_tier as string) || 'Free',
       subscription_tier_id: (publicMetadata.josi_subscription_tier_id as number) || 1,
       roles: (publicMetadata.josi_roles as string[]) || ['user'],
+      language_preference: (publicMetadata.josi_language_preference as string) || null,
       is_active: (publicMetadata.josi_is_active as boolean) ?? true,
       is_verified: (publicMetadata.josi_is_verified as boolean) ?? false,
     };

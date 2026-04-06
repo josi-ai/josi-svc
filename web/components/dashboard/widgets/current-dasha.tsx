@@ -89,12 +89,16 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
   const mahadasha = currentDasha?.mahadasha
   const antardasha = currentDasha?.antardasha
 
-  // Calculate progress from antardasha if available, else mahadasha
-  const activePeriod = antardasha || mahadasha
-  const progress = activePeriod
-    ? calculateProgress(activePeriod.start_date, activePeriod.end_date)
+  // Calculate progress for each period independently
+  const mahaProgress = mahadasha
+    ? calculateProgress(mahadasha.start_date, mahadasha.end_date)
     : 0
-  const endLabel = activePeriod ? formatEndDate(activePeriod.end_date) : ''
+  const mahaEndLabel = mahadasha ? formatEndDate(mahadasha.end_date) : ''
+
+  const antarProgress = antardasha
+    ? calculateProgress(antardasha.start_date, antardasha.end_date)
+    : 0
+  const antarEndLabel = antardasha ? formatEndDate(antardasha.end_date) : ''
 
   return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
@@ -129,39 +133,61 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
         </div>
       ) : (
         /* Data state */
-        <div className="p-5">
+        <div className="p-5" data-testid="dasha-widget-v2">
+          {(() => { console.log('[DASHA-DEBUG] antardasha:', antardasha, 'mahadasha:', mahadasha); return null; })()}
           <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3">
             Current Dasha
           </div>
 
-          <div className="font-display text-base text-[var(--text-primary)] mb-1">
-            {mahadasha.planet} Maha Dasha
+          {/* Maha Dasha progress */}
+          <div className="mb-3">
+            <div className="flex justify-between items-baseline mb-1">
+              <span className="font-display text-sm text-[var(--text-primary)] font-medium">
+                {mahadasha.planet} Maha Dasha
+              </span>
+              <span className="text-[10px] text-[var(--text-faint)]">
+                {mahaProgress}%
+              </span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${mahaProgress}%`,
+                  background: 'var(--gold-bright)',
+                }}
+              />
+            </div>
+            <div className="text-[10px] text-[var(--text-faint)] mt-1">
+              Until {mahaEndLabel}
+            </div>
           </div>
+
+          {/* Antar Dasha progress */}
           {antardasha && (
-            <div className="text-xs text-[var(--text-secondary)] mb-1">
-              {antardasha.planet} Antar Dasha
+            <div className="mb-1">
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="text-xs text-[var(--text-secondary)] font-medium">
+                  {antardasha.planet} Antar Dasha
+                </span>
+                <span className="text-[10px] text-[var(--text-faint)]">
+                  {antarProgress}%
+                </span>
+              </div>
+              <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${antarProgress}%`,
+                    background: 'var(--gold)',
+                  }}
+                />
+              </div>
+              <div className="text-[10px] text-[var(--text-faint)] mt-1">
+                Until {antarEndLabel}
+              </div>
             </div>
           )}
-
-          {/* Progress bar */}
-          <div className="w-full h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden my-2">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${progress}%`,
-                background: 'var(--gold-bright)',
-              }}
-            />
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-[11px] text-[var(--text-faint)]">
-              {progress}% elapsed
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">
-              Until {endLabel}
-            </span>
-          </div>
 
           <div
             className="text-xs font-semibold mt-3 cursor-pointer"

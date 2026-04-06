@@ -68,10 +68,10 @@ export function ProfileFormModal({
         bottom: 0,
         background: 'rgba(0,0,0,0.6)',
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,
-        padding: 0,
+        padding: 24,
       }}
       onClick={onClose}
     >
@@ -79,13 +79,13 @@ export function ProfileFormModal({
         style={{
           background: 'var(--card)',
           border: '1px solid var(--border)',
-          borderRadius: '14px 14px 0 0',
-          padding: 28,
-          maxWidth: 560,
+          borderRadius: 14,
+          padding: '20px 24px',
+          maxWidth: 520,
           width: '100%',
-          maxHeight: '90vh',
+          maxHeight: '80vh',
           overflowY: 'auto',
-          animation: 'slideUp 0.25s ease-out',
+          animation: 'fadeIn 0.2s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -95,7 +95,7 @@ export function ProfileFormModal({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 24,
+            marginBottom: 16,
           }}
         >
           <h3
@@ -126,7 +126,7 @@ export function ProfileFormModal({
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Name */}
             <div>
               <label style={labelStyle}>Name *</label>
