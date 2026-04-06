@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
 import { WidgetCard } from './widget-card'
+import type { CurrentTransitsData, TransitAspect } from '@/types'
 
 /* ---------- Types ---------- */
 
@@ -34,24 +35,27 @@ export default function WesternTransit({ onRemove }: { onRemove: () => void }) {
   } = useQuery({
     queryKey: ['transits', 'current', defaultProfile?.person_id],
     queryFn: () =>
-      apiClient.get<Transit[]>(
+      apiClient.get<CurrentTransitsData>(
         `/api/v1/transits/current/${defaultProfile!.person_id}`
       ),
     enabled: !!defaultProfile?.person_id,
   })
 
   const rawData = transitsResponse?.data;
-  const rawTransits: Transit[] = Array.isArray(rawData)
-    ? rawData
-    : (rawData as any)?.major_transits || [];
+  const rawTransits: TransitAspect[] = rawData?.major_transits ?? [];
   // Normalize API fields to widget fields
-  const transits = rawTransits.map((t) => ({
-    ...t,
-    transiting_planet: t.transiting_planet || t.planet || 'Unknown',
-    aspect_type: t.aspect_type || t.aspect || '',
-    natal_planet: t.natal_planet || `natal ${t.natal_sign || ''}`.trim(),
+  const transits: Transit[] = rawTransits.map((t) => ({
+    transiting_planet: t.planet || 'Unknown',
+    aspect_type: t.aspect || '',
+    natal_planet: `natal ${t.natal_sign || ''}`.trim(),
     intensity: t.intensity ?? t.orb,
-    description: t.description || t.effects || '',
+    description: t.effects || '',
+    planet: t.planet,
+    aspect: t.aspect,
+    natal_sign: t.natal_sign,
+    current_sign: t.current_sign,
+    effects: t.effects,
+    orb: t.orb,
   }));
   const isLoading = profileLoading || transitsLoading
 

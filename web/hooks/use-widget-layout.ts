@@ -2,9 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { type Layouts } from 'react-grid-layout';
 import { apiClient } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  loadFromStorage,
+  saveToStorage,
+  removeFromStorage,
+  widgetInstanceArraySchema,
+  layoutsSchema,
+} from '@/lib/storage';
 import {
   type WidgetType,
   type WidgetInstance,
@@ -44,44 +52,27 @@ const BREAKPOINT_COLS: Record<string, number> = {
 
 function loadLocalWidgets(): WidgetInstance[] {
   if (typeof window === 'undefined') return defaultWidgets;
-  try {
-    // Invalidate stale localStorage when widget config changes
-    const savedVersion = localStorage.getItem(VERSION_KEY);
-    if (savedVersion !== CURRENT_VERSION) {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(LAYOUT_STORAGE_KEY);
-      localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
-      return defaultWidgets;
-    }
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as WidgetInstance[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    // corrupted — fall back
+  // Invalidate stale localStorage when widget config changes
+  const savedVersion = loadFromStorage(VERSION_KEY, z.string(), '');
+  if (savedVersion !== CURRENT_VERSION) {
+    removeFromStorage(STORAGE_KEY);
+    removeFromStorage(LAYOUT_STORAGE_KEY);
+    saveToStorage(VERSION_KEY, CURRENT_VERSION);
+    return defaultWidgets;
   }
-  return defaultWidgets;
+  const widgets = loadFromStorage(STORAGE_KEY, widgetInstanceArraySchema, []);
+  return widgets.length > 0 ? (widgets as WidgetInstance[]) : defaultWidgets;
 }
 
 function loadLocalLayouts(): Layouts | null {
   if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Layouts;
-  } catch {
-    // corrupted
-  }
-  return null;
+  const layouts = loadFromStorage(LAYOUT_STORAGE_KEY, layoutsSchema, null);
+  return layouts as Layouts | null;
 }
 
 function saveLocal(widgets: WidgetInstance[], layouts: Layouts) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layouts));
-  } catch {
-    // storage full or unavailable
-  }
+  saveToStorage(STORAGE_KEY, widgets);
+  saveToStorage(LAYOUT_STORAGE_KEY, layouts);
 }
 
 /* ---------- Default layouts builder ---------- */

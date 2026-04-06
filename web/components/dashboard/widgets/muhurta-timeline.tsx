@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
 import { WidgetCard } from './widget-card'
 import Link from 'next/link'
+import type { PanchangResponse } from '@/types'
 
 /* ---------- Helpers ---------- */
 
@@ -22,6 +23,15 @@ function ft(m: number) { const h = Math.floor(m / 60), mn = m % 60, p = h >= 12 
 function pr(s: string) { const p = s.split(/\s*[-\u2013]\s*/); if (p.length !== 2) return null; const a = pt(p[0].trim()), b = pt(p[1].trim()); return a && b && a < b ? { start: a, end: b } : null }
 
 type Seg = { s: number; e: number; t: string }
+
+interface MuhurtaWidgetData {
+  rk: { start: string; end: string } | null
+  ab: { start: string; end: string } | null
+  sunrise: string
+  sunset: string
+  segs: Seg[]
+}
+
 const COLORS: Record<string, string> = { good: 'var(--bar-good)', rahu: 'var(--bar-avoid)', abhijit: 'var(--bar-special)' }
 
 function buildSegs(rk: { start: number; end: number } | null, ab: { start: number; end: number } | null): Seg[] {
@@ -40,11 +50,11 @@ export default function MuhurtaTimeline({ onRemove }: { onRemove: () => void }) 
   const { location, isLoading: pl } = useDefaultProfile()
   const today = new Date().toISOString().split('T')[0] + 'T06:00:00'
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<MuhurtaWidgetData>({
     queryKey: ['muhurta-widget', today, location.latitude, location.longitude],
     queryFn: async () => {
-      const res = await apiClient.get<any>(`/api/v1/panchang/?date=${encodeURIComponent(today)}&latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`)
-      const d = res.data?.detailed_panchang || res.data
+      const res = await apiClient.get<PanchangResponse>(`/api/v1/panchang/?date=${encodeURIComponent(today)}&latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`)
+      const d = res.data?.detailed_panchang ?? null
       const rk = pr(d?.inauspicious_times?.rahu_kaal || ''), ab = pr(d?.auspicious_times?.abhijit_muhurta || '')
       return { rk: rk ? { start: ft(rk.start), end: ft(rk.end) } : null, ab: ab ? { start: ft(ab.start), end: ft(ab.end) } : null, sunrise: d?.sunrise || '', sunset: d?.sunset || '', segs: buildSegs(rk, ab) }
     },

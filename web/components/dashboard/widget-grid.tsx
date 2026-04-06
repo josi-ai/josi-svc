@@ -51,6 +51,18 @@ import { AddWidgetModal } from './add-widget-modal';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
+function WidgetSkeleton() {
+  return (
+    <div style={{ height: '100%', background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)', padding: 20 }}>
+      <div className="animate-pulse space-y-3">
+        <div className="h-3 w-24 rounded" style={{ background: 'var(--border)' }} />
+        <div className="h-4 w-40 rounded" style={{ background: 'var(--border-subtle)' }} />
+        <div className="h-3 w-full rounded" style={{ background: 'var(--border-subtle)' }} />
+      </div>
+    </div>
+  );
+}
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface WidgetComponentProps {
@@ -65,14 +77,30 @@ const widgetComponents: Record<
   WidgetType,
   React.ComponentType<WidgetComponentProps>
 > = {
-  'todays-sky': dynamic(() => import('./widgets/todays-sky')),
-  'chart-quick-view': dynamic(() => import('./widgets/chart-quick-view')),
-  'current-dasha': dynamic(() => import('./widgets/current-dasha')),
-  'ai-chat-access': dynamic(() => import('./widgets/ai-chat-access')),
-  'muhurta-timeline': dynamic(() => import('./widgets/muhurta-timeline')),
-  'western-transit': dynamic(() => import('./widgets/western-transit')),
-  'latest-reading': dynamic(() => import('./widgets/latest-reading')),
-  'bazi-summary': dynamic(() => import('./widgets/bazi-summary')),
+  'todays-sky': dynamic(() => import('./widgets/todays-sky'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'chart-quick-view': dynamic(() => import('./widgets/chart-quick-view'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'current-dasha': dynamic(() => import('./widgets/current-dasha'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'ai-chat-access': dynamic(() => import('./widgets/ai-chat-access'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'muhurta-timeline': dynamic(() => import('./widgets/muhurta-timeline'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'western-transit': dynamic(() => import('./widgets/western-transit'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'latest-reading': dynamic(() => import('./widgets/latest-reading'), {
+    loading: () => <WidgetSkeleton />,
+  }),
+  'bazi-summary': dynamic(() => import('./widgets/bazi-summary'), {
+    loading: () => <WidgetSkeleton />,
+  }),
 };
 
 /* ------------------------------------------------------------------
