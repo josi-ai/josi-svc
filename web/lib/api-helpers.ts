@@ -17,7 +17,7 @@ export function extractData<T>(response: ApiResponse<T> | undefined | null): T |
  * This extracts the array regardless of nesting.
  */
 export function extractArray<T>(
-  response: ApiResponse<unknown> | undefined | null,
+  response: ApiResponse<any> | undefined | null,
   key?: string
 ): T[] {
   if (!response?.data) return [];
@@ -34,20 +34,20 @@ export function extractArray<T>(
  * Extract transit data -- handles the specific shape where
  * transits are nested under major_transits key.
  */
-export function extractTransits(response: ApiResponse<unknown> | undefined | null) {
+export function extractTransits(response: ApiResponse<any> | undefined | null) {
   return extractArray(response, 'major_transits');
 }
 
 /**
  * Extract consultations from the nested response shape.
  */
-export function extractConsultations(response: ApiResponse<unknown> | undefined | null) {
+export function extractConsultations(response: ApiResponse<any> | undefined | null) {
   return extractArray(response, 'consultations');
 }
 
 /**
  * Extract astrologers from the nested response shape.
  */
-export function extractAstrologers(response: ApiResponse<unknown> | undefined | null) {
+export function extractAstrologers(response: ApiResponse<any> | undefined | null) {
   return extractArray(response, 'astrologers');
 }
