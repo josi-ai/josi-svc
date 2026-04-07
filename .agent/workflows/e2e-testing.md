@@ -9,8 +9,7 @@ description: End-to-end testing of all Josi frontend pages after login
 This workflow tests all frontend pages of the Josi astrology platform (localhost:1989) after logging in. It covers navigation, data loading, UI rendering, and error detection for every dashboard page.
 
 ## Prerequisites
-- The API backend must be running (Docker: `redock` or `docker-compose up -d`)
-- The frontend dev server must be running on port 1989 (`npm run dev` from `web/`)
+- The dev server must be running. Start it with: `josi redock up dev --local` (see `/dev-server` workflow)
 - Test credentials: `imgovind@live.com` / `Test@123`
 - A verification code will be needed during login — ask the user for it
 

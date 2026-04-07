@@ -134,7 +134,6 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
       ) : (
         /* Data state */
         <div className="p-5" data-testid="dasha-widget-v2">
-          {(() => { console.log('[DASHA-DEBUG] antardasha:', antardasha, 'mahadasha:', mahadasha); return null; })()}
           <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3">
             Current Dasha
           </div>
