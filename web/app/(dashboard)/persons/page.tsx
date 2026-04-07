@@ -140,14 +140,14 @@ export default function PersonsPage() {
           border-color: #E5484D !important;
           color: #E5484D !important;
         }
-        @keyframes slideUp {
+        @keyframes fadeIn {
           from {
-            transform: translateY(100%);
             opacity: 0;
+            transform: translateY(8px);
           }
           to {
-            transform: translateY(0);
             opacity: 1;
+            transform: translateY(0);
           }
         }
         @keyframes spin {
