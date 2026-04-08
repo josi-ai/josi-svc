@@ -6,11 +6,9 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Star } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { SouthIndianChart, NorthIndianChart, WesternWheelChart } from '@/components/charts/chart-visualizations';
 import type { ChartDetail, ChartDetailPerson } from '@/types';
-import { TABS, type Tab, getPlanets, getDefaultFormat } from './_components/chart-detail-helpers';
+import { TABS, type Tab, getDefaultFormat } from './_components/chart-detail-helpers';
 import { ChartDetailHeader } from './_components/chart-detail-header';
-import { QuickInfoPanel } from './_components/quick-info-panel';
 import { OverviewTab } from './_components/overview-tab';
 import { PlanetsTab } from './_components/planets-tab';
 import { HousesTab } from './_components/houses-tab';
@@ -94,10 +92,6 @@ export default function ChartDetailPage() {
   if (chartError) return <ErrorState message={(chartErr as Error).message} />;
   if (!chart) return <ErrorState message="Chart not found" />;
 
-  const planets = getPlanets(chart);
-
-
-
 
   const handleTraditionChange = (newTradition: string) => {
     setTradition(newTradition);
@@ -125,26 +119,6 @@ export default function ChartDetailPage() {
         onDeleteClick={() => setShowDeleteConfirm(true)}
         isDeleting={deleteMutation.isPending}
       />
-
-      {/* ===== CHART VISUALIZATION + QUICK INFO ===== */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 28,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          marginBottom: 28,
-          padding: 20,
-          border: '1px solid var(--border)',
-          borderRadius: 14,
-          background: 'var(--bg-card)',
-        }}
-      >
-        {chartFormat === 'South Indian' && <SouthIndianChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
-        {chartFormat === 'North Indian' && <NorthIndianChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
-        {chartFormat === 'Western Wheel' && <WesternWheelChart planets={planets} ascSign={chart.chart_data?.ascendant?.sign} />}
-        <QuickInfoPanel chart={chart} />
-      </div>
 
       {/* ===== STICKY TAB BAR ===== */}
       <div
