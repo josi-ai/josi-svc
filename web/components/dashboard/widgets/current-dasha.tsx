@@ -47,6 +47,15 @@ function formatEndDate(dateStr: string): string {
   }
 }
 
+function formatDateTime(dateStr: string): string {
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
 /* ---------- Skeleton ---------- */
 
 function Skeleton() {
@@ -94,13 +103,13 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
   const sookshma = currentDasha?.sookshma
   const prana = currentDasha?.prana
 
-  // Build all 5 levels
-  const levels: { period: DashaPeriod | undefined; label: string; barHeight: number; opacity: number }[] = [
-    { period: mahadasha, label: 'Dasha', barHeight: 6, opacity: 1 },
-    { period: antardasha, label: 'Bukthi', barHeight: 5, opacity: 1 },
-    { period: pratyantardasha, label: 'Antaram', barHeight: 4, opacity: 0.85 },
-    { period: sookshma, label: 'Sookshma', barHeight: 3, opacity: 0.7 },
-    { period: prana, label: 'Prana', barHeight: 2, opacity: 0.55 },
+  // Build all 5 levels — same indentation, label first
+  const levels: { period: DashaPeriod | undefined; label: string }[] = [
+    { period: mahadasha, label: 'Dasha' },
+    { period: antardasha, label: 'Bukthi' },
+    { period: pratyantardasha, label: 'Antaram' },
+    { period: sookshma, label: 'Sookshamam' },
+    { period: prana, label: 'Pranam' },
   ]
 
   return (
@@ -135,35 +144,40 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
           </p>
         </div>
       ) : (
-        /* Data state — all 5 levels */
+        /* Data state — all 5 levels, flat layout */
         <div className="p-5">
-          <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3">
+          <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 12 }}>
             Current Dasha
           </div>
 
-          {levels.map(({ period, label, barHeight, opacity }, idx) => {
-            if (!period) return null
-            const progress = calculateProgress(period.start_date, period.end_date)
-            const endLabel = formatEndDate(period.end_date)
-            const isFirst = idx === 0
-            return (
-              <div key={label} style={{ marginBottom: idx < levels.length - 1 ? 10 : 4, paddingLeft: idx * 4 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
-                  <span style={{ fontSize: isFirst ? 14 : 12, fontWeight: isFirst ? 600 : 500, color: 'var(--text-primary)' }}>
-                    {period.planet}{' '}
-                    <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>{label}</span>
-                  </span>
-                  <span style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 500 }}>{progress}%</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {levels.map(({ period, label }) => {
+              if (!period) return null
+              const progress = calculateProgress(period.start_date, period.end_date)
+              const startStr = formatDateTime(period.start_date)
+              const endStr = formatDateTime(period.end_date)
+              return (
+                <div key={label}>
+                  {/* Label + Planet — both bold */}
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)' }}>{period.planet}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-faint)', marginLeft: 'auto', fontWeight: 500 }}>{progress}%</span>
+                  </div>
+                  {/* Progress bar */}
+                  <div style={{ width: '100%', height: 5, borderRadius: 3, background: 'var(--border-subtle)', overflow: 'hidden', marginBottom: 3 }}>
+                    <div style={{ height: '100%', borderRadius: 3, width: `${progress}%`, background: 'var(--gold)', transition: 'width 0.5s ease' }} />
+                  </div>
+                  {/* Start → End dates */}
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    {startStr} → {endStr}
+                  </div>
                 </div>
-                <div style={{ width: '100%', height: barHeight, borderRadius: barHeight, background: 'var(--border-subtle)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: barHeight, width: `${progress}%`, background: 'var(--gold)', opacity, transition: 'width 0.5s ease' }} />
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 2 }}>Until {endLabel}</div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
 
-          <a href="/dasha" style={{ display: 'inline-block', marginTop: 8, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
+          <a href="/dasha" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
             View full Dasha &rarr;
           </a>
         </div>
