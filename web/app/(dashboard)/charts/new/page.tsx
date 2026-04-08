@@ -134,7 +134,7 @@ export default function NewChartPage() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '32px 16px' }}>
+    <div style={{ maxWidth: 640, padding: '32px 0' }}>
       <Link
         href="/charts"
         style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--gold)', textDecoration: 'none', marginBottom: 16 }}

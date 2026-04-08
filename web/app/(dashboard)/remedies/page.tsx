@@ -159,7 +159,7 @@ export default function RemediesPage() {
   const visibleTierKeys = activeTier ? [activeTier] : [...tierKeys];
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 16px' }}>
+    <div>
       <style>{`@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }`}</style>
 
       {/* Header */}

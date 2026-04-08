@@ -166,7 +166,7 @@ export default function PredictionsPage() {
   const navLabel = useMemo(() => periodLabel(timeframe, offset), [timeframe, offset]);
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px' }}>
+    <div>
       <style>{`@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }`}</style>
 
       {/* Header */}

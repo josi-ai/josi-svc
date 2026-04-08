@@ -25,7 +25,7 @@ export default function MuhurtaPage() {
     : `${MONTHS[vm.getMonth()]} ${vm.getFullYear()}`;
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px 48px' }}>
+    <div style={{ padding: '0 0 48px' }}>
       {/* Hero */}
       <section style={{ padding: '48px 24px 36px', textAlign: 'center', marginBottom: 28, background: 'radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.08) 0%, transparent 70%)' }}>
         <h1 className="font-display" style={{ fontSize: 32, fontWeight: 400, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>Muhurta</h1>

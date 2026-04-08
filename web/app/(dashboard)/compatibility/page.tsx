@@ -35,7 +35,7 @@ export default function CompatibilityPage() {
   const canCalculate = person1Id && person2Id && person1Id !== person2Id && !isPending;
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 4px' }}>
+    <div>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>

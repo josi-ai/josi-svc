@@ -43,7 +43,7 @@ export default function ConsultationsPage() {
   });
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div>
       {/* Hero */}
       <section style={{ padding: '40px 24px 32px', textAlign: 'center',
         background: 'radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.08) 0%, transparent 70%)' }}>

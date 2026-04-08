@@ -38,7 +38,7 @@ export default function TransitsPage() {
   const data = response?.data;
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 4px' }}>
+    <div>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
