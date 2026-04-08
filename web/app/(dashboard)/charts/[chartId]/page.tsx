@@ -15,6 +15,8 @@ import { OverviewTab } from './_components/overview-tab';
 import { PlanetsTab } from './_components/planets-tab';
 import { HousesTab } from './_components/houses-tab';
 import { AspectsTab } from './_components/aspects-tab';
+import { DivisionalChartsTab } from './_components/divisional-charts-tab';
+import { StrengthTab } from './_components/strength-tab';
 
 const centerBox: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' };
 const dot: (bg: string) => React.CSSProperties = (bg) => ({
@@ -184,10 +186,12 @@ export default function ChartDetailPage() {
       </div>
 
       {/* ===== TAB CONTENT ===== */}
-      {activeTab === 'Overview' && <OverviewTab chart={chart} />}
+      {activeTab === 'Overview' && <OverviewTab chart={chart} chartFormat={chartFormat} />}
       {activeTab === 'Planets' && <PlanetsTab chart={chart} />}
       {activeTab === 'Houses' && <HousesTab chart={chart} />}
       {activeTab === 'Aspects' && <AspectsTab chart={chart} />}
+      {activeTab === 'Divisional Charts' && <DivisionalChartsTab chart={chart} />}
+      {activeTab === 'Strength' && <StrengthTab chart={chart} />}
 
       {/* Delete confirmation modal */}
       <ConfirmDialog

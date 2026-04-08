@@ -21,7 +21,7 @@ import {
      Row 3: Sagitt.  Scorpio  Libra    Virgo
    ================================================================ */
 
-export function SouthIndianChart({ planets, ascSign }: ChartProps) {
+export function SouthIndianChart({ planets, ascSign, centerLabel = 'Rasi' }: ChartProps) {
   const planetsBySign = getPlanetsBySign(planets);
 
   const cells: React.ReactNode[] = [];
@@ -93,7 +93,7 @@ export function SouthIndianChart({ planets, ascSign }: ChartProps) {
         letterSpacing: 1,
       }}
     >
-      Rasi
+      {centerLabel}
     </div>,
   );
 

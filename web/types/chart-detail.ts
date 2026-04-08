@@ -16,6 +16,7 @@ export interface ChartDetailPlanetData {
   is_retrograde: boolean;
   speed?: number;
   dignity?: string;
+  navamsa_sign?: string;
 }
 
 export interface ChartDetailHouseData {
@@ -50,10 +51,30 @@ export interface ChartDetailCurrentDasha {
   description?: string;
 }
 
+export interface ChartDetailDashaBirthBalance {
+  planet?: string;
+  years?: number;
+  months?: number;
+  days?: number;
+}
+
+export interface ChartDetailDashaBirthDetails {
+  nakshatra_name?: string;
+  nakshatra_number?: number;
+  nakshatra_progress?: number;
+  birth_dasha_lord?: string;
+  elapsed_at_birth?: number;
+}
+
+/** Vargas / divisional chart: mapping of sign name to planet name arrays */
+export type VargaChart = Record<string, string[]>;
+
 export interface ChartDetailData {
   planets: Record<string, ChartDetailPlanetData>;
   houses: Record<string, ChartDetailHouseData> | number[];
   ascendant: { sign: string; degree: number; longitude?: number; nakshatra?: string };
+  ayanamsa?: number;
+  ayanamsa_name?: string;
   panchang?: {
     tithi?: ChartDetailPanchangItem;
     nakshatra?: ChartDetailPanchangItem;
@@ -67,10 +88,12 @@ export interface ChartDetailData {
   };
   dasha?: {
     current_dasha?: ChartDetailCurrentDasha;
-    birth_details?: { nakshatra_name?: string; nakshatra_number?: number };
+    birth_details?: ChartDetailDashaBirthDetails;
+    birth_balance?: ChartDetailDashaBirthBalance;
     mahadashas?: ChartDetailDashaPeriod[];
     [key: string]: unknown;
   };
+  vargas?: Record<string, VargaChart>;
   [key: string]: unknown;
 }
 

@@ -21,7 +21,7 @@ import {
    Planets are placed at their absolute longitude on the wheel.
 ================================================================ */
 
-export function WesternWheelChart({ planets, ascSign }: ChartProps) {
+export function WesternWheelChart({ planets, ascSign, centerLabel = 'Natal' }: ChartProps) {
   const S = 350;
   const cx = S / 2;
   const cy = S / 2;
@@ -181,7 +181,7 @@ export function WesternWheelChart({ planets, ascSign }: ChartProps) {
         fill="var(--text-muted)"
         fontFamily="'DM Serif Display', serif"
       >
-        Natal
+        {centerLabel}
       </text>
     </svg>
   );

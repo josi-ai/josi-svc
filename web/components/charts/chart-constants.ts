@@ -13,11 +13,13 @@ export interface PlanetData {
   is_retrograde: boolean;
   speed?: number;
   dignity?: string;
+  navamsa_sign?: string;
 }
 
 export interface ChartProps {
   planets: Record<string, PlanetData>;
   ascSign?: string; // Ascendant sign name (e.g., "Aries")
+  centerLabel?: string; // Label shown in the center of the chart (default: "Rasi")
 }
 
 export const PLANET_ABBREV: Record<string, string> = {
