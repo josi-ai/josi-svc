@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import { existsSync, writeFileSync, mkdirSync, openSync } from 'node:fs';
+import { existsSync, writeFileSync, mkdirSync, openSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawn, execFileSync, type ChildProcess } from 'node:child_process';
 import { VALID_ENVS, type Env, type UpOptions } from '../../types.js';
@@ -139,6 +139,13 @@ Examples:
               logger.dim('  Killed existing process on port 1989');
             }
           } catch { /* no process on port — fine */ }
+
+          // Clear .next cache to avoid stale Turbopack builds
+          const nextCacheDir = resolve(webDir, '.next');
+          if (existsSync(nextCacheDir)) {
+            rmSync(nextCacheDir, { recursive: true, force: true });
+            logger.dim('  Cleared .next cache');
+          }
 
           if (detach) {
             // Background mode: spawn detached, write PID file
