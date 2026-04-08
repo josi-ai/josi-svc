@@ -106,24 +106,24 @@ function DashaLevelRow({ levelLabel, altLabel, period, barHeight = 8 }: DashaLev
     : null;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '140px 110px 1fr 48px 72px', alignItems: 'center', gap: 10, padding: '8px 0' }}>
-      {/* Level name */}
+    <div style={{ display: 'grid', gridTemplateColumns: '160px 120px 1fr 48px 72px', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+      {/* Level name — primary label bold, alt smaller */}
       <div>
-        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text-faint)' }}>{levelLabel}</span>
-        <span style={{ fontSize: 9, color: 'var(--text-faint)', marginLeft: 4 }}>({altLabel})</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{levelLabel}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-faint)', marginLeft: 6 }}>{altLabel}</span>
       </div>
 
       {/* Planet with color dot */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <div style={{ width: 10, height: 10, borderRadius: 3, background: pColor(period.planet), flexShrink: 0 }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{period.planet}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--gold)', whiteSpace: 'nowrap' }}>{period.planet}</span>
       </div>
 
       {/* Progress bar with date range above */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-          <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{fmtDate(period.start_date)}</span>
-          <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{fmtDate(period.end_date)}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDate(period.start_date)}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDate(period.end_date)}</span>
         </div>
         <div style={{ height: barHeight, borderRadius: barHeight / 2, background: 'var(--border)', overflow: 'hidden' }}>
           <div style={{
@@ -150,11 +150,11 @@ function DashaLevelRow({ levelLabel, altLabel, period, barHeight = 8 }: DashaLev
 
 export function CurrentPeriodCard({ current, birthNakshatra }: { current: CurrentDasha; birthNakshatra?: string }) {
   const levels: { label: string; alt: string; period?: DashaPeriod }[] = [
-    { label: 'Mahadasha', alt: 'Dasha', period: current.mahadasha },
-    { label: 'Antardasha', alt: 'Bhukti', period: current.antardasha },
-    { label: 'Pratyantardasha', alt: 'Antaram', period: current.pratyantardasha },
-    { label: 'Sookshma', alt: 'Sookshma', period: current.sookshma },
-    { label: 'Prana', alt: 'Prana', period: current.prana },
+    { label: 'Dasha', alt: 'Mahadasha', period: current.mahadasha },
+    { label: 'Bukthi', alt: 'Antardasha', period: current.antardasha },
+    { label: 'Antaram', alt: 'Pratyantardasha', period: current.pratyantardasha },
+    { label: 'Sookshamam', alt: 'Sookshma Dasha', period: current.sookshma },
+    { label: 'Pranam', alt: 'Prana Dasha', period: current.prana },
   ];
 
   return (

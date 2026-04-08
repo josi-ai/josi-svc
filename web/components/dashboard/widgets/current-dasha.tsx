@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useDefaultProfile } from '@/hooks/use-default-profile'
@@ -100,11 +99,7 @@ function DashaLevelRow({ label, period }: { label: string; period: DashaPeriod }
 /* ---------- Levels Container ---------- */
 
 function DashaLevels({ levels }: { levels: { period: DashaPeriod | undefined; label: string }[] }) {
-  const [expanded, setExpanded] = useState(false)
-
   const primary = levels.slice(0, 3)
-  const secondary = levels.slice(3)
-  const hasSecondary = secondary.some(l => l.period)
 
   return (
     <div className="p-5">
@@ -117,30 +112,9 @@ function DashaLevels({ levels }: { levels: { period: DashaPeriod | undefined; la
           if (!period) return null
           return <DashaLevelRow key={label} label={label} period={period} />
         })}
-
-        {/* Expanded levels 4-5 */}
-        {expanded && secondary.map(({ period, label }) => {
-          if (!period) return null
-          return <DashaLevelRow key={label} label={label} period={period} />
-        })}
       </div>
 
-      {/* See more / See less toggle */}
-      {hasSecondary && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          style={{
-            display: 'inline-block', marginTop: 10, fontSize: 11, fontWeight: 600,
-            color: 'var(--text-muted)', background: 'none', border: 'none',
-            cursor: 'pointer', padding: 0, textDecoration: 'underline',
-            textUnderlineOffset: 2,
-          }}
-        >
-          {expanded ? 'See less' : 'See more (Sookshamam & Pranam)'}
-        </button>
-      )}
-
-      <a href="/dasha" style={{ display: 'inline-block', marginTop: 10, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
+      <a href="/dasha" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
         View full Dasha &rarr;
       </a>
     </div>
