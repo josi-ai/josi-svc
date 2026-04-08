@@ -21,6 +21,8 @@ interface DashaResponse {
     mahadasha: DashaPeriod
     antardasha?: DashaPeriod
     pratyantardasha?: DashaPeriod
+    sookshma?: DashaPeriod
+    prana?: DashaPeriod
     description?: string
   } | null
 }
@@ -88,6 +90,7 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
   const currentDasha = dasha?.current_dasha
   const mahadasha = currentDasha?.mahadasha
   const antardasha = currentDasha?.antardasha
+  const pratyantardasha = currentDasha?.pratyantardasha
 
   // Calculate progress for each period independently
   const mahaProgress = mahadasha
@@ -99,6 +102,11 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
     ? calculateProgress(antardasha.start_date, antardasha.end_date)
     : 0
   const antarEndLabel = antardasha ? formatEndDate(antardasha.end_date) : ''
+
+  const pratyantarProgress = pratyantardasha
+    ? calculateProgress(pratyantardasha.start_date, pratyantardasha.end_date)
+    : 0
+  const pratyantarEndLabel = pratyantardasha ? formatEndDate(pratyantardasha.end_date) : ''
 
   return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
@@ -138,11 +146,11 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
             Current Dasha
           </div>
 
-          {/* Maha Dasha progress */}
-          <div className="mb-3">
+          {/* Mahadasha (Dasha) progress */}
+          <div className="mb-2.5">
             <div className="flex justify-between items-baseline mb-1">
               <span className="font-display text-sm text-[var(--text-primary)] font-medium">
-                {mahadasha.planet} Maha Dasha
+                {mahadasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Mahadasha</span>
               </span>
               <span className="text-[10px] text-[var(--text-faint)]">
                 {mahaProgress}%
@@ -157,17 +165,17 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
                 }}
               />
             </div>
-            <div className="text-[10px] text-[var(--text-faint)] mt-1">
+            <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
               Until {mahaEndLabel}
             </div>
           </div>
 
-          {/* Antar Dasha progress */}
+          {/* Antardasha (Bhukti) progress */}
           {antardasha && (
-            <div className="mb-1">
+            <div className="mb-2.5">
               <div className="flex justify-between items-baseline mb-1">
                 <span className="text-xs text-[var(--text-secondary)] font-medium">
-                  {antardasha.planet} Antar Dasha
+                  {antardasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Bhukti</span>
                 </span>
                 <span className="text-[10px] text-[var(--text-faint)]">
                   {antarProgress}%
@@ -182,8 +190,35 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
                   }}
                 />
               </div>
-              <div className="text-[10px] text-[var(--text-faint)] mt-1">
+              <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
                 Until {antarEndLabel}
+              </div>
+            </div>
+          )}
+
+          {/* Pratyantardasha (Antaram) progress */}
+          {pratyantardasha && (
+            <div className="mb-1">
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="text-xs text-[var(--text-secondary)] font-medium">
+                  {pratyantardasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Antaram</span>
+                </span>
+                <span className="text-[10px] text-[var(--text-faint)]">
+                  {pratyantarProgress}%
+                </span>
+              </div>
+              <div className="w-full h-[3px] rounded-full bg-[var(--border-subtle)] overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${pratyantarProgress}%`,
+                    background: 'var(--gold)',
+                    opacity: 0.75,
+                  }}
+                />
+              </div>
+              <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
+                Until {pratyantarEndLabel}
               </div>
             </div>
           )}

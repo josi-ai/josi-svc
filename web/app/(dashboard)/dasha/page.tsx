@@ -94,8 +94,9 @@ export default function DashaPage() {
             />
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {dasha.current_dasha && <CurrentPeriodCard current={dasha.current_dasha} birthNakshatra={dasha.birth_nakshatra} />}
+          {dasha.current_dasha && <CurrentPeriodCard current={dasha.current_dasha} birthNakshatra={dasha.birth_nakshatra} />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
             <UpcomingTransitions changes={dasha.detailed_periods?.upcoming_changes} antardashas={antardashas} />
           </div>
           {antardashas.length > 0 && <AntardashaTimeline periods={antardashas} currentAntar={currentAntarPlanet} onPlanetClick={handlePlanetClick} />}
