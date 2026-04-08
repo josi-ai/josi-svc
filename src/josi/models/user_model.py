@@ -49,6 +49,7 @@ class User(SQLModel, table=True):
     # Status
     is_active: bool = Field(default=True)
     is_verified: bool = Field(default=False)
+    is_onboarded: bool = Field(default=False)
     last_login: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -129,6 +130,7 @@ class UserUpdate(SQLModel):
     notification_settings: Optional[Dict] = None
     ethnicity: Optional[List[str]] = None
     language_preference: Optional[str] = None
+    is_onboarded: Optional[bool] = None
 
 
 class UserResponse(SQLModel):
@@ -146,6 +148,7 @@ class UserResponse(SQLModel):
     roles: List[str]
     is_active: bool
     is_verified: bool
+    is_onboarded: bool = False
     created_at: datetime
     preferences: Dict
     notification_settings: Dict

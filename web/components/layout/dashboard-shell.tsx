@@ -1,13 +1,52 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import AppSidebar from '@/components/layout/app-sidebar';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiClient } from '@/lib/api-client';
+
+interface PersonCheck {
+  person_id: string;
+  date_of_birth: string | null;
+  time_of_birth: string | null;
+  place_of_birth: string | null;
+  is_default?: boolean;
+}
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const { user, isAuthReady } = useAuth();
 
   useEffect(() => setMounted(true), []);
+
+  // Fetch the user's profiles to check if onboarding is needed
+  const { data: personsResponse, isLoading: personsLoading } = useQuery({
+    queryKey: ['persons'],
+    queryFn: () => apiClient.get<PersonCheck[]>('/api/v1/persons/'),
+    enabled: isAuthReady && !!user,
+  });
+
+  // Check if user needs onboarding
+  useEffect(() => {
+    if (!mounted || !isAuthReady || !user || personsLoading) return;
+    if (!personsResponse) return;
+
+    const persons = personsResponse.data || [];
+    const defaultProfile = persons.find((p) => p.is_default) || persons[0];
+    const needsOnboarding =
+      !defaultProfile ||
+      !defaultProfile.date_of_birth ||
+      !defaultProfile.time_of_birth ||
+      !defaultProfile.place_of_birth;
+
+    if (needsOnboarding) {
+      router.push('/onboarding');
+    }
+  }, [mounted, isAuthReady, user, personsResponse, personsLoading, router]);
 
   // Don't render anything until client-side mount — eliminates all hydration mismatches
   if (!mounted) {
