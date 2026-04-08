@@ -91,22 +91,17 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
   const mahadasha = currentDasha?.mahadasha
   const antardasha = currentDasha?.antardasha
   const pratyantardasha = currentDasha?.pratyantardasha
+  const sookshma = currentDasha?.sookshma
+  const prana = currentDasha?.prana
 
-  // Calculate progress for each period independently
-  const mahaProgress = mahadasha
-    ? calculateProgress(mahadasha.start_date, mahadasha.end_date)
-    : 0
-  const mahaEndLabel = mahadasha ? formatEndDate(mahadasha.end_date) : ''
-
-  const antarProgress = antardasha
-    ? calculateProgress(antardasha.start_date, antardasha.end_date)
-    : 0
-  const antarEndLabel = antardasha ? formatEndDate(antardasha.end_date) : ''
-
-  const pratyantarProgress = pratyantardasha
-    ? calculateProgress(pratyantardasha.start_date, pratyantardasha.end_date)
-    : 0
-  const pratyantarEndLabel = pratyantardasha ? formatEndDate(pratyantardasha.end_date) : ''
+  // Build all 5 levels
+  const levels: { period: DashaPeriod | undefined; label: string; barHeight: number; opacity: number }[] = [
+    { period: mahadasha, label: 'Dasha', barHeight: 6, opacity: 1 },
+    { period: antardasha, label: 'Bukthi', barHeight: 5, opacity: 1 },
+    { period: pratyantardasha, label: 'Antaram', barHeight: 4, opacity: 0.85 },
+    { period: sookshma, label: 'Sookshma', barHeight: 3, opacity: 0.7 },
+    { period: prana, label: 'Prana', barHeight: 2, opacity: 0.55 },
+  ]
 
   return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
@@ -140,95 +135,37 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
           </p>
         </div>
       ) : (
-        /* Data state */
-        <div className="p-5" data-testid="dasha-widget-v2">
+        /* Data state — all 5 levels */
+        <div className="p-5">
           <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3">
             Current Dasha
           </div>
 
-          {/* Mahadasha (Dasha) progress */}
-          <div className="mb-2.5">
-            <div className="flex justify-between items-baseline mb-1">
-              <span className="font-display text-sm text-[var(--text-primary)] font-medium">
-                {mahadasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Mahadasha</span>
-              </span>
-              <span className="text-[10px] text-[var(--text-faint)]">
-                {mahaProgress}%
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${mahaProgress}%`,
-                  background: 'var(--gold-bright)',
-                }}
-              />
-            </div>
-            <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
-              Until {mahaEndLabel}
-            </div>
-          </div>
+          {levels.map(({ period, label, barHeight, opacity }, idx) => {
+            if (!period) return null
+            const progress = calculateProgress(period.start_date, period.end_date)
+            const endLabel = formatEndDate(period.end_date)
+            const isFirst = idx === 0
+            return (
+              <div key={label} style={{ marginBottom: idx < levels.length - 1 ? 10 : 4, paddingLeft: idx * 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+                  <span style={{ fontSize: isFirst ? 14 : 12, fontWeight: isFirst ? 600 : 500, color: 'var(--text-primary)' }}>
+                    {period.planet}{' '}
+                    <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>{label}</span>
+                  </span>
+                  <span style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 500 }}>{progress}%</span>
+                </div>
+                <div style={{ width: '100%', height: barHeight, borderRadius: barHeight, background: 'var(--border-subtle)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: barHeight, width: `${progress}%`, background: 'var(--gold)', opacity, transition: 'width 0.5s ease' }} />
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 2 }}>Until {endLabel}</div>
+              </div>
+            )
+          })}
 
-          {/* Antardasha (Bhukti) progress */}
-          {antardasha && (
-            <div className="mb-2.5">
-              <div className="flex justify-between items-baseline mb-1">
-                <span className="text-xs text-[var(--text-secondary)] font-medium">
-                  {antardasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Bhukti</span>
-                </span>
-                <span className="text-[10px] text-[var(--text-faint)]">
-                  {antarProgress}%
-                </span>
-              </div>
-              <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${antarProgress}%`,
-                    background: 'var(--gold)',
-                  }}
-                />
-              </div>
-              <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
-                Until {antarEndLabel}
-              </div>
-            </div>
-          )}
-
-          {/* Pratyantardasha (Antaram) progress */}
-          {pratyantardasha && (
-            <div className="mb-1">
-              <div className="flex justify-between items-baseline mb-1">
-                <span className="text-xs text-[var(--text-secondary)] font-medium">
-                  {pratyantardasha.planet} <span className="text-[10px] font-normal text-[var(--text-faint)]">Antaram</span>
-                </span>
-                <span className="text-[10px] text-[var(--text-faint)]">
-                  {pratyantarProgress}%
-                </span>
-              </div>
-              <div className="w-full h-[3px] rounded-full bg-[var(--border-subtle)] overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pratyantarProgress}%`,
-                    background: 'var(--gold)',
-                    opacity: 0.75,
-                  }}
-                />
-              </div>
-              <div className="text-[10px] text-[var(--text-faint)] mt-0.5">
-                Until {pratyantarEndLabel}
-              </div>
-            </div>
-          )}
-
-          <div
-            className="text-xs font-semibold mt-3 cursor-pointer"
-            style={{ color: 'var(--gold)' }}
-          >
-            Chat about this &rarr;
-          </div>
+          <a href="/dasha" style={{ display: 'inline-block', marginTop: 8, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
+            View full Dasha &rarr;
+          </a>
         </div>
       )}
     </WidgetCard>
