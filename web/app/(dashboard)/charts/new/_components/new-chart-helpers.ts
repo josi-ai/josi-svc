@@ -11,12 +11,11 @@ export function extractTimeValue(timeStr: string | null): string {
   return timeStr.substring(0, 5);
 }
 
-/** Format time for API: "HH:MM" -> "YYYY-MM-DD HH:MM:SS" using the DOB date */
-export function formatTimeForApi(time: string, dob: string): string | null {
+/** Format time for API: "HH:MM" -> "HH:MM:SS" */
+export function formatTimeForApi(time: string, _dob?: string): string | null {
   if (!time) return null;
-  const t = time.length === 5 ? `${time}:00` : time; // "12:12" -> "12:12:00"
-  const date = dob || '2000-01-01'; // fallback date if no DOB
-  return `${date} ${t}`;
+  // Backend expects just the time portion: HH:MM, HH:MM:SS, or HH:MM AM/PM
+  return time.length === 5 ? `${time}:00` : time;
 }
 
 export const labelStyle: React.CSSProperties = {

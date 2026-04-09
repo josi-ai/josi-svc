@@ -1,12 +1,11 @@
-/** Format time for API: "HH:MM" -> "YYYY-MM-DD HH:MM:SS" */
+/** Format time for API: "HH:MM" -> "HH:MM:SS" */
 export function formatTimeForApi(
   time: string | null,
-  dob: string | null,
+  _dob?: string | null,
 ): string | null {
   if (!time) return null;
-  const t = time.length === 5 ? `${time}:00` : time;
-  const date = dob || '2000-01-01';
-  return `${date} ${t}`;
+  // Backend expects just the time portion: HH:MM, HH:MM:SS, or HH:MM AM/PM
+  return time.length === 5 ? `${time}:00` : time;
 }
 
 export function formatDateOfBirth(dateStr: unknown): string | null {

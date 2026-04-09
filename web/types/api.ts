@@ -82,6 +82,7 @@ export interface UserResponse {
   roles: string[];
   is_active: boolean;
   is_verified: boolean;
+  is_onboarded: boolean;
   created_at: string;
   preferences: Record<string, unknown>;
   notification_settings: Record<string, unknown>;
@@ -98,6 +99,7 @@ export interface UserUpdate {
   notification_settings?: Record<string, unknown>;
   ethnicity?: string[] | null;
   language_preference?: string | null;
+  is_onboarded?: boolean;
 }
 
 /** Tier limits included in usage and subscription responses. */

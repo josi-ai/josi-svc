@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Plus } from 'lucide-react';
 import type { Person, PersonFormData } from '@/types/api';
-import { formatTimeForApi, extractTimeValue } from './_components/person-helpers';
+import { extractTimeValue } from './_components/person-helpers';
 import { ProfileFormModal } from './_components/person-form-modal';
 import {
   LoadingGrid,
@@ -40,7 +40,7 @@ export default function PersonsPage() {
       apiClient.post<Person>('/api/v1/persons/', {
         name: data.name,
         date_of_birth: data.date_of_birth,
-        time_of_birth: formatTimeForApi(data.time_of_birth, data.date_of_birth),
+        time_of_birth: data.time_of_birth || null,
         place_of_birth: data.place_of_birth || null,
       }),
     onSuccess: () => {
@@ -59,7 +59,7 @@ export default function PersonsPage() {
       apiClient.put<Person>(`/api/v1/persons/${id}`, {
         name: data.name,
         date_of_birth: data.date_of_birth,
-        time_of_birth: formatTimeForApi(data.time_of_birth, data.date_of_birth),
+        time_of_birth: data.time_of_birth || null,
         place_of_birth: data.place_of_birth || null,
       }),
     onSuccess: () => {

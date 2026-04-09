@@ -77,7 +77,16 @@ async function request<T>(
     }
 
     const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(error.detail || error.message || 'Request failed');
+    // FastAPI 422 returns detail as an array of validation errors
+    let errorMessage: string;
+    if (Array.isArray(error.detail)) {
+      errorMessage = error.detail.map((d: { msg?: string; loc?: string[] }) =>
+        d.msg || JSON.stringify(d)
+      ).join('; ');
+    } else {
+      errorMessage = error.detail || error.message || 'Request failed';
+    }
+    throw new Error(errorMessage);
   }
 
   // Handle 204 No Content (e.g., DELETE responses)

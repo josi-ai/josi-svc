@@ -19,10 +19,11 @@ class CreatePersonRequest(BaseModel):
 
     # Birth Information
     date_of_birth: date
-    time_of_birth: Union[str, time] = Field(
+    time_of_birth: Optional[Union[str, time]] = Field(
+        default=None,
         description="Birth time in format: HH:MM, HH:MM:SS, HH:MM AM/PM, or time object"
     )
-    place_of_birth: str
+    place_of_birth: Optional[str] = None
 
     # Location coordinates (optional - will be geocoded if not provided)
     latitude: Optional[Decimal] = None
@@ -38,6 +39,8 @@ class CreatePersonRequest(BaseModel):
     @classmethod
     def parse_time_of_birth(cls, v):
         """Parse various time formats into a time object."""
+        if v is None:
+            return None
         if isinstance(v, time):
             return v
         if isinstance(v, str):
@@ -66,9 +69,11 @@ class CreatePersonRequest(BaseModel):
         """Convert to PersonEntity with combined datetime."""
         from josi.models.person_model import PersonEntity
         
-        # Combine date and time into datetime
-        time_obj = self.time_of_birth if isinstance(self.time_of_birth, time) else time.fromisoformat(self.time_of_birth)
-        combined_datetime = datetime.combine(self.date_of_birth, time_obj)
+        # Combine date and time into datetime (if time is provided)
+        combined_datetime = None
+        if self.time_of_birth is not None:
+            time_obj = self.time_of_birth if isinstance(self.time_of_birth, time) else time.fromisoformat(self.time_of_birth)
+            combined_datetime = datetime.combine(self.date_of_birth, time_obj)
         
         return PersonEntity(
             name=self.name,

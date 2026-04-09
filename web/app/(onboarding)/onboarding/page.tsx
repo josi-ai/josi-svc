@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -191,6 +191,21 @@ function StepAboutYou({
   onChange: (d: Step1Data) => void;
   onNext: () => void;
 }) {
+  // Ref to always access latest data — prevents stale closures in Google Maps listener
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
+  const handlePlaceChange = useCallback(
+    (val: string) => onChange({ ...dataRef.current, placeOfBirth: val }),
+    [onChange],
+  );
+
+  const handlePlaceSelect = useCallback(
+    (place: { name: string; lat: number; lng: number }) =>
+      onChange({ ...dataRef.current, placeOfBirth: place.name, latitude: place.lat, longitude: place.lng }),
+    [onChange],
+  );
+
   const canProceed = data.fullName.trim() && data.dateOfBirth && data.placeOfBirth;
 
   return (
@@ -306,10 +321,8 @@ function StepAboutYou({
         <label style={labelStyle}>Place of Birth</label>
         <PlaceAutocomplete
           value={data.placeOfBirth}
-          onChange={(val) => onChange({ ...data, placeOfBirth: val })}
-          onSelect={(place) =>
-            onChange({ ...data, placeOfBirth: place.name, latitude: place.lat, longitude: place.lng })
-          }
+          onChange={handlePlaceChange}
+          onSelect={handlePlaceSelect}
           placeholder="City, Country"
           style={inputStyle}
         />
@@ -596,12 +609,11 @@ export default function OnboardingPage() {
     }
   }, [user?.full_name]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Format time for the API: "HH:MM" -> "YYYY-MM-DD HH:MM:SS"
-  const formatTimeForApi = useCallback((time: string, dob: string): string | null => {
+  // Format time for the API: "HH:MM" -> "HH:MM:SS"
+  const formatTimeForApi = useCallback((time: string): string | null => {
     if (!time) return null;
-    const t = time.length === 5 ? `${time}:00` : time;
-    const date = dob || '2000-01-01';
-    return `${date} ${t}`;
+    // Backend expects just the time portion: HH:MM or HH:MM:SS
+    return time.length === 5 ? `${time}:00` : time;
   }, []);
 
   // Step 3: run API calls with animated progress
@@ -633,16 +645,17 @@ export default function OnboardingPage() {
 
       // 2. Save/create person profile with birth details
       const timeValue = step1.unknownBirthTime
-        ? formatTimeForApi('06:00', step1.dateOfBirth) // sunrise default
-        : formatTimeForApi(step1.timeOfBirth, step1.dateOfBirth);
+        ? formatTimeForApi('06:00') // sunrise default
+        : formatTimeForApi(step1.timeOfBirth);
 
       const personPayload = {
         name: step1.fullName,
         date_of_birth: step1.dateOfBirth,
         time_of_birth: timeValue,
         place_of_birth: step1.placeOfBirth,
-        latitude: step1.latitude,
-        longitude: step1.longitude,
+        // Round to 6 decimal places to satisfy backend Decimal(max_digits=9, decimal_places=6)
+        latitude: step1.latitude != null ? Math.round(step1.latitude * 1e6) / 1e6 : null,
+        longitude: step1.longitude != null ? Math.round(step1.longitude * 1e6) / 1e6 : null,
         gender: step1.gender || undefined,
         is_default: true,
       };
