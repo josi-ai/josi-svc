@@ -34,6 +34,7 @@ class CreatePersonRequest(BaseModel):
     gender: Optional[str] = None
     birth_certificate_id: Optional[str] = None
     notes: Optional[str] = None
+    is_default: Optional[bool] = False
 
     @field_validator('time_of_birth', mode='before')
     @classmethod
@@ -87,7 +88,8 @@ class CreatePersonRequest(BaseModel):
             timezone=self.timezone or 'UTC',  # Will be determined
             gender=self.gender,
             birth_certificate_id=self.birth_certificate_id,
-            notes=self.notes
+            notes=self.notes,
+            is_default=self.is_default or False,
         )
 
 

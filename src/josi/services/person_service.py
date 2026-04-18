@@ -4,7 +4,7 @@ Person service - handles business logic for person management.
 from typing import Optional, List, Dict
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, update as sa_update
 
 from josi.repositories.person_repository import PersonRepository
 from josi.models.person_model import Person
@@ -20,6 +20,25 @@ class PersonService:
         self.user_id = user_id
         self.person_repo = PersonRepository(Person, db, user_id)
         self.geocoding_service = GeocodingService()
+
+    async def _ensure_single_default(self, exclude_person_id: UUID = None):
+        """Unset is_default on all other profiles for this user.
+        
+        When setting a profile as default, call this first to ensure
+        only one profile is marked as default at a time.
+        """
+        stmt = (
+            sa_update(Person)
+            .where(
+                Person.user_id == self.user_id,
+                Person.is_default == True,
+                Person.is_deleted == False,
+            )
+            .values(is_default=False)
+        )
+        if exclude_person_id:
+            stmt = stmt.where(Person.person_id != exclude_person_id)
+        await self.db.execute(stmt)
     
     async def create_person(self, person_data: PersonEntity) -> Person:
         """Create a new person with geocoding."""
@@ -64,7 +83,12 @@ class PersonService:
             "timezone": tz,
             "notes": getattr(person_data, 'notes', None)
         }
-        
+
+        # Enforce single default
+        if getattr(person_data, 'is_default', False):
+            await self._ensure_single_default()
+            person_dict['is_default'] = True
+
         return await self.person_repo.create(person_dict)
     
     async def get_person(self, person_id: UUID) -> Optional[Person]:
@@ -109,6 +133,10 @@ class PersonService:
                     })
                 except ValueError:
                     pass  # Geocoding failed — keep existing coordinates
+
+        # Enforce single default if setting this profile as default
+        if update_data.get('is_default'):
+            await self._ensure_single_default(exclude_person_id=person_id)
 
         return await self.person_repo.update(person_id, update_data)
     

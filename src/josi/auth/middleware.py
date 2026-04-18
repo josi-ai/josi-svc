@@ -68,12 +68,8 @@ async def _ensure_user_exists_in_db(current_user: CurrentUser, claims: dict) -> 
         full_name=current_user.full_name,
     )
 
-    # Ensure a default birth profile exists for this user
-    await user_service.ensure_default_profile_exists(
-        user_id=current_user.user_id,
-        full_name=current_user.full_name,
-        email=current_user.email,
-    )
+    # Note: Default birth profile is now created during onboarding,
+    # not here. This prevents duplicate "My Profile" records.
 
     # Set the flag in Redis (1 hour TTL)
     try:
