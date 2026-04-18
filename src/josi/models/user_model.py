@@ -40,7 +40,8 @@ class User(SQLModel, table=True):
     notification_settings: Dict = Field(default_factory=dict, sa_column=Column(JSON))
 
     # Demographics
-    ethnicity: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    ethnicity: Optional[str] = Field(default=None, nullable=True)
+    religion: Optional[str] = Field(default=None, nullable=True)
     language_preference: Optional[str] = Field(default=None, nullable=True)
 
     # Authorization (owned by us, not Clerk)
@@ -128,7 +129,8 @@ class UserUpdate(SQLModel):
     birth_location: Optional[Dict] = None
     preferences: Optional[Dict] = None
     notification_settings: Optional[Dict] = None
-    ethnicity: Optional[List[str]] = None
+    ethnicity: Optional[str] = None
+    religion: Optional[str] = None
     language_preference: Optional[str] = None
     is_onboarded: Optional[bool] = None
 
@@ -140,7 +142,8 @@ class UserResponse(SQLModel):
     full_name: str
     phone: Optional[str]
     avatar_url: Optional[str]
-    ethnicity: Optional[List[str]] = None
+    ethnicity: Optional[str] = None
+    religion: Optional[str] = None
     language_preference: Optional[str] = None
     subscription_tier_id: Optional[int]
     subscription_tier_name: Optional[str]

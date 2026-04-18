@@ -27,9 +27,14 @@ const APP_LANGUAGE_OPTIONS = [
 ];
 
 const ETHNICITY_OPTIONS = [
-  'Tamil Hindu', 'North Indian Hindu', 'Bengali Hindu', 'South Indian Christian',
-  'Keralite Hindu', 'Maharashtrian Hindu', 'Gujarati Hindu', 'Punjabi Hindu',
-  'Muslim', 'Buddhist', 'Sikh', 'Jain', 'Christian', 'Other',
+  'Tamil', 'Telugu', 'Kannada', 'North Indian', 'Bengali', 'Keralite',
+  'Maharashtrian', 'Gujarati', 'Punjabi', 'Marwari', 'Assamese',
+  'Odia', 'Rajasthani', 'Kashmiri', 'Other',
+];
+
+const RELIGION_OPTIONS = [
+  'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain',
+  'Zoroastrian', 'Spiritual (Non-religious)', 'Other',
 ];
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -352,7 +357,8 @@ interface Step2Data {
   motherTongue: string;
   languagesSpoken: string[];
   appLanguage: string;
-  ethnicity: string[];
+  ethnicity: string;
+  religion: string;
 }
 
 function StepCulture({
@@ -427,14 +433,42 @@ function StepCulture({
         </select>
       </div>
 
-      {/* Religion / Ethnicity */}
+      {/* Ethnicity */}
       <div>
-        <label style={labelStyle}>Religion / Ethnicity</label>
-        <PillSelect
-          options={ETHNICITY_OPTIONS}
-          selected={data.ethnicity}
-          onChange={(val) => onChange({ ...data, ethnicity: val })}
-        />
+        <label style={labelStyle}>Ethnicity</label>
+        <select
+          value={data.ethnicity}
+          onChange={(e) => onChange({ ...data, ethnicity: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          <option value="">Select...</option>
+          {ETHNICITY_OPTIONS.map((e) => (
+            <option key={e} value={e}>
+              {e}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Religion */}
+      <div>
+        <label style={labelStyle}>Religion</label>
+        <select
+          value={data.religion}
+          onChange={(e) => onChange({ ...data, religion: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          <option value="">Select...</option>
+          {RELIGION_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
@@ -599,7 +633,8 @@ export default function OnboardingPage() {
     motherTongue: '',
     languagesSpoken: [],
     appLanguage: 'en',
-    ethnicity: [],
+    ethnicity: '',
+    religion: '',
   });
 
   // Pre-fill from Clerk user name
@@ -635,7 +670,8 @@ export default function OnboardingPage() {
       // 1. Save user preferences
       await apiClient.put('/api/v1/me', {
         language_preference: step2.appLanguage,
-        ethnicity: step2.ethnicity.length > 0 ? step2.ethnicity : undefined,
+        ethnicity: step2.ethnicity || undefined,
+        religion: step2.religion || undefined,
         is_onboarded: true,
         preferences: {
           mother_tongue: step2.motherTongue || undefined,
