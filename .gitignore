@@ -225,9 +225,11 @@ redis_data/
 *.temp
 .cache/
 
-# Claude conversation files
+# Claude conversation files (ignore at root / anywhere by default;
+# the archived copies under docs/conversations/ are explicitly tracked)
 2025-*.txt
 2026-*.txt
+!docs/conversations/**
 
 # Test data with personal birth chart information
 test_data/
@@ -261,3 +263,4 @@ node_modules
 # Dev artifacts
 .web-dev.pid
 *.png
+docs/conversations/2026-03-08-101750-this-session-is-being-continued-from-a-previous-co.txt

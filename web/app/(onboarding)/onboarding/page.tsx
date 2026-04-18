@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import PlaceAutocomplete from '@/components/ui/place-autocomplete';
@@ -39,7 +38,33 @@ const RELIGION_OPTIONS = [
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
+const TRADITION_OPTIONS = [
+  { value: 'vedic', label: 'Vedic (Jyotish)' },
+  { value: 'western', label: 'Western' },
+  { value: 'chinese', label: 'Chinese' },
+];
+
+const HOUSE_SYSTEM_OPTIONS = [
+  { value: 'whole_sign', label: 'Whole Sign' },
+  { value: 'placidus', label: 'Placidus' },
+  { value: 'koch', label: 'Koch' },
+  { value: 'equal', label: 'Equal' },
+];
+
+const AYANAMSA_OPTIONS = [
+  { value: 'lahiri', label: 'Lahiri' },
+  { value: 'raman', label: 'Raman' },
+  { value: 'kp', label: 'KP (Krishnamurti)' },
+];
+
+const CHART_FORMAT_OPTIONS = [
+  { value: 'South Indian', label: 'South Indian' },
+  { value: 'North Indian', label: 'North Indian' },
+  { value: 'Western Wheel', label: 'Western Wheel' },
+];
+
 const PROGRESS_STEPS = [
+  'Creating your birth profile...',
   'Calculating planetary positions...',
   'Computing house cusps...',
   'Analysing nakshatra placements...',
@@ -361,16 +386,23 @@ interface Step2Data {
   religion: string;
 }
 
+interface Step3Data {
+  tradition: string;
+  houseSystem: string;
+  ayanamsa: string;
+  chartFormat: string;
+}
+
 function StepCulture({
   data,
   onChange,
   onBack,
-  onComplete,
+  onNext,
 }: {
   data: Step2Data;
   onChange: (d: Step2Data) => void;
   onBack: () => void;
-  onComplete: () => void;
+  onNext: () => void;
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -466,6 +498,133 @@ function StepCulture({
           {RELIGION_OPTIONS.map((r) => (
             <option key={r} value={r}>
               {r}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            flex: 1,
+            padding: '13px 0',
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#8B99B5',
+            background: 'transparent',
+            border: '1px solid #1A2340',
+            borderRadius: 10,
+            cursor: 'pointer',
+          }}
+        >
+          &larr; Back
+        </button>
+        <button type="button" onClick={onNext} style={{ ...goldButtonStyle, flex: 2 }}>
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Step 3: Chart Preferences
+// ---------------------------------------------------------------------------
+
+function StepChartPreferences({
+  data,
+  onChange,
+  onBack,
+  onComplete,
+}: {
+  data: Step3Data;
+  onChange: (d: Step3Data) => void;
+  onBack: () => void;
+  onComplete: () => void;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ textAlign: 'center', marginBottom: 4 }}>
+        <h1
+          className="font-display"
+          style={{ fontSize: 26, color: '#D4DAE6', fontWeight: 400, margin: 0 }}
+        >
+          Chart Preferences
+        </h1>
+        <p style={{ fontSize: 14, color: '#5B6A8A', marginTop: 6 }}>
+          Choose your preferred astrological system and defaults.
+        </p>
+      </div>
+
+      {/* Tradition */}
+      <div>
+        <label style={labelStyle}>Default Tradition</label>
+        <select
+          value={data.tradition}
+          onChange={(e) => onChange({ ...data, tradition: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          {TRADITION_OPTIONS.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* House System */}
+      <div>
+        <label style={labelStyle}>House System</label>
+        <select
+          value={data.houseSystem}
+          onChange={(e) => onChange({ ...data, houseSystem: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          {HOUSE_SYSTEM_OPTIONS.map((h) => (
+            <option key={h.value} value={h.value}>
+              {h.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Ayanamsa */}
+      <div>
+        <label style={labelStyle}>Ayanamsa</label>
+        <select
+          value={data.ayanamsa}
+          onChange={(e) => onChange({ ...data, ayanamsa: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          {AYANAMSA_OPTIONS.map((a) => (
+            <option key={a.value} value={a.value}>
+              {a.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Chart Format */}
+      <div>
+        <label style={labelStyle}>Chart Format</label>
+        <select
+          value={data.chartFormat}
+          onChange={(e) => onChange({ ...data, chartFormat: e.target.value })}
+          style={selectStyle}
+          onFocus={focusHandlers.onFocus}
+          onBlur={focusHandlers.onBlur}
+        >
+          {CHART_FORMAT_OPTIONS.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
             </option>
           ))}
         </select>
@@ -585,19 +744,6 @@ function StepCalculating({ completedSteps }: { completedSteps: number }) {
 // Main onboarding page
 // ---------------------------------------------------------------------------
 
-interface PersonProfile {
-  person_id: string;
-  name: string;
-  date_of_birth: string | null;
-  time_of_birth: string | null;
-  place_of_birth: string | null;
-  latitude: string | number | null;
-  longitude: string | number | null;
-  timezone: string | null;
-  is_default?: boolean;
-  gender?: string | null;
-}
-
 export default function OnboardingPage() {
   const router = useRouter();
   const { user, isAuthReady } = useAuth();
@@ -605,16 +751,6 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState(0);
   const [error, setError] = useState('');
-
-  // Fetch existing profiles to find default
-  const { data: personsResponse } = useQuery({
-    queryKey: ['persons'],
-    queryFn: () => apiClient.get<PersonProfile[]>('/api/v1/persons/'),
-    enabled: isAuthReady,
-  });
-
-  const persons = personsResponse?.data || [];
-  const defaultProfile = persons.find((p) => p.is_default) || persons[0] || null;
 
   // Step 1 state
   const [step1, setStep1] = useState<Step1Data>({
@@ -637,6 +773,14 @@ export default function OnboardingPage() {
     religion: '',
   });
 
+  // Step 3 state — chart preferences (with sensible defaults)
+  const [step3, setStep3] = useState<Step3Data>({
+    tradition: 'vedic',
+    houseSystem: 'whole_sign',
+    ayanamsa: 'lahiri',
+    chartFormat: 'South Indian',
+  });
+
   // Pre-fill from Clerk user name
   useEffect(() => {
     if (user?.full_name && !step1.fullName) {
@@ -653,7 +797,7 @@ export default function OnboardingPage() {
 
   // Step 3: run API calls with animated progress
   const runOnboarding = useCallback(async () => {
-    setStep(2);
+    setStep(3);
     setCompletedSteps(0);
     setError('');
 
@@ -667,7 +811,7 @@ export default function OnboardingPage() {
     }, 1200);
 
     try {
-      // 1. Save user preferences
+      // 1. Save user preferences + chart defaults
       await apiClient.put('/api/v1/me', {
         language_preference: step2.appLanguage,
         ethnicity: step2.ethnicity || undefined,
@@ -676,6 +820,16 @@ export default function OnboardingPage() {
         preferences: {
           mother_tongue: step2.motherTongue || undefined,
           languages_spoken: step2.languagesSpoken.length > 0 ? step2.languagesSpoken : undefined,
+        },
+      });
+
+      // Save chart preferences
+      await apiClient.put('/api/v1/me/preferences', {
+        chart: {
+          default_tradition: step3.tradition,
+          default_house_system: step3.houseSystem,
+          default_ayanamsa: step3.ayanamsa,
+          default_format: step3.chartFormat,
         },
       });
 
@@ -696,21 +850,16 @@ export default function OnboardingPage() {
         is_default: true,
       };
 
-      let personId: string;
-      if (defaultProfile?.person_id) {
-        await apiClient.put(`/api/v1/persons/${defaultProfile.person_id}`, personPayload);
-        personId = defaultProfile.person_id;
-      } else {
-        const res = await apiClient.post<{ person_id: string }>('/api/v1/persons/', personPayload);
-        personId = res.data!.person_id;
-      }
+      // Always create a new profile (no auto-profile on signup anymore)
+      const res = await apiClient.post<{ person_id: string }>('/api/v1/persons/', personPayload);
+      const personId = res.data!.person_id;
 
-      // 3. Calculate Vedic chart
+      // 3. Calculate chart using user-selected preferences
       const params = new URLSearchParams({
         person_id: personId,
-        systems: 'vedic',
-        house_system: 'whole_sign',
-        ayanamsa: 'lahiri',
+        systems: step3.tradition,
+        house_system: step3.houseSystem,
+        ayanamsa: step3.ayanamsa,
       });
       await apiClient.post(`/api/v1/charts/calculate?${params.toString()}`);
 
@@ -728,7 +877,7 @@ export default function OnboardingPage() {
       // Fall back to step 1 so user can retry
       setStep(0);
     }
-  }, [step1, step2, defaultProfile, formatTimeForApi, router]);
+  }, [step1, step2, step3, formatTimeForApi, router]);
 
   // Card wrapper
   const cardStyle: React.CSSProperties = {
@@ -737,16 +886,16 @@ export default function OnboardingPage() {
     width: '100%',
     maxWidth: 520,
     margin: '0 auto',
-    padding: step === 2 ? '48px 32px' : '40px 32px',
-    background: step === 2 ? 'transparent' : 'rgba(17,24,40,0.7)',
-    border: step === 2 ? 'none' : '1px solid #1A2340',
+    padding: step === 3 ? '48px 32px' : '40px 32px',
+    background: step === 3 ? 'transparent' : 'rgba(17,24,40,0.7)',
+    border: step === 3 ? 'none' : '1px solid #1A2340',
     borderRadius: 16,
-    backdropFilter: step === 2 ? 'none' : 'blur(20px)',
+    backdropFilter: step === 3 ? 'none' : 'blur(20px)',
   };
 
   return (
     <div style={cardStyle}>
-      {step < 2 && <StepIndicator current={step} total={3} />}
+      {step < 3 && <StepIndicator current={step} total={4} />}
 
       {error && (
         <div
@@ -773,11 +922,20 @@ export default function OnboardingPage() {
           data={step2}
           onChange={setStep2}
           onBack={() => setStep(0)}
+          onNext={() => setStep(2)}
+        />
+      )}
+
+      {step === 2 && (
+        <StepChartPreferences
+          data={step3}
+          onChange={setStep3}
+          onBack={() => setStep(1)}
           onComplete={runOnboarding}
         />
       )}
 
-      {step === 2 && <StepCalculating completedSteps={completedSteps} />}
+      {step === 3 && <StepCalculating completedSteps={completedSteps} />}
     </div>
   );
 }
