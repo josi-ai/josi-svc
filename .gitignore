@@ -225,9 +225,11 @@ redis_data/
 *.temp
 .cache/
 
-# Claude conversation files
+# Claude conversation files (ignore at root / anywhere by default;
+# the archived copies under docs/conversations/ are explicitly tracked)
 2025-*.txt
 2026-*.txt
+!docs/conversations/**
 
 # Test data with personal birth chart information
 test_data/
