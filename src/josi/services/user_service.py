@@ -154,23 +154,37 @@ class UserService:
         if user:
             return  # Exists under different ID — close enough
 
+        # Try by email (might exist from a previous session/provider)
+        if email:
+            user = await self.user_repository.get_by_email(email)
+            if user:
+                return  # Exists under this email
+
         # Create the user record
         logger.info(
             "Creating missing user record from JWT claims",
             user_id=str(user_id),
             email=email,
         )
+        # Use a unique placeholder if no email — avoids unique constraint collisions
+        resolved_email = email if email else f"{auth_provider_id}@placeholder.josiam.com"
         new_user = User(
             user_id=user_id,
             auth_provider_id=auth_provider_id,
             auth_provider="clerk",
-            email=email or "unknown@josiam.com",
+            email=resolved_email,
             full_name=full_name or "User",
             is_active=True,
             is_verified=bool(email),
             last_login=datetime.utcnow(),
         )
-        await self.user_repository.create(new_user)
+        try:
+            await self.user_repository.create(new_user)
+        except Exception as e:
+            if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+                logger.warning("User creation race condition, record likely already exists", email=resolved_email)
+                return
+            raise
 
     # --- Default profile creation ---
 

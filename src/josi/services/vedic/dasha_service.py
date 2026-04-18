@@ -40,7 +40,9 @@ class VimshottariDashaCalculator:
         birth_datetime: datetime,
         moon_longitude: float,
         include_antardashas: bool = True,
-        include_pratyantardashas: bool = False
+        include_pratyantardashas: bool = False,
+        include_sookshma: bool = False,
+        include_prana: bool = False
     ) -> Dict:
         """
         Calculate Vimshottari Dasha periods from birth.
@@ -48,9 +50,11 @@ class VimshottariDashaCalculator:
         Args:
             birth_datetime: Date and time of birth
             moon_longitude: Sidereal longitude of Moon at birth
-            include_antardashas: Include sub-periods
-            include_pratyantardashas: Include sub-sub-periods
-        
+            include_antardashas: Include sub-periods (level 2)
+            include_pratyantardashas: Include sub-sub-periods (level 3)
+            include_sookshma: Include sookshma periods (level 4)
+            include_prana: Include prana periods (level 5)
+
         Returns:
             Dictionary with dasha periods and current dasha
         """
@@ -109,12 +113,48 @@ class VimshottariDashaCalculator:
                                     antardasha["duration_days"] / 365.25
                                 )
                                 antardashas[j]["pratyantardashas"] = pratyantardashas
-                                
+
                                 # Get current pratyantardasha
                                 current_pratyantardasha = self._get_current_period(
                                     pratyantardashas, current_date
                                 )
                                 current_dasha["pratyantardasha"] = current_pratyantardasha
+
+                                # Calculate sookshma if requested
+                                if include_sookshma and current_pratyantardasha:
+                                    for k, pratyantar in enumerate(pratyantardashas):
+                                        if pratyantar["planet"] == current_pratyantardasha["planet"]:
+                                            sookshmas = self._calculate_sookshma(
+                                                pratyantar["start_date"],
+                                                pratyantar["planet"],
+                                                pratyantar["duration_days"] / 365.25
+                                            )
+                                            pratyantardashas[k]["sookshmas"] = sookshmas
+
+                                            # Get current sookshma
+                                            current_sookshma = self._get_current_period(
+                                                sookshmas, current_date
+                                            )
+                                            current_dasha["sookshma"] = current_sookshma
+
+                                            # Calculate prana if requested
+                                            if include_prana and current_sookshma:
+                                                for m, sookshma in enumerate(sookshmas):
+                                                    if sookshma["planet"] == current_sookshma["planet"]:
+                                                        pranas = self._calculate_prana(
+                                                            sookshma["start_date"],
+                                                            sookshma["planet"],
+                                                            sookshma["duration_days"] / 365.25
+                                                        )
+                                                        sookshmas[m]["pranas"] = pranas
+
+                                                        # Get current prana
+                                                        current_prana = self._get_current_period(
+                                                            pranas, current_date
+                                                        )
+                                                        current_dasha["prana"] = current_prana
+                                                        break
+                                            break
                     break
         
         # Calculate future predictions based on upcoming dashas
@@ -269,6 +309,78 @@ class VimshottariDashaCalculator:
         
         return pratyantardashas
     
+    def _calculate_sookshma(
+        self,
+        pratyantardasha_start: datetime,
+        pratyantardasha_lord: str,
+        pratyantardasha_years: float
+    ) -> List[Dict]:
+        """Calculate sookshma (level 4) sub-periods within a pratyantardasha."""
+        sookshmas = []
+        current_date = pratyantardasha_start
+
+        # Find starting index
+        start_index = self._get_dasha_index(pratyantardasha_lord)
+
+        # Calculate each sookshma
+        for i in range(9):
+            index = (start_index + i) % 9
+            planet, planet_years = self.DASHA_ORDER[index]
+
+            # Sookshma duration = (planet_years * pratyantardasha_years) / 120
+            sookshma_years = (planet_years * pratyantardasha_years) / 120
+            sookshma_days = sookshma_years * 365.25
+
+            end_date = current_date + timedelta(days=sookshma_days)
+
+            sookshmas.append({
+                "planet": planet,
+                "start_date": current_date,
+                "end_date": end_date,
+                "duration_years": sookshma_years,
+                "duration_days": int(sookshma_days)
+            })
+
+            current_date = end_date
+
+        return sookshmas
+
+    def _calculate_prana(
+        self,
+        sookshma_start: datetime,
+        sookshma_lord: str,
+        sookshma_years: float
+    ) -> List[Dict]:
+        """Calculate prana (level 5) sub-periods within a sookshma."""
+        pranas = []
+        current_date = sookshma_start
+
+        # Find starting index
+        start_index = self._get_dasha_index(sookshma_lord)
+
+        # Calculate each prana
+        for i in range(9):
+            index = (start_index + i) % 9
+            planet, planet_years = self.DASHA_ORDER[index]
+
+            # Prana duration = (planet_years * sookshma_years) / 120
+            prana_years = (planet_years * sookshma_years) / 120
+            prana_days = prana_years * 365.25
+
+            end_date = current_date + timedelta(days=prana_days)
+
+            pranas.append({
+                "planet": planet,
+                "start_date": current_date,
+                "end_date": end_date,
+                "duration_years": prana_years,
+                "duration_days": int(prana_days)
+            })
+
+            current_date = end_date
+
+        return pranas
+
     def _get_current_dasha(self, mahadashas: List[Dict], current_date: datetime) -> Dict:
         """Get current dasha periods."""
         current_mahadasha = self._get_current_period(mahadashas, current_date)

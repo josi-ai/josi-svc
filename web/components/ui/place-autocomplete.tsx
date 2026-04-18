@@ -64,6 +64,12 @@ export default function PlaceAutocomplete({
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  // Keep refs to latest callbacks so the Google Maps listener never goes stale
+  const onChangeRef = useRef(onChange);
+  const onSelectRef = useRef(onSelect);
+  onChangeRef.current = onChange;
+  onSelectRef.current = onSelect;
+
   useEffect(() => {
     loadGoogleMaps().then(() => setLoaded(true));
   }, []);
@@ -78,21 +84,21 @@ export default function PlaceAutocomplete({
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       if (place.formatted_address) {
-        onChange(place.formatted_address);
-        if (onSelect && place.geometry?.location) {
-          onSelect({
+        onChangeRef.current(place.formatted_address);
+        if (onSelectRef.current && place.geometry?.location) {
+          onSelectRef.current({
             name: place.formatted_address,
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng(),
           });
         }
       } else if (place.name) {
-        onChange(place.name);
+        onChangeRef.current(place.name);
       }
     });
 
     autocompleteRef.current = autocomplete;
-  }, [loaded, onChange, onSelect]);
+  }, [loaded]);
 
   return (
     <input

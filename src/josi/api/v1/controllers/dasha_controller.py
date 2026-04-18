@@ -80,12 +80,14 @@ async def get_vimshottari_dasha(
     # Get Moon longitude
     moon_longitude = natal_chart["planets"]["Moon"]["longitude"]
     
-    # Calculate Vimshottari Dasha
+    # Calculate Vimshottari Dasha (all 5 levels)
     dasha_data = vimshottari_calculator.calculate_dasha_periods(
         person.time_of_birth,
         moon_longitude,
         include_antardashas=True,
-        include_pratyantardashas=True
+        include_pratyantardashas=True,
+        include_sookshma=True,
+        include_prana=True
     )
     
     return ResponseModel(
@@ -100,6 +102,8 @@ async def get_vimshottari_dasha(
                 "current_mahadasha": dasha_data["current_dasha"]["mahadasha"] if dasha_data["current_dasha"] else None,
                 "current_antardasha": dasha_data["current_dasha"].get("antardasha") if dasha_data["current_dasha"] else None,
                 "current_pratyantardasha": dasha_data["current_dasha"].get("pratyantardasha") if dasha_data["current_dasha"] else None,
+                "current_sookshma": dasha_data["current_dasha"].get("sookshma") if dasha_data["current_dasha"] else None,
+                "current_prana": dasha_data["current_dasha"].get("prana") if dasha_data["current_dasha"] else None,
                 "upcoming_changes": dasha_data.get("upcoming_changes", [])
             },
             "life_timeline": dasha_data["mahadashas"]

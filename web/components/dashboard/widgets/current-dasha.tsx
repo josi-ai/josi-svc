@@ -21,6 +21,8 @@ interface DashaResponse {
     mahadasha: DashaPeriod
     antardasha?: DashaPeriod
     pratyantardasha?: DashaPeriod
+    sookshma?: DashaPeriod
+    prana?: DashaPeriod
     description?: string
   } | null
 }
@@ -45,6 +47,15 @@ function formatEndDate(dateStr: string): string {
   }
 }
 
+function formatDateTime(dateStr: string): string {
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
 /* ---------- Skeleton ---------- */
 
 function Skeleton() {
@@ -58,6 +69,54 @@ function Skeleton() {
         <div className="h-3 w-16 rounded" style={{ background: 'var(--border-subtle)' }} />
         <div className="h-3 w-24 rounded" style={{ background: 'var(--border-subtle)' }} />
       </div>
+    </div>
+  )
+}
+
+/* ---------- Level Row ---------- */
+
+function DashaLevelRow({ label, period }: { label: string; period: DashaPeriod }) {
+  const progress = calculateProgress(period.start_date, period.end_date)
+  const startStr = formatDateTime(period.start_date)
+  const endStr = formatDateTime(period.end_date)
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)' }}>{period.planet}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-faint)', marginLeft: 'auto', fontWeight: 500 }}>{progress}%</span>
+      </div>
+      <div style={{ width: '100%', height: 5, borderRadius: 3, background: 'var(--border-subtle)', overflow: 'hidden', marginBottom: 3 }}>
+        <div style={{ height: '100%', borderRadius: 3, width: `${progress}%`, background: 'var(--gold)', transition: 'width 0.5s ease' }} />
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        {startStr} → {endStr}
+      </div>
+    </div>
+  )
+}
+
+/* ---------- Levels Container ---------- */
+
+function DashaLevels({ levels }: { levels: { period: DashaPeriod | undefined; label: string }[] }) {
+  const primary = levels.slice(0, 3)
+
+  return (
+    <div className="p-5">
+      <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--text-faint)', marginBottom: 12 }}>
+        Current Dasha
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {primary.map(({ period, label }) => {
+          if (!period) return null
+          return <DashaLevelRow key={label} label={label} period={period} />
+        })}
+      </div>
+
+      <a href="/dasha" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, fontWeight: 600, color: 'var(--gold)', textDecoration: 'none' }}>
+        View full Dasha &rarr;
+      </a>
     </div>
   )
 }
@@ -88,17 +147,18 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
   const currentDasha = dasha?.current_dasha
   const mahadasha = currentDasha?.mahadasha
   const antardasha = currentDasha?.antardasha
+  const pratyantardasha = currentDasha?.pratyantardasha
+  const sookshma = currentDasha?.sookshma
+  const prana = currentDasha?.prana
 
-  // Calculate progress for each period independently
-  const mahaProgress = mahadasha
-    ? calculateProgress(mahadasha.start_date, mahadasha.end_date)
-    : 0
-  const mahaEndLabel = mahadasha ? formatEndDate(mahadasha.end_date) : ''
-
-  const antarProgress = antardasha
-    ? calculateProgress(antardasha.start_date, antardasha.end_date)
-    : 0
-  const antarEndLabel = antardasha ? formatEndDate(antardasha.end_date) : ''
+  // Build all 5 levels — same indentation, label first
+  const levels: { period: DashaPeriod | undefined; label: string }[] = [
+    { period: mahadasha, label: 'Dasha' },
+    { period: antardasha, label: 'Bukthi' },
+    { period: pratyantardasha, label: 'Antaram' },
+    { period: sookshma, label: 'Sookshamam' },
+    { period: prana, label: 'Pranam' },
+  ]
 
   return (
     <WidgetCard tradition="vedic" onRemove={onRemove}>
@@ -132,69 +192,8 @@ export default function CurrentDasha({ onRemove }: { onRemove: () => void }) {
           </p>
         </div>
       ) : (
-        /* Data state */
-        <div className="p-5" data-testid="dasha-widget-v2">
-          <div className="text-[10px] uppercase tracking-[1.5px] font-semibold text-[var(--text-muted)] mb-3">
-            Current Dasha
-          </div>
-
-          {/* Maha Dasha progress */}
-          <div className="mb-3">
-            <div className="flex justify-between items-baseline mb-1">
-              <span className="font-display text-sm text-[var(--text-primary)] font-medium">
-                {mahadasha.planet} Maha Dasha
-              </span>
-              <span className="text-[10px] text-[var(--text-faint)]">
-                {mahaProgress}%
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${mahaProgress}%`,
-                  background: 'var(--gold-bright)',
-                }}
-              />
-            </div>
-            <div className="text-[10px] text-[var(--text-faint)] mt-1">
-              Until {mahaEndLabel}
-            </div>
-          </div>
-
-          {/* Antar Dasha progress */}
-          {antardasha && (
-            <div className="mb-1">
-              <div className="flex justify-between items-baseline mb-1">
-                <span className="text-xs text-[var(--text-secondary)] font-medium">
-                  {antardasha.planet} Antar Dasha
-                </span>
-                <span className="text-[10px] text-[var(--text-faint)]">
-                  {antarProgress}%
-                </span>
-              </div>
-              <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${antarProgress}%`,
-                    background: 'var(--gold)',
-                  }}
-                />
-              </div>
-              <div className="text-[10px] text-[var(--text-faint)] mt-1">
-                Until {antarEndLabel}
-              </div>
-            </div>
-          )}
-
-          <div
-            className="text-xs font-semibold mt-3 cursor-pointer"
-            style={{ color: 'var(--gold)' }}
-          >
-            Chat about this &rarr;
-          </div>
-        </div>
+        /* Data state — levels 1-3 visible, 4-5 behind "See more" */
+        <DashaLevels levels={levels} />
       )}
     </WidgetCard>
   )

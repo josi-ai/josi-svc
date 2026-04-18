@@ -89,29 +89,86 @@ export function MahadashaTimeline({ periods, currentPlanet, onPlanetClick }: { p
   );
 }
 
+/* ---------- Single Dasha Level Row ---------- */
+
+interface DashaLevelRowProps {
+  levelLabel: string;
+  altLabel: string;
+  period: DashaPeriod;
+  barHeight?: number;
+}
+
+function DashaLevelRow({ levelLabel, altLabel, period, barHeight = 8 }: DashaLevelRowProps) {
+  const progress = period.progress_percentage ?? 0;
+  const remaining = period.remaining_days;
+  const remLabel = remaining != null
+    ? (remaining > 365 ? `${Math.round(remaining / 365.25 * 10) / 10}y left` : `${remaining}d left`)
+    : null;
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '160px 120px 1fr 48px 72px', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+      {/* Level name — primary label bold, alt smaller */}
+      <div>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{levelLabel}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-faint)', marginLeft: 6 }}>{altLabel}</span>
+      </div>
+
+      {/* Planet with color dot */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ width: 10, height: 10, borderRadius: 3, background: pColor(period.planet), flexShrink: 0 }} />
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--gold)', whiteSpace: 'nowrap' }}>{period.planet}</span>
+      </div>
+
+      {/* Progress bar with date range above */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDate(period.start_date)}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDate(period.end_date)}</span>
+        </div>
+        <div style={{ height: barHeight, borderRadius: barHeight / 2, background: 'var(--border)', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            width: `${Math.min(100, progress)}%`,
+            background: 'var(--gold-bright, var(--gold))',
+            borderRadius: barHeight / 2,
+            transition: 'width 0.5s ease-out',
+          }} />
+        </div>
+      </div>
+
+      {/* Percentage */}
+      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>{Math.round(progress)}%</span>
+
+      {/* Remaining */}
+      {remLabel && <span style={{ fontSize: 10, color: 'var(--text-faint)', textAlign: 'right', whiteSpace: 'nowrap' }}>{remLabel}</span>}
+      {!remLabel && <span />}
+    </div>
+  );
+}
+
 /* ---------- Current Period Card ---------- */
 
 export function CurrentPeriodCard({ current, birthNakshatra }: { current: CurrentDasha; birthNakshatra?: string }) {
-  const maha = current.mahadasha;
+  const levels: { label: string; alt: string; period?: DashaPeriod }[] = [
+    { label: 'Dasha', alt: 'Mahadasha', period: current.mahadasha },
+    { label: 'Bukthi', alt: 'Antardasha', period: current.antardasha },
+    { label: 'Antaram', alt: 'Pratyantardasha', period: current.pratyantardasha },
+    { label: 'Sookshamam', alt: 'Sookshma Dasha', period: current.sookshma },
+    { label: 'Pranam', alt: 'Prana Dasha', period: current.prana },
+  ];
+
   return (
-    <div style={CARD}>
-      <h3 style={{ ...HEADING, marginBottom: 4 }}>Current Period</h3>
-      {birthNakshatra && <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16 }}>Birth Nakshatra: {birthNakshatra}</p>}
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 20 }}>
-        {maha && <PeriodBlock label="Mahadasha" period={maha} />}
-        {current.antardasha && <PeriodBlock label="Antardasha" period={current.antardasha} />}
+    <div style={{ ...CARD, gridColumn: '1 / -1' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+        <h3 style={{ ...HEADING, marginBottom: 0 }}>Current Period</h3>
+        {birthNakshatra && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Birth Nakshatra: {birthNakshatra}</span>}
       </div>
-      {maha?.progress_percentage != null && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-faint)', marginBottom: 4 }}>
-            <span>Mahadasha Progress</span><span>{Math.round(maha.progress_percentage)}%</span>
-          </div>
-          <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min(100, maha.progress_percentage)}%`, background: pColor(maha.planet), borderRadius: 3, transition: 'width 0.5s ease-out' }} />
-          </div>
-        </div>
-      )}
-      {current.description && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 16, lineHeight: 1.6, fontStyle: 'italic' }}>{current.description}</p>}
+      <div style={{ borderTop: '1px solid var(--border)', marginTop: 8 }}>
+        {levels.map(({ label, alt, period }) =>
+          period ? <DashaLevelRow key={label} levelLabel={label} altLabel={alt} period={period} barHeight={label === 'Mahadasha' ? 10 : label === 'Prana' ? 5 : 7} /> : null
+        )}
+      </div>
+      {current.description && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.6, fontStyle: 'italic' }}>{current.description}</p>}
     </div>
   );
 }

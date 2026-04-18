@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const profile = profileData?.data;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
+    <div style={{ padding: '32px 0' }}>
       {/* Header */}
       <h1
         className="font-display"

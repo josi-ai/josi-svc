@@ -18,6 +18,8 @@ export interface CurrentDasha {
   mahadasha?: DashaPeriod;
   antardasha?: DashaPeriod;
   pratyantardasha?: DashaPeriod;
+  sookshma?: DashaPeriod;
+  prana?: DashaPeriod;
   description?: string;
 }
 

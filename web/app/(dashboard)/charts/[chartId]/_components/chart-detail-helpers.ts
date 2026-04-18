@@ -4,7 +4,7 @@ import type { ChartDetail, ChartDetailPlanetData } from '@/types';
    Constants
    ================================================================ */
 
-export const TABS = ['Overview', 'Planets', 'Houses', 'Aspects'] as const;
+export const TABS = ['Overview', 'Planets', 'Houses', 'Aspects', 'Divisional Charts', 'Strength'] as const;
 export type Tab = (typeof TABS)[number];
 
 export const PLANET_ORDER = [

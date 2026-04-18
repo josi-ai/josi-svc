@@ -23,29 +23,30 @@ class PersonService:
     
     async def create_person(self, person_data: PersonEntity) -> Person:
         """Create a new person with geocoding."""
-        # Geocode location
-        # Parse place_of_birth string
-        place_parts = person_data.place_of_birth.split(',')
-        city = place_parts[0].strip() if len(place_parts) > 0 else ""
-        state = place_parts[1].strip() if len(place_parts) > 1 else ""
-        country = place_parts[2].strip() if len(place_parts) > 2 else ""
+        # Parse place_of_birth string (may be None)
+        city, state, country = "", "", ""
+        lat, lon, tz = None, None, "UTC"
+
+        if person_data.place_of_birth:
+            place_parts = person_data.place_of_birth.split(',')
+            city = place_parts[0].strip() if len(place_parts) > 0 else ""
+            state = place_parts[1].strip() if len(place_parts) > 1 else ""
+            country = place_parts[2].strip() if len(place_parts) > 2 else ""
+            
+            lat, lon, tz = self.geocoding_service.get_coordinates_and_timezone(
+                city=city,
+                state=state,
+                country=country
+            )
         
-        lat, lon, tz = self.geocoding_service.get_coordinates_and_timezone(
-            city=city,
-            state=state,
-            country=country
-        )
-        
-        # Get timezone object
-        tz_obj = self.geocoding_service.get_timezone(tz)
-        
-        # Combine date and time (store as naive datetime for database)
-        from datetime import datetime
-        birth_datetime = datetime.combine(
-            person_data.date_of_birth,
-            person_data.time_of_birth.time()
-        )
-        # Store as naive datetime - timezone info is stored separately
+        # Combine date and time (if time is provided)
+        birth_datetime = None
+        if person_data.time_of_birth is not None:
+            from datetime import datetime
+            birth_datetime = datetime.combine(
+                person_data.date_of_birth,
+                person_data.time_of_birth.time() if hasattr(person_data.time_of_birth, 'time') else person_data.time_of_birth
+            )
         
         # Create person
         person_dict = {

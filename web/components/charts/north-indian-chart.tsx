@@ -44,7 +44,7 @@ import {
    Sign mapping: H1 gets the ascendant sign, H2 the next sign, etc.
 ================================================================ */
 
-export function NorthIndianChart({ planets, ascSign }: ChartProps) {
+export function NorthIndianChart({ planets, ascSign, centerLabel }: ChartProps) {
   const planetsBySign = getPlanetsBySign(planets);
   const ascIdx = SIGNS_ORDERED.indexOf(ascSign || 'Aries');
   const houseSign = (h: number) => SIGNS_ORDERED[(ascIdx + h) % 12];
@@ -99,6 +99,22 @@ export function NorthIndianChart({ planets, ascSign }: ChartProps) {
       <line x1={TR[0]} y1={TR[1]} x2={CC[0]} y2={CC[1]} stroke="var(--border)" strokeWidth="0.5" />
       <line x1={BR[0]} y1={BR[1]} x2={CC[0]} y2={CC[1]} stroke="var(--border)" strokeWidth="0.5" />
       <line x1={BL[0]} y1={BL[1]} x2={CC[0]} y2={CC[1]} stroke="var(--border)" strokeWidth="0.5" />
+
+      {/* Center label */}
+      {centerLabel && (
+        <text
+          x={M}
+          y={M + 4}
+          textAnchor="middle"
+          fontSize="11"
+          fill="var(--text-muted)"
+          fontFamily="'DM Serif Display', serif"
+          letterSpacing="1"
+          opacity="0.6"
+        >
+          {centerLabel}
+        </text>
+      )}
 
       {/* House contents: sign abbreviation + planets */}
       {houses.map((h, i) => {

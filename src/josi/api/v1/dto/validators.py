@@ -6,10 +6,17 @@ from datetime import time
 def parse_birth_time(v: str) -> time:
     """Parse a flexible time string into a time object.
 
-    Accepts HH:MM, HH:MM:SS, or HH:MM AM/PM formats.
+    Accepts HH:MM, HH:MM:SS, HH:MM AM/PM, or YYYY-MM-DD HH:MM:SS formats.
     Raises ValueError if the format is invalid.
     """
     v = v.strip()
+
+    # Full datetime format: "YYYY-MM-DD HH:MM:SS" — extract just the time part
+    match = re.match(
+        r"^\d{4}-\d{2}-\d{2}\s+(\d{1,2}:\d{2}(?::\d{2})?)$", v
+    )
+    if match:
+        v = match.group(1)
 
     # AM/PM format
     match = re.match(

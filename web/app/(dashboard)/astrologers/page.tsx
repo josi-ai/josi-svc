@@ -38,7 +38,7 @@ export default function AstrologersPage() {
   const clearAll = () => { setSearchName(''); setTradition(''); setLanguage(''); setRatingFilter(''); };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div>
       {/* Hero */}
       <section style={{ padding: '48px 24px 40px', textAlign: 'center',
         background: 'radial-gradient(ellipse at 50% 0%, rgba(200,145,58,0.08) 0%, transparent 70%)', marginBottom: 32 }}>

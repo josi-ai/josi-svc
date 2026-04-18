@@ -39,7 +39,7 @@ export default function DashaPage() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: 'var(--text-primary)', marginBottom: 4 }}>Dasha Timeline</h1>
@@ -54,14 +54,11 @@ export default function DashaPage() {
 
       {/* Loading */}
       {isLoading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <SkeletonBar width="100%" height={80} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <SkeletonBar width="100%" height={200} />
-            <SkeletonBar width="100%" height={200} />
-          </div>
-          <SkeletonBar width="100%" height={140} />
-          <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }`}</style>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: 16 }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid var(--border)', borderTopColor: 'var(--gold)', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Calculating dasha periods...</p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)' }}>Analysing 120-year planetary cycle from birth nakshatra</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
@@ -94,8 +91,9 @@ export default function DashaPage() {
             />
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {dasha.current_dasha && <CurrentPeriodCard current={dasha.current_dasha} birthNakshatra={dasha.birth_nakshatra} />}
+          {dasha.current_dasha && <CurrentPeriodCard current={dasha.current_dasha} birthNakshatra={dasha.birth_nakshatra} />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
             <UpcomingTransitions changes={dasha.detailed_periods?.upcoming_changes} antardashas={antardashas} />
           </div>
           {antardashas.length > 0 && <AntardashaTimeline periods={antardashas} currentAntar={currentAntarPlanet} onPlanetClick={handlePlanetClick} />}

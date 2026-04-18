@@ -29,8 +29,8 @@ class PersonEntity(SQLModel):
     place_of_birth: Optional[str] = Field(default=None, nullable=True)
 
     # Location coordinates
-    latitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=6, max_digits=9)
-    longitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=6, max_digits=9)
+    latitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=10, max_digits=13)
+    longitude: Optional[Decimal] = Field(default=None, nullable=True, decimal_places=10, max_digits=13)
     timezone: Optional[str] = Field(default=None, nullable=True)
 
     # Profile flags

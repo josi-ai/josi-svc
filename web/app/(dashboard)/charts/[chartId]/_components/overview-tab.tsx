@@ -1,7 +1,8 @@
 'use client';
 
 import { Sun, Moon, Star } from 'lucide-react';
-import type { ChartDetail, ChartDetailPanchangItem } from '@/types';
+import { SouthIndianChart, NorthIndianChart, WesternWheelChart } from '@/components/charts/chart-visualizations';
+import type { ChartDetail, ChartDetailPanchangItem, ChartDetailPlanetData, VargaChart } from '@/types';
 import { formatDegree, getPlanets } from './chart-detail-helpers';
 
 /* --- Sub-components --- */
@@ -106,9 +107,323 @@ function PanchangCard({ label, item }: { label: string; item?: ChartDetailPancha
   );
 }
 
+/* --- Navamsa helpers --- */
+
+/**
+ * Build planet positions for the Navamsa (D9) chart.
+ * Priority: planet.navamsa_sign > vargas.D9 sign-to-planet mapping > fallback to rasi sign.
+ */
+function buildNavamsaPlanets(
+  planets: Record<string, ChartDetailPlanetData>,
+  vargaD9?: VargaChart,
+): Record<string, ChartDetailPlanetData> | null {
+  // First try: per-planet navamsa_sign from backend
+  const hasNavamsaSigns = Object.values(planets).some((p) => p.navamsa_sign);
+
+  if (hasNavamsaSigns) {
+    const result: Record<string, ChartDetailPlanetData> = {};
+    for (const [name, data] of Object.entries(planets)) {
+      result[name] = {
+        ...data,
+        sign: data.navamsa_sign || data.sign,
+      };
+    }
+    return result;
+  }
+
+  // Second try: vargas.D9 is a sign-to-planets mapping { "Aries": ["Sun", "Mars"], ... }
+  if (vargaD9) {
+    const planetToSign: Record<string, string> = {};
+    for (const [sign, planetNames] of Object.entries(vargaD9)) {
+      if (!Array.isArray(planetNames)) continue;
+      for (const pName of planetNames) {
+        planetToSign[pName] = sign;
+      }
+    }
+
+    if (Object.keys(planetToSign).length > 0) {
+      const result: Record<string, ChartDetailPlanetData> = {};
+      for (const [name, data] of Object.entries(planets)) {
+        result[name] = {
+          ...data,
+          sign: planetToSign[name] || data.sign,
+        };
+      }
+      return result;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Determine the Navamsa ascendant sign from vargas.D9 or the main ascendant's navamsa.
+ */
+function getNavamsaAscSign(
+  chart: ChartDetail,
+  vargaD9?: VargaChart,
+): string | undefined {
+  // Check if Ascendant is in the D9 varga mapping
+  if (vargaD9) {
+    for (const [sign, names] of Object.entries(vargaD9)) {
+      if (Array.isArray(names) && names.includes('Ascendant')) {
+        return sign;
+      }
+    }
+  }
+  // Fall back to the main ascendant sign
+  return chart.chart_data?.ascendant?.sign;
+}
+
+/* --- Chart Visualization Section --- */
+
+function ChartVisualizationSection({
+  chart,
+  chartFormat,
+  planets,
+  navamsaPlanets,
+  navamsaAscSign,
+}: {
+  chart: ChartDetail;
+  chartFormat: string;
+  planets: Record<string, ChartDetailPlanetData>;
+  navamsaPlanets: Record<string, ChartDetailPlanetData> | null;
+  navamsaAscSign?: string;
+}) {
+  const ascSign = chart.chart_data?.ascendant?.sign;
+
+  const renderChart = (
+    p: Record<string, ChartDetailPlanetData>,
+    asc?: string,
+    label?: string,
+  ) => {
+    if (chartFormat === 'South Indian') return <SouthIndianChart planets={p} ascSign={asc} centerLabel={label} />;
+    if (chartFormat === 'North Indian') return <NorthIndianChart planets={p} ascSign={asc} centerLabel={label} />;
+    if (chartFormat === 'Western Wheel') return <WesternWheelChart planets={p} ascSign={asc} centerLabel={label} />;
+    return <SouthIndianChart planets={p} ascSign={asc} centerLabel={label} />;
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 28 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          Rasi (D1)
+        </p>
+        {renderChart(planets, ascSign, 'Rasi')}
+      </div>
+      {navamsaPlanets && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+            Navamsa (D9)
+          </p>
+          {renderChart(navamsaPlanets, navamsaAscSign, 'D9')}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --- Birth Panchang Section --- */
+
+function BirthPanchangSection({ chart }: { chart: ChartDetail }) {
+  const panchang = chart.chart_data?.panchang;
+  if (!panchang) return null;
+
+  const vara = panchang.vara;
+
+  // Build detailed items for a 2-column grid
+  const items: { label: string; value: string; sub?: string }[] = [];
+
+  // Tithi
+  if (panchang.tithi) {
+    const t = panchang.tithi;
+    const tithiName = typeof t === 'string' ? t : t.name || '\u2014';
+    const paksha = typeof t === 'object' && t.paksha ? t.paksha : undefined;
+    items.push({ label: 'Tithi', value: tithiName, sub: paksha });
+  }
+
+  // Nakshatra
+  if (panchang.nakshatra) {
+    const n = panchang.nakshatra;
+    const nName = typeof n === 'string' ? n : n.name || '\u2014';
+    const parts: string[] = [];
+    if (typeof n === 'object') {
+      if (n.pada) parts.push(`Pada ${n.pada}`);
+      if (n.ruler) parts.push(`Ruler: ${n.ruler}`);
+    }
+    items.push({ label: 'Nakshatra', value: nName, sub: parts.join(' | ') || undefined });
+  }
+
+  // Yoga
+  if (panchang.yoga) {
+    const y = panchang.yoga;
+    const yName = typeof y === 'string' ? y : y.name || '\u2014';
+    items.push({ label: 'Yoga', value: yName });
+  }
+
+  // Karana
+  if (panchang.karana) {
+    const k = panchang.karana;
+    const kName = typeof k === 'string' ? k : k.name || '\u2014';
+    items.push({ label: 'Karana', value: kName });
+  }
+
+  // Vara (weekday)
+  if (vara) {
+    const varaDay = vara.day || '\u2014';
+    const varaRuler = vara.ruler ? `Ruler: ${vara.ruler}` : undefined;
+    items.push({ label: 'Vara', value: varaDay, sub: varaRuler });
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      <SectionHeading>Birth Panchang</SectionHeading>
+      <div
+        style={{
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          background: 'var(--bg-card)',
+          padding: 20,
+          marginBottom: 28,
+        }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 32px' }}>
+          {items.map((item) => (
+            <div key={item.label}>
+              <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>
+                {item.label}
+              </p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{item.value}</p>
+              {item.sub && (
+                <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{item.sub}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* --- Dasha Balance at Birth --- */
+
+function DashaBalanceSection({ chart }: { chart: ChartDetail }) {
+  const dashaData = chart.chart_data?.dasha;
+  if (!dashaData) return null;
+
+  // Try birth_balance first, then birth_details
+  const birthBalance = dashaData.birth_balance;
+  const birthDetails = dashaData.birth_details;
+
+  const balancePlanet = birthBalance?.planet || birthDetails?.birth_dasha_lord;
+  const balanceYears = birthBalance?.years;
+  const balanceMonths = birthBalance?.months;
+  const balanceDays = birthBalance?.days;
+
+  const hasBalance = balancePlanet && (balanceYears != null || balanceMonths != null || balanceDays != null);
+
+  if (!hasBalance) return null;
+
+  const parts: string[] = [];
+  if (balanceYears != null && balanceYears > 0) parts.push(`${balanceYears} year${balanceYears !== 1 ? 's' : ''}`);
+  if (balanceMonths != null && balanceMonths > 0) parts.push(`${balanceMonths} month${balanceMonths !== 1 ? 's' : ''}`);
+  if (balanceDays != null && balanceDays > 0) parts.push(`${balanceDays} day${balanceDays !== 1 ? 's' : ''}`);
+  const balanceStr = parts.join(' ') || '0 days';
+
+  return (
+    <div
+      style={{
+        border: '1px solid var(--border)',
+        borderRadius: 10,
+        background: 'var(--bg-card)',
+        padding: 14,
+        marginBottom: 16,
+      }}
+    >
+      <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>
+        Dasha Balance at Birth
+      </p>
+      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+        {balancePlanet} Dasha — {balanceStr} remaining
+      </p>
+    </div>
+  );
+}
+
+/* --- Technical Details Section --- */
+
+function TechnicalDetailsSection({ chart }: { chart: ChartDetail }) {
+  const chartData = chart.chart_data;
+
+  // Ayanamsa value: check chart_data.ayanamsa (numeric) or panchang.ayanamsa
+  const ayanamsaValue: number | undefined =
+    (typeof chartData?.ayanamsa === 'number' ? chartData.ayanamsa : undefined) ??
+    chartData?.panchang?.ayanamsa;
+
+  const ayanamsaName = chartData?.ayanamsa_name || chart.ayanamsa;
+
+  if (!ayanamsaName && ayanamsaValue == null) return null;
+
+  // Format ayanamsa value as degrees/minutes/seconds
+  let ayanamsaFormatted = '';
+  if (ayanamsaValue != null) {
+    const deg = Math.floor(ayanamsaValue);
+    const minFloat = (ayanamsaValue - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = Math.round((minFloat - min) * 60);
+    ayanamsaFormatted = `${deg}\u00B0${min.toString().padStart(2, '0')}\u2032${sec.toString().padStart(2, '0')}\u2033`;
+  }
+
+  const displayName = ayanamsaName
+    ? ayanamsaName.charAt(0).toUpperCase() + ayanamsaName.slice(1)
+    : '';
+
+  const label = displayName && ayanamsaFormatted
+    ? `${displayName} (${ayanamsaFormatted})`
+    : displayName || ayanamsaFormatted;
+
+  return (
+    <>
+      <SectionHeading>Technical Details</SectionHeading>
+      <div
+        style={{
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          background: 'var(--bg-card)',
+          padding: 20,
+          marginBottom: 28,
+        }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 32px' }}>
+          <div>
+            <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>
+              Ayanamsa
+            </p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+              {label || '\u2014'}
+            </p>
+          </div>
+          {chart.house_system && (
+            <div>
+              <p style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>
+                House System
+              </p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                {chart.house_system.charAt(0).toUpperCase() + chart.house_system.slice(1)}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 /* --- Main Component --- */
 
-export function OverviewTab({ chart }: { chart: ChartDetail }) {
+export function OverviewTab({ chart, chartFormat = 'South Indian' }: { chart: ChartDetail; chartFormat?: string }) {
   const planets = getPlanets(chart);
   const ascendant = chart.chart_data?.ascendant;
   const sun = planets['Sun'];
@@ -118,8 +433,27 @@ export function OverviewTab({ chart }: { chart: ChartDetail }) {
   const dashaData = chart.chart_data?.dasha;
   const currentDasha = dashaData?.current_dasha;
 
+  // Build navamsa planet positions
+  const vargaD9 = chart.chart_data?.vargas?.D9 as VargaChart | undefined;
+  const navamsaPlanets = isVedic ? buildNavamsaPlanets(planets, vargaD9) : null;
+  const navamsaAscSign = isVedic ? getNavamsaAscSign(chart, vargaD9) : undefined;
+
   return (
     <div style={{ animation: 'fadeIn 0.25s ease-out' }}>
+      {/* Chart Visualizations: Rasi + Navamsa side by side (Vedic only) */}
+      {isVedic && navamsaPlanets && (
+        <>
+          <SectionHeading>Chart Visualization</SectionHeading>
+          <ChartVisualizationSection
+            chart={chart}
+            chartFormat={chartFormat}
+            planets={planets}
+            navamsaPlanets={navamsaPlanets}
+            navamsaAscSign={navamsaAscSign}
+          />
+        </>
+      )}
+
       {/* Key Placements */}
       <SectionHeading>Key Placements</SectionHeading>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
@@ -161,8 +495,11 @@ export function OverviewTab({ chart }: { chart: ChartDetail }) {
         )}
       </div>
 
-      {/* Panchang (Vedic only) */}
-      {isVedic && panchang && (
+      {/* Birth Panchang (Vedic only) — enhanced version */}
+      {isVedic && <BirthPanchangSection chart={chart} />}
+
+      {/* Legacy compact Panchang if BirthPanchangSection renders nothing */}
+      {isVedic && panchang && !panchang.vara && (
         <>
           <SectionHeading>Panchang</SectionHeading>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 28 }}>
@@ -174,7 +511,10 @@ export function OverviewTab({ chart }: { chart: ChartDetail }) {
         </>
       )}
 
-      {/* Dasha (Vedic only) */}
+      {/* Dasha Balance at Birth (Vedic only) */}
+      {isVedic && <DashaBalanceSection chart={chart} />}
+
+      {/* Current Dasha (Vedic only) */}
       {isVedic && currentDasha && (
         <>
           <SectionHeading>Current Dasha</SectionHeading>
@@ -243,6 +583,9 @@ export function OverviewTab({ chart }: { chart: ChartDetail }) {
           </div>
         </>
       )}
+
+      {/* Technical Details (Vedic only) */}
+      {isVedic && <TechnicalDetailsSection chart={chart} />}
     </div>
   );
 }

@@ -109,7 +109,7 @@ export default function PanchangPage() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: 'var(--text-primary)', marginBottom: 4 }}>

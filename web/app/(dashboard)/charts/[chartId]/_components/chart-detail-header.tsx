@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronDown, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { ChartDetail, ChartDetailPerson } from '@/types';
 import { TRADITION_STYLES, TRADITIONS_LIST, CHART_FORMATS, getPlanets, getFormatsForTradition } from './chart-detail-helpers';
+import { ChartExport } from './chart-export';
 
 /* --- Dropdown --- */
 function Dropdown({ value, options, onChange }: { value: string; options: readonly string[]; onChange?: (val: string) => void }) {
@@ -143,6 +144,7 @@ export function ChartDetailHeader({
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+          <ChartExport chart={chart} person={person} />
           <Dropdown value={tradition.label} options={TRADITIONS_LIST} onChange={onTraditionChange} />
           <Dropdown value={chartFormat} options={availableFormats} onChange={onChartFormatChange} />
           <button

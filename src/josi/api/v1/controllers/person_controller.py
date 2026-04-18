@@ -9,7 +9,7 @@ import logging
 from josi.api.v1.dependencies import PersonServiceDep, CurrentUserDep
 from josi.api.response import ResponseModel
 from josi.models.person_model import PersonEntity
-from josi.api.v1.dto.person_dto import CreatePersonRequest
+from josi.api.v1.dto.person_dto import CreatePersonRequest, UpdatePersonRequest
 
 log = logging.getLogger("uvicorn")
 
@@ -187,7 +187,7 @@ async def list_persons(
 @router.put("/{person_id}", response_model=ResponseModel)
 async def update_person(
     person_id: UUID,
-    payload: PersonEntity,
+    payload: UpdatePersonRequest,
     person_service: PersonServiceDep
 ) -> ResponseModel:
     """
@@ -198,7 +198,7 @@ async def update_person(
     
     Args:
         person_id (UUID): Unique identifier of the person to update
-        payload (PersonEntity): Updated person data
+        payload (UpdatePersonRequest): Updated person data with flexible time parsing
         person_service (PersonServiceDep): Injected person service
     
     Returns:
@@ -216,11 +216,19 @@ async def update_person(
         PUT /api/v1/persons/123e4567-e89b-12d3-a456-426614174000
         {
             "name": "John Doe Updated",
+            "time_of_birth": "2:30 PM",
             "place_of_birth": "Los Angeles, CA, USA"
         }
     """
     try:
-        person = await person_service.update_person(person_id, payload.model_dump(exclude_unset=True))
+        # Get existing person to access current date_of_birth for time combination
+        existing = await person_service.get_person(person_id)
+        existing_dob = None
+        if existing and hasattr(existing, 'date_of_birth'):
+            existing_dob = existing.date_of_birth
+
+        update_data = payload.to_update_dict(existing_date_of_birth=existing_dob)
+        person = await person_service.update_person(person_id, update_data)
         return ResponseModel(
             success=True,
             message="Person updated successfully",

@@ -87,7 +87,7 @@ export default function CulturalEventsPage() {
   const isCurrentMonth = now.getMonth() === month && now.getFullYear() === year;
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 16px' }}>
+    <div style={{ padding: '32px 0' }}>
       <h1 className="font-display" style={{ fontSize: 28, color: 'var(--text-primary)', fontWeight: 400, margin: '0 0 8px' }}>Cultural Events &amp; Festivals</h1>
       <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: '0 0 28px' }}>
         {userEthnicity.length > 0 ? `Showing events for: ${userEthnicity.join(', ')}` : 'Showing all cultural events'}
