@@ -11,7 +11,7 @@ classical_sources: [bphs, saravali, phaladeepika, jataka_parijata]
 estimated_effort: 4 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E4a — Classical Yoga Engine MVP (60 Core Yogas)
@@ -69,6 +69,64 @@ The 60 chosen here are the *highest-cited* across BPHS, Saravali, and Phaladeepi
 - F16 (golden chart suite — adds yoga fixtures).
 - F17 (property harness — ensures deterministic activation).
 - Existing: `src/josi/services/astrology_service.py` supplies chart state (planet positions, houses, aspects, dispositors).
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E4a Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E4a-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md`)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed; True default B2C | 1.1 |
+| House system | Whole Sign B2C rasi chart + Bhava Chalit/Sripati parallel | 1.3 |
+| Natchathiram count | 27 for all yoga predicates | 3.7 |
+| Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |
+| Divisional chart purpose | BPHS Ch.6 canonical metadata per varga | 1.9/1.10 |
+
+### E4a-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Neecha Bhanga cancellation** (Q1) | **Approach A — separate yoga only.** Neecha Bhanga Raja Yoga emitted as one of 60 MVP yogas; does NOT affect other yoga activations. Pancha Mahapurusha and other predicates check own-sign/exaltation strictly. Matches BPHS/Phaladeepika/Saravali + Raman/Rao/Rath/Narasimha Rao + JH/PyJHora/Parashara's Light. Post-research (unanimous classical + modern authority consensus). | Q1 post-research |
+| **Strength formula source** (Q2) | **Source D — Modern synthesis with Shadbalam dependency.** Each yoga strength incorporates participating planets' Shadbalam fractions per BPHS qualitative + Phaladeepika numerical + modern synthesis. **Engineering sequencing flag:** E4a depends on E19 Shadbalam Engine (new P2 PRD per GAP_CLOSURE). Options: bump E19 P2→P1 OR E4a v1 ships with Source E (dignity-weighted average) temporarily and upgrades when E19 lands. | Q2 |
+| **Cross-source yoga variants** (Q3) | **Approach D — per-yoga curation by modern Parashari consensus.** For each of ~5-8 disputed yogas (Gajakesari, Sunapha, Vasi, Adhi, etc.), pick whichever variant Raman/Rath/Narasimha Rao endorses (typically matches Jagannatha Hora). Per-yoga decisions documented inline in YAML rule files with citation. | Q3 |
+| **Active-yoga threshold** (Q4) | **Approach D — no threshold; rank-based display.** All activated yogas shown sorted by strength descending. B2C UI shows top 5-7; astrologer sees full list with strength column. Matches Jagannatha Hora behavior. | Q4 |
+| **Graha Drishti in yoga predicates** (Q5) | **Composite approach** post-research: **Predicate:** V1 boolean with special-aspect promotion — 7th for all grahas + 3/10 for Sani (full) + 5/9 for Guru (full) + 4/8 for Sevvai (full). Matches BPHS Ch.26 "sambandha requires full drishti". **Strength formula:** V2 graded per BPHS Ch.28 Sphuta drishti (handled via Source D synthesis in Q2). **Rahu/Ketu default:** 7th only (matches JH/PyJHora/PL/AstroSage). **Astrologer profile toggle:** 4-option Node Aspect Rule selector — None (BPHS literal) / 7th only (default) / 5/7/9 Jupiter-like (Sanjay Rath) / 3/7/11 Tamil folk variant. | Q5 post-research |
+| **Predicate vocabulary scope** (Q6) | **Option B — BPHS-comprehensive (~30 predicates).** Covers Ch.36-44 yoga descriptions comprehensively. Forward-compatible with E4b's 250-yoga extension. Matches Jagannatha Hora's implemented predicate set. Includes: planet-in-kendra, -trikona, -upachaya, -own-sign, -exalted, -debilitated, -moolatrikona, -vargottama, parivartana, conjunction, aspect (boolean V1+promotion), mutual-aspect, lord-of-house, dispositor-of, planet-in-Nth-from, same-nakshatra, bhava-has-benefic/malefic, planet-not-combust, planet-is-yoga-karaka-for-lagna, aspect-strength (V2 for strength), neecha-bhanga-conditions, and related. | Q6 |
+| **Golden chart fixture architecture** (Q7) | **3-tier fixture architecture** post-research: **Tier 1 synthesized (60 files)** — minimal-activation isolated charts per yoga, classical-śloka-cited, deterministic. **Tier 2 public-figure (~15 AA-rated astrodatabank charts)** — Gandhi, Einstein, Nehru, Ramakrishna, Indira Gandhi, Queen Elizabeth II, Ramana Maharshi, Sri Aurobindo, Helen Keller, et al. — integration-level multi-yoga validation. **Tier 3 classical-text** — verified Raman 300C chart transcriptions, populated as physical book is consulted. **Sourcing stack:** Raman *Three Hundred Important Combinations* (58/60 coverage) + K.N. Rao *Yogas in Astrology* (Kala Sarpa + Vipareeta) + PVR Narasimha Rao *Integrated Approach* (cross-validation). **13 single-source yogas** (Parvata, Dhwaja, Kahala, Pushkala, Chamara, Kuladeepa, Vasi-from-Moon, Vesi/Vosi-from-Moon, Surya sect triad, Pisacha, Jadatva, Bhiru, Vesha-afflicting, Nirbhagya) resolved via Tier 1 synthesized. | Q7 post-research |
+| **Yoga Karaka per-ascendant table** (Q8) | **Canonical 12-row table.** 6 Lagnas with dedicated Yoga Karaka: Rishabam (Sani), Kadagam (Sevvai), Simmam (Sevvai), Thulam (Sani), Magaram (Sukkiran), Kumbham (Sukkiran). 6 Lagnas with Lagna-lord-only: Mesham, Mithunam, Kanni, Viruchigam, Dhanusu, Meenam. Rahu/Ketu excluded from Yoga Karaka eligibility. Matches JH/PL/all modern software. | Q8 |
+
+### Yoga Karaka canonical table (BPHS Ch.40 v.1-3)
+
+| Lagna | Yoga Karaka | Rules kendra | Rules trikona |
+|---|---|:-:|:-:|
+| Mesham | Lagna lord (Sevvai) only | 1 | 1 |
+| Rishabam | **Sani** | 10 | 9 |
+| Mithunam | Lagna lord (Budhan) only | 1, 4 | 1 |
+| Kadagam | **Sevvai** | 10 | 5 |
+| Simmam | **Sevvai** | 4 | 9 |
+| Kanni | Lagna lord (Budhan) only | 1, 10 | 1 |
+| Thulam | **Sani** | 4 | 5 |
+| Viruchigam | Lagna lord (Sevvai) only | 1 | 1 |
+| Dhanusu | Lagna lord (Guru) only | 1, 4 | 1 |
+| Magaram | **Sukkiran** | 10 | 5 |
+| Kumbham | **Sukkiran** | 4 | 9 |
+| Meenam | Lagna lord (Guru) only | 1, 10 | 1 |
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Resolve E19 Shadbalam Engine sequencing (P2→P1 bump vs staged E4a v1 upgrade path)
+- [ ] Implement ~30-predicate BPHS-comprehensive DSL in `src/josi/services/classical/yoga/predicates.py`
+- [ ] Author 60 YAML rule files under `src/josi/db/rules/yoga/` (Pancha Mahapurusha 5, Raja 15, Dhana 10, Chandra 10, Surya 5, Dushta 15)
+- [ ] Implement 3-tier fixture architecture at `tests/fixtures/yogas/{tier1_synthesized,tier2_public_figures,tier3_classical_text}/`
+- [ ] Node Aspect Rule astrologer-profile toggle (4 options) via F2 `astrologer_source_preference`
+- [ ] Yoga Karaka table encoded as shared reference data for predicate evaluation
+- [ ] Per-yoga curation documentation for the ~5-8 BPHS-vs-Saravali disputed yogas with classical citation per decision
+- [ ] Neecha Bhanga Raja Yoga as standalone predicate (classical cancellation conditions from BPHS Ch.40 v.19-25)
+
+---
 
 ## 3. Classical / Technical Research
 

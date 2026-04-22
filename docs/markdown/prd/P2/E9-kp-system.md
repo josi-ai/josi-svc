@@ -11,7 +11,7 @@ classical_sources: [kp_reader]
 estimated_effort: 5-6 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E9 — KP System: Sub-Lord, Significators, Ruling Planets, KP Horary
@@ -75,6 +75,83 @@ This PRD delivers KP as a **full engine family** with its own compute module, pr
 - F8 — aggregation protocol
 - E1a — natal chart primitives; Vimshottari dasa proportions (reused for sub boundaries)
 - `pyswisseph` for Placidus house cusps (existing in Josi for Western calc)
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E9 Pass 1 astrologer review are resolved. KP is **single-source canon** (KS Krishnamurti KP Reader Vols 1-6, 1971-1983) — no commentary variants unlike Parashari/Jaimini/Tajaka PRDs.
+
+### Cross-cutting decisions
+
+| Decision | Value | Ref |
+|---|---|---|
+| Krishnamurti ayanamsa | Required for KP chart (in astrologer 9-shortlist) | DECISIONS 1.2 |
+| Placidus house system | Required for KP chart (in astrologer 6-shortlist) | DECISIONS 1.3 |
+| Rahu/Ketu node type | Both Mean + True | DECISIONS 1.1 |
+| Natchathiram count | 27 | DECISIONS 3.7 |
+| Sub-lord proportions | Vimshottari dasa lord-years (shared with E1a) | E1a inheritance |
+| Language display | Sanskrit-IAST + Tamil phonetic | DECISIONS 1.5 |
+
+### E9-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **KP ayanamsa + house system binding** (Q1) | **Separate KP chart — don't modify natal.** Natal chart stays with Lahiri ayanamsa + Whole Sign house system. KP engine generates its OWN chart with Krishnamurti ayanamsa + Placidus houses for KP-specific analysis. Astrologer workbench shows both side-by-side (Parashari natal + KP chart). Cleanest separation. Matches JH convention. | Q1 |
+| **Significator hierarchy source** (Q2) | **KP Reader Vol.2 Ch.4 canonical 5-level hierarchy.** Strict single-source (KS Krishnamurti's own text). Levels (strongest → weakest): (1) natchathiram-lords of house occupants, (2) house occupants themselves, (3) natchathiram-lord of house-cusp lord, (4) house-cusp lord, (5) modifier planets (conjunct Level 1-4 OR Rahu/Ketu OR aspecting cusp/lord). Matches all KP software. | Q2 |
+| **Ruling Planets variant** (Q3) | **5-element standard** (KP Reader Vol.3 canonical): (1) day lord, (2) ascendant sign lord, (3) ascendant natchathiram lord, (4) Moon sign lord, (5) Moon natchathiram lord. Computed at query moment. Matches JH + PL + Astrosage. | Q3 |
+| **Sub-level depth** (Q4) | **5 levels** full KP Reader canonical: Natchathiram lord → Sub-lord → Sub-sub-lord → 4th-level → 5th-level. Each level subdivides by Vimshottari proportions (27 × 9 = 243 subs; 243 × 9 = 2187 sub-subs; etc. through 5 levels). Matches KPStar + JH. | Q4 |
+| **KP cross-tradition activation** (Q5) | **Practice-type profile preset.** Astrologer selects at profile creation: Vedic-Parashari only (KP hidden) / Vedic-KP practitioner (KP primary + Parashari cross-reference) / Mixed (both visible) / Western (Vedic+KP hidden, Western Depth per E8/E8b). Matches E8b Q4 convention. | Q5 |
+| **KP canon scope** (Q6) | **Strict KP Reader Vols 1-6 only** (KS Krishnamurti 1971-1983). Single-source canonical. No modern extensions (Hariharan 6-element RP, Bosale regional variants, etc.). Matches JH + KPStar + PL + Astrosage. KP's defining feature is single-authority canon — preserving that. Same for both user types. | Q6 |
+
+### KP engine output shape
+
+```python
+kp_analysis = {
+    "chart_id": str,
+    "kp_chart": {  # Separate KP chart per Q1
+        "ayanamsa": "krishnamurti",
+        "house_system": "placidus",
+        "planetary_positions": {planet: {rasi, longitude, natchathiram, sub, sub_sub, ...}},
+        "cusps": [12_cusps_with_sub_lords]
+    },
+    "significators": {  # 5-level hierarchy per Q2
+        house_num: {
+            level_1: list[graha],  # natchathiram-lords of occupants
+            level_2: list[graha],  # occupants
+            level_3: list[graha],  # natchathiram-lord of house-cusp lord
+            level_4: graha,        # house-cusp lord
+            level_5: list[graha]   # modifier planets
+        }
+    },
+    "ruling_planets": {  # 5-element per Q3 at specified moment
+        "day_lord": graha,
+        "asc_sign_lord": graha,
+        "asc_natchathiram_lord": graha,
+        "moon_sign_lord": graha,
+        "moon_natchathiram_lord": graha,
+        "computed_at": datetime
+    },
+    "sub_depth_levels": 5,  # per Q4
+    "source": "kp_reader_vols_1_6"  # strict canon
+}
+```
+
+### 249-number horary mapping
+
+Static lookup table mapping each number 1-249 to specific zodiacal longitude from Mesham 0°00' at #1 to Meenam 29°41' at #249. KP Reader Vol.3 canonical table. Used in `POST /api/v1/kp/horary` endpoint.
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Sub-lord computation engine: 243-sub zodiac table + per-longitude sub-lord lookup
+- [ ] 5-level significator computation per KP Reader Vol.2 Ch.4
+- [ ] Ruling Planets real-time computation at query moment (5-element)
+- [ ] 249-number horary table + horary chart cast endpoint
+- [ ] Cuspal sub-lord analysis logic per house + matter mapping
+- [ ] Separate KP chart generation (Krishnamurti ayanamsa + Placidus) alongside natal
+- [ ] Practice-type profile preset (6 options per Q5) + KP tab visibility logic
+- [ ] `kp_analysis` output shape — propose as new F7 shape; fallback to `structured_positions` with rich `details`
+- [ ] Golden chart fixtures: 10 KP Reader example charts cross-verified at ±0 exact sub-lord match vs KP Reader Vol.2-4 published cases
+
+---
 
 ## 3. Classical Research
 

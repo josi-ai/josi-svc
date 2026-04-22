@@ -11,7 +11,7 @@ classical_sources: [bphs, jataka_parijata, saravali]
 estimated_effort: 2.5 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E1a — Multi-Dasa Engine v1 (Yogini + Ashtottari)
@@ -65,6 +65,51 @@ Implementation expectation: engine matches Jagannatha Hora 7.x (JH) period bound
 - F13 (content-hash provenance chain).
 - F16 (golden chart suite scaffolding — adds fixtures for dasa tests).
 - F17 (property-based test harness — enforces invariants: sum of periods = system cycle, no gaps, no overlaps).
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E1a Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E1a-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md`)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri (Chitrapaksha Official) for B2C; 9-shortlist for astrologer profile (Lahiri, Raman, Krishnamurti, True Chithirai, Yukteshwar, J.N. Bhasin, Suryasiddhantha, True Poosam, Fagan-Bradley) | DECISIONS 1.2 |
+| Ashtottari eligibility | Permissive default (always compute); astrologer can toggle BPHS strict via F2 `astrologer_source_preference` | DECISIONS 1.6 |
+| Dasai hierarchy depth | 5 levels (MD → AD → PD → Sookshma → Prana) for both user types | DECISIONS 1.4 |
+| Rahu/Ketu node type | Both Mean Node + True Node computed always; B2C default True Node; astrologer prompted | DECISIONS 1.1 |
+| Natchathiram count | 27 for everything (including dasai starting-lord mapping); SBC exception only (28 in SBC) | DECISIONS 3.7 |
+| Language display | Sanskrit-IAST canonical + Tamil phonetic for UI; entity names use Tamil phonetic primary | DECISIONS 1.5 |
+
+### E1a-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| Yogini starting-natchathiram lookup | BPHS Ch.48 table only (27-row mapping in §3.1); no Saravali variant | Pass 1 Q3 |
+| Ashtottari starting-lord algorithm | Continuous longitude-based: `cumulative_years = moon_sidereal_long / 360 × 108` — matches JH 7.x exactly | Pass 1 Q4 |
+| Paksham method (strict-mode Ashtottari only) | Tithi-based lookup reused from panchangam layer; zero recomputation | Pass 1 Q7 |
+| Natchathiram-boundary edge case | Boundary-inclusive lower (`floor(moon_long / 13°20') + 1`); silent (no warning) | Pass 1 Q8 |
+| Matching bar vs JH 7.x | ±1 day across 10-chart golden suite | Pass 1 Q9 |
+| Dasai balance rendering | Y/M/D/H/M classical breakdown for both user types; internal float for arithmetic | Pass 1 Q10 |
+| Timezone for dasai boundary dates | Birthplace timezone with historical awareness via `pytz` (handles pre-1947 Madras Time LMT variations, pre-DST-change transitions, Indian IST fixed +5:30 post-1947) | Pass 1 Q11 |
+
+### Implementation implications
+
+1. **Dual-node computation** per chart → both Mean Node and True Node stored with discriminator. Starting-lord selection uses Chandran's natchathiram (independent of node type). Period lengths unchanged; only active-moment Rahu position differs between node types.
+2. **5-level depth computation** → extend proportional formula naturally: `sookshma = antardasa × sookshma_lord_years / cycle_total`; `prana = sookshma × prana_lord_years / cycle_total`. For Yogini, `cycle_total = 36`; Ashtottari `= 108`; Vimshottari `= 120`.
+3. **Historical timezone awareness** → use `pytz` (not fixed UTC offset) for rendering dasai boundary dates. Pre-1947 Indian births use Madras Time LMT; post-1947 use IST (+5:30 fixed). Western births need full DST transition history.
+4. **Tithi dependency** → dasai engine strict-mode Ashtottari check reads tithi from panchangam layer output. Engine-ordering constraint: panchangam computes before dasai engine.
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Extend existing `dasa_calculator.py` Vimshottari to compute 5 levels (currently ships 3); behavior-preserving refactor alongside new Yogini/Ashtottari engines.
+- [ ] Implement dual Mean + True node computation at chart creation; store both with discriminator.
+- [ ] Add `pytz`-based historical timezone rendering to dasai boundary date output layer.
+- [ ] Golden chart suite: 10 charts × 3 dasai systems × 5 levels, cross-verified against JH 7.x at ±1 day.
+- [ ] Rule YAMLs for both Yogini and Ashtottari encode classical variants as sibling rules; permissive/BPHS-strict Ashtottari selected via `effective_from`.
+- [ ] Engineering decision on Vimshottari refactor risk (behavior-preserving refactor vs duplicate base logic vs feature-flag gate) — out of astrologer review scope, engineering team owns.
+
+---
 
 ## 3. Classical / Technical Research
 

@@ -11,7 +11,7 @@ classical_sources: [bphs, uttara_kalamrita, jaimini_sutras, kerala_commentaries,
 estimated_effort: 3-4 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E7 — Extended Vargas (D61–D144), Sarvatobhadra Chakra, Upagrahas
@@ -74,6 +74,78 @@ These additions bring Josi to parity with Jagannatha Hora on the "full classical
 - E1a — natal ascendant, planet positions, sunrise/sunset (for day-fraction upagrahas)
 - Existing `DivisionalChartsCalculator` — extended here
 - Existing `AstrologyCalculator` — for sunrise/sunset/tithi
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E7 Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; GAP_CLOSURE Sphuta extension applied. E7-specific decisions documented here.
+
+### Cross-cutting decisions
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa | Lahiri | DECISIONS 1.2 |
+| Rahu/Ketu node type | Both Mean + True | DECISIONS 1.1 |
+| Natchathiram count | 27 for all general use; **28 for SBC only** (scoped exception) | DECISIONS 3.7 |
+| Language display | Sanskrit-IAST + Tamil phonetic | DECISIONS 1.5 |
+| Varga purpose metadata | BPHS Ch.6 canonical strings | DECISIONS 1.9/1.10 |
+| 5 Sphutas in E7 scope | Per GAP_CLOSURE §1.B extension | GAP_CLOSURE |
+
+### E7-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Extended Varga division algorithms** (Q1) | **BPHS Ch.6 + Uttara Kalamrita Ch.2 synthesis** for D72 Dwadashottari, D84 Chaturashittiyamsa, D100 Shatamsa, D108 Ashtottari Amsa, D144 Nadi Amsa Extended. Matches JH + PL + Astrosage. | Q1 |
+| **Sarvathobhadra Chakra (SBC) layout** (Q2) | **BPHS Ch.86 standard 9×9 grid** — 28 natchathirams (incl. Abhijit), 12 rasis, 8 weekdays, directions, letters, vowels, tithis. Matches JH + PL + Astrosage + Tamil Vakya. Same for both user types. | Q2 |
+| **Upagrahas school default** (Q3) | **North Indian school default** (8 upagrahas: Dhuma, Vyatipata, Parivesha, Chapa/Indrachapa, Upaketu, Kala, Yamakantaka, Ardhaprahara) + **Kerala school (6 upagrahas) as astrologer-profile toggle**. Matches JH + Tamil Vakya default + uniform variant convention. | Q3 |
+| **5 Sphutas classical source** (Q4) | **BPHS Ch.79-80 + UK Ch.2 synthesis** for all 5 Sphutas (Beeja, Kshetra, Deha, Mrityu, Pranapada). Modern standard. Matches JH + PL + Astrosage + Tamil Vakya. **Ethical gating:** Mrityu Sphuta astrologer-workbench-only (same convention as E5b Ayus); B2C AI chat declines Mrityu-specific queries. | Q4 |
+| **SBC query API scope** (Q5) | **4 query types shipped:** (1) name-testing / varna fitness, (2) natchathiram compatibility, (3) weekday fitness for activity, (4) travel/direction auspiciousness. **Type 5 muhurta date-range search deferred** to E7-enhancement PRD. Matches JH scope. Same for both user types. | Q5 |
+| **Cross-source aggregation for E7** (Q6) | **Variant-toggle pattern extended to all E7 techniques.** Extended Vargas: BPHS+UK default + Kerala Parahita variant (D84/D108 toggle). SBC: BPHS Ch.86 only (no variant — classical grid deterministic). Upagrahas: North Indian default + Kerala school toggle (already in Q3). Sphutas: BPHS+UK default + Phaladeepika/Kerala Prashnashastra variant toggle. Uniform with E1b/E3/E5/E5b. | Q6 |
+
+### E7 engine output shapes
+
+```python
+extended_vargas = {
+    "D72_dwadashottari": {planet: sign_position},
+    "D84_chaturashittiyamsa": {planet: sign_position},
+    "D100_shatamsa": {planet: sign_position},
+    "D108_ashtottari_amsa": {planet: sign_position},
+    "D144_nadi_amsa_extended": {planet: sign_position},
+    "source": Literal["bphs_uk", "kerala_parahita"]  # D84/D108 variant
+}
+
+sarvathobhadra_chakra = {
+    "grid_9x9": nested_grid_structure,
+    "active_cells_for_chart": list[CellReference],
+    "source": "bphs_ch86"
+}
+
+upagrahas = {
+    "school": Literal["north_indian", "kerala"],  # 8 or 6 positions
+    "positions": {name: longitude}
+}
+
+sphutas = {
+    "beeja": float,        # longitude
+    "kshetra": float,
+    "deha": float,
+    "mrityu": float,       # astrologer-workbench-only
+    "pranapada": float,
+    "source": Literal["bphs_uk", "phaladeepika", "kerala_prashnashastra"]
+}
+```
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Extended Varga computation module (5 algorithms per BPHS+UK)
+- [ ] Kerala Parahita variant for D84/D108 as sibling rules; astrologer toggle
+- [ ] SBC 9×9 grid static data + query engine (4 query types per Q5)
+- [ ] Upagraha North Indian + Kerala computation modules; astrologer school toggle via F2
+- [ ] 5 Sphuta formulas per BPHS+UK + Phaladeepika/Kerala variant siblings
+- [ ] Mrityu Sphuta role-gated API (astrologer-only; 403 for B2C)
+- [ ] REST endpoints: `/api/v1/charts/{id}/vargas/extended`, `/api/v1/charts/{id}/sarvathobhadra`, `/api/v1/charts/{id}/upagrahas?school=...`, `/api/v1/charts/{id}/sphutas`
+- [ ] SBC query endpoints: `POST /api/v1/sarvathobhadra/query` with `{query_type, params}` for name/compat/weekday/direction queries
+
+---
 
 ## 3. Classical Research
 

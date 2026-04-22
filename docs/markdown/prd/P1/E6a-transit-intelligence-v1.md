@@ -11,7 +11,7 @@ classical_sources: [bphs, phaladeepika, saravali, jataka_parijata]
 estimated_effort: 3 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E6a — Transit Intelligence v1 (Sade Sati, Dhaiya, Major Transits, Eclipses)
@@ -69,6 +69,73 @@ Core engine approach: **event stream, not date-by-date scan.** For each classica
 - Existing `src/josi/services/transit_monitor.py` (raw transit computation — retained and wrapped).
 - Existing `src/josi/services/astrology_service.py` AstrologyCalculator (for natal position retrieval).
 - `pyswisseph` (Swiss Ephemeris) for high-precision planetary longitudes and eclipse events.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E6a Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E6a-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md`)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri (for sidereal longitude computation) | 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed; True default B2C | 1.1 |
+| Natchathiram count | 27 | 3.7 |
+| Sunrise/sunset convention | Center of disc + refraction (for eclipse timing at location) | 2.3 |
+| Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |
+| Festival engine Sankrantis | DECISIONS 3.12 owns Sankranti events; E6a references but does not duplicate | 3.12 |
+
+### E6a-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Sade Sati phase model** (Q1) | **Standard 3-phase** — Rising Dhaiya (12th-from-Chandran), Peak (Chandran rasi), Setting Dhaiya (2nd-from-Chandran). Tamil labels: Aarambha Saadesaatai / Madhya Saadesaatai / Avasana Saadesaatai supported. Matches BPHS Ch.40 + Phaladeepika Ch.26 + JH/PL/Astrosage/Drik/Tamil Vakya. | Q1 |
+| **Retrograde re-entry handling** (Q2) | **Hybrid (Approach C)** — B2C sees linear phase progression (primary entry + final exit only); astrologer sees retrograde re-entry annotations overlaid on timeline. Calculation stores all retrograde events; UI renders per user type. Matches Drik Panchang convention. | Q2 |
+| **Eclipse orb** (Q3) | **3° orb, same for solar+lunar, 11 natal points** (7 grahas + Rahu/Ketu + Lagna + MC). Matches JH + PL + Drik standard. Same for both user types. | Q3 |
+| **Transit event horizon** (Q4) | **Split by user type** — B2C: rolling 10 years forward + 5 years back. Astrologer: full lifetime (birth to birth + 100yr or soft cap). Calculation stores full lifetime (~450 events/chart); UI renders per user type. | Q4 |
+| **Kantaka vs Ashtama Shani severity** (Q5) | **Equal severity** — both 2.5-year Saturn malefic transits rendered identically. Different house-focus labels only (4th axis vs 8th axis). Matches JH + PL + Drik. No comparative severity weighting. | Q5 |
+| **Sign-ingress event scope** (Q6) | **Outer + Sevvai (5 grahas)** — Sevvai, Guru, Sani, Rahu, Ketu. ~332 ingress events per 30yr. Sooriyan Sankrantis delegated to festival engine (DECISIONS 3.12) — no duplication. Sevvai peyarchi included per Tamil practice. | Q6 |
+| **Matching bar vs JH 7.x** (Q7) | **Event-type-specific bars:** sign ingress ±1 hour · Sade Sati phase ±1 day · eclipse contact (P1/U1/Max/U4/P4) ±1 second · retrograde flip ±1 minute. Tailored per event's natural precision + classical usage convention. Same bars for both user types. | Q7 |
+
+### Event taxonomy (unified output stream)
+
+```
+Event types emitted by E6a engines:
+
+1. sade_sati.rising_dhaiya.start      (Sani enters 12th-from-Chandran rasi)
+2. sade_sati.peak.start               (Sani enters Chandran rasi)
+3. sade_sati.setting_dhaiya.start     (Sani enters 2nd-from-Chandran rasi)
+4. sade_sati.exit                     (Sani leaves 2nd-from-Chandran rasi)
+5. sade_sati.retrograde_reentry       (astrologer-only annotation)
+6. kantaka_shani.start                (Sani enters 4th-from-Chandran rasi)
+7. kantaka_shani.exit                 (Sani leaves)
+8. ashtama_shani.start                (Sani enters 8th-from-Chandran rasi)
+9. ashtama_shani.exit                 (Sani leaves)
+10. graha_ingress                     (Sevvai/Guru/Sani/Rahu/Ketu sign boundary crossing)
+11. graha_retrograde_flip             (direct→retrograde or retrograde→direct)
+12. eclipse.solar.contact             (P1/U1/Max/U4/P4) with natal conjunction flags
+13. eclipse.lunar.contact             (P1/U1/Max/U4/P4) with natal conjunction flags
+```
+
+### Horizon-by-user-type breakdown (Q4)
+
+| User type | Horizon | Events per chart (avg) |
+|---|---|:-:|
+| B2C | Rolling 10yr forward + 5yr back | ~90 |
+| Astrologer | Birth to (birth + 100yr) or death | ~450 |
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Event-stream boundary-detection engine (not day-by-day scan). Uses Swiss Ephemeris `swe.calc_ut` with iterative root-finding on sidereal-longitude-mod-30° for ingresses.
+- [ ] Retrograde re-entry detection via speed-sign monitoring on each graha
+- [ ] Sade Sati phase transitions via Sani boundary crossings of 3 adjacent natal-Chandran-anchored rasis
+- [ ] Eclipse computation via `swe.sol_eclipse_when_loc` + `swe.lun_eclipse_when`; 3°-orb conjunction check against 11 natal points
+- [ ] Horizon computation — lifetime horizon for astrologer (ayurdaya-based soft cap from E5b when available; fallback to 100yr)
+- [ ] 10-chart golden suite cross-verified at event-type-specific bars (ingress ±1 hour, Sade Sati ±1 day, eclipse ±1 second, retrograde ±1 minute)
+- [ ] Federation with festival engine (DECISIONS 3.12) — Sooriyan Sankrantis referenced, not re-emitted
+- [ ] B2C rolling-window query pattern (compute full lifetime once; filter to 10yr+5yr window per query)
+
+---
 
 ## 3. Classical / Technical Research
 

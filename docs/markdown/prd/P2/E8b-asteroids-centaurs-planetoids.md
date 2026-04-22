@@ -11,7 +11,7 @@ classical_sources: [modern_western, brady, reinhart, zane_stein, richard_brown]
 estimated_effort: 2-3 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E8b — Asteroids, Centaurs & Planetoids
@@ -99,6 +99,52 @@ This PRD delivers 15-20 minor bodies, each as a first-class position source with
 - E8 — Western depth; this PRD extends E8's aspect engine and minor-body output shapes.
 - `pyswisseph` — `swe.calc_ut()` for all minor bodies. Extended asteroid ephemeris files (`ast*.se1`) shipped under `EPHEMERIS_PATH` (approximately 300 MB if all asteroids included; we ship only the 15-20 needed).
 - Swiss Ephemeris asteroid ephemeris files at `/usr/share/swisseph/ast0/` (paths `seas_18.se1`, `seas_24.se1`, etc. — standard). Verified present on container.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E8b Pass 1 astrologer review are resolved. E8b inherits most from E8 (Western tradition isolation); E8b-specific scope decisions documented here.
+
+### Cross-cutting + E8 inheritance (applied automatically)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Per-technique zodiac hybrid | Tropical for minor-body natal positions (Western convention) | E8 Q1 |
+| House system default | Placidus + astrologer toggle (Whole Sign / Porphyry / Koch / Equal) | E8 Q2 |
+| Tradition isolation | Strict — E8b bodies NEVER merged into Vedic rule sets; tagged `tradition=modern_western`; default `source_id='modern_western'` (with Chiron/Eris carrying own named sources) | E8 §2.4 guarantee |
+| Rahu/Ketu node type | Both Mean + True (Western uses same Nodes) | DECISIONS 1.1 |
+| Language display | Sanskrit-IAST + Tamil phonetic for UI; Western names for bodies | DECISIONS 1.5 |
+
+### E8b-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Body inclusion scope (tiered)** (Q1) | **Tiered feature flags.** Tier 1 (always on): Chiron + Ceres + Pallas + Juno + Vesta (Big Five + Chiron). Tier 2 (default on): Eris + Astraea. Tier 3 (astrologer toggle): 4 centaurs (Pholus, Nessus, Chariklo, Hylonome). Tier 4 (research flag, off by default): 4 TNOs (Sedna, Haumea, Makemake, Orcus). Preserves PRD 15-body scope with user-friendly defaults. Matches Solar Fire + Kepler base + Astro.com progressive disclosure pattern. | Q1 |
+| **Orb conventions for minor bodies** (Q2) | **PRD orb convention.** Asteroid → major planet: 2°. Asteroid → asteroid: 1°. Centaur → major: 3°. TNO → major: 3°. Matches Solar Fire + Kepler modern Western standard. Same for both user types. | Q2 |
+| **Interpretation layer scope** (Q3) | **Canonical interpretive strings per body with single primary-authority citation.** Per-body archetype + source: Chiron/Reinhart 1989, Ceres/George 1986, Pallas/Bach 1973, Juno/George, Vesta/George, Eris/Tarnas, Astraea/modern, Pholus/Reinhart, Nessus/Stein, Chariklo/Reinhart, Hylonome/Stein, Sedna/Seltzer, Haumea/Holmes, Makemake/Brown, Orcus/emerging. Matches Solar Fire + Kepler. Same for both user types. | Q3 |
+| **Astrologer-profile practice-type defaults** (Q4) | **Preset practice-type profiles + per-body override.** At profile creation, astrologer selects practice type: Hellenistic purist (all E8b tiers off) / Modern Western (Tier 1+2 on; Tier 3+4 off) / Modern Western+centaurs (Tier 1+2+3 on; Tier 4 off) / Vedic-only (Western Depth tab hidden entirely) / Modern psychological (Tier 1+2 on) / Uranian (variable — may include asteroids) / Cross-tradition generalist (Tier 1 on). Preset sets initial E8b toggles; astrologer overrides individual bodies afterward. Matches Solar Fire + Astro.com + Ernst Wilhelm convention. | Q4 |
+
+### Swiss Ephemeris implementation notes
+
+- **Major asteroids (5):** `swe.calc_ut(jd_ut, swe.CERES/PALLAS/JUNO/VESTA/ASTRAEA, SEFLG_SWIEPH | SEFLG_SPEED)`
+- **Chiron:** `swe.calc_ut(jd_ut, swe.CHIRON, flag)`
+- **Eris:** `swe.calc_ut(jd_ut, swe.ERIS, flag)`
+- **Centaurs (Pholus):** `swe.calc_ut(jd_ut, swe.PHOLUS, flag)`
+- **Centaurs (Nessus, Chariklo, Hylonome) + TNOs:** `swe.calc_ut(jd_ut, 10000 + mpc_number, flag)` after registering Swiss Ephemeris asteroid files via `swe.set_jpl_file()` or `swe.set_ephe_path()` pointing to `seas_*.se1` or extended `ast*.se1`
+- **Output shape:** `structured_positions` with per-body entry: `name`, `longitude`, `latitude`, `distance_au`, `speed_deg_per_day`, `retrograde: bool`, `details.body_type ∈ {major_asteroid, centaur, dwarf_planet, tno}`
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Swiss Eph minor-body ephemeris file integration (`ast*.se1` extended files for non-built-in numbered asteroids)
+- [ ] Tiered feature-flag infrastructure (Tier 1/2/3/4 per-body enable logic)
+- [ ] Astrologer practice-type preset at profile creation (6 presets: Hellenistic/Modern Western/Modern Western+centaurs/Vedic-only/Modern psychological/Uranian/Cross-tradition)
+- [ ] Per-body override API (user toggles individual bodies post-preset)
+- [ ] Aspect engine integration at PRD orb conventions (2° asteroid-major, 1° asteroid-asteroid, 3° centaurs, 3° TNOs)
+- [ ] Interpretation string database with primary-authority citations per 15 bodies
+- [ ] Strict tradition isolation enforcement (never include E8b bodies in Vedic yoga rules / Parashari aggregations)
+- [ ] Retrograde + speed display (modern convention — all minor bodies can retrograde visually from Earth)
+- [ ] Golden chart fixtures: 5 AA-rated astrodatabank charts with known minor-body positions cross-verified
+
+---
 
 ## 3. Classical / Technical Research
 

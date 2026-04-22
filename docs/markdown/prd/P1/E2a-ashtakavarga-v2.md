@@ -11,7 +11,7 @@ classical_sources: [bphs, phaladeepika, jataka_parijata]
 estimated_effort: 2 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E2a — Ashtakavarga v2 (Trikona + Ekadhipatya Shodhana, Sodhya Pinda)
@@ -64,6 +64,75 @@ This PRD:
 - F8 (`ClassicalEngine` Protocol).
 - F16, F17 (golden suite + property test harness).
 - Existing `ashtakavarga_calculator.py` (to be refactored, not replaced).
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E2a Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E2a-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md`)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed; True default B2C; astrologer prompted | 1.1 |
+| Natchathiram count | 27 (affects contributor-from-Moon rules) | 3.7 |
+| Ashtakavargam scope (B2C) | 3-tier bhava-strength summary from post-shodhanai SAV with BPHS Ch.6 purpose mapping | 1.8 |
+| Ashtakavargam scope (Astrologer) | Full 5-tab view (Raw BAV, Trikona-Shodhit, Ekadhipatya-Shodhit, Shodhit SAV, Sodhya Pinda) + Kaksha Vibhaga panel + contributor-trace drill-down | 1.8 |
+| Divisional scope | D1 (Rasi) + D9 (Navamsam) Ashtakavargam computed; D10+ deferred | 1.8 |
+| Trikona Shodhanai variant | Phaladeepika subtract-minimum | 1.8 |
+| Kaksha Vibhaga | Promoted from "optional stage 7" to in-scope astrologer view | 1.8 |
+| Sodhya Pinda downstream | Feeds E5b Ayurdaya (Pindayu computation); astrologer-gated for ethical reasons | 1.7 (references E5b) |
+| Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |
+
+### E2a-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| Ekadhipatya Shodhanai variant | BPHS strict (Variant 1) — zero-out based on ruler-position and lower-bindu rules. Matches JH + Parashara's Light + Tamil Vakya dominant practice. Mixes traditions with Phaladeepika Trikona; acceptable since separate reduction operations. | Pass 1 Q1 |
+| Graha Pinda + Rashi Pinda source | **Chakra values** (not literal verse). Graha Pinda: Sooriyan 5, Chandran 5, Sevvai 8, Budhan 5, Guru 10, Sukkiran 7, Sani 5. Rashi Pinda per-sign: Mesham 7, Rishabam 10, Mithunam 8, Karkatam 4, Simmam 10, Kanni 6, Thulam 7, Viruchigam 8, Dhanusu 9, Magaram 5, Kumbham 11, Meenam 12. Matches JH + Parashara's Light + all modern software (chakra overrides literal verse per 500+ years working practice). | Pass 1 Q2 (post-research) |
+| Per-graha max bindu totals | Classical 48/49/39/54/56/52/39 (Sooriyan/Chandran/Sevvai/Budhan/Guru/Sukkiran/Sani). SAV classical max = 337. Used as property-test invariant (assert computed BAV totals don't exceed maxes) + percentage-of-max rendering ("Budhan 42/54 = 78%") in astrologer view. | Pass 1 Q3 |
+| Contributor-trace storage | Bindu-only storage (no bitmask or trace materialization). Drill-down recomputes contributor rules on demand (~10-50ms latency). Minimal storage (~1.3 KB/chart) — acceptable latency trade-off for rare astrologer drill-down usage. | Pass 1 Q4 |
+| Matching bar vs JH 7.x | **Exact (±0) per-cell match** across 10 golden-chart fixtures. Covers Raw BAV + Trikona-Shodhit + Ekadhipatya-Shodhit + SAV + Sodhya Pinda. Any divergence is a bug; Ashtakavargam is integer math, deterministic. | Pass 1 Q5 |
+
+### Sodhya Pinda worked computation (example)
+
+For a chart with shodhit BAV totals per graha (hypothetical):
+
+```
+Graha       Shodhit BAV total    Graha Pinda    Sodhya (per-sign weighted)
+─────────────────────────────────────────────────────────────────────────
+Sooriyan    34                   5              1360
+Chandran    36                   5              1260
+Sevvai      28                   8              1568
+Budhan      40                   5              1600
+Guru        41                   10             2870
+Sukkiran    38                   7              2128
+Sani        26                   5              1040
+─────────────────────────────────────────────────────────────────────────
+Total                                           11826     → feeds E5b Pindayu
+```
+
+### Implementation implications
+
+1. **Dual-node computation** (from DECISIONS 1.1) → BAV computed twice if node type affects Rahu/Ketu contributor tables. Store both computations with discriminator.
+2. **D9 Navamsam Ashtakavargam** → second full Ashtakavargam pipeline computed alongside D1. 2× storage, 2× compute. Cached per chart.
+3. **Kaksha Vibhaga** → additional 96-kaksha computation per graha per chart (7 grahas × 96 kakshas = 672 lookups). Tabulated; trivial compute.
+4. **Percentage-of-max rendering** → requires classical-max table hardcoded; when astrologer views per-graha BAV, render "X/max (Y%)". Invariant assertion in property tests.
+5. **Sodhya Pinda → E5b dependency** → Ashtakavargam pipeline must complete before E5b Pindayu can compute. Pipeline ordering: Panchangam → Chart positions → Ashtakavargam → E5b Ayurdaya.
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Refactor existing `ashtakavarga_calculator.py` to `ClassicalEngine` Protocol conformance (per E2a §3).
+- [ ] Add Trikona Shodhanai rule (Phaladeepika subtract-minimum) as YAML rule.
+- [ ] Add Ekadhipatya Shodhanai rule (BPHS strict zero-out logic) as YAML rule.
+- [ ] Add Sodhya Pinda computation with chakra Graha Pinda + per-sign Rashi Pinda constants.
+- [ ] Build 10 golden chart fixtures cross-verified at ±0 tolerance against JH 7.x (BAV + SAV + Sodhya Pinda).
+- [ ] Property tests: post-shodhanai bindu counts ≤ pre-shodhanai; per-graha totals ≤ classical max (48/49/39/54/56/52/39).
+- [ ] D9 Navamsam Ashtakavargam pipeline parallel to D1 (same 6 stages applied to D9 planetary positions).
+- [ ] Contributor-trace recompute API endpoint (on-demand; not stored).
+- [ ] Kaksha Vibhaga per-graha 96-kaksha table + API surface for astrologer panel.
+
+---
 
 ## 3. Classical / Technical Research
 

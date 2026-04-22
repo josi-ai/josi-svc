@@ -11,7 +11,7 @@ classical_sources: [bphs, jh, cosmic_clock, rectification_modern]
 estimated_effort: 4-5 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E17 — Chart Rectification
@@ -111,6 +111,27 @@ E17 is not just a correctness fix — it is a **user-acquisition lever**. "We ca
 - S6 — "lazy compute on demand" — once a chart is rectified and birth_time updated, downstream re-computation triggered via S6.
 - `pyswisseph` — for per-candidate chart recalculation.
 - `AstrologyCalculator` — existing natal chart primitives.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+**Cross-cutting decisions inherited** from `DECISIONS.md`: node type (Mean), ayanamsa (Lahiri default), house system (Whole-sign Parashari), Vimshottari depth (L4), language display (Tamil phonetic transliteration), two-user-type framework (B2C defaults + Astrologer options), region auto-adapt.
+
+**PRD-specific decisions:**
+
+| # | Decision | Lock |
+|---|---|---|
+| Q1 | **4-method scoring weights: Parashari-weighted** — Vimshottari 35% + Transit 30% + Varga 25% + Progressions 10%. Matches Parashari classical emphasis; Josi is Parashari-primary. | B |
+| Q2 | **Search window default: ±4 hours.** Matches traditional Tamil astrologer practice for family-recollected ("pulgalkaalam"/"maalai") birth times; covers ~80% of Indian diaspora cases. | B |
+| Q3 | **Operating modes: Modes 1+2 for B2C; all 3 for astrologers.** Event-based (Mode 1) + Personality (Mode 2) exposed to B2C; Prashna-assisted (Mode 3) gated to verified astrologers only. | B |
+| Q4 | **Confidence threshold: absolute ≥70% match score.** Below threshold → "insufficient data, please add more events." Protects B2C from false certainty. | B |
+| Q5 | **Cross-source aggregation: BPHS canonical default + Jaimini/KP as astrologer toggles.** B2C gets pure Parashari (Vimshottari + Varga + transits). Astrologer can enable Jaimini Chara dasa or KP cuspal sub-lord as additional scoring dimensions. Matches cross-cutting Pattern 1.x. | B |
+
+**Engineering action items:**
+- Implement weighted scoring pipeline per Q1 weights; expose weights as astrologer-tunable (B2C locked to default).
+- Default `search_window_hours = 4` (±4h); allow astrologer override up to ±12h.
+- Gate Mode 3 (Prashna-assisted) behind `astrologer_role_verified == True` feature flag.
+- Surface `score < 0.70` as inconclusive response with "add more events" CTA; astrologer UI shows top 3 candidates with scores (Option D fallback per Q4 variant).
+- Add `tradition_toggle` astrologer option: `bphs_only` (default) | `bphs_plus_jaimini` | `bphs_plus_kp` | `bphs_plus_both`.
 
 ## 3. Classical / Technical Research
 

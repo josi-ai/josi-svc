@@ -11,7 +11,7 @@ classical_sources: [tajaka_neelakanthi, varshatantra, phaladeepika, jataka_parij
 estimated_effort: 4-5 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E5 — Varshaphala (Tajaka) Annual Chart System
@@ -71,6 +71,73 @@ This is the unlocking EPIC for P2-UI-tajaka (the dedicated Varshaphala UI) and E
 - E1a — natal Moon nakshatra computation (used by Mudda starting lord)
 - `pyswisseph` — solar-return moment calculation via `swe.solcross_ut`
 - `AstrologyCalculator` (existing) — natal chart primitives
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E5 Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E4a inheritance applies to Tajaka yogas. E5-specific decisions documented here.
+
+### Cross-cutting + inheritance (applied automatically)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | DECISIONS 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed | DECISIONS 1.1 |
+| Natchathiram count | 27 | DECISIONS 3.7 |
+| Sunrise/sunset convention | Center of disc + refraction (for solar-return moment) | DECISIONS 2.3 |
+| Dasai hierarchy depth | 5 levels (applies to Mudda Dasha) | DECISIONS 1.4 |
+| Language display | Sanskrit-IAST canonical + Tamil phonetic | DECISIONS 1.5 |
+| 16 Tajaka yogas | Moved from E4b to E5 scope | E4b Q4 |
+| Tajaka aspect predicates | `tajaka_applying_aspect` + `tajaka_separating_aspect` in E4b's 40-predicate vocabulary, gated on E5 (this PRD) | E4b Q2 |
+| Yoga strength formula (Source D synthesis) | Applied to 16 Tajaka yogas via E4a inheritance | E4a Q2 |
+| Cross-source aggregation convention | Default + 1 variant per technique with astrologer toggle | E1b Q7 / E3 Q6 |
+
+### E5-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Annual chart location** (Q1) | **Birthplace default, no toggle.** Solar-return annual chart always cast at native's birthplace coordinates regardless of current residence. Matches Tajaka Neelakanthi classical convention + BPHS Ch.5 + JH + PL + K.N. Rao + Raman + Astrosage + Tamil Vakya. Same for both user types. | Q1 |
+| **Varsheswara selection method** (Q2) | **Tajaka Neelakanthi Ch.2 strict 5-candidate contest.** Candidates: (1) Muntha-rasi lord, (2) annual-Lagna lord, (3) natal-Lagna lord, (4) Sooriyan, (5) Muni (trirasipa lord). Scoring per classical table (Uccha/Own-sign/Mooltrikona/Kendra-Trikona/Aspects). Tie-break hierarchy: Sooriyan > natal-lagna-lord > annual-lagna-lord > Muntha-lord. Matches JH + PL + Astrosage. | Q2 |
+| **Deeptamsha (Tajaka aspect orb) table** (Q3) | **Tajaka Neelakanthi Ch.3 standard.** Sooriyan 15°, Chandran 12°, Sevvai 8°, Budhan 7°, Guru 9°, Sukkiran 7°, Sani 9°. Rahu/Ketu 7° convention. Applies to both applying and separating Tajaka aspects. Matches JH + PL + Astrosage. | Q3 |
+| **30 Sahams MVP selection** (Q4) | **PRD-proposed 30 Sahams.** Full list: Punya, Vidya, Yasas, Mitra, Mahatmya, Guru, Karma, Aishwarya, Vivaha, Putra, Jeeva, Marana, Shatru, Jaya, Karya, Roga, Vrana, Bandhu, Mrityu, Paradesh, Artha, Paradara, Karmagaha, Vanik, Vanija, Gaja, Ashwa, Bhratru, Punar, Satya. Balanced across 9 themes (virtue / education / career / wealth / family / health-death / conflict / transport / misc). Remaining 20+ Sahams deferred. | Q4 |
+| **Mudda Dasha variant** (Q5) | **Yoga-Vimshottari-Mudda default + Patayini-Mudda astrologer-profile toggle.** Matches JH convention + E1b Q7 pattern. B2C always sees Yoga-Vimshottari-Mudda; astrologer can switch to Patayini. Drig-Mudda and Trikona-Mudda deferred (future enhancement PRD). | Q5 |
+| **Tripathaka Chakra scope** (Q6) | **Skip for MVP.** Defer hourly Tajaka sub-chart to E5-enhancement PRD. Matches PL + Astrosage + Tamil Vakya (none ship hourly Tripathaka). Classical usage frequency ~5% even among Tajaka specialists; tight MVP scope. | Q6 |
+| **Cross-source aggregation for E5** (Q7) | **Tajaka Neelakanthi canonical default + Varshatantra commentary variant per technique, astrologer-profile toggle.** Matches E1b Q7 + E3 Q6 convention + JH + Sanjay Rath SJVC. Applies to: Varsheswara tie-break extended rules, Saham formula variants (~5-7 Sahams with TN vs Varshatantra differences), Tajaka yoga commentary nuances (~2-3 of 16 yogas have sibling rules). | Q7 |
+
+### E5 engine output shape
+
+```python
+annual_chart_summary = {
+    "year": int,                         # Solar-return year (e.g., 2026)
+    "solar_return_moment_utc": datetime, # Exact moment Sun reached natal longitude
+    "muntha_sign": str,                  # Muntha rasi (e.g., "Dhanusu")
+    "muntha_house": int,                 # House of Muntha from annual Lagna (1-12)
+    "year_lord": str,                    # Varsheswara (e.g., "Sooriyan")
+    "year_lord_strength": float,         # 0.0-1.0 strength score from 5-candidate contest
+    "active_sahams": list[SahamResult],  # 30 Sahams with positions + active flags
+    "active_yogas": list[TajakaYoga],    # 16 Tajaka yogas with activation + strength
+    "mudda_periods": list[TemporalRange],# Mudda Dasha MD/AD/PD periods for this year
+    "chart_context": "varshaphala",      # Discriminator for yoga engine gating
+    "ayanamsa_used": "lahiri",
+    "computed_at": datetime
+}
+```
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Solar-return moment solver (iterative root-finding on Sun longitude == natal_sun_longitude)
+- [ ] Birthplace-coordinates defaulting (no toggle for MVP)
+- [ ] Muntha computation (natal Lagna + elapsed years = Muntha rasi)
+- [ ] Varsheswara 5-candidate contest scorer with tie-break hierarchy
+- [ ] Deeptamsha orb table hardcoded + applying/separating aspect detector (predicate implementation from E4b Q2)
+- [ ] 30 Saham formula table + position computation per Tajaka Neelakanthi
+- [ ] 16 Tajaka yoga YAML rules (moved from E4b to E5 scope per E4b Q4)
+- [ ] Mudda Dasha engine (Yoga-Vimshottari-Mudda) + Patayini-Mudda sibling rule for astrologer toggle
+- [ ] `annual_chart_summary` output shape conforming to F7 JSON Schema
+- [ ] Varshatantra variant YAMLs per technique for astrologer toggle
+- [ ] Golden chart fixtures: 5 natal charts × 2 years each (10 chart-years) verified against JH 7.x Varshaphala output
+- [ ] REST endpoint `GET /api/v1/varshaphala/{chart_id}?year={YYYY}` returning `TechniqueResult[AnnualChartSummary]`
+
+---
 
 ## 3. Classical Research
 

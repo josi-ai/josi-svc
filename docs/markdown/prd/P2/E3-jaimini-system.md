@@ -11,7 +11,7 @@ classical_sources: [jaimini_sutras, bphs, saravali, jataka_parijata]
 estimated_effort: 5-6 weeks
 status: draft
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E3 — Jaimini System (Chara Karakas, Arudhas, Rashi Drishti, Jaimini Yogas)
@@ -115,6 +115,44 @@ Each yoga ships as a F6 DSL rule with explicit citation.
 - F17 (property tests)
 - E1b (Chara/Narayana dasa outputs consumed by dasa-phalita yoga rules)
 - Existing `AstrologyChart` schema: sidereal planet longitudes (already computed), Navamsha (D9) chart (already computed), house lords, planetary placements per sign.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E3 Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E3-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md` + E1b)
+
+| Decision | Value | Ref |
+|---|---|---|
+| 8-karaka Atmakaraka | Rahu included with `30°−long` rule | E1b Q1 / §2.4 |
+| Ayanamsa default | Lahiri | 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed | 1.1 |
+| Natchathiram count | 27 | 3.7 |
+| Language display | Sanskrit-IAST + Tamil phonetic | 1.5 |
+| Cross-source aggregation convention | Default + 1 variant per technique with astrologer toggle | E1b Q7 |
+
+### E3-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Chara Karaka tie-breaking** (Q1) | **Lexicographic planet-id fallback** (Sooriyan > Chandran > Sevvai > Budhan > Guru > Sukkiran > Sani > Rahu) + WARN log on sub-arcsecond tie. Matches JH + Astrosage. Same for both user types. | Q1 |
+| **Arudha Pada exception rules source** (Q2) | **Jaimini Upadesha Sutras 1.2.39-45 canonical.** 2 exception rules only: (a) if Arudha = H itself → project to 10th from L; (b) if Arudha = 7th from H → project to 10th from L. Matches JH + PL + K.N. Rao + Astrosage + Rao. | Q2 |
+| **Rashi Drishti matrix + node treatment** (Q3) | **Standard 12×12 matrix per JUS 1.1.8-12, node-agnostic.** Chara aspects 3 fixed (except adjacent); Sthira aspects 3 movable (except adjacent); Dwiswabhava aspects 3 other dual. Purely boolean (no graded strength). Rahu/Ketu occupy signs like any graha; no node-specific drishti modification. Exposed as astrologer-facing matrix view + internal `rashi_drishti_between(from, to)` predicate for yoga rules. | Q3 |
+| **Jaimini yogas MVP list** (Q4) | **15 yogas balanced across 8 categories**, each cited to Jaimini Upadesha Sutras verse: (1) Chara Karaka Raja Yoga (JUS 1.2.11), (2) Karakamsa Yoga (JUS 1.3.1-3), (3) Swamsha Yoga (JUS 1.3.4-5), (4) Raja Sambandha Yoga (JUS 1.2.14), (5) Upapada Rahasya Yoga (JUS 2.1.10-15), (6) AL-Kendra Benefic Yoga (JUS 1.2.20-22), (7) AL-Upachaya Yoga (JUS 1.2.30), (8) Hara Yoga (commentary), (9) Karakamsa 5th Benefic Yoga (JUS 1.3.7), (10) Putra Karaka Yoga (JUS 1.2.19), (11) Argala to AL Yoga (JUS 1.2.35-38), (12) Virodha Argala Yoga (JUS 1.2.40), (13) AL-Drishti Rasi Raja Yoga (commentary), (14) Chara Karaka Dhana Yoga (commentary), (15) Mahapurusha Karaka Yoga (JUS 1.2.17). | Q4 |
+| **Argala / Virodha Argala scope** (Q5) | **Generalized Argala from any reference bhava** (not AL-only as PRD original). Argala + Virodha Argala computable from Lagna, AL, any karaka position, any bhava. Astrologer UI has reference-point picker. Same for both user types. Matches GAP_CLOSURE lock + JH + Sanjay Rath SJVC. Classical Argala positions per JUS 1.2.35-38: Primary at 2/4/5/8/11, Subha at 3/12, Virodha Argala at counter positions. | Q5 |
+| **Cross-source aggregation** (Q6) | **JUS canonical default + Rangacharya Kalpalatha variant per technique as astrologer-profile toggle.** Matches E1b Q7 convention. Per-technique application: Arudha (JUS default + Rangacharya extended exceptions toggle), Rashi Drishti (JUS deterministic — no variant), Argala (JUS generalized default + Rangacharya nuances toggle), Jaimini yogas (sibling rules where JUS + Rangacharya disagree; 2-option astrologer toggle). | Q6 |
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] 8-karaka AK ranking with lexicographic tie-break + WARN log (inherited from E1b)
+- [ ] Arudha computation per JUS 1.2.39-45 with 2-exception rule
+- [ ] Rashi Drishti 12×12 matrix as static lookup + `rashi_drishti_between(from, to)` predicate
+- [ ] 15 Jaimini yoga rules as YAML under `src/josi/db/rules/jaimini_yoga/`
+- [ ] Generalized Argala engine with reference-point parameter
+- [ ] Rangacharya variant rules as sibling YAMLs per technique; astrologer profile toggle via F2
+- [ ] Golden chart fixtures with known Jaimini yoga activations (from K.N. Rao / Rath published charts)
+
+---
 
 ## 3. Classical / Technical Research
 

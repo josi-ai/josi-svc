@@ -11,7 +11,7 @@ classical_sources: [prasna_marga, kp_reader, hora_deepika, jataka_parijata]
 estimated_effort: 4-5 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E10 — Prasna / Horary — Vedic (Kerala) + KP Unified
@@ -98,6 +98,98 @@ The output is a `horary_analysis` shape (proposed new F7 shape; fallback to `str
 - E7 — Sarvatobhadra Chakra (used for auxiliary omen-grid analysis); Upagrahas (for advanced Kerala Prasna)
 - E9 — KP engine (delegated for KP horary)
 - Existing `AstrologyCalculator` — Ascendant at arbitrary moment
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E10 Pass 1 astrologer review are resolved. E10 orchestrates E5 (Tajaka) + E7 (SBC) + E9 (KP) + E1a (Vimshottari) + E4a (yogas). E10-specific decisions documented here.
+
+### Cross-cutting + orchestration inheritance
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa | Lahiri for Kerala branch; Krishnamurti for KP branch | DECISIONS 1.2 + E9 Q1 |
+| Natchathiram count | 27 | DECISIONS 3.7 |
+| Horai computation | Chaldean + variable-length | DECISIONS 3.11 |
+| Sunrise/sunset | Center of disc + refraction | DECISIONS 2.3 |
+| 5-level significators | KP Reader Vol.2 Ch.4 canonical | E9 Q2 |
+| 5-element Ruling Planets | Day + Asc sign/natchathiram + Moon sign/natchathiram lords | E9 Q3 |
+| 249-number horary | KP Reader Vol.3 canonical | E9 inheritance |
+| Sarvathobhadra Chakra | BPHS Ch.86 9×9 grid | E7 Q2 |
+| Tajaka aspects + Sahams | Tajaka Neelakanthi + 30 Sahams | E5 inheritance |
+| Practice-type preset | Determines KP vs Kerala vs Both visibility | E9 Q5 |
+| Arudha computation | JUS 1.2.39-45 canonical (E3 Q2 inheritance) | E3 Q2 |
+| Language display | Sanskrit-IAST + Tamil phonetic | DECISIONS 1.5 |
+
+### E10-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Method routing** (Q1) | **Always run BOTH Kerala Prasna + KP Horary methods** for every query. Classical rigor; dual results with per-method reasoning trace. Matches JH Prasna module + PRD intent ("Ultra AI mode surfaces both"). Same for both user types. | Q1 |
+| **Arudha of Prasna Lagna formula** (Q2) | **Same JUS 1.2.39-45 rule as natal Arudha (E3 Q2 inheritance).** 2 exception rules: (a) Arudha = Prasna Lagna itself → project to 10th from L, (b) Arudha = 7th from Prasna Lagna → project to 10th from L. Consistent with natal Arudha computation; Prasna Marga (17th c Kerala) follows JUS foundation. Matches JH + PL + Kerala tools + Sanjay Rath. | Q2 |
+| **Omen rule scope** (Q3) | **Tiered:** 15 core always-available (temple bell, crow, cow, dog, sudden wind/rain, sweet/harsh sounds, directional signs, etc.) + 65 extended astrologer-toggle for comprehensive Nimitta Shastra coverage. Total 80 omens per Prasna Marga full canon. Progressive disclosure matches tiered decisions convention (E8b Q1, E7 scope). | Q3 |
+| **Navamsa yes/no rule** (Q4) | **Prasna Marga Ch.8 canonical.** Lord of query-house in Navamsa dignity evaluation → yes / no / maybe verdict (own sign/exaltation/friend/benefic aspect = yes; enemy/debilitation/malefic = no; neutral = maybe). Strict single-source. Matches JH + PL + Kerala tools + Rath. | Q4 |
+| **AI synthesis strictness (dual-method presentation)** (Q5) | **Dual display for astrologer + narrative synthesis for B2C.** Split by user type. **Astrologer workbench:** raw dual-method results with per-method reasoning trace (classical rigor). **B2C AI chat:** unified narrative synthesis weaving both Kerala + KP methods with agreement flag (AGREE / PARTIAL / DIVERGE). Matches Josi's two-user-type pattern. | Q5 |
+| **Cross-source aggregation** (Q6) | **Strict single-source per branch.** Kerala Prasna = Prasna Marga canonical (17th c Kerala). KP = KP Reader Vols 1-6 (inherited from E9 Q6). No commentary variant toggles for MVP. Matches E9 Q6 single-source approach. Same for both user types. | Q6 |
+
+### E10 engine output shape
+
+```python
+horary_analysis = {
+    "query_id": str,
+    "question_text": str,
+    "moment_utc": datetime,
+    "location": {lat: float, lon: float},
+    "intent_category": str,  # marriage/career/lost_article/health/etc.
+    "query_house": int,      # Mapped per E9 query map
+    "kerala_prasna": {
+        "prasna_lagna": rasi,
+        "arudha_of_prasna_lagna": rasi,  # JUS rule
+        "vimshottari_at_moment": {md: graha, ad: graha, pd: graha},
+        "navamsa_yes_no": Literal["yes", "no", "maybe"],
+        "planetary_hour_lord": graha,
+        "omens_active": list[OmenResult],  # From user-reported + 15 core + astrologer-enabled extended
+        "verdict": str,
+        "confidence": float,
+        "reasoning_trace": str
+    },
+    "kp_horary": {
+        "horary_chart": ... ,  # From E9 (Krishnamurti ayanamsa + Placidus)
+        "cuspal_sub_lord_analysis": {house: str},
+        "ruling_planets": ... ,  # From E9
+        "verdict": str,
+        "confidence": float,
+        "reasoning_trace": str
+    },
+    "synthesis": {
+        "agreement_level": Literal["AGREE", "PARTIAL", "DIVERGE"],
+        "astrologer_view": "dual_raw",  # Q5 astrologer UX
+        "b2c_narrative": str,           # Q5 B2C AI-generated synthesis
+        "combined_verdict": str,
+        "combined_confidence": float
+    },
+    "source_attribution": {
+        "kerala_source": "prasna_marga",
+        "kp_source": "kp_reader_vols_1_6"
+    }
+}
+```
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] Prasna Lagna computation at query moment (both Lahiri + Krishnamurti depending on branch)
+- [ ] Arudha of Prasna Lagna using JUS 1.2.39-45 rule (reuse E3 logic)
+- [ ] Navamsa yes/no computation per Prasna Marga Ch.8
+- [ ] Planetary hour (Horai) lookup per DECISIONS 3.11
+- [ ] Omen rule engine: 15 core + 65 extended with astrologer-profile enable toggle
+- [ ] KP horary delegation to E9 engine
+- [ ] Kerala Prasna + KP both-methods orchestrator
+- [ ] Synthesis engine: agreement flag computation (AGREE/PARTIAL/DIVERGE) + B2C narrative AI
+- [ ] Intent categorization AI layer (maps question text → house number)
+- [ ] `horary_analysis` output shape per F7 (propose as new shape)
+- [ ] REST endpoint: `POST /api/v1/prasna` with `PrasnaQuery` body
+- [ ] Golden-test-fixture horary cases: 10 classical Prasna Marga examples + 10 KP Reader Vol.5/6 example horaries, cross-verified
+
+---
 
 ## 3. Classical Research
 

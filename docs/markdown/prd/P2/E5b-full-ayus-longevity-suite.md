@@ -11,7 +11,7 @@ classical_sources: [bphs, jaimini_sutras, phaladeepika, saravali, jataka_parijat
 estimated_effort: 3-4 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E5b — Full Ayus (Longevity) Suite
@@ -119,6 +119,71 @@ All four methods produce a numeric longevity estimate; results are presented **t
 - E4a — yoga engine infrastructure (haranas follow same predicate-rule pattern).
 - `pyswisseph` — existing ephemeris access.
 - `AstrologyCalculator` — natal primitives + Navamsa (D9) positions.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E5b Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E2a Sodhya Pinda feeds Pindayu. E5b-specific decisions documented here.
+
+### Cross-cutting + inheritance
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa | Lahiri | DECISIONS 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed | DECISIONS 1.1 |
+| Natchathiram count | 27 | DECISIONS 3.7 |
+| Language display | Sanskrit-IAST + Tamil phonetic | DECISIONS 1.5 |
+| Sodhya Pinda | Chakra Graha Pinda + per-sign Rashi Pinda (feeds Pindayu) | E2a Q2 |
+| Trikona Shodhanai | Phaladeepika subtract-minimum | DECISIONS 1.8 |
+| Ekadhipatya Shodhanai | BPHS strict | E2a Q1 |
+| 8-karaka Atmakaraka | Rahu with `30°−long` rule | E1b Q1 |
+
+### E5b-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Pindayu 5 harana factors** (Q1) | **BPHS Ch.72 5-harana standard** — Chakra, Kroorasthana, Astangata, Shatrukshetra, Sheersha-odaya. Matches JH + PL + Raman + Astrosage + K.N. Rao. Same for both user types. | Q1 |
+| **Amshayu harana application** (Q2) | **Same 5 haranas as Pindayu** (BPHS Ch.73 v.2 "as in Pindayu"). Consistent with Q1. Matches JH + PL + Raman + Astrosage + K.N. Rao. | Q2 |
+| **Jaimini Ayur-dasha thresholds** (Q3) | **BPHS/Jaimini Sutras standard** — Alpa 0-32 yr, Madhya 33-70 yr, Deergha 71-100 yr. Matches JH + PL + K.N. Rao + Tamil Vakya. | Q3 |
+| **Ayur-nirnaya integration** (Q4) | **All 4 methods side-by-side + consensus-agreement flag** (HIGH/MEDIUM/LOW based on spread/category alignment). Classical rigor per BPHS Ch.72 v.1. Astrologer-workbench display: Pindayu + Amshayu + Nisargayu numerical + Jaimini category, plus overall consensus view. Matches JH + K.N. Rao astrologer expectation. | Q4 |
+| **Ethical gating strictness (B2C)** (Q5) | **Hard refusal scripted response** for B2C AI chat. No numeric/categorical ayus surfaced to end-user. Scripted text: "This is a question I'm not set up to answer directly — classical astrology has strong ethical traditions against stating specific lifespan to the native, and I follow that tradition. If longevity context is important for a life-planning decision you're facing, I can connect you with a professional astrologer from our network." Routes to marketplace consultation. Matches classical Phaladeepika Ch.7 v.2 + Raman + Drik/mypanchang + B.V. Raman's ethical stance. | Q5 |
+| **Uncertainty band display (astrologer workbench)** (Q6) | **Raw numerical values only, no uncertainty band imposed.** Astrologer interprets precision themselves per their expertise. Matches JH + PL + Astrosage. Same on workbench for all astrologers. | Q6 |
+| **Cross-source aggregation for E5b** (Q7) | **Canonical default + 1 commentary variant per method, astrologer-profile toggle.** Pindayu: BPHS 5-harana (default) + Phaladeepika 3-harana (toggle). Amshayu: BPHS 5-harana (default) + Phaladeepika 2-harana (toggle). Nisargayu: BPHS standard (default) + Varaha Mihira Brihat Jataka (toggle). Jaimini Ayur-dasha: JUS+BPHS canonical (default) + Rangacharya Kalpalatha (toggle). Matches E1b Q7 / E3 Q6 / E5 Q7 uniform convention across Jaimini/Tajaka/Longevity tradition layers. | Q7 |
+
+### E5b engine output shape
+
+```python
+longevity_summary = {
+    "chart_id": str,
+    "pindayu_years": float,                # BPHS Ch.72 result after 5 haranas
+    "amshayu_years": float,                # BPHS Ch.73 result (Navamsa-based + 5 haranas)
+    "nisargayu_years": float,              # BPHS Ch.74 result (fixed per-planet + haranas)
+    "jaimini_category": Literal["Alpa", "Madhya", "Deergha"],
+    "jaimini_range_years": tuple[int, int], # (0,32) | (33,70) | (71,100)
+    "ayur_nirnaya_consensus": {
+        "agreement_level": Literal["HIGH", "MEDIUM", "LOW"],
+        "numerical_spread_years": float,    # Max - min of Pindayu/Amshayu/Nisargayu
+        "jaimini_alignment": Literal["AGREE", "PARTIAL", "DIVERGE"],
+    },
+    "visibility": "astrologer_workbench_only", # Hard-gated from B2C AI chat
+    "b2c_response_script": str,                # Scripted refusal for B2C queries
+    "computed_at": datetime
+}
+```
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] PindayuEngine: BPHS Ch.72 5-harana computation (consumes E2a Sodhya Pinda output)
+- [ ] AmshayuEngine: Navamsa D9 positions + same 5 haranas
+- [ ] NisargayuEngine: fixed per-planet table (Sooriyan 19, Chandran 25, Sevvai 15, Budhan 12, Guru 15, Sukkiran 21, Sani 20) + 5 haranas
+- [ ] JaiminiAyurDashaEngine: lord-of-8th placement + Chara Karaka analysis + AL strength → Alpa/Madhya/Deergha classification
+- [ ] Consensus-agreement flag computation (HIGH when all 4 within ±10 yr + category-aligned; MEDIUM/LOW otherwise)
+- [ ] B2C AI chat hard-refusal scripted response + marketplace-routing hook
+- [ ] Astrologer-workbench-only access gate via user-role check in API layer
+- [ ] Phaladeepika/Varaha Mihira/Rangacharya commentary variant YAMLs per method; astrologer profile toggle via F2
+- [ ] Golden chart fixtures (astrologer-only): 10 charts with hand-verified ayus per all 4 methods from K.N. Rao/Raman published charts
+- [ ] Pindayu REST endpoint: `GET /api/v1/longevity/{chart_id}` with role-check (astrologer only); 403 for B2C
+
+---
 
 ## 3. Classical Research
 

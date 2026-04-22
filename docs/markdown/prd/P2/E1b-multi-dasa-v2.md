@@ -11,7 +11,7 @@ classical_sources: [bphs, jaimini_sutras, jataka_parijata, saravali]
 estimated_effort: 4-5 weeks
 status: draft
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E1b — Multi-Dasa Engine v2 (Chara + Narayana + Kalachakra)
@@ -61,6 +61,44 @@ All three systems emit the same `temporal_hierarchy` output shape defined in F7 
 - F16 (golden chart suite scaffolding).
 - F17 (property-based test harness).
 - Existing chart data: Atmakaraka (ranking by sidereal longitude of the 7 graha excluding Ketu by the Parashari school; Rahu optional per Jaimini variant), Lagna sign, Karakamsa sign (Atmakaraka's Navamsha sign), Moon nakshatra and pada.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E1b Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E1b-specific decisions documented here.
+
+### Cross-cutting decisions (applied via `DECISIONS.md`)
+
+| Decision | Value | Ref |
+|---|---|---|
+| Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed (affects AK candidacy for Rahu, Rahu-MD periods) | 1.1 |
+| Natchathiram count | 27 (affects Kalachakra pada→paryaya selection) | 3.7 |
+| Dasai hierarchy depth | 5 levels (MD→AD→PD→Sookshma→Prana) for both user types | 1.4 |
+| Dasai matching bar vs JH | ±1 day (inherited from E1a Q9) | E1a §2.4 |
+| Language display | Sanskrit-IAST + Tamil phonetic | 1.5 |
+
+### E1b-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Atmakaraka determination** (Q1) | **8-karaka (include Rahu)** — Rahu's AK candidacy = `30° − longitude_within_sign`. Traditional Jaimini per Upadesha Sutras + Rangacharya + Rath + Rao + JH/PL. Same for both user types. | Q1 |
+| **Chara Dasai direction rule** (Q2) | **BPHS Ch.50 parity rule** — odd starting rasi → forward direction; even starting rasi → backward direction. Matches JH + PL + Astrosage + Tamil Vakya default. | Q2 |
+| **Chara Dasai period-length formula** (Q3) | **BPHS Ch.50 count-to-lord**, traditional rulers only (Sevvai for Viruchigam, Sani for Kumbham — NOT Ketu/Rahu co-rulership). Period = count−1 years (forward/backward per Q2 direction); 12 years if lord in rasi itself. Total cycle ~144 years. | Q3 |
+| **Narayana Dasai starting rule** (Q4) | **Karakamsa rasi (Variant B) default + astrologer toggle to 7th-from-Lagna (Variant A)**. Matches JH convention. Classical foundation: Jaimini Upadesha Sutras + Rangacharya + Rath + Rao. | Q4 |
+| **Kalachakra paryaya selection** (Q5) | **BPHS Ch.53 standard paryaya table** — canonical 108-pada × 4-paryaya mapping (Savya-1 / Savya-2 / Apasavya-1 / Apasavya-2). Savya year table: Mesham=7, Rishabam=16, Mithunam=9, Kadagam=21, Simmam=5, Kanni=9, Thulam=16, Viruchigam=7, Dhanusu=10. Apasavya per BPHS Ch.53 corresponding table. | Q5 |
+| **Kalachakra rasi-year table** (Q6 covered by Q5) | BPHS Ch.53 canonical. Both Savya and Apasavya tables from same source. | covered via Q5 |
+| **Cross-source aggregation** (Q7) | **Option C — BPHS canonical default + 1 Rangacharya commentary variant per Jaimini dasai, 2-option astrologer-profile toggle.** Chara: BPHS parity rule (default) + Rangacharya lord-placement variant (toggle). Narayana: Karakamsa (default, locked Q4) + 7th-from-Lagna (toggle). Kalachakra: BPHS Ch.53 standard only (no variant; Mandook/Gatika deferred as research curiosities). No full F8 aggregation for MVP. Matches JH convention + PRD §2.2 intention. | Q7 |
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] CharaDasaEngine: implement BPHS Ch.50 parity direction + count-to-lord period; Rangacharya variant as sibling rule via F6 YAML DSL
+- [ ] NarayanaDasaEngine: Karakamsa-based starting (AK's Navamsa position); 7th-from-Lagna as sibling rule
+- [ ] KalachakraDasaEngine: BPHS Ch.53 pada→paryaya lookup table + Savya/Apasavya year tables; handle natchathiram-pada edge cases per boundary-inclusive lower convention (DECISIONS 3.7)
+- [ ] 8-karaka AK computation with Rahu's `30° − longitude` rule; expose 7-karaka mode as optional astrologer toggle
+- [ ] Golden chart suite: 5 charts × 3 dasai systems × 3 levels at ±1 day bar vs JH 7.x
+- [ ] Property tests: sum invariants, no gaps, no overlaps, direction consistency, paryaya selection determinism
+
+---
 
 ## 3. Classical / Technical Research
 

@@ -11,7 +11,7 @@ classical_sources: [bphs, saravali, phaladeepika, jataka_parijata, jaimini_sutra
 estimated_effort: 8 weeks
 status: draft
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-19
+last_updated: 2026-04-21
 ---
 
 # E4b — Classical Yoga Engine, Full 250-Yoga Catalog
@@ -58,6 +58,45 @@ Three observations drive this PRD:
 - **F6** rule DSL + loader; extended here. **F16** golden chart suite; +190 fixtures. **F17** property-test harness.
 - **E5 (Varshaphala)** — *soft* dep for Tajaka; YAMLs ship here, become evaluable when E5 provides Varshaphala chart state. Feature-flagged.
 - Classical-advisor network (Sanskritist + working astrologer) — operational.
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-21)
+
+All open questions from E4b Pass 1 astrologer review are resolved. Cross-cutting decisions reference `DECISIONS.md`; E4a inheritance applies. E4b-specific decisions documented here.
+
+### Cross-cutting + E4a inheritance (applied automatically)
+
+| Decision | Value | Ref |
+|---|---|---|
+| All E4a decisions (Neecha Bhanga, strength, cross-source, threshold, Graha Drishti, predicate vocab, fixtures, Yoga Karaka) | See E4a §2.4 | E4a full suite |
+| Ayanamsa | Lahiri B2C + 9-shortlist astrologer | DECISIONS 1.2 |
+| Rahu/Ketu node type | Both Mean + True computed | DECISIONS 1.1 |
+| House system | Whole Sign B2C + Bhava Chalit/Sripati parallel | DECISIONS 1.3 |
+| Natchathiram count | 27 | DECISIONS 3.7 |
+| Language display | Sanskrit-IAST + Tamil phonetic | DECISIONS 1.5 |
+| Kaal Sarpa 12 variants | Per GAP_CLOSURE | GAP_CLOSURE §1.F |
+
+### E4b-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **190 → 174 yoga category breakdown** (Q1 + Q4 combined) | **174 yogas** across 10 categories (Tajaka moved to E5). Distribution: Raja 30, Dhana 20, Chandra 10, Surya 5, Dushta 20, Nabhasa 32, Parivartana 15, Kaal Sarpa 12 (GAP_CLOSURE), Dignity/Strength 20, Misc 10. Phase P2 end total: 60 (E4a) + 174 (E4b) + 16 (E5 Tajaka) = 250. | Q1 + Q4 |
+| **10 new DSL predicates beyond E4a's 30** (Q2) | Total vocabulary: **40 predicates**. Additions: planets_in_N_signs, planets_all_in_kendra, planets_all_in_trikona, parivartana, all_planets_between_rahu_ketu, rahu_ketu_axis_direction, planet_in_vargottama, planet_debility_cancelled, tajaka_applying_aspect (gated on E5), tajaka_separating_aspect (gated on E5). Same for both user types. | Q2 |
+| **Kaal Sarpa implementation** (Q3) | **Strict "all 7 grahas between Rahu-Ketu"** + hemisphere-majority rule for direction + emit named variant (Anant/Kulik/Vasuki/Shankapal/Padma/Mahapadma/Takshak/Karkotak/Shankhachur/Ghatak/Vishdhar/Sheshnag) with classical severity label. Matches JH + K.N. Rao + Astrosage. Same for both user types. | Q3 |
+| **Tajaka yoga scope** (Q4) | **Moved 16 Tajaka yogas from E4b to E5 scope** — clean boundary. E4b = natal yogas only (174); E5 = Varshaphala + Tajaka yogas. Matches JH/PL/SJVC organizational separation. | Q4 |
+| **Ship-wave release strategy** (Q5) | **4 waves of ~43-44 yogas each** (PRD pattern). Wave 1: Raja + Dhana (50). Wave 2: Chandra + Surya + Dushta (35). Wave 3: Nabhasa (32). Wave 4: Parivartana + Kaal Sarpa + Dignity + Misc (57). Each wave passes 3-tier golden fixtures before promotion. | Q5 |
+| **Authoring workflow for 154 non-spec'd yogas** (Q6) | **Incremental authoring during 4 waves** (PRD pattern). 20 reference-implementation yogas authored in E4b implementation phase; 154 incremental during wave 1-4. 5 quality gates per yoga: full YAML + classical citation (BPHS/Saravali/Phaladeepika) + Tamil phonetic + Sanskrit-IAST names + 3-tier test fixture + astrologer review sign-off. In-house authoring. | Q6 |
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] 10 new DSL predicates added to `src/josi/services/classical/yoga/predicates.py`
+- [ ] 20 reference-implementation YAML rules authored in E4b implementation phase
+- [ ] Wave-based release infrastructure (feature-flag per wave, 3-tier fixture gate per wave)
+- [ ] 154 remaining YAMLs incremental during wave 1-4 per authoring workflow
+- [ ] Kaal Sarpa strict detection + 12-variant classification logic
+- [ ] Golden-chart validation cycle per wave at ±0 exact match (inherited from E2a Q5 convention; yoga activation is discrete boolean)
+- [ ] Cross-source sibling rules where BPHS/Saravali/Phaladeepika disagree (per E4a Q3 per-yoga curation)
+
+---
 
 ## 3. Classical Research — The 250-Yoga Catalog
 

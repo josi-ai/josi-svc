@@ -11,7 +11,7 @@ classical_sources: [dorotheus, valens, ptolemy, paulus_alexandrinus, addey, witt
 estimated_effort: 4-5 weeks
 status: draft
 author: "@agent"
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 ---
 
 # E8 — Western Depth: Arabic Parts, Fixed Stars, Harmonics, Eclipses, Uranian Points
@@ -96,6 +96,59 @@ This PRD delivers all five as first-class engines, each conforming to the classi
 - `pyswisseph` — `swe.fixstar` for fixed-star ephemeris; `swe.sol_eclipse_when_glob`, `swe.lun_eclipse_when_glob` for eclipse dates
 - NASA Five Millennium Canon of Solar/Lunar Eclipses — static data file (public domain, Goddard)
 - Witte Transneptunian table — static data (published in Witte & Lefeldt)
+
+## 2.4 Design Decisions (Pass 1 Astrologer Review — Locked 2026-04-22)
+
+All open questions from E8 Pass 1 astrologer review are resolved. E8 is NON-PARASHARI (Western tradition isolated). Cross-cutting Vedic locks mostly don't apply; Western has own conventions documented here.
+
+### Cross-cutting decisions that DO apply
+
+| Decision | Value | Ref |
+|---|---|---|
+| Rahu/Ketu (Lunar Nodes) node type | Both Mean + True computed (Western uses same nodes) | DECISIONS 1.1 |
+| Language display | Sanskrit-IAST + Tamil phonetic for UI framing; Western uses native Latin/Greek names for Lots + stars | DECISIONS 1.5 |
+| Fagan-Bradley ayanamsa | Available in astrologer 9-shortlist for Western sidereal users | DECISIONS 1.2 |
+
+### Cross-cutting decisions that DON'T apply to E8 (per tradition isolation)
+
+- Lahiri ayanamsa (Western uses tropical by default; Fagan-Bradley only for sidereal Western)
+- Whole Sign house system (Western uses Placidus primary)
+- Natchathiram count 27 (Western doesn't use natchathiram concept)
+- Parashari graha drishti (Western uses own aspect system with orbs)
+- Trikona/Ekadhipatya Shodhanai (Ashtakavargam-specific)
+
+### E8-specific decisions (locked this review)
+
+| Decision | Value | Source |
+|---|---|---|
+| **Zodiac default** (Q1) | **Per-technique hybrid.** Arabic Parts / Harmonics / Uranian use **tropical** (Hellenistic + modern Western mainstream). **Fixed Stars inherently sidereal** (stars don't shift with equinox precession). **Eclipses** are astronomical events (same dates either zodiac; longitudes differ). Most classically accurate per technique. Matches Ernst Wilhelm / Solar Fire power-user convention. | Q1 |
+| **House system default** (Q2) | **Placidus default** for Western charts + astrologer-profile toggle exposing Whole Sign / Porphyry / Koch / Equal. Matches Solar Fire + Kepler + Astro.com modern Western mainstream + classical flexibility for Hellenistic revival astrologers. | Q2 |
+| **Arabic Parts classical source** (Q3) | **Modern synthesis (Chris Brennan / Project Hindsight)** for all 50 Lots. Cross-references Dorotheus / Valens / Paulus / Al-Biruni for best-attested formula per Lot. Sect-aware formulas (day-born vs night-born). Matches Solar Fire + Kepler + Hellenistic revival mainstream. Same for both user types. | Q3 |
+| **Fixed Stars list** (Q4) | **Modern synthesis curated 60** — Brady + Robson + Ptolemy classical synthesis. Includes 4 Royal Stars (Regulus, Spica, Antares, Aldebaran) + 10 classical core (Algol, Sirius, Vega, Altair, Deneb, Fomalhaut, Betelgeuse, Rigel, Capella, Arcturus) + 46 extended. Epoch-adjusted sidereal positions via Swiss Ephemeris `swe.fixstar`. 1° conjunction orb for natal-point flagging. Matches Solar Fire + Kepler selection. | Q4 |
+| **Harmonic Charts scope** (Q5) | **7 PRD-specified harmonics** (H5 talent, H7 spiritual, H9 marriage/Vedic-Navamsa-parallel, H10 career, H11 friendship, H12 karmic, H16 tests). Addey mainstream. Matches Kepler + Astro.com. Same for both user types. | Q5 |
+| **Eclipse catalog horizon** (Q6) | **Default 200y past + 50y future** (matches Astro.com convention) + astrologer-profile toggle to extend (500y / 1000y / full 5-millennium NASA canon). PRD default for B2C + most astrologers; research flexibility. | Q6 |
+| **Uranian scope** (Q7) | **Tiered Uranian scope.** Default: 78 midpoints + planetary pictures (astronomically defensible; useful across Western traditions). Astrologer-profile toggle exposes 8 Uranian hypothetical planets (Cupido, Hades, Zeus, Kronos, Apollon, Admetos, Vulkanus, Poseidon) for Hamburg School practitioners. Matches Kepler + Ernst Wilhelm convention. | Q7 |
+
+### E8 tradition-isolation guarantees
+
+- E8 outputs are strictly tagged `tradition=western`. Never merged into Parashari yoga rules (E4a/E4b), Jaimini yogas (E3), or Vedic aggregations.
+- E8 panel in astrologer workbench is a DEDICATED tab, separate from Vedic natal/yoga/dasa panels.
+- AI chat answers using E8 data frame interpretations in Western tradition language, not Parashari.
+- B2C users who prefer Vedic-only framing can hide Western Depth tab via preference.
+
+### Engineering action items (not astrologer-review scope)
+
+- [ ] 50 Arabic Parts YAML rules per Chris Brennan modern synthesis; sect-aware formula evaluator
+- [ ] 60 Fixed Star catalog + Swiss Eph `swe.fixstar` positions per chart; 1°-orb conjunction detector
+- [ ] 7-harmonic chart computation module (tropical-longitude × N mod 360° per graha)
+- [ ] NASA 5-millennium eclipse canon ingestion (JSON static file); 200y+50y default window + astrologer-extend
+- [ ] Uranian midpoint matrix engine (78 midpoints + planetary pictures detector within 2° orb)
+- [ ] 8 Uranian hypothetical planets Witte-ephemeris integration (behind astrologer toggle)
+- [ ] Tradition-isolation guarantee via `tradition` field on all E8 outputs
+- [ ] Placidus default house system + astrologer toggle to Whole Sign / Porphyry / Koch / Equal for Western charts
+- [ ] Per-technique zodiac routing (tropical for Parts/Harmonics/Uranian; sidereal for Fixed Stars; both for Eclipses)
+
+---
 
 ## 3. Classical Research
 
