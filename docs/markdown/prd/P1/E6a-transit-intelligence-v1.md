@@ -79,7 +79,7 @@ All open questions from E6a Pass 1 astrologer review are resolved. Cross-cutting
 | Decision | Value | Ref |
 |---|---|---|
 | Ayanamsa default | Lahiri (for sidereal longitude computation) | 1.2 |
-| Rahu/Ketu node type | Both Mean + True computed; True default B2C | 1.1 |
+| Rahu/Ketu node type | Both Mean + True computed; **Mean default B2C** (revised 2026-04-22) | 1.1 |
 | Natchathiram count | 27 | 3.7 |
 | Sunrise/sunset convention | Center of disc + refraction (for eclipse timing at location) | 2.3 |
 | Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |

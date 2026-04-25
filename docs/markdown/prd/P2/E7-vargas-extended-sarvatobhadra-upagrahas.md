@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #extensibility, #astrologer-ux]
 priority: should
 depends_on: [F1, F2, F6, F7, F8, E1a]
-enables: [E14a, P2-UI-vargas]
+enables: [E14a, E12 (Extended Vargas + SBC tabs)]
 classical_sources: [bphs, uttara_kalamrita, jaimini_sutras, kerala_commentaries, saravali]
 estimated_effort: 3-4 weeks
 status: draft
@@ -26,7 +26,7 @@ This PRD closes those gaps:
 2. **Sarvatobhadra Chakra (SBC)** — 9×9 grid encoding 28 nakshatras (incl. Abhijit), 12 rashis, 8 weekdays, vowels, and tithi categories. Used to evaluate fitness of names, moments, letters. Critical for muhurta selection, horary (prasna), and daily-choice consulting.
 3. **Upagrahas (sub-planets)** — beyond already-implemented Gulika/Mandi, add Dhuma, Vyatipata (Pata), Parivesha, Chapa, Upaketu, Kala, Yamakantaka, Ardhaprahara. Two computation schools (Kerala vs North Indian) differ markedly — we support both as distinct `source_id`.
 
-These additions bring Josi to parity with Jagannatha Hora on the "full classical instrument inventory" axis and unlock dedicated UIs (P2-UI-vargas) and downstream EPICs (E10 uses SBC for Prasna omen analysis; E14a uses them in aggregation experiments).
+These additions bring Josi to parity with Jagannatha Hora on the "full classical instrument inventory" axis and unlock dedicated UIs (E12 (Extended Vargas + SBC tabs)) and downstream EPICs (E10 uses SBC for Prasna omen analysis; E14a uses them in aggregation experiments).
 
 ## 2. Scope
 
@@ -62,7 +62,7 @@ These additions bring Josi to parity with Jagannatha Hora on the "full classical
 - **Vedha analysis on SBC** — "vedha" is the blocking-aspect analysis on the SBC grid; non-trivial classical predicate system; deferred to E7b.
 - **Astrocartography / locational astrology** — different infrastructure.
 - **Nadi-reading text lookups** — Nadi palm-leaf readings use the extended vargas; integrating Nadi text lookups is a P5+ content partnership problem, not calculation.
-- **D-chart strength computation beyond D30** — Shadvarga / Saptavarga / Shodashavarga strength tables already exist; extending those scores to D60+ follows naturally from compute but is tracked in separate PRD (E2b).
+- **D-chart strength computation beyond D30** — Shadvarga / Saptavarga / Shodashavarga strength tables already exist; extending those scores to D60+ follows naturally from compute; **deferred (no PRD yet; future scope)**. Note 2026-04-23: prior reference to "E2b" was removed as that PRD ID was never actually authored.
 
 ### 2.3 Dependencies
 

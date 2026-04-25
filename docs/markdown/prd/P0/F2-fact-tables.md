@@ -11,7 +11,7 @@ classical_sources: []
 estimated_effort: 3 days
 status: approved
 author: Govind
-last_updated: 2026-04-19
+last_updated: 2026-04-25
 ---
 
 # F2 — Fact Tables with Composite FKs
@@ -50,6 +50,383 @@ Design invariants:
 - F1 (dimension tables are FK targets)
 - `TenantBaseModel` (existing in codebase)
 - `AstrologyChart` model (existing; PK `chart_id`)
+
+## 2.5 Engineering Review (Pass 2 — Locked 2026-04-25)
+
+**Reviewer:** cpselvam + Govind (pair) · **Rubric:** 3-layer (12-point structural + 7-lens design + cross-cutting compliance) · **Conforms to:** ARCHITECTURE_DECISIONS §0.9, §0.10, §0.12, §0.13, §0.14, §1.5 · **Cascades from:** F1 Pass 2
+
+### Summary
+
+F2 builds on F1's dim tables; F1's Pass 2 revisions (UUID PKs, SCD Type 2, `experiment`/`experiment_arm` moved to E14a, multilingual JSONB) cascade through F2. Pass 2 locks 5 decisions and revises the schema to a shape that is simultaneously §0.14-compliant (UUID PKs + composite UNIQUE business keys), §0.12-compliant (no bare `id`), §0.9-compliant (row_id pins for SCD reconstructability), and ergonomic (text-code FKs preserve readable logs/analytics).
+
+### Layer 1 — Structural Completeness (12-point)
+
+| # | Item | Status | Note |
+|:-:|---|:-:|---|
+| 1 | Frontmatter complete | ✅ | `last_updated` bumped to 2026-04-25 on Pass 2 lock |
+| 2 | Purpose clear | ✅ | §1 articulates idempotency / composite FK / append-only invariants |
+| 3 | Scope precise | ✅ | §2.1/§2.2 in+out; §2.3 deps on F1 + existing models |
+| 4 | Research substantive | ✅ | §3 covers composite FK rationale, append-only aggregation, index strategy, 4 rejected alternatives |
+| 5 | Open questions resolved | ✅ | §4 (6 original) + §2.5 Pass 2 Decisions (F2-Q1–F2-Q5) |
+| 6 | Component design executable | ✅ | §5 full SQL + Pydantic + Protocol; revised schema below |
+| 7 | User stories testable | ✅ | §6 US-F2.1–F2.4 |
+| 8 | Tasks decomposed | ✅ | §7 T-F2.1–F2.6 + §2.5 Task DAG |
+| 9 | Unit tests enumerated | ✅ | §8.1–§8.6 full tables (models / trigger / integration) |
+| 10 | Acceptance criteria binary | ✅ | §9 + expanded §2.5 list |
+| 11 | Rollout plan credible | ✅ | §10 — flag N/A justified; rollback via downgrade |
+| 12 | Risks identified | ✅ | §11 — 5 risks with likelihood+impact+mitigation |
+
+**Layer 1 verdict:** 12 / 12 pass.
+
+### Layer 2 — Design Quality (7-lens)
+
+| # | Lens | Finding | Status |
+|:-:|---|---|:-:|
+| 1 | Futuristic | Partition-ready (F3 LIST+HASH), experiment hooks deferred cleanly to E14a, signal log ready for learning loop | ✅ |
+| 2 | Future-proof | Text-code FKs + row_id UUID pins give stable business identity + SCD versioning in one shape. F1 revisions absorbed cleanly via F2-Q1/Q2/Q5. | ✅ (resolved by Pass 2) |
+| 3 | Extendible | New techniques plug in via YAML classical_rule rows (F6); no F2 schema changes needed | ✅ |
+| 4 | Audit-ready | `input_fingerprint` + `output_hash` (F13) + `{dim}_row_id` SCD pins → full §0.9 reconstructability. F2-Q5 applied. | ✅ (resolved by Pass 2) |
+| 5 | Performant | 3 tuned indexes; denormalized `technique_family_code` avoids joins for family-scoped reads | ✅ |
+| 6 | User-friendly | N/A — data layer | N/A |
+| 7 | AI-first | `result JSONB` typed by Pydantic per output_shape; typed tool-use contract deferred to F10 | ✅ |
+
+**Layer 2 verdict:** 6 / 6 applicable lenses green after Pass 2 Decisions; 1 N/A.
+
+### Layer 3 — Cross-cutting Compliance
+
+| Lock | Requirement | Status | Evidence |
+|---|---|:-:|---|
+| §0.5 liability | Crisis flow for AI surfaces | N/A | Data layer; no user-facing AI |
+| §0.8 eval harness | Golden dataset + LLM-as-judge | N/A | No AI surface; Eval cases section confirms |
+| §0.9 reconstructability | Fact tables pin exact rule + SCD versions at compute time | ✅ | F2-Q5: `source_authority_row_id`, `technique_family_row_id`, `output_shape_row_id` on `technique_compute`; `aggregation_strategy_row_id` on `aggregation_event`; existing `input_fingerprint` + `output_hash` (F13) retained |
+| §0.10 task DAG + path overlap | DAG entry + path overlap declared | ✅ | 6-task DAG in §2.5; path overlap declared (models/classical, schemas/classical, services/classical) |
+| §0.12 naming | No bare `id`; full English identifiers | ✅ | F2-Q4: `id` → `aggregation_event_id` / `aggregation_signal_id`. `rule_id TEXT` → `rule_code TEXT`; `source_id TEXT` → `source_authority_code TEXT`; `strategy_id` → `aggregation_strategy_code`; `family_id` → `technique_family_code`; `shape_id` → `output_shape_code` (F1 already renamed). Trigger `validate_source_weights_keys` OK. |
+| §0.13 config-based versioning | SCD row_id pins replace git SHA or TEXT version snapshots | ✅ | F2-Q5: `strategy_version TEXT` removed; `aggregation_strategy_row_id UUID` pins the SCD row. `classical_rule.version` retained (rule registry is its own immutable-append versioning per §3.2). |
+| §0.14 PK conventions | UUIDv7 PK + composite UNIQUE business key on real-entity tables | ✅ | F2-Q1: `classical_rule_id UUID PK` + `UNIQUE(rule_code, source_authority_code, version)`; `technique_compute_id UUID PK` + `UNIQUE(chart_id, classical_rule_id)`; `aggregation_event_id UUID PK`; `aggregation_signal_id UUID PK`; `astrologer_source_preference` keeps composite PK (config table, genuinely identified by `(user_id, technique_family_code)`) — documented exception |
+| §1.5 multilingual | `classical_names` JSONB on rule registry rows | ✅ | Present on `classical_rule` (existing); inherited FK dims carry own JSONB per F1 |
+| F1 cascade | F2 FKs align with F1 revised dim shape | ✅ | F2-Q2: text-code FKs against F1 `{dim}_code` UNIQUE columns. F2-Q3: `experiment` / `experiment_arm` removed from F2 — E14a re-adds. |
+
+**Layer 3 verdict:** 7 applicable locks ✅; 2 N/A (justified); 0 ⚠️/❌.
+
+### Pass 2 Decisions
+
+| # | Gap | Decision |
+|---|---|---|
+| F2-Q1 | Composite PKs violate §0.14 (UUID PK convention) | **UUID PK + composite UNIQUE** on real-entity tables. `classical_rule_id UUID PK DEFAULT uuidv7()` + `UNIQUE(rule_code, source_authority_code, version)`. `technique_compute_id UUID PK DEFAULT uuidv7()` + `UNIQUE(chart_id, classical_rule_id)`. `astrologer_source_preference` keeps composite PK as a config-table exception (documented). |
+| F2-Q2 | FK column types (F1 cascade) | **Text-code FKs** — `{dim}_code TEXT REFERENCES {dim}({dim}_code)` for stable, readable business identity in fact rows and logs. Combined with F2-Q5 row_id pins where SCD reconstructability is needed. |
+| F2-Q3 | `experiment` / `experiment_arm` FK (F1-Q4 cascade) | **Removed from F2.** Both columns + composite FK + `idx_aggregation_experiment` index deleted. E14a re-adds via `ALTER TABLE aggregation_event ADD COLUMN experiment_row_id UUID REFERENCES experiment(experiment_row_id)` when it ships. |
+| F2-Q4 | `id` column naming (§0.12) | **Renamed.** `aggregation_event.id` → `aggregation_event_id`; `aggregation_signal.id` → `aggregation_signal_id`. |
+| F2-Q5 | SCD version pinning (§0.9) | **Added row_id UUID columns** alongside text-code FKs. On `technique_compute`: `source_authority_row_id UUID NOT NULL REFERENCES source_authority(source_authority_row_id)`, `technique_family_row_id UUID NOT NULL REFERENCES technique_family(technique_family_row_id)`, `output_shape_row_id UUID NOT NULL REFERENCES output_shape(output_shape_row_id)`. On `aggregation_event`: `aggregation_strategy_row_id UUID NOT NULL REFERENCES aggregation_strategy(aggregation_strategy_row_id)` (replaces `strategy_version TEXT` snapshot). |
+
+### Revised schema (applied — supersedes §5.2 below)
+
+**`classical_rule` — immutable rule registry, UUID PK + composite business key**
+
+```sql
+CREATE TABLE classical_rule (
+    classical_rule_id        UUID PRIMARY KEY DEFAULT uuidv7(),
+    rule_code                TEXT NOT NULL,                          -- e.g., 'yoga.raja.gaja_kesari'
+    source_authority_code    TEXT NOT NULL REFERENCES source_authority(source_authority_code),
+    source_authority_row_id  UUID NOT NULL REFERENCES source_authority(source_authority_row_id),
+    version                  TEXT NOT NULL,                          -- semver for this rule's own evolution
+    content_hash             CHAR(64) NOT NULL,                      -- F13: sha256 of canonical rule body JSON
+    technique_family_code    TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    technique_family_row_id  UUID NOT NULL REFERENCES technique_family(technique_family_row_id),
+    output_shape_code        TEXT NOT NULL REFERENCES output_shape(output_shape_code),
+    output_shape_row_id      UUID NOT NULL REFERENCES output_shape(output_shape_row_id),
+    rule_body                JSONB NOT NULL,                         -- DSL payload (F6)
+    citation                 TEXT,                                   -- "BPHS 36.14-16"
+    classical_names          JSONB NOT NULL DEFAULT '{}'::jsonb,     -- §1.5 multilingual
+    effective_from           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    effective_to             TIMESTAMPTZ,                            -- null = active
+    created_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT unique_classical_rule_business_key
+        UNIQUE (rule_code, source_authority_code, version)
+);
+
+CREATE INDEX idx_classical_rule_family ON classical_rule(technique_family_code);
+CREATE INDEX idx_classical_rule_active
+    ON classical_rule(rule_code, source_authority_code)
+    WHERE effective_to IS NULL;
+```
+
+**`technique_compute` — UUID PK + composite UNIQUE + SCD row_id pins**
+
+```sql
+CREATE TABLE technique_compute (
+    technique_compute_id     UUID PRIMARY KEY DEFAULT uuidv7(),
+    organization_id          UUID NOT NULL REFERENCES organization(organization_id),
+    chart_id                 UUID NOT NULL REFERENCES astrology_chart(chart_id),
+
+    classical_rule_id        UUID NOT NULL REFERENCES classical_rule(classical_rule_id),
+    rule_code                TEXT NOT NULL,                          -- denormalized for fast filters + readable logs
+    source_authority_code    TEXT NOT NULL REFERENCES source_authority(source_authority_code),
+    source_authority_row_id  UUID NOT NULL REFERENCES source_authority(source_authority_row_id),
+    rule_version             TEXT NOT NULL,
+
+    technique_family_code    TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    technique_family_row_id  UUID NOT NULL REFERENCES technique_family(technique_family_row_id),
+    output_shape_code        TEXT NOT NULL REFERENCES output_shape(output_shape_code),
+    output_shape_row_id      UUID NOT NULL REFERENCES output_shape(output_shape_row_id),
+
+    result                   JSONB NOT NULL,
+    input_fingerprint        CHAR(64) NOT NULL,                      -- F13
+    output_hash              CHAR(64) NOT NULL,                      -- F13
+    computed_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT unique_technique_compute_chart_rule
+        UNIQUE (chart_id, classical_rule_id)
+);
+
+CREATE INDEX idx_compute_family
+    ON technique_compute(chart_id, technique_family_code);
+CREATE INDEX idx_compute_org_family
+    ON technique_compute(organization_id, technique_family_code, computed_at DESC);
+```
+
+**`aggregation_event` — UUID PK (renamed), experiment FKs removed, strategy SCD pinned**
+
+```sql
+CREATE TABLE aggregation_event (
+    aggregation_event_id         UUID PRIMARY KEY DEFAULT uuidv7(),
+    organization_id              UUID NOT NULL REFERENCES organization(organization_id),
+    chart_id                     UUID NOT NULL REFERENCES astrology_chart(chart_id),
+
+    technique_family_code        TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    technique_family_row_id      UUID NOT NULL REFERENCES technique_family(technique_family_row_id),
+    technique_code               TEXT NOT NULL,                      -- e.g., 'yoga.raja.gaja_kesari'; nullable for family-level aggregation
+
+    aggregation_strategy_code    TEXT NOT NULL REFERENCES aggregation_strategy(aggregation_strategy_code),
+    aggregation_strategy_row_id  UUID NOT NULL REFERENCES aggregation_strategy(aggregation_strategy_row_id),
+    -- NB: strategy_version TEXT removed — pinned via aggregation_strategy_row_id per F2-Q5
+
+    inputs_hash                  CHAR(64) NOT NULL,                  -- hash of (classical_rule_id) tuples consumed
+    output                       JSONB NOT NULL,
+    surface                      TEXT NOT NULL CHECK (surface IN
+                                   ('b2c_chat','astrologer_pro','ultra_ai','internal_experiment','api')),
+    user_mode                    TEXT NOT NULL CHECK (user_mode IN ('auto','custom','ultra')),
+    computed_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
+    -- NB: experiment_id / experiment_arm_id / composite FK removed per F2-Q3; E14a re-adds
+);
+
+CREATE INDEX idx_aggregation_chart
+    ON aggregation_event(chart_id, technique_family_code, aggregation_strategy_code, computed_at DESC);
+CREATE INDEX idx_aggregation_org_recent
+    ON aggregation_event(organization_id, computed_at DESC);
+-- NB: idx_aggregation_experiment dropped per F2-Q3; E14a re-creates
+```
+
+**`aggregation_signal` — UUID PK (renamed)**
+
+```sql
+CREATE TABLE aggregation_signal (
+    aggregation_signal_id     UUID PRIMARY KEY DEFAULT uuidv7(),
+    organization_id           UUID NOT NULL REFERENCES organization(organization_id),
+    aggregation_event_id      UUID NOT NULL REFERENCES aggregation_event(aggregation_event_id),
+    signal_type               TEXT NOT NULL CHECK (signal_type IN
+                                ('astrologer_override_implicit','astrologer_override_explicit',
+                                 'user_thumbs_up','user_thumbs_down',
+                                 'outcome_positive','outcome_negative','outcome_neutral')),
+    signal_value              JSONB NOT NULL DEFAULT '{}'::jsonb,
+    recorded_by_user_id       UUID REFERENCES "user"(user_id),
+    recorded_at               TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_signal_event    ON aggregation_signal(aggregation_event_id, signal_type);
+CREATE INDEX idx_signal_org_recent ON aggregation_signal(organization_id, recorded_at DESC);
+```
+
+**`astrologer_source_preference` — composite PK retained (config table exception per §0.14)**
+
+```sql
+CREATE TABLE astrologer_source_preference (
+    organization_id                   UUID NOT NULL REFERENCES organization(organization_id),
+    user_id                           UUID NOT NULL REFERENCES "user"(user_id),
+    technique_family_code             TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    source_weights                    JSONB NOT NULL DEFAULT '{}'::jsonb,
+                                      -- keys validated against source_authority_code by trigger
+    preferred_aggregation_strategy_code  TEXT REFERENCES aggregation_strategy(aggregation_strategy_code),
+    preference_mode                   TEXT NOT NULL DEFAULT 'auto'
+                                      CHECK (preference_mode IN ('auto','custom','ultra')),
+    created_at                        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at                        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, technique_family_code)
+);
+
+-- Trigger renamed source_id → source_authority_code to match F1
+CREATE OR REPLACE FUNCTION validate_source_weights_keys()
+RETURNS trigger AS $$
+DECLARE
+    invalid_key TEXT;
+BEGIN
+    SELECT key INTO invalid_key
+    FROM jsonb_object_keys(NEW.source_weights) AS key
+    WHERE key NOT IN (
+        SELECT source_authority_code FROM source_authority
+        WHERE is_current = true AND deprecated_at IS NULL
+    )
+    LIMIT 1;
+    IF invalid_key IS NOT NULL THEN
+        RAISE EXCEPTION 'Invalid source_authority_code in source_weights: %', invalid_key;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_source_weights
+    BEFORE INSERT OR UPDATE ON astrologer_source_preference
+    FOR EACH ROW EXECUTE FUNCTION validate_source_weights_keys();
+```
+
+### Naming rule (§0.12) compliance — delta from original §5.2
+
+| Original identifier | Revised identifier | Reason |
+|---|---|---|
+| `classical_rule(rule_id, source_id, version)` composite PK | `classical_rule_id UUID PK` + `UNIQUE(rule_code, source_authority_code, version)` | §0.14 + F2-Q1 |
+| `aggregation_event.id UUID` | `aggregation_event_id UUID` | §0.12 + F2-Q4 |
+| `aggregation_signal.id UUID` | `aggregation_signal_id UUID` | §0.12 + F2-Q4 |
+| `rule_id TEXT` (on compute) | `rule_code TEXT` + `classical_rule_id UUID FK` | §0.12 no bare `id` + F2-Q1 |
+| `source_id TEXT` | `source_authority_code TEXT` + `source_authority_row_id UUID` | F1 rename + F2-Q2 + F2-Q5 |
+| `family_id TEXT` (on compute) | `technique_family_code TEXT` + `technique_family_row_id UUID` | F1 rename + F2-Q2 + F2-Q5 |
+| `shape_id TEXT` | `output_shape_code TEXT` + `output_shape_row_id UUID` | F1 rename + F2-Q2 + F2-Q5 |
+| `strategy_id TEXT` | `aggregation_strategy_code TEXT` + `aggregation_strategy_row_id UUID` | F1 rename + F2-Q2 + F2-Q5 |
+| `strategy_version TEXT` | *removed* | Replaced by `aggregation_strategy_row_id` per F2-Q5 |
+| `experiment_id TEXT` / `experiment_arm_id TEXT` | *removed* | Moved to E14a per F2-Q3 |
+
+### Path overlap declaration
+
+F2 tasks reserve these paths (no other P0 PRD may write here):
+
+```
+src/josi/models/classical/classical_rule.py
+src/josi/models/classical/technique_compute.py
+src/josi/models/classical/aggregation_event.py
+src/josi/models/classical/aggregation_signal.py
+src/josi/models/classical/astrologer_source_preference.py
+src/josi/schemas/classical/result_payloads.py
+src/josi/schemas/classical/aggregation_outputs.py
+src/josi/schemas/classical/signal_payloads.py
+src/josi/services/classical/base_engine.py
+src/alembic/versions/                   # One migration file (sequenced after F1)
+tests/unit/models/classical/test_classical_rule.py
+tests/unit/models/classical/test_technique_compute.py
+tests/unit/models/classical/test_aggregation_event.py
+tests/unit/models/classical/test_aggregation_signal.py
+tests/unit/models/classical/test_astrologer_source_preference.py
+tests/integration/classical/test_f2_round_trip.py
+```
+
+F2 extends F1's `src/josi/models/classical/` directory; no conflict because file names are disjoint.
+
+### Task DAG entries (for §0.10 agent-team orchestration)
+
+```json
+[
+  {
+    "task_id": "F2-schema-migration",
+    "prd_ref": "F2",
+    "role": "coder + migration-writer",
+    "depends_on": ["F1-schema-migration", "F1-seed-yaml-authoring"],
+    "acceptance_criteria": "5 fact tables (classical_rule, technique_compute, aggregation_event, aggregation_signal, astrologer_source_preference) via Alembic migration sequenced after F1. UUIDv7 PKs on 4 real-entity tables; composite PK on astrologer_source_preference config table. All FKs resolve to F1 dim tables. source_weights trigger installed. Migration-lint passes. mypy passes on SQLModel classes.",
+    "affected_paths": ["src/josi/models/classical/classical_rule.py", "src/josi/models/classical/technique_compute.py", "src/josi/models/classical/aggregation_event.py", "src/josi/models/classical/aggregation_signal.py", "src/josi/models/classical/astrologer_source_preference.py", "src/alembic/versions/"],
+    "test_command": "poetry run alembic upgrade head && poetry run pytest tests/unit/models/classical/",
+    "max_turns": 60,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F2-pydantic-result-payloads",
+    "prd_ref": "F2",
+    "role": "coder",
+    "depends_on": ["F1-seed-yaml-authoring"],
+    "acceptance_criteria": "Pydantic BaseModel per output_shape (10 shapes from F1). .model_json_schema() works. Every shape is discriminator-addressable. Unit tests validate round-trip from JSONB to typed model.",
+    "affected_paths": ["src/josi/schemas/classical/result_payloads.py", "src/josi/schemas/classical/aggregation_outputs.py", "src/josi/schemas/classical/signal_payloads.py"],
+    "test_command": "poetry run pytest tests/unit/schemas/classical/",
+    "max_turns": 40,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F2-classical-engine-protocol",
+    "prd_ref": "F2",
+    "role": "coder",
+    "depends_on": ["F2-schema-migration"],
+    "acceptance_criteria": "ClassicalEngine Protocol in base_engine.py. Helper for idempotent upsert via ON CONFLICT on UNIQUE(chart_id, classical_rule_id). Test subclass round-trips successfully.",
+    "affected_paths": ["src/josi/services/classical/base_engine.py", "tests/unit/services/classical/test_base_engine.py"],
+    "test_command": "poetry run pytest tests/unit/services/classical/test_base_engine.py",
+    "max_turns": 40,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F2-trigger-validation",
+    "prd_ref": "F2",
+    "role": "coder",
+    "depends_on": ["F2-schema-migration"],
+    "acceptance_criteria": "source_weights trigger validates JSONB keys against source_authority.source_authority_code WHERE is_current AND deprecated_at IS NULL. Rejects unknown + deprecated keys with clear error. 3+ test cases (valid / unknown / deprecated).",
+    "affected_paths": ["tests/unit/models/classical/test_astrologer_source_preference.py"],
+    "test_command": "poetry run pytest tests/unit/models/classical/test_astrologer_source_preference.py",
+    "max_turns": 20,
+    "model_tier": "cheap",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F2-integration-round-trip",
+    "prd_ref": "F2",
+    "role": "coder + qa",
+    "depends_on": ["F2-schema-migration", "F2-pydantic-result-payloads", "F2-classical-engine-protocol"],
+    "acceptance_criteria": "End-to-end test: seed dim rows (F1) → insert classical_rule → insert technique_compute with SCD row_id pins → insert aggregation_event → insert aggregation_signal → verify all reads return expected shapes. Reconstructability test: given technique_compute.source_authority_row_id, resolve to exact SCD version of source_authority at compute time.",
+    "affected_paths": ["tests/integration/classical/test_f2_round_trip.py"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f2_round_trip.py",
+    "max_turns": 40,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F2-index-explain-tests",
+    "prd_ref": "F2",
+    "role": "coder + qa",
+    "depends_on": ["F2-schema-migration"],
+    "acceptance_criteria": "EXPLAIN tests assert index usage: idx_compute_family used for (chart_id, technique_family_code) queries; idx_aggregation_chart used for strategy-scoped reads; idx_signal_event used for signal-by-event reads. Fails on seq scan.",
+    "affected_paths": ["tests/integration/classical/test_f2_indexes.py"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f2_indexes.py",
+    "max_turns": 30,
+    "model_tier": "mid",
+    "retry_budget": 1
+  }
+]
+```
+
+**Total F2 implementation estimate:** 6 parallel tasks; 2 (payloads + protocol) can start as soon as F1-seed-yaml-authoring lands. Estimated cost ~$20-30. Wall-clock ~3-4 days at full agent parallelism.
+
+### Acceptance criteria (expanded beyond §9)
+
+In addition to existing acceptance criteria:
+- [ ] All 5 tables conform to §0.14 PK conventions (UUID PK on 4 real-entity tables; composite PK on astrologer_source_preference config-table exception documented)
+- [ ] All FKs resolve: text-code FKs to F1 `{dim}_code` UNIQUE columns; row_id FKs to F1 SCD `{dim}_row_id` PK columns
+- [ ] §0.9 reconstructability test passes: given a technique_compute row and its `{source_authority,technique_family,output_shape}_row_id` + `input_fingerprint`, the compute output can be regenerated bit-exact
+- [ ] No bare `id` columns (§0.12) — verified by ruff rule N997+
+- [ ] `experiment_id` / `experiment_arm_id` / `strategy_version` fields NOT present in F2 tables
+- [ ] Trigger `validate_source_weights_keys` references `source_authority_code` column (not `source_id`) and filters by `is_current = true`
+- [ ] ON CONFLICT DO NOTHING works against `UNIQUE(chart_id, classical_rule_id)` for technique_compute idempotency
+
+### Eval cases
+
+N/A — F2 is data-layer foundation; no AI surface. §0.8 eval harness does not apply.
+
+### Cross-references
+
+- `ARCHITECTURE_DECISIONS.md §0.9` — fact tables pin `{dim}_row_id UUID` for reconstructability (F2-Q5 applied)
+- `ARCHITECTURE_DECISIONS.md §0.10` — task DAG + path overlap
+- `ARCHITECTURE_DECISIONS.md §0.12` — no bare `id`; full English identifiers (F2-Q4 applied)
+- `ARCHITECTURE_DECISIONS.md §0.13` — config-based versioning via SCD row_id, not TEXT snapshots (F2-Q5 removed `strategy_version`)
+- `ARCHITECTURE_DECISIONS.md §0.14` — UUIDv7 PK + composite UNIQUE business key (F2-Q1 applied)
+- `F1-star-schema-dimensions.md §2.5` — F1 revised shape that F2 FKs now align with (F2-Q2 applied)
+- `DECISIONS.md §1.5` — multilingual `classical_names` on `classical_rule`
+- **E14a** — re-adds `experiment_row_id UUID` column to `aggregation_event` when experiment framework ships (F2-Q3 defers)
+
+---
 
 ## 3. Technical Research
 

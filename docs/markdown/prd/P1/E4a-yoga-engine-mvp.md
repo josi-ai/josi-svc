@@ -11,7 +11,7 @@ classical_sources: [bphs, saravali, phaladeepika, jataka_parijata]
 estimated_effort: 4 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-21
+last_updated: 2026-04-22
 ---
 
 # E4a — Classical Yoga Engine MVP (60 Core Yogas)
@@ -79,7 +79,7 @@ All open questions from E4a Pass 1 astrologer review are resolved. Cross-cutting
 | Decision | Value | Ref |
 |---|---|---|
 | Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | 1.2 |
-| Rahu/Ketu node type | Both Mean + True computed; True default B2C | 1.1 |
+| Rahu/Ketu node type | Both Mean + True computed; **Mean default B2C** (revised 2026-04-22) | 1.1 |
 | House system | Whole Sign B2C rasi chart + Bhava Chalit/Sripati parallel | 1.3 |
 | Natchathiram count | 27 for all yoga predicates | 3.7 |
 | Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |
@@ -233,7 +233,7 @@ Afflicting / inauspicious combinations. Some cancel each other (cancellation rul
 | 54 | Graha Yuddha (Planetary War) | Two planets within 1° of each other (excluding Sun-Moon, Rahu-Ketu) — classical "war" rule identifies winner and loser | BPHS Ch. 27 |
 | 55 | Balarishta | Moon in 6/8/12 with malefic aspect AND no benefic relief (birth-time affliction for infant) | BPHS 42.3-5 |
 | 56 | Arishta Yoga (Chandra-weak) | Moon in 6/8/12 AND hemmed by malefics with no benefic aspect | BPHS 42.5 |
-| 57 | Kuja Dosha (Mangal Dosha) | Mars in 1/2/4/7/8/12 from Lagna OR from Moon OR from Venus (classical counted from Lagna; Moon + Venus are modern regional additions) | Phaladeepika 14.12 |
+| 57 | Kuja Dosha (Mangal Dosha) | **B2C default (per DECISIONS §6.5 E25 Q2, revised 2026-04-22):** Sevvai in 2/4/7/8/12 from Lagna (5 houses, Lagna-only single-reference). **Astrologer toggle:** add 1st-house inclusion + Chandran-reference + Sukran-reference for lineages that require them. Classical Phaladeepika 14.12 lists Moon + Venus reference; not in current Tamil Parashari practice. | Phaladeepika 14.12 + DECISIONS §6.5 E25 Q2 |
 | 58 | Kuja Dosha Cancellation | Kuja Dosha canceled when: Mars in own/exalted OR Mars aspected by Jupiter OR both partners have Kuja Dosha | Classical synthesis (B.V. Raman) |
 | 59 | Sakata Cancellation (Sakata Bhanga) | Shakata canceled when Moon in own/exalted sign OR aspected by benefics | Classical synthesis |
 | 60 | Neecha Bhanga Raja Yoga | Debilitated planet's debilitation canceled (see §3.4); produces Raja Yoga | BPHS 39.1-10 |
@@ -710,7 +710,7 @@ For each, the brief predicate structure as it will appear in the YAML. Complete 
 - **Graha Yuddha** (`yoga.dushta.graha_yuddha.bphs`): two planets within 1° longitude, excluding Sun-Moon and Rahu-Ketu pairs. Emit per-pair, with winner/loser per BPHS 27 rules (northern planet wins if latitude differs; otherwise brighter wins). BPHS Ch. 27.
 - **Balarishta** (`yoga.dushta.balarishta.bphs`): Moon in {6,8,12} AND hemmed by malefics AND no benefic aspect. BPHS 42.3-5.
 - **Arishta (chandra-weak)** (`yoga.dushta.arishta_chandra.bphs`): Moon in {6,8,12} AND aspected by malefic AND no benefic aspect. BPHS 42.5.
-- **Kuja Dosha** (`yoga.dushta.kuja_dosha.phaladeepika`): Mars in {1,2,4,7,8,12} from Lagna OR from Moon OR from Venus (3 variant references; default all 3 active). Phaladeepika 14.12.
+- **Kuja Dosha** (`yoga.dushta.kuja_dosha.phaladeepika`): **B2C default (per DECISIONS §6.5 E25 Q2 revised 2026-04-22):** Sevvai in {2,4,7,8,12} from Lagna (5 houses, Lagna-only single-reference). **Astrologer toggles (off by default):** add 1st-house inclusion + Chandran-reference + Sukran-reference for lineages that require them. Phaladeepika 14.12 canonical 3-reference list retained as astrologer-enable but not active by default (not in current Tamil Parashari practice). Phaladeepika 14.12.
 - **Kuja Dosha Cancellation** (`yoga.cancellation.kuja_dosha_bhanga.classical_synthesis`): Kuja Dosha canceled when Mars in own/exalted OR aspected by Jupiter OR Mars in Pisces/Cancer with Moon. Classical synthesis after B.V. Raman.
 - **Sakata Bhanga** (`yoga.cancellation.sakata_bhanga.classical_synthesis`): Shakata canceled when Moon in own/exalted sign OR aspected by benefic (Jupiter, Venus, unafflicted Mercury). Classical synthesis.
 - **Neecha Bhanga Raja Yoga** → full YAML in §3.2.5 above.

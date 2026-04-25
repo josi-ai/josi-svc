@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #ai-chat, #astrologer-ux, #extensibility]
 priority: must
 depends_on: [F1, F2, F6, F7, F8, F13, E1a, E5, E7, E9]
-enables: [P2-UI-prasna, E14a, P5-horary-marketplace]
+enables: [E12, E14a, P5-horary-marketplace]  # 2026-04-23: P2-UI-prasna resolved to E12 Astrologer Workbench UI (dedicated Prasna tab)
 classical_sources: [prasna_marga, kp_reader, hora_deepika, jataka_parijata]
 estimated_effort: 4-5 weeks
 status: draft
@@ -109,7 +109,7 @@ All open questions from E10 Pass 1 astrologer review are resolved. E10 orchestra
 |---|---|---|
 | Ayanamsa | Lahiri for Kerala branch; Krishnamurti for KP branch | DECISIONS 1.2 + E9 Q1 |
 | Natchathiram count | 27 | DECISIONS 3.7 |
-| Horai computation | Chaldean + variable-length | DECISIONS 3.11 |
+| Hora computation | Chaldean + variable-length | DECISIONS 3.11 |
 | Sunrise/sunset | Center of disc + refraction | DECISIONS 2.3 |
 | 5-level significators | KP Reader Vol.2 Ch.4 canonical | E9 Q2 |
 | 5-element Ruling Planets | Day + Asc sign/natchathiram + Moon sign/natchathiram lords | E9 Q3 |
@@ -142,6 +142,7 @@ horary_analysis = {
     "intent_category": str,  # marriage/career/lost_article/health/etc.
     "query_house": int,      # Mapped per E9 query map
     "kerala_prasna": {
+        # Kerala branch uses Lahiri ayanamsa + Whole-Sign houses per DECISIONS §1.2 + §1.3 (Parashari primary)
         "prasna_lagna": rasi,
         "arudha_of_prasna_lagna": rasi,  # JUS rule
         "vimshottari_at_moment": {md: graha, ad: graha, pd: graha},
@@ -153,6 +154,7 @@ horary_analysis = {
         "reasoning_trace": str
     },
     "kp_horary": {
+        # KP branch uses Krishnamurti ayanamsa + Placidus houses per E9 Q1 (exclusive to KP chart; natal chart remains Lahiri+Whole-Sign)
         "horary_chart": ... ,  # From E9 (Krishnamurti ayanamsa + Placidus)
         "cuspal_sub_lord_analysis": {house: str},
         "ruling_planets": ... ,  # From E9
@@ -179,7 +181,7 @@ horary_analysis = {
 - [ ] Prasna Lagna computation at query moment (both Lahiri + Krishnamurti depending on branch)
 - [ ] Arudha of Prasna Lagna using JUS 1.2.39-45 rule (reuse E3 logic)
 - [ ] Navamsa yes/no computation per Prasna Marga Ch.8
-- [ ] Planetary hour (Horai) lookup per DECISIONS 3.11
+- [ ] Planetary hour (Hora) lookup per DECISIONS 3.11
 - [ ] Omen rule engine: 15 core + 65 extended with astrologer-profile enable toggle
 - [ ] KP horary delegation to E9 engine
 - [ ] Kerala Prasna + KP both-methods orchestrator

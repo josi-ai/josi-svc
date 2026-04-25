@@ -6,12 +6,12 @@ phase: P1-mvp
 tags: [#correctness, #extensibility]
 priority: must
 depends_on: [F1, F2, F4, F6, F7, F8, F13, F16, F17]
-enables: [E2b, E11a, E14a]
+enables: [E11a, E14a]  # E2b removed 2026-04-23 — orphaned reference, no E2b PRD exists or is planned
 classical_sources: [bphs, phaladeepika, jataka_parijata]
 estimated_effort: 2 weeks
 status: approved
 author: @agent-claude-opus-4-7
-last_updated: 2026-04-21
+last_updated: 2026-04-22
 ---
 
 # E2a — Ashtakavarga v2 (Trikona + Ekadhipatya Shodhana, Sodhya Pinda)
@@ -74,12 +74,12 @@ All open questions from E2a Pass 1 astrologer review are resolved. Cross-cutting
 | Decision | Value | Ref |
 |---|---|---|
 | Ayanamsa default | Lahiri B2C + 9-shortlist astrologer | 1.2 |
-| Rahu/Ketu node type | Both Mean + True computed; True default B2C; astrologer prompted | 1.1 |
+| Rahu/Ketu node type | Both Mean + True computed; **Mean default B2C** (revised 2026-04-22); astrologer prompted per chart | 1.1 |
 | Natchathiram count | 27 (affects contributor-from-Moon rules) | 3.7 |
 | Ashtakavargam scope (B2C) | 3-tier bhava-strength summary from post-shodhanai SAV with BPHS Ch.6 purpose mapping | 1.8 |
 | Ashtakavargam scope (Astrologer) | Full 5-tab view (Raw BAV, Trikona-Shodhit, Ekadhipatya-Shodhit, Shodhit SAV, Sodhya Pinda) + Kaksha Vibhaga panel + contributor-trace drill-down | 1.8 |
 | Divisional scope | D1 (Rasi) + D9 (Navamsam) Ashtakavargam computed; D10+ deferred | 1.8 |
-| Trikona Shodhanai variant | Phaladeepika subtract-minimum | 1.8 |
+| Trikona Shodhanai variant | Phaladeepika 3-case rule: (1) if min=0 → zero all three; (2) if min is tied ≥2 members → zero all three; (3) else subtract min (revised 2026-04-22) | 1.8 |
 | Kaksha Vibhaga | Promoted from "optional stage 7" to in-scope astrologer view | 1.8 |
 | Sodhya Pinda downstream | Feeds E5b Ayurdaya (Pindayu computation); astrologer-gated for ethical reasons | 1.7 (references E5b) |
 | Language display | Sanskrit-IAST canonical + Tamil phonetic for UI | 1.5 |
@@ -123,7 +123,7 @@ Total                                           11826     → feeds E5b Pindayu
 ### Engineering action items (not astrologer-review scope)
 
 - [ ] Refactor existing `ashtakavarga_calculator.py` to `ClassicalEngine` Protocol conformance (per E2a §3).
-- [ ] Add Trikona Shodhanai rule (Phaladeepika subtract-minimum) as YAML rule.
+- [ ] Add Trikona Shodhanai rule (Phaladeepika 3-case) as YAML rule: if trine min=0 → zero all; elif trine min tied ≥2 members → zero all; else subtract min. Reject any impl that only subtracts min without the two edge cases.
 - [ ] Add Ekadhipatya Shodhanai rule (BPHS strict zero-out logic) as YAML rule.
 - [ ] Add Sodhya Pinda computation with chakra Graha Pinda + per-sign Rashi Pinda constants.
 - [ ] Build 10 golden chart fixtures cross-verified at ±0 tolerance against JH 7.x (BAV + SAV + Sodhya Pinda).
@@ -393,8 +393,11 @@ compute:
       - [2, 6, 10]
       - [3, 7, 11]
       - [4, 8, 12]
-    subtract_minimum_per_trikona: true
-    skip_if_any_zero: true    # BPHS 66.4 exception
+    # Phaladeepika 3-case rule (Ch.26 v.12-18) — revised 2026-04-22
+    reduction_rule: phaladeepika_3_case
+    zero_all_if_any_member_is_zero: true      # edge case 1: any zero → zero all three
+    zero_all_if_min_tied_2_or_more: true      # edge case 2: tie at min → zero all three
+    else_subtract_minimum: true                # normal case
   output:
     matrix_dim: [7, 12]
     row_labels: [sun, moon, mars, mercury, jupiter, venus, saturn]

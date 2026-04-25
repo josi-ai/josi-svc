@@ -19,9 +19,9 @@ When a decision doesn't answer both sides, it's flagged.
 ### 1.1 Rahu/Ketu node computation 🔒
 
 - **Compute both Mean Node AND True Node** for Rahu and Ketu on every chart. Store both.
-- **End-user default:** True Node.
-- **Astrologer:** prompted at chart calculation time to pick Mean or True.
-- Current code uses `swe.MEAN_NODE` — needs extension to compute True Node in parallel.
+- **End-user (B2C) default:** **Mean Node.** Matches Parashari Tamil lineage + every major Indian published panchang (Drik Panchang, Rashtriya Panchang, Kalnirnay) + JH default. Smoother motion, classical BPHS canonical. (Revised 2026-04-22 from prior True Node default after classical-soundness quality pass flagged mismatch with ecosystem norm.)
+- **Astrologer:** prompted at chart calculation time to pick Mean or True (no default override at profile level — per-chart choice).
+- Current code uses `swe.MEAN_NODE` — already matches B2C default. Extension needed: compute True Node in parallel and store alongside for astrologer toggle + audit.
 
 ### 1.2 Ayanamsa 🔒 (Option A — agent recommendation accepted)
 
@@ -76,7 +76,10 @@ When a decision doesn't answer both sides, it's flagged.
   - Schema update: add `hi`, `te`, `kn`, `ml`, `bn`, `gu`, `mr` fields to `classical_names`.
   - Audit/fill all canonical entities: 27 nakshatras · 12 rashis · 9 grahas · 16 vargas · 60 Samvatsaras · tithi names · karana names · yoga names · panchaka subtypes · muhurta labels · auspicious/inauspicious yoga names.
   - B2C UI + AI chat: render `sa_iast + regional` pair based on user language setting; never render `en` translation.
-- **Conversational convention (this review process):** Use **Tamil phonetic transliteration ONLY** — no Tamil script, no IAST diacritics. Examples: "Dasai" not "Daśā" or "தசை"; "Horai" not "Horā"; "Uthiradam" not "Uttara Āṣāḍhā"; "Nazhigai" not "ghati"; "Emakandam" not "Yamagaṇḍa"; "Kuligai" not "Gulika Kāla"; "Pradosham" not "Pradoṣa"; "Karthikai" not "Kṛttikā"; "Sooriyan" not "Sūrya"; "Mirugasirsham" not "Mṛgaśīrā". Where a Tamil-specific term exists (nazhigai, emakandam, kuligai, pongal), use that over the Sanskrit term. Durable docs (PRDs, DECISIONS.md itself) continue to use Sanskrit-IAST as canonical for cross-reference stability across multi-tradition use.
+- **Conversational convention (this review process):** Use **Tamil phonetic transliteration ONLY** — no Tamil script, no IAST diacritics. Examples: "Dasai" not "Daśā" or "தசை"; "Uthiradam" not "Uttara Āṣāḍhā"; "Nazhigai" not "ghati"; "Emakandam" not "Yamagaṇḍa"; "Kuligai" not "Gulika Kāla"; "Pradosham" not "Pradoṣa"; "Karthikai" not "Kṛttikā"; "Sooriyan" not "Sūrya"; "Mirugasirsham" not "Mṛgaśīrā". Where a Tamil-specific term exists (nazhigai, emakandam, kuligai, pongal), use that over the Sanskrit term. Durable docs (PRDs, DECISIONS.md itself) continue to use Sanskrit-IAST as canonical for cross-reference stability across multi-tradition use.
+- **Hora exception 🔒 (revised 2026-04-22):** Use **"Hora"** (Sanskrit-IAST form without macron) instead of Tamil phonetic "Horai" throughout — because the same word refers to 3 distinct classical concepts that need disambiguating qualifiers: (a) **Hora Bala** — Kala Bala sub-component per BPHS Ch.27; (b) **Hora Lagna** — Special Lagna per BPHS Ch.4; (c) **Hora** (standalone) — Chaldean planetary hour per §3.11. The qualifier ("Bala" / "Lagna" / standalone) carries the disambiguation. Using "Horai" for all three creates ambiguity with no benefit. This is a targeted exception to the Tamil-phonetic rule; other Tamil-phonetic terms (Dasai, Uthiradam, Nazhigai, Kuligai, etc.) remain unchanged.
+
+- **Foreign-language support scope 🔒 (locked 2026-04-23, Option A — Indian-only policy continued):** The 8 Indian regional languages listed above (Tamil, Hindi, Telugu, Kannada, Malayalam, Bengali, Gujarati, Marathi) + Sanskrit-IAST English transliteration remain the only supported display languages for **P1 / P2 / P3**. Foreign languages (Spanish, French, Portuguese, German, Chinese, Arabic, Russian, etc.) are **out of scope**. Rationale: (a) Vedic is the primary engine and Indian regional market is the primary audience for v1–v3; (b) non-Vedic traditions (Western, Chinese, Hellenistic, Mayan, Celtic) are not yet fully specced and premature foreign-language work would lock in compromises; (c) global B2B API consumers can consume `sa_iast` canonical and localize in their own UI layer; (d) AI interpretation language (GPT/Claude output) can already adapt naturally without schema changes. Revisit at **P4 or later** if global non-diaspora demand materializes; at that point likely adopt tradition-native rendering per tradition's classical canon (Western = English common names, Hellenistic = Greek, Chinese = Chinese, etc.) — deferred decision.
 
 - **Ambiguity editorial locks 🔒 (Option A — agent recommendations accepted).** Primary Tamil phonetic spellings locked for all 14 ambiguous entries from `TAMIL_NAMING_AUDIT.md`:
 
@@ -127,7 +130,8 @@ When a decision doesn't answer both sides, it's flagged.
     Classification: malefic (classical — Sooriyan conjunction)  [Astrologer toggle]
   ```
 - Minimum thresholds per graha (BPHS Ch.27):
-  - Sooriyan 6.5 · Chandran 6.0 · Sevvai 5.0 · Budhan 7.0 · Guru 6.5 · Sukkiran 5.5 · Sani 5.0 rupas
+  - Sooriyan 6.5 · Chandran 6.0 · Sevvai 5.0 · Budhan 7.0 · Guru 6.5 · **Sukkiran 5.5** · Sani 5.0 rupas
+  - Sukkiran threshold 5.5 ratified 2026-04-22 by reviewer (vs Raman's *Graha and Bhava Balas* variant of 5.25). BPHS Ch.27 canonical value is 5.5 rupas; Raman's 5.25 is a lineage-specific refinement not adopted.
 - Astrologer-only additional data: virupa-level precision, component formula trace, Ishta-Kashta Phala derivation.
 
 ### 1.8 Ashtakavargam scope and display 🔒
@@ -165,12 +169,26 @@ When a decision doesn't answer both sides, it's flagged.
 - D9 Ashtakavargam toggle — full 5-tab view applied to Navamsa chart
 - Contributor-trace drill-down per cell
 
-**Trikona Shodhanai variant 🔒 (Option A — Phaladeepika subtract-minimum):**
-- For each trine (1-5-9, 2-6-10, 3-7-11, 4-8-12): find minimum bindu; subtract that minimum from all three trine members.
-- Example (5, 3, 4) → (2, 0, 1).
-- Same for both user types.
-- Matches Jagannatha Hora, Parashara's Light, B.V. Raman *A Catechism of Astrology* modern standard.
-- BPHS strict "zero-out" variant not implemented (can revisit if astrologer demand emerges).
+**Trikona Shodhanai variant 🔒 (Option A — Phaladeepika 3-case rule; revised 2026-04-22):**
+
+For each trine (1-5-9, 2-6-10, 3-7-11, 4-8-12), apply the following 3-case rule to `(s1, s2, s3)`:
+
+1. **If `min(s1, s2, s3) == 0`** → zero all three: `(0, 0, 0)`. Rationale: any zero-bindu member pollutes the trine; classical Phaladeepika treats the trine as a unit that collapses when any member is void.
+2. **Else if the minimum value appears in 2 or more members (tie at the bottom)** → zero all three: `(0, 0, 0)`. Rationale: no single sign stands out as the unique weak member; excess at the top is considered redundant and stripped.
+3. **Else (unique minimum > 0)** → subtract minimum from all three members.
+
+**Worked examples:**
+- `(5, 3, 4)` → min=3, unique, >0 → `(2, 0, 1)` *(normal subtract)*
+- `(0, 2, 3)` → min=0 → `(0, 0, 0)` *(edge case 1)*
+- `(3, 3, 5)` → min=3, appears twice → `(0, 0, 0)` *(edge case 2)*
+- `(4, 2, 2)` → min=2, appears twice → `(0, 0, 0)` *(edge case 2)*
+- `(6, 4, 5)` → min=4, unique, >0 → `(2, 0, 1)` *(normal subtract)*
+
+Same for both user types.
+
+**Classical sources:** Phaladeepika Ch.26 v.12-18 (Mantreswara — spells out the edge cases that BPHS Ch.40 v.39-42 leaves terse); implemented identically in Jagannatha Hora and Parashara's Light.
+
+**Revision note:** Prior version (pre-2026-04-22) locked a simple "subtract-minimum" rule without edge cases 1 and 2. Classical-soundness quality pass on 2026-04-22 flagged that this would systematically over-report Shodhit SAV for any chart where a trine contains (a) any zero-bindu sign or (b) a tie at the minimum — both common conditions. Revised to the full 3-case rule.
 
 ### 1.9 Sudarshana Chakra 🔒 (new dedicated PRD E18)
 
@@ -435,7 +453,7 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 
 ### E19 Shadbalam Engine — Pass 1 locked 2026-04-22
 
-**Cross-cutting inheritance:** All DECISIONS.md + Shadbalam-related locks apply (1.1 Rahu/Ketu node, 1.2 Ayanamsa Lahiri, 1.5 Language display, 1.7 Shadbalam display format + Budhan dual-classification + Chandran classification + minimum thresholds per graha, 3.7 Natchathiram 27, 3.11 Horai Chaldean variable-length).
+**Cross-cutting inheritance:** All DECISIONS.md + Shadbalam-related locks apply (1.1 Rahu/Ketu node, 1.2 Ayanamsa Lahiri, 1.5 Language display, 1.7 Shadbalam display format + Budhan dual-classification + Chandran classification + minimum thresholds per graha, 3.7 Natchathiram 27, 3.11 Hora Chaldean variable-length).
 
 **E19-specific decisions:**
 
@@ -443,7 +461,7 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 |---|---|---|
 | Sthana Bala sub-components (Q1) | **5 classical BPHS Ch.27 canonical** — Uccha + Saptavargaja + Oja-Yugma + Kendra + Drekkana. Same for both user types. |
 | Saptavargaja Bala varga set (Q2) | **BPHS Ch.27 canonical 7** — D1 Rashi + D2 Hora + D3 Drekkana + D7 Saptamsa + D9 Navamsa + D12 Dwadashamsa + D30 Trimsamsa. |
-| Kala Bala sub-components (Q3) | **BPHS 9 canonical** — Nata-Unnata + Paksha + Tribhaga + Varsha + Masa + Dina + Horai + Ayana + Yuddha. |
+| Kala Bala sub-components (Q3) | **BPHS 9 canonical** — Nata-Unnata + Paksha + Tribhaga + Varsha + Masa + Dina + **Hora Bala** + Ayana + Yuddha. |
 | Yuddha Bala winner rule (Q4) | **Declination-based (BPHS Ch.27 v.48-52 canonical)** — winner = graha with greater northern declination. |
 | Chesta Bala variant (Q5) | **BPHS Ch.27 v.23-30 canonical** — standard 9-step formula. Synodic position for inner planets (Budhan, Sukkiran); retrograde + speed for outer planets (Sevvai, Guru, Sani); Sooriyan uses Ayana Bala; Chandran uses Paksha Bala. |
 | Ishta-Kashta Phala formula (Q6) | **BPHS Ch.29 canonical** — `Ishta Phala = sqrt(Uccha Bala × Chesta Bala)` [0-60 range] + `Kashta Phala = 60 − Ishta Phala`. Astrologer-only data per DECISIONS 1.7. |
@@ -565,11 +583,13 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 | Badhaka lord activation criteria (Q3) | **Classical strict (BPHS Ch.44 v.20-25) + Shadbalam-strength weighting** (hybrid). Self-placement / dusthana / malefic affliction / dasha-period triggers + Shadbalam modulates severity. |
 | E5b Ayus integration (Q4) | **E27 feeds E5b dasha-window prediction.** Flags "critical Maraka dasha periods" within E5b Ayus window. Astrologer workbench integrated view. Ethical gating inherited from E5b Q5 (B2C hard refusal for direct longevity-timing queries). |
 | Cross-source aggregation (Q5) | **BPHS canonical only, no variants.** |
+| KP Maraka scope (Q6, locked 2026-04-23) | **Out of scope for E27 v1 — deferred to P3 or later.** E27 ships Parashari-only (BPHS Ch.44 canonical). KP Maraka analysis (sub-lord of 2/7/12 cusps + contrary-significator rejection per KPR Vol.4 Ch.18–22) is a specialized application of E9 primitives (5-level significators + cuspal sub-lords + RP matching); when added, will compose on top of E9 rather than extending E27. No engineering work in P2. |
 
 **Dependencies:**
 - E27 depends on E5b Ayus (feeds critical-period prediction)
 - E27 uses E19 Shadbalam (lord-strength weighting)
 - E27 inherits E5b ethical gating (hard refusal B2C)
+- **KP Maraka analysis — NOT a dependency for v1.** Future P3 work will build on E9 (not E27).
 
 **Engineering action items:**
 - Create E27 PRD file under `docs/markdown/prd/P2/` applying above Pass 1 decisions
@@ -610,7 +630,7 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 | Decision | Value | Source |
 |---|---|---|
 | 8-Koota classical source + points (Q1) | **Muhurta Chintamani Ch.5 + BPHS canonical 36-point** — Varna 1, Vashya 2, Tara 3, Yoni 4, Graha Maitri 5, Gana 6, Bhakoot 7, Nadi 8. Matches all matrimony tools. |
-| Manglik placement rules (Q2) | **Dual-reference (Lagna + Chandran).** 6 houses per reference (1/2/4/7/8/12). Manglik if either reference triggers. Matches Phaladeepika + conservative matrimony + Tamil Vakya. |
+| Manglik placement rules (Q2) | **Single-reference (Lagna only), 5 houses (2/4/7/8/12).** Revised 2026-04-22. Sevvai in houses 2, 4, 7, 8, or 12 from Lagna triggers Manglik. 1st house dropped (user: not in current Tamil Parashari practice). Chandran-reference and Sukran-reference counting dropped (user: not in current use). Astrologer toggle exposes Chandran-reference + 1st-house-inclusion for lineages that require them; B2C sees Lagna-only 5-house result. |
 | Manglik cancellations (Q3) | **Core 5 classical cancellations** — (1) mutual Manglik, (2) Sevvai in own sign, (3) Sevvai in exaltation, (4) benefic aspect on Sevvai, (5) Sevvai conjunct benefic. |
 | Dashakoota extension scope (Q4) | **Ashtakoota 36 + Rajju Dosha + Vedha Dosha + Papasamya** checks. Middle ground; matches JH + PL + Astrosage + matrimony tools. |
 | Cross-source aggregation (Q5) | **Muhurta Chintamani + BPHS canonical only, no variants.** |
@@ -623,7 +643,7 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 **Engineering action items:**
 - Create E25 PRD file under `docs/markdown/prd/P2/` applying above Pass 1 decisions
 - 8-Koota scorer per MC+BPHS
-- Manglik dual-reference checker
+- Manglik single-reference checker (Lagna-only, 5 houses: 2/4/7/8/12). Astrologer toggle to add Chandran-reference + 1st-house-inclusion.
 - Core 5 cancellation rule engine
 - Rajju/Vedha/Papasamya dosha checks
 - Dual-chart API (user + partner) for compatibility query
@@ -636,9 +656,9 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 
 | Decision | Value | Source |
 |---|---|---|
-| Lagnas-to-ship scope (Q1) | **All 10 Special Lagnas** — Bhava, Horai, Ghati, Vighati, Sri, Indu, Pranapada (from E7), Varnada, Nisheka, Vakra-Shoola. AL referenced from E3. Same for both user types. |
-| Classical formulas source (Q2) | **BPHS + JUS + UK per canonical primary source per Lagna.** Bhava/Horai/Ghati/Vighati from BPHS Ch.4; Sri/Indu from BPHS Ch.85; Pranapada from BPHS Ch.79-80 (E7 inheritance); Varnada from JUS + BPHS; Nisheka from BPHS Ch.4 + Phaladeepika; Vakra-Shoola from UK. |
-| Display tiering (Q3) | **Tiered:** Primary (Bhava, Horai, Ghati, Sri) always visible. Secondary (Vighati, Indu, Pranapada, Varnada) expandable panel. Research (Nisheka, Vakra-Shoola) opt-in flag. Matches JH + PL + SJVC + uniform tiered convention. |
+| Lagnas-to-ship scope (Q1) | **All 10 Special Lagnas** — Bhava, **Hora Lagna**, Ghati, Vighati, Sri, Indu, Pranapada (from E7), Varnada, Nisheka, Vakra-Shoola. AL referenced from E3. Same for both user types. |
+| Classical formulas source (Q2) | **BPHS + JUS + UK per canonical primary source per Lagna.** Bhava/Hora Lagna/Ghati/Vighati from BPHS Ch.4; Sri/Indu from BPHS Ch.85; Pranapada from BPHS Ch.79-80 (E7 inheritance); Varnada from JUS + BPHS; Nisheka from BPHS Ch.4 + Phaladeepika; Vakra-Shoola from UK. |
+| Display tiering (Q3) | **Tiered:** Primary (Bhava, Hora Lagna, Ghati, Sri) always visible. Secondary (Vighati, Indu, Pranapada, Varnada) expandable panel. Research (Nisheka, Vakra-Shoola) opt-in flag. Matches JH + PL + SJVC + uniform tiered convention. |
 | Cross-source aggregation (Q4) | **BPHS + JUS + UK canonical only, no variants.** |
 
 **Dependencies:**
@@ -808,6 +828,15 @@ These decisions are captured for new GAP_CLOSURE PRDs before their PRD files are
 |---|---|---|
 | 2026-04-19 | Initial decision log created after Panchangam review session | cpselvam |
 | 2026-04-22 | E17 Chart Rectification Pass 1 locked (Q1–Q5 all Option B). Pass 1 complete across all astrology-heavy PRDs. | cpselvam |
+| 2026-04-22 | §1.1 B2C node default revised True Node → Mean Node after classical-soundness quality pass flagged mismatch with Parashari Tamil lineage + Indian panchang ecosystem norm. | cpselvam |
+| 2026-04-22 | §1.8 Trikona Shodhanai revised simple-subtract → Phaladeepika 3-case rule (zero-if-min-is-zero, zero-if-tie-at-min, else subtract). Prior rule would over-report Shodhit SAV for common trine patterns. | cpselvam |
+| 2026-04-22 | §1.5 Hora exception added: "Horai" → "Hora" with qualifiers (Hora Bala / Hora Lagna / Hora standalone). Other Tamil-phonetic terms unchanged. Disambiguates 3 collided Kala-Bala/Special-Lagna/Chaldean-clock senses. | cpselvam |
+| 2026-04-22 | §1.7 Sukkiran Kala Bala threshold 5.5 rupas ratified (BPHS Ch.27 canonical); Raman's 5.25 variant not adopted. | cpselvam |
+| 2026-04-22 | §6.5 E25 Q2 Manglik revised — dual-reference (Lagna+Chandran, 6 houses 1/2/4/7/8/12) → single-reference (Lagna only, 5 houses 2/4/7/8/12). 1st house dropped; Chandran + Sukran counting dropped. Matches current Tamil Parashari practice. Astrologer toggle retains Chandran-reference + 1st-house-inclusion for lineages that require them. | cpselvam |
+| 2026-04-22 | §6.5 E27 Q3 Badhaka "Classical strict + Shadbalam-weighted activation" — ratified as-is. Reviewer comfortable with hybrid BPHS triggers + severity modulation by Shadbalam total. Attribution note: Shadbalam weighting is Rath-school modern commentary, not BPHS literal; labeled "Classical strict" per reviewer preference. | cpselvam |
+| 2026-04-23 | §6.5 E27 Q6 KP Maraka scope locked — **out of scope for v1**, deferred to P3+. E27 ships Parashari-only. When added, KP Maraka will build on E9 primitives (significators + cuspal sub-lords + RPs) per KPR Vol.4 Ch.18–22, not extend E27. | cpselvam |
+| 2026-04-23 | §1.5 Foreign-language support locked as Option A (Indian-only continued) for P1/P2/P3. 8 Indian regional languages + Sanskrit-IAST remain sole supported display set. Foreign languages (Spanish/French/Chinese/etc.) deferred to P4+ with tradition-native rendering if demand materializes. | cpselvam |
+| 2026-04-23 | Consistency audit fixes (per `CONSISTENCY_AUDIT.md`): (1) stale True Node B2C default cleaned from E1a/E2a/E4a/E6a inheritance tables → Mean; (2) `review.md` tracker updated: 13 GAP_CLOSURE PRDs added as 🚧 rows (12 to P2, 1 to P3), P2 header count 14→27, P3 header count 9→10, first-sentence count 76→89; (3) orphan `E2b` reference removed from E2a `enables` + E7 prose; (4) `P2-UI-*` placeholders resolved to E12 in E5/E5b/E7/E8/E8b/E9/E10; (5) E10 Prasna branches annotated with house-system/ayanamsa source per branch; (6) E4a Tamil yoga #57 + Kuja Dosha catalog entry aligned to revised §6.5 E25 Q2 5-house Lagna-only default. | cpselvam |
 
 ---
 

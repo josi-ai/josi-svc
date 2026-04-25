@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #extensibility, #astrologer-ux]
 priority: should
 depends_on: [F1, F2, F6, F7, F8, F13, E1a, E2a, E4a]
-enables: [E12, P2-UI-longevity]
+enables: [E12]  # 2026-04-23: P2-UI-longevity resolved into E12 (Longevity tab); was duplicate entry
 classical_sources: [bphs, jaimini_sutras, phaladeepika, saravali, jataka_parijata]
 estimated_effort: 3-4 weeks
 status: draft

@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #extensibility, #ai-chat, #astrologer-ux]
 priority: must
 depends_on: [F1, F2, F6, F7, F8, F13, E1a]
-enables: [E10, E14a, P2-UI-kp]
+enables: [E10, E14a, E12]  # 2026-04-23: P2-UI-kp resolved to E12 Astrologer Workbench UI (dedicated KP tab)
 classical_sources: [kp_reader]
 estimated_effort: 5-6 weeks
 status: draft

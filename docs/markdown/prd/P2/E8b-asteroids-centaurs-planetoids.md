@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #extensibility, #ai-chat, #astrologer-ux]
 priority: should
 depends_on: [F1, F2, F6, F7, F8, F13, E1a, E8]
-enables: [E14a, P2-UI-western]
+enables: [E14a, E12]  # 2026-04-23: P2-UI-western resolved to E12 Astrologer Workbench UI (asteroid/centaur overlays within Western tab)
 classical_sources: [modern_western, brady, reinhart, zane_stein, richard_brown]
 estimated_effort: 2-3 weeks
 status: draft

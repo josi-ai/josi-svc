@@ -88,7 +88,7 @@
 | IAST | Tamil Phonetic | Tamil Script | English Gloss |
 |---|---|---|---|
 | D1 Rāśi | Rasi | ராசி | Birth chart |
-| D2 Horā | Horai | ஓரை | Wealth (2 parts) |
+| D2 Horā | Horai (Tamil phonetic) / **Hora (Josi convention per DECISIONS §1.5 Hora exception)** | ஓரை | Wealth (2 parts) |
 | D3 Drekkāṇa | Drekkanam | திரேக்காணம் | Siblings (3 parts) |
 | D4 Caturthāṃśa | Chathurthamsam | சதுர்த்தாம்சம் | Fortune/assets (4) |
 | D7 Saptāṃśa | Sapthamsam | சப்தாம்சம் | Children (7) |
@@ -388,7 +388,7 @@ Weekday mapping (Sun→Sat) in Tamil Nadu almanacs:
 | Varṣa Bala | Varsha Balam | வர்ஷ பலம் |
 | Māsa Bala | Masa Balam | மாச பலம் |
 | Dina Bala | Dina Balam | தின பலம் |
-| Horā Bala | Horai Balam | ஓரை பலம் |
+| Horā Bala | Horai Balam (phonetic) / **Hora Bala (Josi convention per DECISIONS §1.5 Hora exception)** | ஓரை பலம் |
 | Ayana Bala | Ayana Balam | அயன பலம் |
 | Yuddha Bala | Yuddha Balam | யுத்த பலம் |
 

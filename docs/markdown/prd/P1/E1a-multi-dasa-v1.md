@@ -77,7 +77,7 @@ All open questions from E1a Pass 1 astrologer review are resolved. Cross-cutting
 | Ayanamsa default | Lahiri (Chitrapaksha Official) for B2C; 9-shortlist for astrologer profile (Lahiri, Raman, Krishnamurti, True Chithirai, Yukteshwar, J.N. Bhasin, Suryasiddhantha, True Poosam, Fagan-Bradley) | DECISIONS 1.2 |
 | Ashtottari eligibility | Permissive default (always compute); astrologer can toggle BPHS strict via F2 `astrologer_source_preference` | DECISIONS 1.6 |
 | Dasai hierarchy depth | 5 levels (MD → AD → PD → Sookshma → Prana) for both user types | DECISIONS 1.4 |
-| Rahu/Ketu node type | Both Mean Node + True Node computed always; B2C default True Node; astrologer prompted | DECISIONS 1.1 |
+| Rahu/Ketu node type | Both Mean Node + True Node computed always; **B2C default Mean Node** (revised 2026-04-22); astrologer prompted per chart | DECISIONS 1.1 |
 | Natchathiram count | 27 for everything (including dasai starting-lord mapping); SBC exception only (28 in SBC) | DECISIONS 3.7 |
 | Language display | Sanskrit-IAST canonical + Tamil phonetic for UI; entity names use Tamil phonetic primary | DECISIONS 1.5 |
 

@@ -1,19 +1,25 @@
 # PRD Review Tracker
 
-Interactive review of all 76 PRDs across phases P0–P6. Every PRD gets checked off here — nothing skipped.
+Interactive review of all 95 PRDs across phases P0–P6 (76 original + 13 GAP_CLOSURE + 1 E-SLM + 5 payment). Every PRD gets checked off here — nothing skipped.
 
 - **Reviewer:** @cpselvam
 - **Started:** 2026-04-19
-- **Total PRDs:** 89 (76 original + 13 added via gap-closure; see `GAP_CLOSURE.md`)
+- **Total PRDs:** 95 (76 original + 13 GAP_CLOSURE + 1 E-SLM from §0.4 + 5 payment from §0.11; see `GAP_CLOSURE.md` + `ARCHITECTURE_DECISIONS.md`)
 - **Pass 1 (Astrologer — calculation correctness + decision capture):** ✅ **COMPLETE — 29 / 29 astrology-heavy PRDs locked** (all P1 MVP ✅ · all P2 astrology-heavy ✅ · GAP_CLOSURE: E19, E23, E20, E21, E22, E27, E24, E25, E26, E28, E29, E18, E1c, E6b ✅ · E17 ✅ final)
-- **Pass 2 (Engineering — 12-point rubric):** 0 / 89
+- **Pass 2 (Engineering — 3-layer rubric: 12-point structural + 7-lens design + cross-cutting compliance, plus task DAG generation):** 4 / 95 (F1 ✅ retrofitted · F2 ✅ · F3 ✅ · F4 ✅ all 2026-04-25)
 - **Cross-cutting locks:** 43 decisions in `DECISIONS.md` apply across all PRDs
 
 ---
 
 ## Review Rubric
 
-For each PRD, we check:
+**Pass 1 (Astrologer — calculation correctness)** uses the 6-point astrologer rubric in `feedback_astrologer_review_workflow.md`. This section documents **Pass 2 (Engineering)**.
+
+Pass 2 is a **3-layer rubric** — each PRD is evaluated against all three layers, and findings from all three are folded into a `§ 2.5 Engineering Review` section stamped on the PRD.
+
+### Layer 1 — Structural Completeness (12-point, pass/fail)
+
+Fast check that the PRD has the sections an implementer needs. Every item is binary.
 
 1. **Frontmatter complete** — id, phase, tags, priority, deps, enables, effort, status, author, date
 2. **Purpose clear** — problem statement, who benefits, business/engineering impact articulated
@@ -28,7 +34,43 @@ For each PRD, we check:
 11. **Rollout plan credible** — feature flag, shadow, backfill, rollback all addressed
 12. **Risks identified** — likelihood/impact/mitigation filled in
 
-**Status legend:** ⬜ not started · 🟡 in review · ✅ approved · ✏️ needs revision · 🚧 blocked
+### Layer 2 — Design Quality (7-lens, findings-based)
+
+Qualitative lens applied to each PRD. Surfaces gaps Layer 1 can't catch. Each lens can be ✅ / ⚠️ finding / N/A.
+
+1. **Futuristic** — Anticipates 5-yr shifts (multimodal AI, agentic workflows, regulatory, global markets). Absorbs GPT-6 / Claude 5 / Gemini 3 without refactor.
+2. **Future-proof** — Data model doesn't lock today's assumptions. Classical rules data-driven (YAML), not code. Calc versioning thought through.
+3. **Extendible** — New tradition / yoga / dasa / dosha / kuta added without touching existing code. Plugin / registry pattern applied.
+4. **Audit-ready** — Every calc has source-trace (which rule, which inputs, which code path). Immutable event log. Versioned rule registry. Reproducible from inputs + version.
+5. **Performant** — Chart calc <500ms P95. Cache hit ratio targeted. Lazy compute for heavy ops. DB query budgets. Tenant isolation doesn't cost perf.
+6. **User-friendly** — B2C complexity hidden; astrologer complexity exposed. Humane errors. Thoughtful loading states. Offline-first panchangam. Accessibility.
+7. **AI-first** — Tool-use clean for LLMs. Structured outputs not free text. Context packaging for RAG. Qdrant vector hooks. Chart data AI-queryable natively.
+
+### Layer 3 — Cross-cutting Compliance (architectural locks)
+
+Checks the PRD against every lock in `ARCHITECTURE_DECISIONS.md` + `DECISIONS.md`. Each lock: ✅ / ⚠️ / N/A (with justification).
+
+- **§0.5 liability posture** — crisis flow + wellness framing (applies to any AI-facing PRD)
+- **§0.8 eval harness** — golden dataset + LLM-as-judge rubric + CI gate (applies to any AI-affecting PRD)
+- **§0.9 audit architecture** — 5-layer reconstructability; fact tables store row_ids pinning rule versions (applies to any data-writing PRD)
+- **§0.10 agent-team orchestration** — task DAG entry (acceptance_criteria / affected_paths / test_command / max_turns / model_tier / retry_budget) + path-overlap declaration (applies to all PRDs)
+- **§0.12 naming conventions** — full English identifiers, no abbreviations, enum `id` column exception documented
+- **§0.13 config-based versioning** — SCD Type 2 or equivalent DB-native versioning; no git SHA refs in schema
+- **§0.14 PK conventions** — UUIDv7 PKs; enum tables add integer `id` + text code; FKs always UUID
+- **Additional cross-cuts from DECISIONS.md** — e.g., §1.5 multilingual `classical_names`, §1.x node type / ayanamsa / house system (applies when PRD computes classical data)
+
+### Output format per PRD
+
+A `§ 2.5 Engineering Review` section stamped on the PRD with:
+1. **Summary** — 2–4 sentences on overall shape
+2. **Layer 1 scorecard** — 12-point table (pass/fail + note)
+3. **Layer 2 findings** — 7-lens table (status + finding)
+4. **Layer 3 compliance** — lock-by-lock table (status + evidence)
+5. **Pass 2 Decisions** — anything locked during review (numbered `{PRD}-Q{n}`)
+6. **Task DAG entries** — JSON for §0.10 agent orchestration
+7. **Cross-references** — back-links to ARCHITECTURE_DECISIONS + DECISIONS sections touched
+
+**Status legend:** ⬜ not started · 🟡 in review · 🟢 approved · ✏️ needs revision · 🚧 blocked
 
 ---
 
@@ -36,10 +78,10 @@ For each PRD, we check:
 
 | # | ID | Title | Status | Notes |
 |:-:|---|---|:-:|---|
-| 1 | [F1](./P0/F1-star-schema-dimensions.md) | Star-schema dimension tables | ⬜ | |
-| 2 | [F2](./P0/F2-fact-tables.md) | Fact tables with composite FKs | ⬜ | |
-| 3 | [F3](./P0/F3-partitioning-from-day-one.md) | LIST + HASH partitioning scheme | ⬜ | |
-| 4 | [F4](./P0/F4-temporal-rule-versioning.md) | Temporal rule versioning | ⬜ | |
+| 1 | [F1](./P0/F1-star-schema-dimensions.md) | Star-schema dimension tables | 🟢 | Pass 2 ✅ 2026-04-23 — 4 F1-Q decisions locked + schema revised to 7 tables (3 enum lookup + 4 SCD Type 2). UUID PK universal + integer `id` for IntEnum mapping. `classical_names` JSONB multilingual. `experiment`/`experiment_arm` moved to E14a. 5-task DAG entry generated. See F1 §2.5. |
+| 2 | [F2](./P0/F2-fact-tables.md) | Fact tables with composite FKs | 🟢 | Pass 2 ✅ 2026-04-25 — 5 F2-Q decisions locked. UUID PK + composite UNIQUE (§0.14). Text-code FKs + SCD row_id pins (F2-Q2+Q5 hybrid for §0.9). `experiment`/`experiment_arm` removed (deferred to E14a per F1-Q4 cascade). `id` → `aggregation_{event,signal}_id` (§0.12). 6-task DAG. See F2 §2.5. |
+| 3 | [F3](./P0/F3-partitioning-from-day-one.md) | HASH(chart_id, 16) + monthly RANGE partitioning | 🟢 | Pass 2 ✅ 2026-04-25 — 5 F3-Q decisions locked. Simplified from LIST+HASH (65 partitions) to HASH-only (16 partitions) on technique_compute; chart-scoped reads are 99% of traffic. Dropped pg_partman in favor of ~80 LOC custom PartitionManager (cloud-portable). Composite PKs include partition keys per PG rule. F1+F2 cascade fully absorbed. Effort 3d→1.5d. See F3 §2.5. |
+| 4 | [F4](./P0/F4-temporal-rule-versioning.md) | Temporal rule versioning (RFC 8785, semver, overlap trigger) | 🟢 | Pass 2 ✅ 2026-04-25 — 3 F4-Q decisions locked. **F4-Q1: RFC 8785 (JCS) replaces custom JCJ** — internet standard, byte-identical for our inputs, unblocks multi-language SDK + cryptographic signing futures. F4-Q2: trigger SQL renamed `rule_id`→`rule_code`, `source_id`→`source_authority_code` per F2 Pass 2. F4-Q3: F2's `idx_classical_rule_active` dropped; replaced by UNIQUE `idx_classical_rule_one_active`. 6-task DAG. Effort 3d→2d. See F4 §2.5. |
 | 5 | [F5](./P0/F5-json-schema-validation.md) | JSON Schema validation at insert | ⬜ | |
 | 6 | [F6](./P0/F6-rule-dsl-yaml-loader.md) | Rule DSL: YAML format + loader | ⬜ | |
 | 7 | [F7](./P0/F7-output-shape-system.md) | Output shapes with JSON schemas | ⬜ | |
@@ -54,7 +96,7 @@ For each PRD, we check:
 | 16 | [F16](./P0/F16-golden-chart-suite.md) | Golden chart suite scaffolding | ⬜ | |
 | 17 | [F17](./P0/F17-property-based-test-harness.md) | Property-based test harness | ⬜ | |
 
-## Phase P1 — MVP Engines (7 PRDs)
+## Phase P1 — MVP Engines + Launch-blocking Payments (12 PRDs; 7 original + 5 payment)
 
 | # | ID | Title | Status | Notes |
 |:-:|---|---|:-:|---|
@@ -65,8 +107,13 @@ For each PRD, we check:
 | 22 | [E11a](./P1/E11a-ai-chat-orchestration-v1.md) | AI Chat Orchestration v1 | ⬜ | |
 | 23 | [E14a](./P1/E14a-experimentation-framework-v1.md) | Experimentation Framework v1 | ⬜ | |
 | 24 | [E15a](./P1/E15a-correctness-harness-v1.md) | Correctness Harness v1 | ⬜ | |
+| 25 | E-BILLING *(file pending)* | B2C subscription billing (Flows 1+2) | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.11. Razorpay India + Stripe rest-of-world. Subscription lifecycle + tier transitions + consultation purchases. Launch blocker per §0.2. PRD file to be authored in Pass 2. |
+| 26 | E-PAYOUT *(file pending)* | Astrologer marketplace payouts (Flow 3) | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.11. RazorpayX Route (India) + Stripe Connect (US/UK/EU). Weekly cadence. Cross-border FX via LRS corridor. KYC at onboarding. Launch blocker. PRD file to be authored in Pass 2. |
+| 27 | E-METER *(file pending)* | B2B API metered billing (Flow 4) | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.11. Stripe Meters usage-based pricing. Per-tenant spend caps. Tier + overage model. Tenant portal. Enterprise contracts. Launch blocker for B2B. PRD file to be authored in Pass 2. |
+| 28 | E-TRUST *(file pending)* | Trust & Safety (disputes / refunds / fraud / sanctions) | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.11. Dispute 48h SLA. Fraud detection on top of Stripe Radar. Sanctions screening (OFAC/UN/EU/UK). Consultation dispute workflow. Launch blocker. PRD file to be authored in Pass 2. |
+| 29 | E-TAX *(file pending)* | Tax compliance automation | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.11. GST India + Stripe Tax (US state + EU VAT-OSS + UK VAT) + 1099-K/1042-S generation. Automated invoice per transaction. Launch blocker. PRD file to be authored in Pass 2. |
 
-## Phase P2 — Breadth & UIs (14 PRDs)
+## Phase P2 — Breadth & UIs (27 PRDs; 14 original + 13 GAP_CLOSURE)
 
 | # | ID | Title | Status | Notes |
 |:-:|---|---|:-:|---|
@@ -84,8 +131,23 @@ For each PRD, we check:
 | 36 | [E12](./P2/E12-astrologer-workbench-ui.md) | Astrologer Workbench UI | ⬜ | |
 | 37 | [E13](./P2/E13-end-user-simplification-ui.md) | End-User Simplification UI | ⬜ | |
 | 38 | [E17](./P2/E17-chart-rectification.md) | Chart Rectification | 🟡 | Pass 1 ✅ 2026-04-22 — 5 E17 locks (Q1-Q5 all Option B); Parashari-weighted scoring, ±4h window, Mode 3 astrologer-gated, ≥70% threshold, BPHS canonical + Jaimini/KP toggles; see E17 §2.4 |
+| 39 | E18 *(file pending)* | Sudarshana Chakra + Triple-Affirmation Analysis | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E18. Jataka Parijata Ch.11 + Sarvartha Chintamani. PRD file to be authored in Pass 2. |
+| 40 | E19 *(file pending)* | Shadbalam Engine | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E19. 6 balas + Budhan dual-classification. Inherits §1.7 Shadbalam + thresholds. PRD file to be authored in Pass 2. |
+| 41 | E20 *(file pending)* | Bhava Bala Engine | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E20. Bhavadhipati + Digbala-Bhavasya + Bhava Drishti decomposition. PRD file to be authored in Pass 2. |
+| 42 | E21 *(file pending)* | Vimshopaka Bala | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E21. 20-point divisional synthesis. PRD file to be authored in Pass 2. |
+| 43 | E22 *(file pending)* | Avastha Suite | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E22. All 5 classical schemes (Baladi / Jagrat-Swapna-Sushupti / 9-fold / Lajjitadi / Arohana-Avarohana). PRD file to be authored in Pass 2. |
+| 44 | E23 *(file pending)* | Panchadha Maitri | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E23. 5-fold composite friendship. Feeds E19 Sthana Bala. PRD file to be authored in Pass 2. |
+| 45 | E24 *(file pending)* | Janma-Tara 9-Cycle | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E24. Tara cycle per Muhurta Chintamani Ch.3. Feeds E25 + muhurtam. PRD file to be authored in Pass 2. |
+| 46 | E25 *(file pending)* | Ashtakoota Milan + Manglik | 🚧 | Pass 1 ✅ 2026-04-22 (Q2 revised 5-house Lagna-only 2026-04-22) — locks in DECISIONS §6.5 E25. 8-koota + Manglik + Rajju/Vedha. PRD file to be authored in Pass 2. |
+| 47 | E26 *(file pending)* | Special Lagnas Suite | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E26. 10 Special Lagnas (Bhava/Hora Lagna/Ghati/Vighati/Sri/Indu/Pranapada/Varnada/Nisheka/Vakra-Shoola). PRD file to be authored in Pass 2. |
+| 48 | E27 *(file pending)* | Maraka-Badhaka Engine | 🚧 | Pass 1 ✅ 2026-04-22 (Q6 KP Maraka deferred 2026-04-23) — locks in DECISIONS §6.5 E27. Parashari-only v1. Inherits E5b ethical gating. PRD file to be authored in Pass 2. |
+| 49 | E28 *(file pending)* | Upaya / Remedies Engine | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E28. Rule-registry dosha→upaya mapping with regional auto-adapt. PRD file to be authored in Pass 2. |
+| 50 | E29 *(file pending)* | Thirumana Porutham (Tamil 10-porutham) | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E29. Tamil-specific wedding matching. PRD file to be authored in Pass 2. |
+| 51 | E1c *(file pending)* | Extended Dasa Pack | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E1c. 5 minor kalpas (Chathurseethi-sama 84yr, Dwisaptati-sama 72yr, Panchottari, Shodashottari, Shatabdika). Eligibility predicates per-dasa (not inherited from Ashtottari §1.6). PRD file to be authored in Pass 2. |
 
-## Phase P3 — Scale to 10M (9 PRDs)
+**Note on 🚧 rows:** These 13 GAP_CLOSURE PRDs have Pass 1 decisions locked in `DECISIONS.md §6.5`; their PRD files will be authored during Engineering Pass 2 per the engineering action items listed in each §6.5 entry. The `🚧` status distinguishes "PRD file pending but Pass 1 locks exist" from `⬜` ("no Pass 1 decisions yet").
+
+## Phase P3 — Scale to 10M (10 PRDs; 9 original + 1 GAP_CLOSURE)
 
 | # | ID | Title | Status | Notes |
 |:-:|---|---|:-:|---|
@@ -98,8 +160,10 @@ For each PRD, we check:
 | 45 | [C5](./P3/C5-differential-testing-vs-reference.md) | Differential testing vs reference | ⬜ | |
 | 46 | [P3-E2-console](./P3/P3-E2-console-rule-authoring-console.md) | Rule authoring console | ⬜ | |
 | 47 | [AI5](./P3/AI5-debate-mode-ultra-ai.md) | Debate-mode Ultra AI | ⬜ | |
+| 48 | E6b *(file pending)* | Transit Intelligence v2 | 🚧 | Pass 1 ✅ 2026-04-22 — locks in DECISIONS §6.5 E6b. Transit Ashtakavargam + Vedha + Lattha + Tara/Chandra Bala + Graha-Karaka transit + Kal Sarpa transit. PRD file to be authored in Pass 2 under P3. |
+| 49 | E-SLM *(file pending)* | Proprietary Astrology SLM (fine-tuned OSS) | 🚧 | Architecture locked 2026-04-23 in ARCHITECTURE_DECISIONS §0.4. Fine-tuned 7B-13B model (Llama-3 / Qwen-2.5) on Josi proprietary data (interpretations + consultation transcripts + NPQ + user feedback). Prerequisites: 100K+ interpretations + 1K+ consultations + opt-in consent framework. Target: 60-70% of B2C interpretation volume at ~10% frontier API cost. Defensive moat. PRD file to be authored when prerequisites hit. |
 
-## Phase P4 — Scale to 100M (6 PRDs)
+## Phase P4 — Scale to 100M (7 PRDs; 6 original + 1 SLM-adjacent if promoted from P3)
 
 | # | ID | Title | Status | Notes |
 |:-:|---|---|:-:|---|

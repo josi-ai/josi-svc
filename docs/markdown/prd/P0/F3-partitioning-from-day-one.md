@@ -1,17 +1,17 @@
 ---
 prd_id: F3
 epic_id: F3
-title: "LIST + HASH partitioning scheme for technique_compute; monthly RANGE partitioning for aggregation_event"
+title: "HASH partitioning on chart_id for technique_compute; monthly RANGE partitioning for aggregation_event"
 phase: P0-foundation
 tags: [#performance, #correctness]
 priority: must
 depends_on: [F1, F2]
 enables: [F9, S2, S4, S7, all engine EPICs at scale]
 classical_sources: []
-estimated_effort: 3 days
-status: draft
+estimated_effort: 1.5 days
+status: approved
 author: Govind
-last_updated: 2026-04-19
+last_updated: 2026-04-25
 ---
 
 # F3 — Partitioning from Day One
@@ -52,10 +52,348 @@ This PRD establishes the partitioned physical layout at the moment the tables fi
 - `chart_reading_view` partitioning (F9 — single table per chart, not fact-scale)
 
 ### 2.3 Dependencies
-- F1 (technique_family seeded — partition names derived from `family_id`)
+- F1 (dim tables seeded — FK targets)
 - F2 (table column definitions — this PRD amends the DDL)
-- Cloud SQL PostgreSQL 17 (confirmed) — supports LIST + HASH multi-level partitioning and FKs on partitioned tables
+- Cloud SQL PostgreSQL 17 (confirmed) — supports HASH + RANGE partitioning and FKs on partitioned tables
 - `AstrologyChart` model (FK target for `chart_id`)
+
+## 2.5 Engineering Review (Pass 2 — Locked 2026-04-25)
+
+**Reviewer:** cpselvam + Govind (pair) · **Rubric:** 3-layer · **Conforms to:** ARCHITECTURE_DECISIONS §0.9, §0.10, §0.12, §0.13, §0.14 · **Cascades from:** F1 + F2 Pass 2
+
+### Summary
+
+F3 partitions both fact tables at empty-table ship time to avoid future migration cost. Pass 2 simplified the original LIST+HASH design on `technique_compute` to plain HASH-on-chart_id (16 buckets) — the dominant query pattern is chart-scoped, family-isolation was nice-to-have, and 16 buckets give runway through ~100M users. Removed the `pg_partman` dependency in favor of an ~80 LOC custom `PartitionManager`. Effort reduced 3 days → 1.5 days; partitions reduced 65 → 16; Postgres extensions reduced 1 → 0. All three rubric layers pass; F1+F2 cascade fully absorbed.
+
+### Layer 1 — Structural Completeness (12-point)
+
+| # | Item | Status | Note |
+|:-:|---|:-:|---|
+| 1 | Frontmatter | ✅ | `last_updated: 2026-04-25`, `status: approved` |
+| 2 | Purpose clear | ✅ | §1 scale curve + invariants |
+| 3 | Scope precise | ✅ | §2.1/§2.2/§2.3 |
+| 4 | Research substantive | ✅ | §3.1–§3.10 — empty-table rationale, partition-key trade-offs, PG version caveats, alternatives, Alembic limitations |
+| 5 | Open questions resolved | ✅ | §4 + Pass 2 Decisions F3-Q1–F3-Q4 |
+| 6 | Component design executable | ✅ | §5 SQL + PartitionManager + lifespan wiring (revised below) |
+| 7 | User stories testable | ✅ | US-F3.1–F3.5 (revised: family-isolation story dropped) |
+| 8 | Tasks decomposed | ✅ | T-F3.1–F3.5 (5 tasks; revised) |
+| 9 | Unit tests enumerated | ✅ | §8.1–§8.6 with EXPLAIN assertions |
+| 10 | Acceptance criteria binary | ✅ | revised below |
+| 11 | Rollout plan credible | ✅ | empty-table swap; no prod-with-data downgrade |
+| 12 | Risks identified | ✅ | revised below — pg_partman risks dropped |
+
+**Layer 1 verdict:** 12 / 12 pass.
+
+### Layer 2 — Design Quality (7-lens)
+
+| # | Lens | Finding | Status |
+|:-:|---|---|:-:|
+| 1 | Futuristic | 16 HASH buckets give runway through ~100M users; each bucket maps cleanly to a future P4 shard | ✅ |
+| 2 | Future-proof | No `pg_partman` dependency → cloud-portable. DEFAULT partition on `aggregation_event` catches out-of-range rows. | ✅ (resolved by F3-Q3) |
+| 3 | Extendible | New technique families don't require schema changes (HASH covers all values automatically) | ✅ |
+| 4 | Audit-ready | Monthly DETACH PARTITION on aggregation_event = O(1) archival; computed_at + row_id pins from F2 retain full §0.9 reconstructability | ✅ |
+| 5 | Performant | Chart-scoped queries auto-prune to 1 partition (no "did you forget WHERE family?" risk); EXPLAIN tests in §8 | ✅ |
+| 6 | User-friendly | N/A — infra layer | N/A |
+| 7 | AI-first | N/A — infra layer | N/A |
+
+**Layer 2 verdict:** 5 / 5 applicable lenses ✅; 2 N/A.
+
+### Layer 3 — Cross-cutting Compliance
+
+| Lock | Status | Evidence |
+|---|:-:|---|
+| §0.5 liability | N/A | No AI surface |
+| §0.8 eval harness | N/A | No AI surface |
+| §0.9 reconstructability | ✅ | Revised DDL preserves F2's SCD `{dim}_row_id` pin columns. `input_fingerprint` + `output_hash` retained. |
+| §0.10 task DAG + path overlap | ✅ | 5-task DAG below; path overlap declared |
+| §0.12 naming | ✅ | Revised DDL uses F1/F2 Pass 2 names (`source_authority_code`, `technique_family_code`, `aggregation_event_id`, etc.) — no bare `id`, no abbreviations. Partition table names (`technique_compute_h0`, `aggregation_event_y2026m04`) are PG schema identifiers, allowed per §0.12. |
+| §0.13 config-based versioning | ✅ | `strategy_version TEXT` removed (F2-Q5); `aggregation_strategy_row_id UUID` retained for SCD pin |
+| §0.14 PK conventions | ✅ | Composite PKs include partition keys per PG rule; UUID PK retained as logical identity. F3-Q1. Documented as partitioned-table pattern. |
+| §1.5 multilingual | N/A | Fact tables; dim JSONB unchanged |
+| F1 cascade | ✅ | All FKs target F1 Pass 2 column shape |
+| F2 cascade | ✅ | F2-Q1/Q2/Q3/Q4/Q5 all propagated |
+
+**Layer 3 verdict:** 8 applicable locks ✅; 2 N/A.
+
+### Pass 2 Decisions
+
+| # | Gap | Decision |
+|---|---|---|
+| F3-Q1 | Partitioned-table PK composition | **Composite PK includes partition key** (PG requirement). `technique_compute`: PK `(technique_compute_id, chart_id)` + UNIQUE `(chart_id, classical_rule_id)` business key. `aggregation_event`: PK `(aggregation_event_id, computed_at)`. UUIDv7 retains logical identity. Documented as partitioned-table pattern under §0.14. |
+| F3-Q2 | Wholesale schema rewrite vs in-place edit | **§2.5 "Revised schema" supersedes §5.2** — same pattern as F1/F2. Original §5.2 stays as historical reference. |
+| F3-Q3 | `pg_partman` vs custom rotation | **Custom `PartitionManager` (~80 LOC).** No `pg_partman` extension dependency. Cloud-portable. Daily cron task creates next month if missing; idempotent. Removes T-F3.2 (pg_partman setup) and T-F3.9 (Cloud SQL availability verification). |
+| F3-Q4 | DEFAULT partition policy | **Keep DEFAULT + alert on `row_count > 0`** for `aggregation_event` (catches `computed_at` out-of-range rows safely). For `technique_compute` HASH-only: **no DEFAULT** — HASH covers all values automatically. |
+| F3-Q5 | Partition strategy on `technique_compute` (Pass 2 simplification) | **HASH(chart_id, 16) only — no LIST on family.** Optimizes the 99% chart-scoped read pattern. Removes 48 partitions (65 → 16) + the family-WHERE lint rule + family-aware engineer training burden. Family-level operations (rare retirement of a classical source) become full-scan `DELETE` jobs — acceptable trade. |
+
+### Revised schema (applied — supersedes §5.2 below)
+
+**`technique_compute` — HASH(chart_id, 16), 16 leaf partitions, no DEFAULT**
+
+```sql
+DROP TABLE IF EXISTS technique_compute;
+
+CREATE TABLE technique_compute (
+    technique_compute_id     UUID NOT NULL DEFAULT uuidv7(),
+    organization_id          UUID NOT NULL REFERENCES organization(organization_id),
+    chart_id                 UUID NOT NULL REFERENCES astrology_chart(chart_id),
+
+    classical_rule_id        UUID NOT NULL REFERENCES classical_rule(classical_rule_id),
+    rule_code                TEXT NOT NULL,
+    source_authority_code    TEXT NOT NULL REFERENCES source_authority(source_authority_code),
+    source_authority_row_id  UUID NOT NULL REFERENCES source_authority(source_authority_row_id),
+    rule_version             TEXT NOT NULL,
+
+    technique_family_code    TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    technique_family_row_id  UUID NOT NULL REFERENCES technique_family(technique_family_row_id),
+    output_shape_code        TEXT NOT NULL REFERENCES output_shape(output_shape_code),
+    output_shape_row_id      UUID NOT NULL REFERENCES output_shape(output_shape_row_id),
+
+    result                   JSONB NOT NULL,
+    input_fingerprint        CHAR(64) NOT NULL,
+    output_hash              CHAR(64) NOT NULL,
+    computed_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (technique_compute_id, chart_id),
+    CONSTRAINT unique_technique_compute_chart_rule
+        UNIQUE (chart_id, classical_rule_id)
+) PARTITION BY HASH (chart_id);
+
+-- 16 HASH partitions; no DEFAULT (HASH covers all values).
+CREATE TABLE technique_compute_h00 PARTITION OF technique_compute FOR VALUES WITH (MODULUS 16, REMAINDER 0);
+CREATE TABLE technique_compute_h01 PARTITION OF technique_compute FOR VALUES WITH (MODULUS 16, REMAINDER 1);
+-- ... through h15
+CREATE TABLE technique_compute_h15 PARTITION OF technique_compute FOR VALUES WITH (MODULUS 16, REMAINDER 15);
+
+-- Indexes declared on parent; PG14+ propagates to all 16 partitions automatically.
+CREATE INDEX idx_compute_family
+    ON technique_compute(chart_id, technique_family_code);
+CREATE INDEX idx_compute_org_family
+    ON technique_compute(organization_id, technique_family_code, computed_at DESC);
+CREATE INDEX idx_compute_classical_rule
+    ON technique_compute(classical_rule_id);   -- new: rule-scoped reads (recompute on rule version change)
+```
+
+**`aggregation_event` — RANGE(computed_at) monthly, 12 months pre-seeded + DEFAULT**
+
+```sql
+DROP TABLE IF EXISTS aggregation_event;
+
+CREATE TABLE aggregation_event (
+    aggregation_event_id         UUID NOT NULL DEFAULT uuidv7(),
+    organization_id              UUID NOT NULL REFERENCES organization(organization_id),
+    chart_id                     UUID NOT NULL REFERENCES astrology_chart(chart_id),
+
+    technique_family_code        TEXT NOT NULL REFERENCES technique_family(technique_family_code),
+    technique_family_row_id      UUID NOT NULL REFERENCES technique_family(technique_family_row_id),
+    technique_code               TEXT NOT NULL,
+
+    aggregation_strategy_code    TEXT NOT NULL REFERENCES aggregation_strategy(aggregation_strategy_code),
+    aggregation_strategy_row_id  UUID NOT NULL REFERENCES aggregation_strategy(aggregation_strategy_row_id),
+
+    inputs_hash                  CHAR(64) NOT NULL,
+    output                       JSONB NOT NULL,
+    surface                      TEXT NOT NULL CHECK (surface IN
+                                   ('b2c_chat','astrologer_pro','ultra_ai','internal_experiment','api')),
+    user_mode                    TEXT NOT NULL CHECK (user_mode IN ('auto','custom','ultra')),
+    computed_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (aggregation_event_id, computed_at)
+) PARTITION BY RANGE (computed_at);
+
+-- Seed 12 months: current month ± 6. Names: aggregation_event_yYYYYmMM.
+CREATE TABLE aggregation_event_y2025m11 PARTITION OF aggregation_event FOR VALUES FROM ('2025-11-01') TO ('2025-12-01');
+-- ... through y2026m10
+CREATE TABLE aggregation_event_default PARTITION OF aggregation_event DEFAULT;
+
+CREATE INDEX idx_aggregation_chart
+    ON aggregation_event(chart_id, technique_family_code, aggregation_strategy_code, computed_at DESC);
+CREATE INDEX idx_aggregation_org_recent
+    ON aggregation_event(organization_id, computed_at DESC);
+```
+
+### Revised PartitionManager (no pg_partman)
+
+```python
+# src/josi/services/classical/partition_manager.py
+
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, timezone
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+@dataclass
+class PartitionStatus:
+    parent_table: str
+    partition_name: str
+    from_bound: str
+    to_bound: str
+    row_estimate: int
+    size_mb: float
+
+
+class PartitionManager:
+    """Monthly partition rotation + observability for aggregation_event.
+
+    Pure SQL — no pg_partman dependency. Cloud-portable.
+    Runs as a daily Celery / procrastinate beat task at 03:00 UTC.
+    """
+
+    FORWARD_MONTHS_REQUIRED = 3   # lifespan check threshold
+    PREMAKE_MONTHS = 6            # how far ahead daily cron pre-creates
+
+    async def status(self, session: AsyncSession) -> list[PartitionStatus]:
+        """Returns inventory + row estimates for all aggregation_event partitions."""
+        ...
+
+    async def verify_forward_coverage(self, session: AsyncSession) -> bool:
+        """True iff partitions exist for at least FORWARD_MONTHS_REQUIRED ahead of today."""
+        ...
+
+    async def ensure_forward_partitions(
+        self,
+        session: AsyncSession,
+        months_ahead: int = PREMAKE_MONTHS,
+    ) -> list[str]:
+        """Idempotently CREATE TABLE partitions for the next `months_ahead` months
+        if they don't already exist. Returns list of partitions created (may be empty).
+        """
+        ...
+
+    async def alert_on_default_rows(self, session: AsyncSession) -> int:
+        """Counts rows in aggregation_event_default. Emits Prometheus metric.
+        Returns the count; >0 should fire an incident alert."""
+        ...
+```
+
+### Path overlap declaration
+
+F3 reserves these paths (no other P0 PRD writes here):
+
+```
+src/josi/services/classical/partition_manager.py
+src/josi/db/partition_helpers.py
+src/alembic/versions/                  # one migration file (sequenced after F2)
+tests/unit/services/classical/test_partition_manager.py
+tests/unit/db/test_partition_helpers.py
+tests/integration/classical/test_f3_partition_pruning.py
+docs/markdown/adr/partitioning-query-requirements.md
+```
+
+F3 amends `src/josi/models/classical/technique_compute.py` and `aggregation_event.py` (PKs change) — touches files reserved by F2. Coordinated as sequential migration: F2 ships with non-partitioned shape; F3 immediately replaces with partitioned shape (both empty at deploy time).
+
+### Task DAG entries (§0.10)
+
+```json
+[
+  {
+    "task_id": "F3-partitioned-migration",
+    "prd_ref": "F3",
+    "role": "coder + migration-writer",
+    "depends_on": ["F2-schema-migration"],
+    "acceptance_criteria": "Alembic migration drops F2's non-partitioned technique_compute and aggregation_event, recreates as partitioned. technique_compute: PARTITION BY HASH(chart_id) MODULUS 16, 16 partitions h00-h15, no DEFAULT. aggregation_event: PARTITION BY RANGE(computed_at), 12 monthly partitions seeded (current ± 6 months), DEFAULT partition. PKs include partition keys per F3-Q1. All F1/F2 FKs preserved. Indexes propagate to children (PG14+). Migration uses op.execute() blocks for partitioning DDL (Alembic autogenerate doesn't emit PARTITION BY).",
+    "affected_paths": ["src/alembic/versions/", "src/josi/models/classical/technique_compute.py", "src/josi/models/classical/aggregation_event.py"],
+    "test_command": "poetry run alembic upgrade head && poetry run alembic downgrade -1 && poetry run alembic upgrade head",
+    "max_turns": 50,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F3-partition-helpers",
+    "prd_ref": "F3",
+    "role": "coder",
+    "depends_on": [],
+    "acceptance_criteria": "Pure functions: aggregation_partition_name(dt) returns 'aggregation_event_yYYYYmMM'; month_bounds(dt) returns (UTC-aligned start, next-month start). Hypothesis property tests for 2000-2050 datetime range.",
+    "affected_paths": ["src/josi/db/partition_helpers.py", "tests/unit/db/test_partition_helpers.py"],
+    "test_command": "poetry run pytest tests/unit/db/test_partition_helpers.py",
+    "max_turns": 20,
+    "model_tier": "cheap",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F3-partition-manager",
+    "prd_ref": "F3",
+    "role": "coder",
+    "depends_on": ["F3-partitioned-migration", "F3-partition-helpers"],
+    "acceptance_criteria": "PartitionManager with status(), verify_forward_coverage(), ensure_forward_partitions() (pure SQL CREATE TABLE PARTITION OF, idempotent), alert_on_default_rows(). Unit tests: idempotency (call twice, no errors), missing-partition-creates, default-row alerting. No pg_partman dependency.",
+    "affected_paths": ["src/josi/services/classical/partition_manager.py", "tests/unit/services/classical/test_partition_manager.py"],
+    "test_command": "poetry run pytest tests/unit/services/classical/test_partition_manager.py --cov=josi.services.classical.partition_manager --cov-fail-under=90",
+    "max_turns": 50,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F3-lifespan-and-cron",
+    "prd_ref": "F3",
+    "role": "coder",
+    "depends_on": ["F3-partition-manager"],
+    "acceptance_criteria": "Lifespan startup hook calls PartitionManager.verify_forward_coverage(); aborts startup with clear error if <3 months. Daily Celery/procrastinate beat at 03:00 UTC calls ensure_forward_partitions(6) and alert_on_default_rows(). Beat schedule registered. Test: forcibly drop forward partitions, verify startup fails.",
+    "affected_paths": ["src/josi/main.py", "src/josi/services/scheduler/beat_schedule.py", "tests/integration/classical/test_f3_lifespan.py"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f3_lifespan.py",
+    "max_turns": 30,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F3-pruning-explain-tests",
+    "prd_ref": "F3",
+    "role": "coder + qa",
+    "depends_on": ["F3-partitioned-migration"],
+    "acceptance_criteria": "EXPLAIN tests assert pruning: WHERE chart_id = ? prunes technique_compute to 1 of 16 partitions. WHERE computed_at >= ? AND computed_at < ? prunes aggregation_event to matching monthly partitions. Function-on-partition-key WHERE date_trunc('month', computed_at) documents anti-pattern (full scan). ADR drafted at docs/markdown/adr/partitioning-query-requirements.md.",
+    "affected_paths": ["tests/integration/classical/test_f3_partition_pruning.py", "docs/markdown/adr/partitioning-query-requirements.md"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f3_partition_pruning.py",
+    "max_turns": 30,
+    "model_tier": "mid",
+    "retry_budget": 1
+  }
+]
+```
+
+**Total F3 implementation estimate:** 5 parallel tasks (F3-partition-helpers parallelizes with F3-partitioned-migration). Estimated cost ~$10-18. Wall-clock ~1.5 days at full agent parallelism.
+
+### Acceptance criteria (revised — supersedes §9)
+
+- [ ] `technique_compute` is `PARTITION BY HASH(chart_id) MODULUS 16` with 16 leaf partitions, no DEFAULT
+- [ ] `aggregation_event` is `PARTITION BY RANGE(computed_at)` with 12 monthly partitions seeded + DEFAULT
+- [ ] PKs include partition keys per F3-Q1: `(technique_compute_id, chart_id)` and `(aggregation_event_id, computed_at)`
+- [ ] All F2 column shape preserved (text-code FKs + SCD `*_row_id` UUID pins per F2-Q2/Q5)
+- [ ] No `pg_partman` extension installed; PartitionManager uses pure SQL
+- [ ] Daily beat task ensures 6 months forward coverage; lifespan check requires ≥3 months at startup
+- [ ] EXPLAIN tests confirm pruning: `WHERE chart_id = ?` → 1 of 16 partitions; monthly RANGE → 1 month
+- [ ] Composite FK `technique_compute.classical_rule_id → classical_rule.classical_rule_id` works on partitioned table (PG17)
+- [ ] Alembic forward + downgrade roundtrip succeeds on empty DB
+- [ ] Default-partition row counter emits Prometheus metric; >0 triggers incident alert
+- [ ] ADR authored at `docs/markdown/adr/partitioning-query-requirements.md`
+
+### Risks (revised — supersedes §11)
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| HASH bucket count of 16 inadequate at >100M users | Medium (P4 horizon) | Medium | Documented migration path: detach partition, re-hash, reattach; planned in P3/P4 scaling roadmap |
+| Forward partition coverage lapses (beat task fails) | Low | High | Lifespan startup check + monitoring + alert at 48h stale |
+| DEFAULT partition on aggregation_event accumulates rows silently | Low | Medium | alert_on_default_rows() emits Prometheus metric; >0 triggers incident |
+| Engineer issues query without `chart_id` and scans all 16 partitions | Low | Low | Far smaller blast radius than F3-original (16 vs 64 partitions); ADR documents predicate requirements |
+| Alembic hand-crafted DDL diverges from SQLModel expectations | Medium | Medium | Migration roundtrip test in CI; SQLModel PK metadata kept in sync via T-F3.1 acceptance criteria |
+| Index propagation from parent to partitions fails on PG version mismatch | Low | High | CI matrix pins PG17; fail fast if PG version < 14 |
+| `DETACH PARTITION` during live traffic takes ACCESS EXCLUSIVE lock | Medium | Medium | Use `DETACH PARTITION CONCURRENTLY` (PG14+); never run during peak |
+
+### Eval cases
+
+N/A — F3 is data-layer infrastructure; no AI surface.
+
+### Cross-references
+
+- `ARCHITECTURE_DECISIONS.md §0.9` — fact tables retain SCD `{dim}_row_id` pins for reconstructability (F2-Q5 cascade)
+- `ARCHITECTURE_DECISIONS.md §0.10` — task DAG + path overlap
+- `ARCHITECTURE_DECISIONS.md §0.12` — naming conventions; partition table names allowed as PG schema identifiers
+- `ARCHITECTURE_DECISIONS.md §0.13` — `aggregation_strategy_row_id UUID` pin retained (no `strategy_version TEXT` snapshot)
+- `ARCHITECTURE_DECISIONS.md §0.14` — UUIDv7 PK + composite UNIQUE; partitioned-table extension documented (PK includes partition key per PG rule)
+- `F1-star-schema-dimensions.md §2.5` — F1 dim shape that F3 FKs target
+- `F2-fact-tables.md §2.5` — F2 fact-table shape that F3 amends with partitioning
+- `S2/S4/S7` — P3/P4 scaling roadmap (read replicas, BigQuery offload, sharding)
+- ADR to author: `docs/markdown/adr/partitioning-query-requirements.md`
+
+---
 
 ## 3. Technical Research
 

@@ -6,7 +6,7 @@ phase: P2-breadth
 tags: [#correctness, #extensibility, #ai-chat, #astrologer-ux]
 priority: must
 depends_on: [F1, F2, F6, F7, F8, F13, E1a]
-enables: [E10, E14a, P2-UI-tajaka]
+enables: [E10, E14a, E12]  # 2026-04-23: E12 (Varshaphala tab) resolved to E12 Astrologer Workbench UI (dedicated Tajaka/Varshaphala tab)
 classical_sources: [tajaka_neelakanthi, varshatantra, phaladeepika, jataka_parijata]
 estimated_effort: 4-5 weeks
 status: draft
@@ -33,7 +33,7 @@ This PRD delivers:
 - Tripathaka Chakra (hourly Tajaka, mini-scope)
 - Emission of a complete `annual_chart_summary` (F7) result
 
-This is the unlocking EPIC for P2-UI-tajaka (the dedicated Varshaphala UI) and E10 (Prasna, which re-uses Tajaka aspect and Saham infrastructure).
+This is the unlocking EPIC for E12 (Varshaphala tab) (the dedicated Varshaphala UI) and E10 (Prasna, which re-uses Tajaka aspect and Saham infrastructure).
 
 ## 2. Scope
 
@@ -56,7 +56,7 @@ This is the unlocking EPIC for P2-UI-tajaka (the dedicated Varshaphala UI) and E
 
 - **Additional Mudda variants** — only Yoga-Vimshottari-Mudda (most widely used) ships in E5. Patayini-Mudda, Drig-Mudda, Trikona-Mudda deferred to E5b.
 - **Sahams 31-50** — less commonly cited Sahams (Mahotsaha, Pururavasa, Karishya, etc.) deferred to E5b. The 30 covered here represent ≥ 95% of astrologer citations per JH documentation.
-- **Varshaphala-prediction AI narrative layer** — interpretation of annual outcomes is P2-UI-tajaka + AI chat (F10); this PRD only emits structured results.
+- **Varshaphala-prediction AI narrative layer** — interpretation of annual outcomes is E12 (Varshaphala tab) + AI chat (F10); this PRD only emits structured results.
 - **Multi-year transit overlays** — comparing year N to year N+1 is a UI concern.
 - **Pashachika Saham and regional Kerala Sahams** — regional variants; deferred.
 

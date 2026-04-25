@@ -8,10 +8,10 @@ priority: must
 depends_on: [F1, F2]
 enables: [F6, F13, P3-E6-flag, S8]
 classical_sources: []
-estimated_effort: 3 days
-status: draft
+estimated_effort: 2 days
+status: approved
 author: Govind
-last_updated: 2026-04-19
+last_updated: 2026-04-25
 ---
 
 # F4 — Temporal Rule Versioning
@@ -55,10 +55,348 @@ This PRD establishes the schema, semantics, and enforcement mechanisms for tempo
 - Hash algorithms other than sha256 (sha256 is sufficient for non-adversarial integrity; if we ever require HMAC or signing, additive column)
 
 ### 2.3 Dependencies
-- F1 (`source_authority` as FK target for rule source)
-- F2 (`classical_rule` table exists with placeholder `effective_from`, `effective_to`, `content_hash` columns)
-- Python 3.12 standard library: `hashlib`, `json` — no new packages
-- `packaging.version.Version` (already in `setuptools` family) for semver parsing
+- F1 (`source_authority` as FK target for rule source — referenced via `source_authority_code` per F1 Pass 2)
+- F2 (`classical_rule` table exists with `effective_from`, `effective_to`, `content_hash`, `version` columns per F2 Pass 2 schema)
+- Python 3.12 standard library: `hashlib` — for sha256
+- `rfc8785` package (~50KB pure Python, MIT licensed) — for RFC 8785 / JCS canonical JSON per F4-Q1
+- `packaging.version.Version` for semver parsing
+
+## 2.5 Engineering Review (Pass 2 — Locked 2026-04-25)
+
+**Reviewer:** cpselvam + Govind (pair) · **Rubric:** 3-layer · **Conforms to:** ARCHITECTURE_DECISIONS §0.9, §0.10, §0.12, §0.13, §0.14 · **Cascades from:** F1 + F2 Pass 2
+
+### Summary
+
+F4 establishes the temporal versioning + content-hash backbone for `classical_rule`. Pass 2 swaps the custom Josi Canonical JSON spec for RFC 8785 (JCS) — internet standard, byte-identical for our inputs, eliminates future migration if we ever ship multi-language SDKs or sign rules cryptographically. Trigger SQL + indexes updated for F1+F2 Pass 2 column renames. F2's non-unique partial index superseded by F4's UNIQUE partial index. Effort 3d → 2d. All three rubric layers pass.
+
+### Layer 1 — Structural Completeness (12-point)
+
+| # | Item | Status | Note |
+|:-:|---|:-:|---|
+| 1 | Frontmatter | ✅ | `status: approved`, `last_updated: 2026-04-25`, effort revised 3d→2d |
+| 2 | Purpose clear | ✅ | §1 — 3 correctness invariants articulated |
+| 3 | Scope precise | ✅ | clean in/out/deps; rfc8785 dependency declared |
+| 4 | Research substantive | ✅ | §3.1–§3.8 with bitemporal reference, RFC 8785 rationale (revised), semver semantics, alternatives |
+| 5 | Open questions resolved | ✅ | §4 + Pass 2 Decisions F4-Q1–F4-Q3 |
+| 6 | Component design executable | ✅ | trigger + 3 Python modules; revised SQL below |
+| 7 | User stories testable | ✅ | US-F4.1–F4.6 |
+| 8 | Tasks decomposed | ✅ | T-F4.1–F4.8 + 6-task DAG below |
+| 9 | Unit tests enumerated | ✅ | §8.1–§8.7 incl. Hypothesis property tests |
+| 10 | Acceptance criteria binary | ✅ | revised below |
+| 11 | Rollout plan credible | ✅ | empty-table swap |
+| 12 | Risks identified | ✅ | revised below — JCJ-specific risks dropped |
+
+**Layer 1 verdict:** 12 / 12 pass.
+
+### Layer 2 — Design Quality (7-lens)
+
+| # | Lens | Finding | Status |
+|:-:|---|---|:-:|
+| 1 | Futuristic | Valid-time only with explicit additive path to bitemporal; semver expressive | ✅ |
+| 2 | Future-proof | RFC 8785 (internet standard) instead of custom JCJ → cross-language SDK / cryptographic signing / federation all unblocked. Resolved by F4-Q1. | ✅ |
+| 3 | Extendible | New rule = INSERT row; new tradition handled by F1 dim layer | ✅ |
+| 4 | Audit-ready | Immutable rows + content-hash + FK preservation forever; F4 IS the audit foundation | ✅ |
+| 5 | Performant | Partial index + temporal index strategy; trigger O(log N); P99 < 5ms target at 100k rules | ✅ |
+| 6 | User-friendly | Trigger error messages name both conflicting versions; semver semantics in author guide | ✅ |
+| 7 | AI-first | N/A — `rule_body` consumed by F6 / engines, not directly LLM-facing | N/A |
+
+**Layer 2 verdict:** 6 / 6 applicable lenses ✅; 1 N/A.
+
+### Layer 3 — Cross-cutting Compliance
+
+| Lock | Status | Evidence |
+|---|:-:|---|
+| §0.5 liability | N/A | No AI surface |
+| §0.8 eval harness | N/A | No AI surface |
+| §0.9 reconstructability | ✅ | F4 IS the reconstructability foundation (immutable rows + content_hash + temporal columns + FK preservation) |
+| §0.10 task DAG + path overlap | ✅ | 6-task DAG below; path overlap declared |
+| §0.12 naming | ✅ | F4-Q2: trigger SQL + indexes use F1+F2 Pass 2 column names (`rule_code`, `source_authority_code`); no bare `id` |
+| §0.13 config-based versioning | ✅ | F4 IS the config-based versioning PRD; semver + temporal columns + content_hash |
+| §0.14 PK conventions | ✅ | Compatible with F2-Q1 — `classical_rule_id UUID PK` + `UNIQUE(rule_code, source_authority_code, version)` |
+| §1.5 multilingual | N/A | `classical_names` JSONB on classical_rule (F2-managed); F4 doesn't touch |
+| F1+F2 cascade | ✅ | F4-Q2 + F4-Q3 applied (column renames + index dedup) |
+
+**Layer 3 verdict:** 7 applicable locks ✅; 2 N/A.
+
+### Pass 2 Decisions
+
+| # | Gap | Decision |
+|---|---|---|
+| F4-Q1 | Custom JCJ vs RFC 8785 (JCS) canonical JSON | **RFC 8785 (JCS)** via `rfc8785` Python package. Internet standard; byte-identical to JCJ for all our inputs; reference implementations in JS / Go / Java / Swift / .NET keep multi-language SDKs and cryptographic-signing futures unblocked. Replaces §3.2 JCJ spec; replaces §5.3 `canonical_json` implementation. |
+| F4-Q2 | F1+F2 cascade column renames in trigger SQL | **Apply rename.** `rule_id` → `rule_code`; `source_id` → `source_authority_code` throughout trigger function `check_rule_version_no_overlap()` and indexes. |
+| F4-Q3 | Index redundancy with F2 | **F4 drops F2's `idx_classical_rule_active` and creates UNIQUE version.** F4's UNIQUE partial index (`idx_classical_rule_one_active`) is functionally a superset (also serves query lookup). Eliminates write-time penalty of duplicate index. |
+
+### Revised SQL (applied — supersedes §5.2)
+
+```sql
+-- ============================================================
+-- F4 migration: trigger + indexes + CHECKs on classical_rule
+-- (table created in F2; this PRD adds enforcement)
+-- ============================================================
+
+-- Drop F2's non-unique partial index; F4-Q3 supersedes with UNIQUE version
+DROP INDEX IF EXISTS idx_classical_rule_active;
+
+-- Partial UNIQUE index: at most one active (effective_to NULL) version per (rule_code, source_authority_code)
+CREATE UNIQUE INDEX idx_classical_rule_one_active
+    ON classical_rule (rule_code, source_authority_code)
+    WHERE effective_to IS NULL;
+
+-- Temporal lookup index: supports "active at time T" queries
+CREATE INDEX idx_classical_rule_temporal
+    ON classical_rule (rule_code, source_authority_code, effective_from DESC, effective_to);
+
+-- Overlap-prevention trigger function (handles closed-interval overlap cases)
+CREATE OR REPLACE FUNCTION check_rule_version_no_overlap()
+RETURNS trigger AS $$
+DECLARE
+    overlap_count INT;
+BEGIN
+    SELECT COUNT(*) INTO overlap_count
+      FROM classical_rule
+     WHERE rule_code = NEW.rule_code
+       AND source_authority_code = NEW.source_authority_code
+       AND version <> NEW.version
+       AND tstzrange(
+             NEW.effective_from,
+             COALESCE(NEW.effective_to, 'infinity'::timestamptz),
+             '[)'
+           ) && tstzrange(
+             effective_from,
+             COALESCE(effective_to, 'infinity'::timestamptz),
+             '[)'
+           );
+    IF overlap_count > 0 THEN
+        RAISE EXCEPTION
+          'classical_rule version overlap: (rule_code=%, source_authority_code=%) new [%..%) conflicts with existing version',
+          NEW.rule_code, NEW.source_authority_code,
+          NEW.effective_from,
+          COALESCE(NEW.effective_to::text, 'open');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_rule_version_no_overlap
+    BEFORE INSERT OR UPDATE ON classical_rule
+    FOR EACH ROW EXECUTE FUNCTION check_rule_version_no_overlap();
+
+-- Content-hash format check
+ALTER TABLE classical_rule
+    ADD CONSTRAINT ck_classical_rule_content_hash_format
+    CHECK (content_hash ~ '^[0-9a-f]{64}$');
+
+-- Semver format check (strict X.Y.Z; pre-release deferred)
+ALTER TABLE classical_rule
+    ADD CONSTRAINT ck_classical_rule_version_semver
+    CHECK (version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$');
+
+-- Effective-window sanity
+ALTER TABLE classical_rule
+    ADD CONSTRAINT ck_classical_rule_effective_window
+    CHECK (effective_to IS NULL OR effective_to > effective_from);
+```
+
+### Revised canonical_json module (RFC 8785 / JCS — supersedes §5.3)
+
+```python
+# src/josi/services/classical/canonical_json.py
+
+import hashlib
+import math
+from typing import Any
+
+import rfc8785
+
+
+class CanonicalJSONError(ValueError):
+    """Raised when a value cannot be canonicalized (NaN/Infinity, unsupported types)."""
+
+
+def canonical_json(obj: Any) -> bytes:
+    """Serialize obj to RFC 8785 (JSON Canonicalization Scheme) bytes.
+
+    RFC 8785 spec (https://datatracker.ietf.org/doc/html/rfc8785):
+      - UTF-8, no BOM
+      - Object keys sorted by UTF-16 code unit ascending
+      - Arrays preserved in source order
+      - Numbers formatted per ECMAScript 2018 §7.1.12.1 (shortest round-trip)
+      - Forbidden: NaN, Infinity (we pre-check + raise CanonicalJSONError)
+      - No insignificant whitespace
+      - No trailing newline
+
+    Cross-language reference implementations exist for JavaScript, Go, Java,
+    Swift, .NET — all guaranteed byte-identical for the same input.
+    """
+    _assert_finite(obj)
+    return rfc8785.dumps(obj)
+
+
+def content_hash(obj: Any) -> str:
+    """Return sha256 hex digest of canonical_json(obj). 64 lowercase hex chars."""
+    return hashlib.sha256(canonical_json(obj)).hexdigest()
+
+
+def _assert_finite(obj: Any) -> None:
+    """Pre-check NaN/Infinity to give a clear error before delegating to rfc8785."""
+    if isinstance(obj, float) and not math.isfinite(obj):
+        raise CanonicalJSONError(f"NaN/Infinity not allowed in canonical JSON: {obj}")
+    if isinstance(obj, dict):
+        for v in obj.values():
+            _assert_finite(v)
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            _assert_finite(v)
+```
+
+### Path overlap declaration
+
+F4 reserves these paths (no other P0 PRD writes here):
+
+```
+src/josi/services/classical/canonical_json.py
+src/josi/services/classical/rule_version.py
+src/josi/services/classical/rule_temporal.py
+src/josi/schemas/classical/rule_version_schema.py
+src/alembic/versions/                  # one F4 migration file (sequenced after F3)
+tests/unit/services/classical/test_canonical_json.py
+tests/unit/services/classical/test_rule_version.py
+tests/unit/services/classical/test_rule_temporal.py
+tests/integration/classical/test_f4_overlap_trigger.py
+tests/integration/classical/test_f4_temporal_lifecycle.py
+docs/markdown/rule-authoring-semver.md
+```
+
+`pyproject.toml` gains `rfc8785 = "^0.1"` dependency (touches a file owned by project root, coordinated as a single-line addition).
+
+### Task DAG entries (§0.10)
+
+```json
+[
+  {
+    "task_id": "F4-canonical-json-module",
+    "prd_ref": "F4",
+    "role": "coder",
+    "depends_on": [],
+    "acceptance_criteria": "rfc8785 added to pyproject.toml. canonical_json(obj) and content_hash(obj) wrappers implemented. Pre-checks NaN/Infinity → CanonicalJSONError. Hypothesis property tests verify determinism across 1000+ generated examples. Cross-version test (PY 3.12 + 3.13) yields identical hashes for known fixtures.",
+    "affected_paths": ["src/josi/services/classical/canonical_json.py", "tests/unit/services/classical/test_canonical_json.py", "pyproject.toml"],
+    "test_command": "poetry run pytest tests/unit/services/classical/test_canonical_json.py --cov=josi.services.classical.canonical_json --cov-fail-under=95",
+    "max_turns": 25,
+    "model_tier": "cheap",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F4-rule-version-module",
+    "prd_ref": "F4",
+    "role": "coder",
+    "depends_on": [],
+    "acceptance_criteria": "RuleVersion.parse() with strict X.Y.Z (rejects pre-release in P0). bump_kind() classifies MAJOR/MINOR/PATCH/NONE. Tests cover all bump cases + invalid input.",
+    "affected_paths": ["src/josi/services/classical/rule_version.py", "tests/unit/services/classical/test_rule_version.py"],
+    "test_command": "poetry run pytest tests/unit/services/classical/test_rule_version.py",
+    "max_turns": 20,
+    "model_tier": "cheap",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F4-trigger-and-indexes-migration",
+    "prd_ref": "F4",
+    "role": "coder + migration-writer",
+    "depends_on": ["F2-schema-migration"],
+    "acceptance_criteria": "Alembic migration: drop F2's idx_classical_rule_active; create idx_classical_rule_one_active (UNIQUE partial); create idx_classical_rule_temporal; create check_rule_version_no_overlap() function + trg_rule_version_no_overlap trigger; add 3 CHECK constraints (content_hash format, semver format, effective_window). Forward + downgrade roundtrip on empty DB.",
+    "affected_paths": ["src/alembic/versions/"],
+    "test_command": "poetry run alembic upgrade head && poetry run alembic downgrade -1 && poetry run alembic upgrade head",
+    "max_turns": 35,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F4-temporal-resolver",
+    "prd_ref": "F4",
+    "role": "coder",
+    "depends_on": ["F4-trigger-and-indexes-migration"],
+    "acceptance_criteria": "resolve_active_rule(session, rule_code, source_authority_code, as_of) returns single ClassicalRule or raises RuleNotActiveError. list_versions() orders by effective_from DESC. EXPLAIN test confirms idx_classical_rule_temporal is used. P99 < 5ms at 100k seeded rule rows.",
+    "affected_paths": ["src/josi/services/classical/rule_temporal.py", "tests/unit/services/classical/test_rule_temporal.py"],
+    "test_command": "poetry run pytest tests/unit/services/classical/test_rule_temporal.py",
+    "max_turns": 30,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F4-overlap-trigger-tests",
+    "prd_ref": "F4",
+    "role": "coder + qa",
+    "depends_on": ["F4-trigger-and-indexes-migration"],
+    "acceptance_criteria": "Integration tests cover all §8.3 cases: adjacent windows OK; two open-ended rejected; closed half-open overlap rejected; UPDATE creating overlap rejected; retroactive overlap caught; legitimate sequence accepted.",
+    "affected_paths": ["tests/integration/classical/test_f4_overlap_trigger.py"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f4_overlap_trigger.py",
+    "max_turns": 30,
+    "model_tier": "mid",
+    "retry_budget": 1
+  },
+  {
+    "task_id": "F4-lifecycle-integration",
+    "prd_ref": "F4",
+    "role": "coder + qa",
+    "depends_on": ["F4-temporal-resolver", "F4-overlap-trigger-tests"],
+    "acceptance_criteria": "End-to-end test: seed v1.0.0 → insert technique_compute against v1.0.0 → deprecate v1 (effective_to=now) → insert v1.1.0 → insert technique_compute against v1.1.0 → both compute rows JOIN to their correct rule rows; resolve_active_rule(now-1d)=v1.0.0, resolve_active_rule(now+1d)=v1.1.0. Future-promotion test + rollback test included.",
+    "affected_paths": ["tests/integration/classical/test_f4_temporal_lifecycle.py"],
+    "test_command": "poetry run pytest tests/integration/classical/test_f4_temporal_lifecycle.py",
+    "max_turns": 35,
+    "model_tier": "mid",
+    "retry_budget": 1
+  }
+]
+```
+
+**Total F4 implementation estimate:** 6 parallelizable tasks; F4-canonical-json-module + F4-rule-version-module run immediately (no blockers). Estimated cost ~$12-20. Wall-clock ~2 days.
+
+### Acceptance criteria (revised — supersedes §9)
+
+- [ ] `rfc8785` package added to `pyproject.toml`
+- [ ] `canonical_json(obj)` wraps `rfc8785.dumps(obj)`; pre-checks NaN/Infinity → `CanonicalJSONError`
+- [ ] `content_hash(obj)` returns sha256 hex of canonical_json(obj); 64 lowercase hex chars
+- [ ] Hypothesis property tests verify determinism across 1000+ examples
+- [ ] Cross-Python-version test (3.12, 3.13) produces identical hashes for fixed inputs
+- [ ] `RuleVersion.parse` + `.bump_kind()` classify MAJOR/MINOR/PATCH correctly; rejects pre-release in P0
+- [ ] `trg_rule_version_no_overlap` enforces non-overlap; uses `rule_code` + `source_authority_code` (F2 Pass 2 names)
+- [ ] F2's `idx_classical_rule_active` dropped; replaced by UNIQUE `idx_classical_rule_one_active`
+- [ ] `idx_classical_rule_temporal` exists and is used by EXPLAIN of resolve_active_rule
+- [ ] 3 CHECK constraints: content_hash format, semver format, effective_window
+- [ ] Integration test: deprecate v1 + insert v1.1 + retain historical compute rows all resolve correctly
+- [ ] Unit test coverage ≥ 95% for canonical_json, rule_version, rule_temporal
+- [ ] Documentation: `docs/markdown/rule-authoring-semver.md` exists; CLAUDE.md references it
+
+### Risks (revised — supersedes §11)
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Author forgets to bump version when semantics change | Medium | High | F6 loader compares computed hash with DB; mismatch fails deploy |
+| Trigger performance degrades at 100k+ rules | Low | Medium | O(log N) via temporal index; only on INSERT/UPDATE |
+| `rfc8785` package unmaintained or behavior changes | Low | Medium | Pin minor version; CI runs property tests on every release; small enough (~50KB pure Python) that we could fork if abandoned |
+| Semver parser rejects valid PEP 440 forms we want later | Medium | Medium | Strict in P0; non-breaking to relax CHECK constraint |
+| Retro-active rule activation surprises astrologers | Medium | Medium | UI shows effective_from date; rule loader logs retroactive activations |
+| content_hash drifts between YAML declaration and DB | Low | High | Loader computes from YAML and asserts match with DB on load; fail deploy on mismatch |
+| Cross-language hash mismatch (if we ever ship a JS/Go SDK) | Low (P0) | High (later) | RFC 8785 chosen specifically to avoid this — JS/Go reference implementations are byte-identical |
+
+### Eval cases
+
+N/A — F4 is data-layer infrastructure; no AI surface.
+
+### Cross-references
+
+- `ARCHITECTURE_DECISIONS.md §0.9` — F4 IS the reconstructability foundation
+- `ARCHITECTURE_DECISIONS.md §0.10` — task DAG + path overlap
+- `ARCHITECTURE_DECISIONS.md §0.12` — naming compliance via F4-Q2 column rename
+- `ARCHITECTURE_DECISIONS.md §0.13` — F4 IS the config-based versioning PRD
+- `ARCHITECTURE_DECISIONS.md §0.14` — UUID PK + composite UNIQUE compatible with F2-Q1
+- `F1-star-schema-dimensions.md §2.5` — `source_authority_code` rename (F4-Q2 cascade)
+- `F2-fact-tables.md §2.5` — `classical_rule` schema F4 amends; `rule_code` rename; F2's `idx_classical_rule_active` superseded (F4-Q3)
+- `F6` (next) — rule loader will consume `canonical_json`, `content_hash`, `RuleVersion.bump_kind`, `resolve_active_rule`
+- `F13` — content-hash provenance chain extends F4's hashing approach to fact rows
+- RFC 8785: https://datatracker.ietf.org/doc/html/rfc8785
+- `rfc8785` Python: https://pypi.org/project/rfc8785/
+
+---
 
 ## 3. Technical Research
 
